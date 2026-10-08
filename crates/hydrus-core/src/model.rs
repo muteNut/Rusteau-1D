@@ -333,6 +333,93 @@ impl Default for WaterBc {
     }
 }
 
+/// Interface properties of one material for the dual-permeability model.
+/// The fracture-matrix water transfer is  Gamma_w = alpha_w (h_f - h_m)  with
+/// alpha_w = beta / a^2 * gamma_w * K_a  and  K_a = [K_a(h_f) + K_a(h_m)] / 2  (Gerke & van Genuchten 1993, 1996).
+/// The matrix-domain parameters are the material's `extra` columns; the primary columns describe the fracture domain.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct DualPermMaterial {
+    /// Shape factor beta (3 for rectangular slabs)
+    pub beta: f64,
+    /// Scaling factor gamma_w (0.4)
+    pub gamma_w: f64,
+    /// Effective diffusion path length a (half the aggregate width / fracture spacing) [L]
+    pub a: f64,
+    /// Saturated hydraulic conductivity of the fracture-matrix interface K_as [L/T]; 0 = use the matrix Ks
+    pub ks_a: f64,
+    /// Pore-connectivity parameter l of the matrix domain
+    pub l_matrix: f64,
+    /// Matrix dual porosity (`DualPermSettings::matrix_dual_por`): residual / saturated water content of the immobile
+    /// region inside the matrix and the water-content driven transfer coefficient omega_w [1/T]
+    #[serde(default)]
+    pub thr_im: f64,
+    #[serde(default = "default_ths_im")]
+    pub ths_im: f64,
+    #[serde(default = "default_omega_w")]
+    pub omega_w: f64,
+    /// Pressure-head driven transfer (`matrix_dual_por_head`): van Genuchten parameters of the immobile region of the
+    /// matrix (alpha, n) and the saturated conductivity of the interface between the mobile and the immobile matrix water
+    #[serde(default = "default_alpha_im")]
+    pub alpha_im: f64,
+    #[serde(default = "default_n_im")]
+    pub n_im: f64,
+    #[serde(default = "default_ks_im")]
+    pub ks_im: f64,
+}
+
+fn default_alpha_im() -> f64 {
+    0.05
+}
+fn default_n_im() -> f64 {
+    1.5
+}
+fn default_ks_im() -> f64 {
+    1.0
+}
+
+fn default_ths_im() -> f64 {
+    0.1
+}
+fn default_omega_w() -> f64 {
+    0.01
+}
+
+impl Default for DualPermMaterial {
+    fn default() -> Self {
+        Self { beta: 3.0, gamma_w: 0.4, a: 10.0, ks_a: 0.0, l_matrix: 0.5, thr_im: 0.0, ths_im: 0.1, omega_w: 0.01, alpha_im: 0.05, n_im: 1.5, ks_im: 1.0 }
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct DualPermSettings {
+    /// Ratio w of the fracture-domain volume to the total soil volume (same for all layers)
+    pub w: f64,
+    /// Fraction of a specified boundary flux that enters the fracture domain (0: all into the matrix, 1: all into the
+    /// fractures); a negative value distributes the flux proportionally to the volume fractions (f = w)
+    pub flux_frac_fracture: f64,
+    /// Dual porosity inside the matrix: mobile and immobile matrix water with a transient immobile water content
+    /// (water-content driven transfer, as the standard dual-porosity model). The solute transport then includes the
+    /// immobile matrix region with the water-transfer term (iDualPor of SOLUTE.FOR).
+    #[serde(default)]
+    pub matrix_dual_por: bool,
+    /// Matrix dual porosity with pressure-head driven transfer (iDualPor = 2) instead of the water-content driven one
+    #[serde(default)]
+    pub matrix_dual_por_head: bool,
+    pub materials: Vec<DualPermMaterial>,
+}
+
+impl Default for DualPermSettings {
+    fn default() -> Self {
+        Self { w: 0.1, flux_frac_fracture: -1.0, matrix_dual_por: false, matrix_dual_por_head: false, materials: vec![] }
+    }
+}
+
+impl DualPermSettings {
+    pub fn material(&self, m: usize) -> DualPermMaterial {
+        self.materials.get(m).cloned().unwrap_or_default()
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct WaterFlow {
     pub max_iter: usize,
@@ -343,12 +430,19 @@ pub struct WaterFlow {
     /// Initial branch: -1 drying, +1 wetting (IKappa)
     pub init_kappa: i32,
     pub h_tab1: f64,
+    /// Interpolate K(h), C(h) and theta(h) linearly (in log h) from tables of 100 points between `h_tab1` and `h_tab_n`, as
+    /// HYDRUS-1D does (GenMat / SetMat). Off: the analytic functions are evaluated.
+    #[serde(default)]
+    pub use_tables: bool,
     pub h_tab_n: f64,
     pub materials: Vec<SoilMaterial>,
     /// Initial condition given as water content instead of pressure head (lInitW)
     pub init_in_water_content: bool,
     pub bc: WaterBc,
 	pub l_w_dep: bool,
+    /// Dual-permeability model (Gerke & van Genuchten, 1993): parameters beyond the material hydraulics
+    #[serde(default)]
+    pub dual_perm: DualPermSettings,
 	pub tabs: Option<Vec<MatTable>>,
 }
 impl Default for WaterFlow {
@@ -361,11 +455,13 @@ impl Default for WaterFlow {
             hysteresis: Hysteresis::None,
             init_kappa: -1,
             h_tab1: 1e-6,
+            use_tables: false,
             h_tab_n: 1e5,
             materials: vec![SoilMaterial::default()],
             init_in_water_content: false,
             bc: WaterBc::default(),
 			l_w_dep: false,
+            dual_perm: DualPermSettings::default(),
 			tabs: None,
         }
     }
@@ -388,6 +484,10 @@ pub struct TimeSettings {
     /// Print at regular intervals (lPrintD / tPrintInt)
     pub print_at_interval: bool,
     pub print_interval: f64,
+    /// lFluxOut: write the extra flux table T_Level1 (potential/actual fluxes and the
+    /// cumulative values CumQ(9), CumQ(10)). Not available in the HYDRUS-1D GUI.
+    #[serde(default)]
+    pub flux_out: bool,
 }
 impl Default for TimeSettings {
     fn default() -> Self {
@@ -405,6 +505,7 @@ impl Default for TimeSettings {
             print_step: 1,
             print_at_interval: false,
             print_interval: 1.0,
+            flux_out: false,
         }
     }
 }
@@ -503,9 +604,11 @@ pub struct RootUptake {
     pub c_root_max: Vec<f64>,
 	// Active root solute uptake (Michaelis-Menten)
     pub l_act_rsu: bool,
+    /// OmegaS: solute stress index below which the uptake is compensated (per species; only species 1 is used)
     pub omega_act: Vec<f64>,
     pub r_km: Vec<f64>,
     pub c_min: Vec<f64>,
+	/// SPot: initial potential root solute uptake (afterwards taken from the cB column of Atmosph.in)
 	pub s_pot: f64,
     pub l_omega_w: bool,
 }
@@ -583,12 +686,15 @@ pub struct SoluteMaterial {
     pub disp_l: f64,
     /// fraction of sorption sites in contact with mobile water (equilibrium sites for two-site model)
     pub frac: f64,
-    /// immobile water content (mobile-immobile model)
+    /// immobile water content (mobile-immobile model); with dual permeability it applies to the fracture domain
     pub th_immobile: f64,
+    /// Dual permeability: immobile water content of the matrix domain (mobile-immobile transport in the matrix)
+    #[serde(default)]
+    pub th_im_matrix: f64,
 }
 impl Default for SoluteMaterial {
     fn default() -> Self {
-        SoluteMaterial { bulk_density: 1.5, disp_l: 1.0, frac: 1.0, th_immobile: 0.0 }
+        SoluteMaterial { bulk_density: 1.5, disp_l: 1.0, frac: 1.0, th_immobile: 0.0, th_im_matrix: 0.0 }
     }
 }
 
@@ -609,6 +715,13 @@ pub struct SpeciesMaterial {
     pub mu0_s: f64,
     pub mu0_g: f64,
     pub omega: f64,
+    /// Dual permeability: fracture-matrix solute transfer coefficient alpha_s [1/T]
+    #[serde(default)]
+    pub alpha_s: f64,
+    /// Dual permeability + colloid model: mass-transfer coefficient between the mobile and the immobile matrix water [1/T]
+    /// (the omega slot of the colloid model holds a detachment rate); 0 = the immobile water is inaccessible
+    #[serde(default)]
+    pub omega_im: f64,
 	// Colloid / virus attachment & filtration parameters
     pub s_max1: f64,
     pub r_ka1: f64,
@@ -951,6 +1064,18 @@ pub struct MeteoSettings {
     pub i_lai: i32,
     pub lai: f64,
     pub r_extinct: f64,
+    /// iInterc of Meteo.in (0: none, 1: LAI + soil cover, 2: soil cover only)
+    #[serde(default)]
+    pub i_interc: i32,
+    /// aInterc of Meteo.in [mm]
+    #[serde(default)]
+    pub a_interc: f64,
+    /// Root depth given in Meteo.in for iCrop = 1 [L]
+    #[serde(default)]
+    pub x_root: f64,
+    /// Crop growth table for iCrop = 2: time, crop height [cm], albedo, LAI, root depth
+    #[serde(default)]
+    pub growth: Vec<[f64; 5]>,
     pub records: Vec<MeteoRecord>,
 }
 
@@ -981,6 +1106,10 @@ impl Default for MeteoSettings {
             i_lai: 1,       // From Crop Height, Clipped Grass
             lai: 0.0,
             r_extinct: 0.463,
+            i_interc: 0,
+            a_interc: 0.25,
+            x_root: 0.0,
+            growth: vec![],
             records: vec![],
         }
     }
@@ -1015,13 +1144,15 @@ pub struct SpeciesWDep {
     pub h_ref: [f64; 9],
 }
 
+/// Water-content dependence of the reaction rates of one solute in one material (iMoistDep = 2, MoistDep.in).
+/// Row `jReact - 1` (jReact = 1..13: GamL, GamS, GamG, GamL1, GamS1, GamG1, xMuL, xMuS, xMuG and the
+/// immobile-phase GamLi, GamSi, GamL1i, GamS1i) holds `[ReacMin0, Theta0, Theta1, Theta2, Theta3, ReacMin1]`:
+/// the relative rate is ReacMin0 below Theta0, rises linearly to 1 at Theta1, stays 1 up to Theta2, falls
+/// linearly to ReacMin1 at Theta3 and stays there. Theta2 = 0 switches the reduction off.
+/// `Project::solute.moist_tables` is ordered material-major: index `material * n_solutes + solute`.
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct MoistDepTable {
-    /// Water contents theta in ascending order
-    pub theta: Vec<f64>,
-    /// Scaling reduction factors (one vector of length matching theta for each of the 9 reaction parameters)
-    /// [mu_w, mu_s, mu_g, gam_w, gam_s, gam_g, mu0_w, mu0_s, mu0_g]
-    pub factors: [Vec<f64>; 9],
+    pub react: Vec<[f64; 6]>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]

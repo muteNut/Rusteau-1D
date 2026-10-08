@@ -126,9 +126,17 @@ pub fn fk(model: SoilModel, h: f64, p: &Par) -> f64 {
                 if ffq <= 0.0 {
                     ffq = m * qee.powf(1.0 / m);
                 }
-                let mut kr = (qe / qek).powf(bpar) * (ffq / ffqk).powf(ppar) * kk / ks;
+                let qe_safe = qe.max(1e-9);
+                let qek_safe = qek.max(1e-9);
+                let ffq_safe = ffq.max(0.0);
+                let ffqk_safe = ffqk.max(1e-9);
+
+                let mut kr = (qe_safe / qek_safe).powf(bpar) * (ffq_safe / ffqk_safe).powf(ppar) * kk / ks;
                 if model == SoilModel::VanGenuchten {
-                    kr = qe.powf(bpar) * ffq.powf(ppar);
+                    kr = qe_safe.powf(bpar) * ffq_safe.powf(ppar);
+                }
+                if ffq <= 0.0 {
+                    kr = 0.0;
                 }
                 fkv = (ks * kr).max(1e-37);
             }
@@ -406,29 +414,11 @@ pub fn fh(model: SoilModel, qe: f64, p: &Par) -> f64 {
     }
 }
 
-pub const NTAB: usize = 100;
-
-/// Pre-tabulated hydraulic properties for one material (GenMat in Fortran)
+/// User-defined hydraulic properties table for one material (Mater.in, Model 10)
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MatTable {
     pub h: Vec<f64>,
     pub con: Vec<f64>,
     pub cap: Vec<f64>,
     pub the: Vec<f64>,
-}
-
-impl MatTable {
-    pub fn build(model: SoilModel, p: &Par, h_tab1: f64, h_tab_n: f64) -> MatTable {
-        let dlh = ((-h_tab_n).log10() - (-h_tab1).log10()) / (NTAB as f64 - 1.0);
-        let mut t = MatTable { h: vec![], con: vec![], cap: vec![], the: vec![] };
-        for i in 0..NTAB {
-            let alh = (-h_tab1).log10() + i as f64 * dlh;
-            let h = -(10f64.powf(alh));
-            t.h.push(h);
-            t.con.push(fk(model, h, p));
-            t.cap.push(fc(model, h, p));
-            t.the.push(fq(model, h, p));
-        }
-        t
-    }
 }

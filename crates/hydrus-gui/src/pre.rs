@@ -817,6 +817,7 @@ impl App {
             di(ui, ch, &mut self.prj.time.print_step);
             ui.end_row();
         });
+        check(ui, ch, &mut self.prj.time.flux_out, "Write extended flux table T_Level1 (potential/actual fluxes and cumulative values, lFluxOut)");
         check(ui, ch, &mut self.prj.time.print_at_interval, "Additionally print at regular intervals");
         if self.prj.time.print_at_interval {
             egui::Grid::new("time3").show(ui, |ui| field_u(ui, ch, "Interval", &mut self.prj.time.print_interval, &tu));
@@ -904,6 +905,84 @@ impl App {
                 }
             });
         }
+        check(ui, ch, &mut self.prj.water.l_w_dep, "Temperature dependence of the hydraulic properties (surface tension, viscosity)");
+        if self.prj.water.model == SoilModel::DualPermeability {
+            self.dual_perm_ui(ui, ch);
+        }
+    }
+
+    /// Parameters of the dual-permeability model that are not material hydraulics (Gerke & van Genuchten, 1993).
+    fn dual_perm_ui(&mut self, ui: &mut Ui, ch: &mut bool) {
+        section(ui, "Dual-permeability model (fracture + matrix domain)");
+        ui.label("Soil parameters: the primary columns describe the FRACTURE domain, the extra columns the MATRIX domain.");
+        ui.label("Water transfer Γw = αw (hf − hm),  αw = β/a² · γw · Ka,  Ka = [Ka(hf) + Ka(hm)] / 2  with  Ka(h) = Kas · Kr,m(h)");
+        let nm = self.prj.water.materials.len();
+        let dp = &mut self.prj.water.dual_perm;
+        while dp.materials.len() < nm {
+            dp.materials.push(DualPermMaterial::default());
+        }
+        ui.horizontal(|ui| {
+            ui.label("Fracture volume fraction w (same for all layers):");
+            dv(ui, ch, &mut dp.w);
+            dp.w = dp.w.clamp(0.001, 0.999);
+        });
+        let mut proportional = dp.flux_frac_fracture < 0.0;
+        ui.horizontal(|ui| {
+            if ui.checkbox(&mut proportional, "Distribute boundary fluxes in proportion to the volume fractions (f = w)").changed() {
+                *ch = true;
+                dp.flux_frac_fracture = if proportional { -1.0 } else { 0.5 };
+            }
+            if !proportional {
+                ui.label("Fraction of the boundary flux into the fractures:");
+                dv(ui, ch, &mut dp.flux_frac_fracture);
+                dp.flux_frac_fracture = dp.flux_frac_fracture.clamp(0.0, 1.0);
+            }
+        });
+        check(ui, ch, &mut dp.matrix_dual_por, "Dual porosity inside the matrix: transient immobile matrix water");
+        if dp.matrix_dual_por {
+            ui.horizontal(|ui| {
+                ui.radio_value(&mut dp.matrix_dual_por_head, false, "water-content driven transfer (ωw)");
+                ui.radio_value(&mut dp.matrix_dual_por_head, true, "pressure-head driven transfer (van Genuchten immobile region)");
+            });
+        }
+        let mdp = dp.matrix_dual_por;
+        let mhead = dp.matrix_dual_por_head;
+        egui::Grid::new("dualperm_mat").striped(true).show(ui, |ui| {
+            let mut heads = vec!["Material", "β (3 = slabs)", "γw (0.4)", "a (path length)", "Kas (0 = matrix Ks)", "l (matrix)"];
+            if mdp {
+                heads.extend(["θr immobile (matrix)", "θs immobile (matrix)"]);
+                if mhead {
+                    heads.extend(["α immobile", "n immobile", "Ks interface"]);
+                } else {
+                    heads.push("ωw (water transfer)");
+                }
+            }
+            for h in heads {
+                ui.strong(h);
+            }
+            ui.end_row();
+            for i in 0..nm {
+                let m = &mut dp.materials[i];
+                ui.colored_label(mat_color(i + 1), format!("{}", i + 1));
+                dv(ui, ch, &mut m.beta);
+                dv(ui, ch, &mut m.gamma_w);
+                dv(ui, ch, &mut m.a);
+                dv(ui, ch, &mut m.ks_a);
+                dv(ui, ch, &mut m.l_matrix);
+                if mdp {
+                    dv(ui, ch, &mut m.thr_im);
+                    dv(ui, ch, &mut m.ths_im);
+                    if mhead {
+                        dv(ui, ch, &mut m.alpha_im);
+                        dv(ui, ch, &mut m.n_im);
+                        dv(ui, ch, &mut m.ks_im);
+                    } else {
+                        dv(ui, ch, &mut m.omega_w);
+                    }
+                }
+                ui.end_row();
+            }
+        });
     }
 
     fn soil_plots(&self, ui: &mut Ui, mi: usize, id: &str) {
@@ -1199,6 +1278,14 @@ impl App {
             }
         });
         ui.horizontal(|ui| {
+            check(ui, ch, &mut self.prj.atmosphere.lai_partitioning, "Partition the potential ET by LAI (the transpiration column then holds the LAI)");
+            if self.prj.atmosphere.lai_partitioning {
+                ui.label("Extinction coefficient:");
+                dv(ui, ch, &mut self.prj.atmosphere.extinction);
+            }
+        });
+        check(ui, ch, &mut self.prj.atmosphere.bc_cycles, "Repeat the atmospheric records cyclically after the last record");
+        ui.horizontal(|ui| {
             if ui.button("➕ Add record").clicked() {
                 let mut r = self.prj.atmosphere.records.last().cloned().unwrap_or(AtmRecord { h_crit_a: 10000.0, ..Default::default() });
                 r.t += 1.0;
@@ -1322,6 +1409,10 @@ impl App {
             ui.radio_value(&mut mp.i_rel_hum, 1, "Vapor Pressure (kPa)");
             check(ui, ch, &mut mp.hargreaves, "Use Hargreaves equation instead of Penman-Monteith");
         });
+        ui.horizontal(|ui| {
+            check(ui, ch, &mut mp.l_en_bal, "Evaporation and heat flux from the surface energy balance (requires heat transport)");
+            check(ui, ch, &mut mp.l_daily, "Generate daily variations of temperature and humidity from the daily records");
+        });
 
         section(ui, "Geographical & Radiation Parameters");
         egui::Grid::new("meteo_geo").num_columns(4).striped(true).show(ui, |ui| {
@@ -1368,7 +1459,9 @@ impl App {
         ui.horizontal(|ui| {
             ui.label("Crop mode:");
             ui.radio_value(&mut mp.i_crop, 0, "Bare Soil");
-            ui.radio_value(&mut mp.i_crop, 1, "Active Crop");
+            ui.radio_value(&mut mp.i_crop, 1, "Constant crop");
+            ui.radio_value(&mut mp.i_crop, 2, "Crop growth table");
+            ui.radio_value(&mut mp.i_crop, 3, "Daily crop data in the records");
         });
 
         if mp.i_crop != 0 {
@@ -1393,6 +1486,53 @@ impl App {
                 ui.label("Radiation Extinction Coeff.");
                 dv(ui, ch, &mut mp.r_extinct);
                 ui.end_row();
+            });
+        }
+
+        if mp.i_crop != 0 {
+            ui.horizontal(|ui| {
+                let mut on = mp.i_interc == 1;
+                if ui.checkbox(&mut on, "Canopy interception").changed() {
+                    mp.i_interc = if on { 1 } else { 0 };
+                    *ch = true;
+                }
+                if mp.i_interc == 1 {
+                    ui.label("Interception constant a (mm):");
+                    dv(ui, ch, &mut mp.a_interc);
+                }
+            });
+        }
+        if mp.i_crop == 1 {
+            ui.horizontal(|ui| {
+                ui.label("Root depth (0 = take it from the root-growth settings):");
+                dv(ui, ch, &mut mp.x_root);
+            });
+        }
+        if mp.i_crop == 2 {
+            ui.label("Crop growth table: time, crop height (cm), albedo, LAI, root depth");
+            ui.horizontal(|ui| {
+                if ui.button("➕ Add row").clicked() {
+                    let mut r = mp.growth.last().copied().unwrap_or([0.0, 10.0, 0.23, 1.0, 10.0]);
+                    r[0] += 1.0;
+                    mp.growth.push(r);
+                    *ch = true;
+                }
+                if ui.button("➖ Remove last").clicked() {
+                    mp.growth.pop();
+                    *ch = true;
+                }
+            });
+            egui::Grid::new("meteo_growth").striped(true).show(ui, |ui| {
+                for h in [format!("t ({})", tu), "Height (cm)".to_string(), "Albedo".into(), "LAI".into(), "Root depth".into()] {
+                    ui.strong(h);
+                }
+                ui.end_row();
+                for r in mp.growth.iter_mut() {
+                    for v in r.iter_mut() {
+                        dv(ui, ch, v);
+                    }
+                    ui.end_row();
+                }
             });
         }
 
@@ -1435,6 +1575,12 @@ impl App {
             }.into(),
         ];
 
+        let daily_crop = mp.i_crop == 3;
+        let (def_h, def_a, def_l, def_x) = (mp.crop_height, mp.albedo, mp.lai, mp.x_root);
+        let mut heads = heads.to_vec();
+        if daily_crop {
+            heads.extend(["Crop height (cm)".to_string(), "Albedo".into(), "LAI".into(), "Root depth".into()]);
+        }
         let num_records = mp.records.len();
         let mut tb = TableBuilder::new(ui).striped(true).max_scroll_height(260.0);
         for _ in 0..heads.len() {
@@ -1459,6 +1605,18 @@ impl App {
                 row.col(|ui| dv(ui, ch, &mut r.rh_mean));
                 row.col(|ui| dv(ui, ch, &mut r.wind_kmd));
                 row.col(|ui| dv(ui, ch, &mut r.sun_hours));
+                if daily_crop {
+                    let (mut h, mut a, mut l, mut x) =
+                        (r.crop_height.unwrap_or(def_h), r.albedo.unwrap_or(def_a), r.lai.unwrap_or(def_l), r.x_root.unwrap_or(def_x));
+                    row.col(|ui| dv(ui, ch, &mut h));
+                    row.col(|ui| dv(ui, ch, &mut a));
+                    row.col(|ui| dv(ui, ch, &mut l));
+                    row.col(|ui| dv(ui, ch, &mut x));
+                    r.crop_height = Some(h);
+                    r.albedo = Some(a);
+                    r.lai = Some(l);
+                    r.x_root = Some(x);
+                }
             });
         });
     }
@@ -1615,12 +1773,35 @@ impl App {
         }
         check(ui, ch, &mut s.equil_init, "Non-equilibrium phase initially in equilibrium with the liquid phase");
         check(ui, ch, &mut s.mass_init, "Initial conditions given as total solute mass (per volume of soil)");
-        check(ui, ch, &mut s.l_moist, "Water content dependent reaction rates (Walker / exponential)");
+        ui.horizontal(|ui| {
+            ui.label("Reported concentration:");
+            ui.radio_value(&mut s.i_conc_type, 1, "Volume averaged (resident)");
+            ui.radio_value(&mut s.i_conc_type, 2, "Flux averaged");
+        });
+        check(ui, ch, &mut s.l_dual_neq, "Dual non-equilibrium: mobile-immobile model plus kinetic sorption sites in the mobile zone (needs θim > 0)");
+        check(ui, ch, &mut s.l_nequil, "Decay products of non-equilibrium sorbed mass go to the non-equilibrium phase (lNEquil)");
+        check(ui, ch, &mut s.l_bact, "Colloid / virus / bacteria transport (attachment-detachment, two attachment sites)");
+        if s.l_bact {
+            ui.indent("bact_opts", |ui| {
+                check(ui, ch, &mut s.l_filtr, "Compute attachment rates from filtration theory (Dc, Dp, sticking efficiencies)");
+                ui.label("Reaction page columns are reused: SMax2/rKa2/rKd2/SMax1/rKa1/rKd1 (and Dc, Dp or the blocking types iPsi1/iPsi2).");
+            });
+        }
+        check(ui, ch, &mut s.l_tdep, "Temperature dependence of transport and reaction parameters (activation energies)");
+        check(ui, ch, &mut s.l_moist, "Water content dependent reaction rates");
+        if s.l_moist {
+            ui.indent("moist_opts", |ui| {
+                ui.horizontal(|ui| {
+                    ui.radio_value(&mut s.i_moist_dep, 1, "Walker: (θ/θref)^B below θref");
+                    ui.radio_value(&mut s.i_moist_dep, 2, "Trapezoidal tables per reaction");
+                });
+            });
+        }
         check(ui, ch, &mut self.prj.root.l_act_rsu, "Active root solute uptake (Michaelis-Menten kinetics)");
 
         if self.prj.root.l_act_rsu {
             ui.indent("act_rsu", |ui| {
-                ui.label("Active solute uptake parameters (OmegaAct, Km, cMin):");
+                ui.label("Active solute uptake (only for a single solute; SPot is read from the cB column of the atmospheric data):");
                 let ns = self.prj.solute.species.len();
                 while self.prj.root.omega_act.len() < ns { self.prj.root.omega_act.push(1.0); }
                 while self.prj.root.r_km.len() < ns { self.prj.root.r_km.push(0.5); }
@@ -1628,11 +1809,15 @@ impl App {
                 for j in 0..ns {
                     ui.horizontal(|ui| {
                         ui.label(format!("Solute {}:", j + 1));
-                        ui.add(egui::DragValue::new(&mut self.prj.root.omega_act[j]).speed(0.05).prefix("ω_act: "));
+                        ui.add(egui::DragValue::new(&mut self.prj.root.omega_act[j]).speed(0.05).prefix("ω_S: "));
                         ui.add(egui::DragValue::new(&mut self.prj.root.r_km[j]).speed(0.05).prefix("Km: "));
                         ui.add(egui::DragValue::new(&mut self.prj.root.c_min[j]).speed(0.01).prefix("cMin: "));
                     });
                 }
+                ui.horizontal(|ui| {
+                    ui.add(egui::DragValue::new(&mut self.prj.root.s_pot).speed(0.01).prefix("SPot (initial): "));
+                    check(ui, ch, &mut self.prj.root.l_omega_w, "Scale SPot by the water stress ratio OmegaW (lOmegaW)");
+                });
             });
         }
         
@@ -1655,8 +1840,12 @@ impl App {
         let lu = self.prj.units.length_str().to_string();
         let nm = self.prj.water.materials.len();
         egui::Grid::new("sm").striped(true).show(ui, |ui| {
-            for h in ["Material", "Bulk density ρ", &format!("Dispersivity Dl ({})", lu), "Fraction f (equilibrium sites)", "Immobile water θim"] {
+            let dual_perm = self.prj.water.model == SoilModel::DualPermeability;
+            for h in ["Material", "Bulk density ρ", &format!("Dispersivity Dl ({})", lu), "Fraction f (equilibrium sites)", if dual_perm { "Immobile water θim (fracture)" } else { "Immobile water θim" }] {
                 ui.strong(h);
+            }
+            if dual_perm {
+                ui.strong("Immobile water θim (matrix)");
             }
             ui.end_row();
             for i in 0..nm {
@@ -1666,10 +1855,16 @@ impl App {
                 dv(ui, ch, &mut m.disp_l);
                 dv(ui, ch, &mut m.frac);
                 dv(ui, ch, &mut m.th_immobile);
+                if dual_perm {
+                    dv(ui, ch, &mut m.th_im_matrix);
+                }
                 ui.end_row();
             }
         });
         ui.label("Non-equilibrium transport is switched on automatically when f < 1 (two-site sorption) or θim > 0 (mobile–immobile water).");
+        if self.prj.water.model == SoilModel::DualPermeability {
+            ui.label("Dual permeability: both domains use the same f, ρ, Dl and reaction parameters; the matrix has its own immobile water content (or a transient one with matrix dual porosity). Gas-phase terms, kinetic sorption, dual non-equilibrium, the colloid model and mobile-immobile transport act in both domains.");
+        }
         let ns = self.prj.solute.species.len();
         section(ui, "Molecular diffusion");
         egui::Grid::new("diff").striped(true).show(ui, |ui| {
@@ -1692,13 +1887,23 @@ impl App {
         self.sync();
         let nm = self.prj.water.materials.len();
         let ns = self.prj.solute.species.len();
+        if self.prj.solute.l_dual_neq {
+            ui.label("Dual non-equilibrium: μg is the fraction f_em of equilibrium sites in the mobile zone and γg the first-order rate ωS of the kinetic sites.");
+        }
         ui.label("Adsorption s = Ks·c^β/(1+η·c^β); μ: first-order decay in liquid (w), solid (s), gas (g); γ: production from the parent solute; μ0: zero-order production; α: first-order mass-transfer rate for non-equilibrium.");
+        let dual_perm = self.prj.water.model == SoilModel::DualPermeability;
+        if dual_perm {
+            ui.label("Dual permeability: α (ω) is the kinetic sorption rate of the non-equilibrium sites in both domains; αs is the fracture-matrix solute transfer coefficient (Γs = αs (1-w) θm (cf - cm) + Γw c*).");
+        }
         for j in 0..ns {
             ui.add_space(6.0);
             ui.label(RichText::new(self.prj.solute.species[j].name.clone()).strong());
             egui::Grid::new(format!("re{}", j)).striped(true).show(ui, |ui| {
                 for h in ["Mat", "Ks", "η (Nu)", "β", "Henry kH", "μw", "μs", "μg", "γw", "γs", "γg", "μ0w", "μ0s", "μ0g", "α"] {
                     ui.strong(h);
+                }
+                if dual_perm {
+                    ui.strong("αs");
                 }
                 ui.end_row();
                 for m in 0..nm {
@@ -1707,9 +1912,155 @@ impl App {
                     for v in [&mut p.ks, &mut p.nu, &mut p.beta, &mut p.henry, &mut p.mu_w, &mut p.mu_s, &mut p.mu_g, &mut p.gam_w, &mut p.gam_s, &mut p.gam_g, &mut p.mu0_w, &mut p.mu0_s, &mut p.mu0_g, &mut p.omega] {
                         dv(ui, ch, v);
                     }
+                    if dual_perm {
+                        dv(ui, ch, &mut p.alpha_s);
+                    }
                     ui.end_row();
                 }
             });
+        }
+    }
+
+    /// Temperature dependence (activation energies), water-content dependence (Walker parameters / tables) and the
+    /// attachment parameters of the colloid-filtration model.
+    pub fn page_sol_advanced(&mut self, ui: &mut Ui, ch: &mut bool) {
+        ui.heading("Solute transport: temperature / water-content dependence, filtration model");
+        self.sync();
+        let nm = self.prj.water.materials.len();
+        let ns = self.prj.solute.species.len();
+        if !(self.prj.solute.l_tdep || self.prj.solute.l_moist || self.prj.solute.l_bact) {
+            ui.label("Enable temperature dependence, water-content dependence or the colloid model on the 'Solute transport: general' page.");
+            return;
+        }
+        if self.prj.solute.l_tdep {
+            section(ui, "Activation energies Ea (J/mol); 0 = no temperature dependence");
+            while self.prj.solute.t_dep.len() < ns {
+                self.prj.solute.t_dep.push(SpeciesTDep::default());
+            }
+            for j in 0..ns {
+                ui.label(RichText::new(self.prj.solute.species[j].name.clone()).strong());
+                let td = &mut self.prj.solute.t_dep[j];
+                egui::Grid::new(format!("tdep{}", j)).striped(true).show(ui, |ui| {
+                    for (h, v) in [
+                        ("Dw", &mut td.diff_w), ("Dg", &mut td.diff_g), ("Ks", &mut td.ks), ("η", &mut td.nu), ("β", &mut td.beta),
+                        ("Henry", &mut td.henry), ("μw", &mut td.mu_w), ("μs", &mut td.mu_s), ("μg", &mut td.mu_g),
+                        ("γw", &mut td.gam_w), ("γs", &mut td.gam_s), ("γg", &mut td.gam_g),
+                        ("μ0w", &mut td.mu0_w), ("μ0s", &mut td.mu0_s), ("μ0g", &mut td.mu0_g), ("ω", &mut td.omega),
+                    ] {
+                        ui.strong(h);
+                        dv(ui, ch, v);
+                        ui.end_row();
+                    }
+                });
+            }
+        }
+        if self.prj.solute.l_moist {
+            if self.prj.solute.i_moist_dep == 1 {
+                section(ui, "Walker's formula: rate × (θ/θref)^B for θ < θref  (θref from the reference pressure head)");
+                while self.prj.solute.w_dep.len() < ns {
+                    self.prj.solute.w_dep.push(SpeciesWDep::default());
+                }
+                let names = ["μw", "μs", "μg", "γw", "γs", "γg", "μ0w", "μ0s", "μ0g"];
+                for j in 0..ns {
+                    ui.label(RichText::new(self.prj.solute.species[j].name.clone()).strong());
+                    let wd = &mut self.prj.solute.w_dep[j];
+                    egui::Grid::new(format!("wdep{}", j)).striped(true).show(ui, |ui| {
+                        ui.strong("Parameter");
+                        ui.strong("B");
+                        ui.strong("href (L)");
+                        ui.end_row();
+                        for k in 0..9 {
+                            ui.label(names[k]);
+                            dv(ui, ch, &mut wd.exp_b[k]);
+                            dv(ui, ch, &mut wd.h_ref[k]);
+                            ui.end_row();
+                        }
+                    });
+                }
+            } else {
+                section(ui, "Reaction rate vs. water content (MoistDep.in): ReacMin0, θ0, θ1, θ2, θ3, ReacMin1  (θ2 = 0: no reduction)");
+                let labels = ["μw", "μs", "μg", "γw", "γs", "γg", "μ0w", "μ0s", "μ0g", "μw (immobile)", "μs (immobile)", "γw (immobile)", "γs (immobile)"];
+                let want = nm * ns;
+                while self.prj.solute.moist_tables.len() < want {
+                    self.prj.solute.moist_tables.push(MoistDepTable { react: vec![[1.0, 0.0, 0.0, 0.0, 0.0, 1.0]; 13] });
+                }
+                for t in self.prj.solute.moist_tables.iter_mut() {
+                    while t.react.len() < 13 {
+                        t.react.push([1.0, 0.0, 0.0, 0.0, 0.0, 1.0]);
+                    }
+                }
+                for m in 0..nm {
+                    for j in 0..ns {
+                        let name = format!("Material {} / {}", m + 1, self.prj.solute.species[j].name);
+                        egui::CollapsingHeader::new(name).id_salt(format!("md{}_{}", m, j)).show(ui, |ui| {
+                            let t = &mut self.prj.solute.moist_tables[m * ns + j];
+                            egui::Grid::new(format!("mdg{}_{}", m, j)).striped(true).show(ui, |ui| {
+                                for h in ["Reaction", "ReacMin0", "θ0", "θ1", "θ2", "θ3", "ReacMin1"] {
+                                    ui.strong(h);
+                                }
+                                ui.end_row();
+                                for (k, row) in t.react.iter_mut().enumerate() {
+                                    ui.label(labels[k]);
+                                    for v in row.iter_mut() {
+                                        dv(ui, ch, v);
+                                    }
+                                    ui.end_row();
+                                }
+                            });
+                        });
+                    }
+                }
+            }
+        }
+        if self.prj.solute.l_bact {
+            section(ui, "Colloid / bacteria attachment parameters (per material and solute)");
+            let filtr = self.prj.solute.l_filtr;
+            let dual_perm_bact = self.prj.water.model == SoilModel::DualPermeability;
+            for j in 0..ns {
+                ui.label(RichText::new(self.prj.solute.species[j].name.clone()).strong());
+                egui::Grid::new(format!("bact{}", j)).striped(true).show(ui, |ui| {
+                    let mut heads = vec!["Mat", "rKa1", "rKd1", "SMax1", "rKa2", "rKd2", "SMax2"];
+                    if filtr {
+                        heads.extend(["Dc", "Dp"]);
+                    } else {
+                        heads.extend(["iPsi1", "iPsi2", "Dc"]);
+                    }
+                    if dual_perm_bact {
+                        heads.push("ω immobile (matrix)");
+                    }
+                    for h in heads {
+                        ui.strong(h);
+                    }
+                    ui.end_row();
+                    for m in 0..nm {
+                        let p = &mut self.prj.solute.species[j].per_material[m];
+                        ui.colored_label(mat_color(m + 1), format!("{}", m + 1));
+                        for v in [&mut p.r_ka1, &mut p.r_kd1, &mut p.s_max1, &mut p.r_ka2, &mut p.r_kd2, &mut p.s_max2] {
+                            dv(ui, ch, v);
+                        }
+                        if filtr {
+                            dv(ui, ch, &mut p.d_c);
+                            dv(ui, ch, &mut p.d_p);
+                        } else {
+                            if ui.add(egui::DragValue::new(&mut p.i_psi1).range(0..=5)).changed() {
+                                *ch = true;
+                            }
+                            if ui.add(egui::DragValue::new(&mut p.i_psi2).range(0..=5)).changed() {
+                                *ch = true;
+                            }
+                            dv(ui, ch, &mut p.d_c);
+                        }
+                        if dual_perm_bact {
+                            dv(ui, ch, &mut p.omega_im);
+                        }
+                        ui.end_row();
+                    }
+                });
+            }
+            if dual_perm_bact {
+                ui.label("Dual permeability: with θim (matrix) > 0 the matrix colloids exchange with the immobile region at rate ω immobile; with ω immobile = 0 the immobile water is simply inaccessible (steady flow: colloid size exclusion with θc = θim (matrix)).");
+            }
+            ui.label("rKa: attachment rate or sticking efficiency (filtration theory), rKd: detachment rate, SMax: maximum solid-phase concentration (blocking), iPsi: 0 none, 1 Langmuir, 2 ripening, 3 RSA, 4 straining, 5 straining + blocking.");
         }
     }
 
@@ -1721,7 +2072,16 @@ impl App {
             ui.label("Upper boundary");
             ui.radio_value(&mut s.k_top, 1, "Concentration BC");
             ui.radio_value(&mut s.k_top, -1, "Concentration flux BC");
+            ui.radio_value(&mut s.k_top, -2, "Volatilization (gas boundary layer)");
         });
+        if s.k_top == -2 {
+            ui.horizontal(|ui| {
+                ui.label("Boundary layer thickness dSurf:");
+                dv(ui, ch, &mut s.d_surf);
+                ui.label("Atmospheric gas concentration cAtm:");
+                dv(ui, ch, &mut s.c_atm);
+            });
+        }
         ui.horizontal(|ui| {
             ui.label("Lower boundary");
             ui.radio_value(&mut s.k_bot, 1, "Concentration BC");
@@ -1821,6 +2181,27 @@ impl App {
         ui.label(format!("Processes: {}", pr.join(", ")));
         if ui.button("Go to hydraulic model page").clicked() {
             self.page = Page::HydModel;
+        }
+    }
+	pub fn page_inverse(&mut self, ui: &mut Ui) {
+        ui.heading("Parameter estimation & inverse modeling");
+        ui.label("Configure automated calibration of soil hydraulic or solute parameters against observed data (Fit.in).");
+        
+        section(ui, "Optimization Settings");
+        egui::Grid::new("inv_settings").num_columns(2).show(ui, |ui| {
+            ui.label("Algorithm");
+            ui.label("Levenberg-Marquardt (non-linear least squares)");
+            ui.end_row();
+            ui.label("Max iterations (MIT)");
+            ui.label("50");
+            ui.end_row();
+        });
+
+        section(ui, "Calibration Observations");
+        ui.label("Observation points and weights loaded from Fit.in will be processed during calibration runs.");
+        
+        if ui.button("▶ Run Parameter Optimization").clicked() {
+            self.start_optimization();
         }
     }
 }

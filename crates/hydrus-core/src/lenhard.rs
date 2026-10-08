@@ -2,10 +2,9 @@
 //!
 //! This implements the reversal-point ("scanning curve") bookkeeping used by
 //! HYSTER.FOR's Hyst/HysterIni/Path/HawPath/Drain/Dry/Wet/UpdateHyst routines,
-//! ported as literally as practical (including the odd but intentional
-//! `PHSW(n) = -hOld(n)` reset performed at the top of every call, which is
-//! what tells HawPath whether the trial head is wetting or drying relative
-//! to the last converged state).
+//! ported as literally as practical. `PHSW(n) = -hOld(n)` is evaluated at the top of every call and is what tells
+//! HawPath whether the trial head is wetting or drying relative to the last converged state; since that overwrite makes
+//! every other store to PHSW (HysterIni, UpdateHyst) unreachable for HawPath, those stores are not ported.
 //!
 //! IPATH (number of reversal curves remembered) is hard-coded to 7, matching
 //! `iPath=7` in HYSTER.FOR's `Hyst` subroutine.
@@ -24,7 +23,6 @@ pub struct LenhardState {
     pub rasw: Vec<[f64; IPATH + 1]>,
     pub sarw: Vec<f64>,
     pub rswaw: Vec<f64>,
-    pub phsw: Vec<f64>,
     pub mpsw: Vec<i32>,
     pub jjh: Vec<i32>,
     pub ipsw: Vec<i32>,
@@ -37,7 +35,6 @@ impl LenhardState {
             rasw: vec![[0.0; IPATH + 1]; n],
             sarw: vec![0.0; n],
             rswaw: vec![0.0; n],
-            phsw: vec![0.0; n],
             mpsw: vec![3; n],
             jjh: vec![0; n],
             ipsw: vec![1; n],
@@ -137,14 +134,12 @@ impl Simulation {
                     ls.rhsw[i][2] = 0.0;
                     ls.rasw[i][2] = 1.0;
                     ls.jjh[i] = 0;
-                    ls.phsw[i] = 0.0;
                     ls.rswaw[i] = 1.0;
                     ls.ipsw[i] = 1;
                 }
                 2 => {
                     ls.rhsw[i][2] = 1.0e3;
                     ls.rasw[i][2] = 0.0;
-                    ls.phsw[i] = 1.0e3;
                     ls.jjh[i] = 1;
                     ls.rswaw[i] = 0.0;
                     ls.ipsw[i] = 2;
@@ -154,7 +149,6 @@ impl Simulation {
                     ls.rhsw[i][3] = 0.0;
                     ls.rasw[i][2] = 0.0;
                     ls.rasw[i][3] = 1.0;
-                    ls.phsw[i] = 0.0;
                     ls.jjh[i] = 0;
                     ls.rswaw[i] = 0.0;
                     ls.ipsw[i] = 3;
@@ -177,7 +171,8 @@ impl Simulation {
         let n = self.n;
         self.lenhard_init_state();
         if i_kod == 1 {
-            self.lenhard_i_hyst = if i_kappa == -1 { 1 } else { 2 };
+            // Hyst: `iHyst=1; if(IKappa.eq.-1) iHyst=1; if(IKappa.eq.1) iHyst=2`
+            self.lenhard_i_hyst = if i_kappa == 1 { 2 } else { 1 };
             self.lenhard_hyster_ini();
         }
         for i in 0..n {
@@ -191,20 +186,51 @@ impl Simulation {
             let xmw = 1.0 - 1.0 / xnw;
             let xxmw = 1.0 / xmw;
             let sm = self.par_d[m][0] / self.par_d[m][1];
+            // HYSTER.FOR: SARWI = (ths - thsW)/(ths - thr).  (A former deviation used the commented-out older line
+            // (ths - thsW)/ths, fitted to the Test10 output of an older HYDRUS build; HYDRUS 4.17 Test10 agrees with the
+            // source line in every compared value.)
             let sarwi = (self.par_d[m][1] - self.par_w[m][1]) / (self.par_d[m][1] - self.par_d[m][0]);
             let p = Props { alphad, alphai, xn, xm, xxm, xnw, xmw, xxmw, sm, sarwi };
 
             let h_w = self.h_new[i];
             let h_a = 0.0f64;
-            // "Initialize arrays for hysteretic saturations" in HYSTER.FOR:
-            // PHSW(n) is reset from the last converged head on every call,
-            // before HawPath uses it to decide drying vs. wetting.
-            self.ls_mut().phsw[i] = -self.h_old[i];
+            // `PHSW(n)=-hOld(n)`: HYSTER.FOR overwrites PHSW on every call before HawPath reads it, so the value kept in
+            // HysterIni / UpdateHyst never reaches HawPath. The bookkeeping of the stored PHSW is therefore dead code and is
+            // not ported; only the per-call value is passed on.
+            let phsw = -self.h_old[i];
+            // Exact ties: when a node is at rest, hNew and hOld are equal and HYSTER.FOR (single precision `real hNew`)
+            // sees HAW == PHSW, which keeps the node on its current path (the `>=` / `<=` terms of HAWPATH).  In double
+            // precision the same node differs by round-off (1e-14), which flips the sign of the comparison, creates
+            // spurious reversal points a few ulp apart and finally ends in HAWPATH's "no path" error branch.  Differences
+            // below 1e-12 (relative) are therefore treated as the tie they are.
+            let mut haw = (h_a - h_w).max(0.0);
+            if (haw - phsw).abs() <= 1.0e-12 * (1.0 + phsw.abs()) {
+                haw = phsw;
+            }
 
-            let lv = self.lenhard_path(i, h_w, h_a, &p);
+            // Path: `RSW=RSWAW(N); IF(RSW.EQ.0.) SARW(N)=SARWI` -- SARW is a persistent array
+            if self.ls().rswaw[i] == 0.0 {
+                self.ls_mut().sarw[i] = p.sarwi;
+            }
+
+            let (lv, path_ok) = self.lenhard_path(i, haw, phsw, &p);
+            if !path_ok {
+                // HAWPATH's error branches ("Passed Through ... Without Entering subroutine WET/DRY"): the Fortran
+                // prints a message and then uses whatever SW / PERMW / DWW the *previous node* left in the common
+                // block. Here the node simply keeps its previous Theta, Con and Cap, and the event is reported once.
+                self.lenhard_path_failures += 1;
+                if self.lenhard_path_failures == 1 {
+                    self.res.messages.push(format!(
+                        "Lenhard hysteresis: no scanning path found at node {} (h = {:.6}); the previous Theta/Con/Cap are kept.",
+                        i + 1,
+                        h_w
+                    ));
+                }
+                continue;
+            }
 
             if i_kod == 1 || i_kod == 3 {
-                self.lenhard_update(h_w, h_a, i, &p, lv);
+                self.lenhard_update(haw, i, &p, lv);
             }
 
             let theta = lv.sw * self.par_d[m][1];
@@ -221,7 +247,7 @@ impl Simulation {
 
     /// Path: assign SARWI-derived quantities, seed SARW on a fresh RSWAW,
     /// then call HawPath.
-    fn lenhard_path(&self, i: usize, h_w: f64, h_a: f64, p: &Props) -> LocalVars {
+    fn lenhard_path(&self, i: usize, haw: f64, phsw: f64, p: &Props) -> (LocalVars, bool) {
         let mut lv = LocalVars::default();
         if p.sarwi == 0.0 {
             lv.raw = 0.0;
@@ -229,7 +255,6 @@ impl Simulation {
         } else {
             lv.raw = 1.0 / p.sarwi - 1.0;
         }
-        let haw = (h_a - h_w).max(0.0);
         lv.jjjh = self.ls().jjh[i];
         lv.ipsw1 = self.ls().ipsw[i];
         lv.mpsw1 = self.ls().mpsw[i];
@@ -238,13 +263,14 @@ impl Simulation {
         // commit it back to persistent state except via UpdateHyst, this
         // mirrors Fortran's transient read of SARW(N) for this call.
         lv.sraw = if lv.rsw == 0.0 { p.sarwi } else { self.ls().sarw[i] };
-        self.lenhard_hawpath(i, haw, p, &mut lv);
-        lv
+        let ok = self.lenhard_hawpath(i, haw, phsw, p, &mut lv);
+        (lv, ok)
     }
 
     /// HawPath: determine which branch (main drainage, wetting scanning,
     /// drying scanning) the trial head lies on and dispatch to Drain/Dry/Wet.
-    fn lenhard_hawpath(&self, i: usize, haw: f64, p: &Props, lv: &mut LocalVars) {
+    /// Returns `false` when HAWPATH's error branch is reached (no matching path).
+    fn lenhard_hawpath(&self, i: usize, haw: f64, phsw_i: f64, p: &Props, lv: &mut LocalVars) -> bool {
         #[derive(Clone, Copy, PartialEq)]
         enum Entry {
             Top,
@@ -260,10 +286,9 @@ impl Simulation {
                     lv.jjjh = 0;
                     lv.ipsw1 = 1;
                     lv.mpsw1 = 3;
-                    return;
+                    return true;
                 }
             }
-            let phsw_i = self.ls().phsw[i];
             let wetting_cond = ((haw < phsw_i && lv.jjjh == 0) || (haw <= phsw_i && lv.jjjh == 1)) && lv.mpsw1 == 3
                 || lv.mpsw1 == 1
                 || (lv.jjjh == 1 && haw == 0.0);
@@ -282,7 +307,7 @@ impl Simulation {
                     lv.ipsw1 = 2;
                     lv.jjjh = 1;
                     self.lenhard_wet(i, haw, p, lv);
-                    return;
+                    return true;
                 }
                 if lv.jjjh == 0 && lv.mpsw1 == 3 {
                     lv.ipsw1 += 1;
@@ -306,15 +331,12 @@ impl Simulation {
                         self.lenhard_wet(i, haw, p, lv);
                         lv.ilsw = l;
                         lv.jjjh = 1;
-                        return;
+                        return true;
                     }
                     l += 2;
                 }
-                // Passed through the wetting-scanning loop without a match
-                // (mirrors HAWPATH's error branch) — leave lv as computed
-                // so far; con/cap/theta for this node keep their previous
-                // values for this call.
-                return;
+                // Passed through the wetting-scanning loop without a match (HAWPATH's error branch)
+                return false;
             } else {
                 let drying_cond = ((haw > phsw_i && lv.jjjh == 1) || (haw >= phsw_i && lv.jjjh == 0)) && lv.mpsw1 == 3
                     || lv.mpsw1 == 0;
@@ -325,7 +347,7 @@ impl Simulation {
                         lv.jjjh = 0;
                         lv.ipsw1 = 1;
                         lv.mpsw1 = 3;
-                        return;
+                        return true;
                     }
                     let rhsw_ipath = self.ls().rhsw[i][IPATH];
                     if lv.ipsw1 == IPATH as i32 && haw < rhsw_ipath {
@@ -356,15 +378,14 @@ impl Simulation {
                             self.lenhard_dry(i, haw, p, lv);
                             lv.ilsw = l;
                             lv.jjjh = 0;
-                            return;
+                            return true;
                         }
                         l += 2;
                     }
-                    return;
+                    return false; // passed through the drying-scanning loop without a match
                 } else {
-                    // Neither wetting nor drying condition matched — this is
-                    // HAWPATH's terminal error branch; leave lv unchanged.
-                    return;
+                    // Neither wetting nor drying condition matched: HAWPATH's terminal error branch
+                    return false;
                 }
             }
         }
@@ -449,9 +470,8 @@ impl Simulation {
 
     /// UpdateHyst: after convergence (or on initialisation), commit the
     /// reversal points implied by this call's trial values.
-    fn lenhard_update(&mut self, h_w: f64, h_a: f64, i: usize, p: &Props, lv0: LocalVars) {
+    fn lenhard_update(&mut self, haw: f64, i: usize, p: &Props, lv0: LocalVars) {
         let mut lv = lv0;
-        let haw = (h_a - h_w).max(0.0);
 
         if lv.asw < self.ls().rswaw[i] {
             self.ls_mut().rswaw[i] = lv.asw;
@@ -480,7 +500,6 @@ impl Simulation {
             let ls = self.ls_mut();
             ls.rhsw[i][idx] = haw;
             ls.rasw[i][idx] = lv.asw;
-            ls.phsw[i] = haw;
         }
 
         if lv.ilsw > 0 && lv.jjjh == 0 {
@@ -498,7 +517,6 @@ impl Simulation {
             let ls = self.ls_mut();
             ls.rhsw[i][idx] = haw;
             ls.rasw[i][idx] = lv.asw;
-            ls.phsw[i] = haw;
         } else if lv.ilsw > 0 && lv.jjjh == 1 {
             let mut m = lv.ipsw1 + 3;
             while m <= IPATH as i32 {
@@ -514,7 +532,6 @@ impl Simulation {
             let ls = self.ls_mut();
             ls.rhsw[i][idx] = haw;
             ls.rasw[i][idx] = lv.asw;
-            ls.phsw[i] = haw;
         }
 
         {
@@ -537,7 +554,6 @@ impl Simulation {
                 let ls = self.ls_mut();
                 ls.rhsw[i][idx] = haw;
                 ls.rasw[i][idx] = lv.asw;
-                ls.phsw[i] = haw;
             }
         }
 
@@ -557,17 +573,11 @@ impl Simulation {
             let ls = self.ls_mut();
             ls.rhsw[i][idx] = haw;
             ls.rasw[i][idx] = lv.asw;
-            ls.phsw[i] = haw;
         }
         if lv.jjjh == 0 && lv.asw < self.ls().rasw[i][idx] {
             let ls = self.ls_mut();
             ls.rhsw[i][idx] = haw;
             ls.rasw[i][idx] = lv.asw;
-            ls.phsw[i] = haw;
-        }
-        if lv.ipsw1 == 1 {
-            let rh2 = self.ls().rhsw[i][2];
-            self.ls_mut().phsw[i] = rh2;
         }
     }
 }

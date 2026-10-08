@@ -80,21 +80,6 @@ impl crate::model::DrainSettings {
 }
 
 impl Simulation {
-    fn lookup(&self, m: usize, him: f64) -> Option<(usize, f64)> {
-        let t0 = &self.tabs[0];
-        if self.l_table && him > t0.h[NTAB - 1] && him <= t0.h[0] {
-            let alh1 = (-self.h_tab_first).log10();
-            let dlh = ((-self.h_tab_last).log10() - alh1) / (NTAB as f64 - 1.0);
-            let it = (((-him).log10() - alh1) / dlh).max(0.0) as usize;
-            let it = it.min(NTAB - 2);
-            let tb = &self.tabs[m];
-            let dh = (him - tb.h[it]) / (tb.h[it + 1] - tb.h[it]);
-            Some((it, dh))
-        } else {
-            None
-        }
-    }
-
     fn lookup_tabular(&self, m: usize, him: f64) -> (f64, f64, f64) {
         let tb = &self.tabs[m];
         let n_pts = tb.h.len();
@@ -126,7 +111,7 @@ impl Simulation {
         let thei = tb.the[low] + (tb.the[high] - tb.the[low]) * dh;
         (coni.max(1e-37), capi.max(0.0), thei.max(0.0))
     }
-	
+
 	/// Evaluate matrix hydraulic properties K_m(h_m) and C_m(h_m).
     pub fn set_mat_matrix(&mut self) {
         for i in 0..self.n {
@@ -146,7 +131,7 @@ impl Simulation {
                 if alpha_m > 0.0 { alpha_m } else { par[2] },
                 if n_m > 1.0 { n_m } else { par[3] },
                 if ks_m > 0.0 { ks_m } else { par[4] },
-                par[5],
+                self.prj.water.dual_perm.material(m).l_matrix,
                 0.0, 0.0, 0.0, 0.0, 0.0,
             ];
 
@@ -186,7 +171,10 @@ impl Simulation {
 
         let pb = b + f2 * self.h_matrix_new[0]
             - (self.th_matrix_new[0] - self.th_matrix_old[0]) * dx / dt
+            - self.sink[0] * dx
+            - self.sink_imm[0] * dx
             + r_bot_m
+            + self.r_bot_matrix()
             + (self.sink_im[0] / w_m) * dx;
 
         // Interior nodes
@@ -204,6 +192,8 @@ impl Simulation {
             p[i] = f2 * self.h_matrix_new[i]
                 - (self.th_matrix_new[i] - self.th_matrix_old[i]) * dx / dt
                 - b
+                - self.sink[i] * dx
+                - self.sink_imm[i] * dx
                 + (self.sink_im[i] / w_m) * dx;
             s[i] = a3;
         }
@@ -220,9 +210,51 @@ impl Simulation {
         let pt = f2 * self.h_matrix_new[m]
             - (self.th_matrix_new[m] - self.th_matrix_old[m]) * dx / dt
             - b
+            - self.sink[m] * dx
+            - self.sink_imm[m] * dx
+            - self.r_top_matrix()
             + (self.sink_im[m] / w_m) * dx;
 
         Sys { p, r, s, pb, rb, sb, pt, rt, st }
+    }
+
+    /// Switching of the atmospheric top boundary condition of the MATRIX domain (the counterpart of `shift` for the fracture):
+    /// flux (-4) <-> head (4) at the dry limit `h_crit_a` or at ponding. Without it a matrix that cannot supply its share of the
+    /// evaporation would be driven to unlimited suctions, or would be forced onto the head of the fracture.
+    fn shift_matrix(&mut self) {
+        if !self.atm_bc {
+            return;
+        }
+        let n = self.n;
+        let h_top = self.h_matrix_new[n - 1];
+        let r_m = self.r_top_matrix();
+        if self.kod_top_m < 0 {
+            if h_top > 0.0 {
+                self.kod_top_m = 4;
+                self.h_top_m = 0.0;
+            } else if h_top <= self.h_crit_a {
+                self.kod_top_m = 4;
+                self.h_top_m = self.h_crit_a;
+            }
+        } else {
+            let m = n - 2;
+            let dx = self.x[n - 1] - self.x[m];
+            let v_top = self.matrix_flux(m, n - 1)
+                - (self.th_matrix_new[n - 1] - self.th_matrix_old[n - 1]) * dx / 2.0 / self.dt
+                - self.sink[n - 1] * dx / 2.0
+                - self.sink_imm[n - 1] * dx / 2.0
+                + self.sink_im[n - 1] / (1.0 - self.w_fracture).max(0.001) * dx / 2.0;
+            if v_top.abs() > r_m.abs() || v_top * r_m <= 0.0 {
+                self.kod_top_m = -4;
+            }
+            if self.kod_top_m == 4 && self.h_matrix_new[n - 1] <= 0.99 * self.h_crit_a && self.r_top < 0.0 {
+                self.kod_top_m = -4;
+            }
+        }
+        // the dry limit also bounds the top node while the flux condition is active (as for the fracture)
+        if self.kod_top_m < 0 && self.h_matrix_new[n - 1] < self.h_crit_a {
+            self.h_matrix_new[n - 1] = self.h_crit_a;
+        }
     }
 
     /// Solve the tridiagonal matrix system for the matrix domain.
@@ -231,7 +263,7 @@ impl Simulation {
         let rmin = 1e-100;
         let mut diag = sys.r.clone();
         let mut rhs = sys.p.clone();
-        let upper = sys.s.clone();
+        let mut upper = sys.s.clone();
         let mut lower = vec![0.0; n];
         for i in 1..n {
             lower[i] = sys.s[i - 1];
@@ -241,6 +273,20 @@ impl Simulation {
         diag[n - 1] = sys.rt;
         lower[n - 1] = sys.st;
         rhs[n - 1] = sys.pt;
+        // prescribed-head boundaries apply to both domains
+        if self.kod_bot > 0 {
+            diag[0] = 1.0;
+            upper[0] = 0.0;
+            rhs[0] = self.h_new[0];
+        }
+        // atmospheric top boundary: the matrix switches between flux and head on its own (`shift_matrix`); a prescribed
+        // head (constant or variable) acts on both domains
+        let (top_head, h_top_val) = if self.atm_bc { (self.kod_top_m > 0, self.h_top_m) } else { (self.kod_top > 0, self.h_new[n - 1]) };
+        if top_head {
+            diag[n - 1] = 1.0;
+            lower[n - 1] = 0.0;
+            rhs[n - 1] = h_top_val;
+        }
 
         for i in 1..n {
             let mut d = diag[i - 1];
@@ -308,12 +354,25 @@ impl Simulation {
                 continue;
             }
 
+            // position in the GenMat table: iT = int((log10(-h) - alh1) / dlh) + 1 (0-based here) and the interpolation weight
+            let nt = self.h_tab.len();
+            let tab_pos = |h: f64| -> (usize, f64) {
+                let alh1 = (-self.h_tab[0]).log10();
+                let dlh = ((-self.h_tab[nt - 1]).log10() - alh1) / (nt - 1) as f64;
+                let it = ((((-h).log10() - alh1) / dlh) as usize).min(nt - 2);
+                (it, (h - self.h_tab[it]) / (self.h_tab[it + 1] - self.h_tab[it]))
+            };
+            let in_tab_con = self.l_table && nt > 1 && him > self.h_tab[nt - 1] && him <= self.h_tab[0];
+            let in_tab_cap = self.l_table && nt > 1 && him >= self.h_tab[nt - 1] && him <= self.h_tab[0];
             let coni;
             if hi1 >= self.h_sat[m] && hi2 >= self.h_sat[m] {
                 coni = self.con_sat[m];
-            } else if let Some((it, dh)) = self.lookup(m, him) {
-                let tb = &self.tabs[m];
-                coni = tb.con[it] + (tb.con[it + 1] - tb.con[it]) * dh;
+            } else if in_tab_con {
+                let (it, dh) = tab_pos(him);
+                coni = self.con_tab[m][it] + (self.con_tab[m][it + 1] - self.con_tab[m][it]) * dh;
+            } else if self.model == SoilModel::Tabular {
+                let (c, _, _) = self.lookup_tabular(m, him);
+                coni = c;
             } else {
                 coni = fk(model, him, &self.par_d[m]);
             }
@@ -322,20 +381,18 @@ impl Simulation {
             if him >= self.h_sat[m] {
                 capi = 0.0;
                 thei = self.ths[m];
-            } else if self.l_table {
-                if let Some((it, dh)) = self.lookup(m, him) {
-                    let tb = &self.tabs[m];
-                    capi = tb.cap[it] + (tb.cap[it + 1] - tb.cap[it]) * dh;
-                    thei = tb.the[it] + (tb.the[it + 1] - tb.the[it]) * dh;
-                } else {
-                    capi = fc(model, him, &self.par_d[m]);
-                    thei = fq(model, him, &self.par_d[m]);
-                }
+            } else if in_tab_cap {
+                let (it, dh) = tab_pos(him);
+                capi = self.cap_tab[m][it] + (self.cap_tab[m][it + 1] - self.cap_tab[m][it]) * dh;
+                thei = self.the_tab[m][it] + (self.the_tab[m][it + 1] - self.the_tab[m][it]) * dh;
+            } else if self.model == SoilModel::Tabular {
+                let (_, c, th) = self.lookup_tabular(m, him);
+                capi = c;
+                thei = th;
             } else {
                 capi = fc(model, him, &self.par_d[m]);
                 thei = fq(model, him, &self.par_d[m]);
             }
-			
 
             if self.kappa[i] == -1 {
                 // Drying branch
@@ -355,7 +412,7 @@ impl Simulation {
                 self.con_o[i] = self.con[i];
             }
         }
-		
+
 		if self.l_vapor || self.prj.water.l_w_dep {
             let temps: Vec<f64> = (0..self.n).map(|i| self.temp(i)).collect();
             crate::vapor::con_vapor(
@@ -373,6 +430,7 @@ impl Simulation {
                 self.t_conv,
                 self.l_vapor,
                 1,
+                self.h_crit_a,
             );
             if self.l_vapor {
                 crate::vapor::vapor_content(
@@ -563,7 +621,7 @@ impl Simulation {
         let dx = dxb / 2.0;
         let mut conb = (self.con[0] + self.con[1]) / 2.0;
         let b = conb * grav;
-		
+
         if self.l_vapor {
             conb += (self.con_vh[0] + self.con_vh[1]) / 2.0;
         }
@@ -571,6 +629,10 @@ impl Simulation {
         if self.free_d {
             self.r_bot = -conb * grav;
         }
+        // WATFLOW.FOR `Reset`: the bottom half-cell keeps its storage term (F2 and (ThNew-ThOld)*dx/dt) for every bottom
+        // condition, free drainage included.  (A former deviation dropped it for a free-drainage bottom node wetted from
+        // above to follow the 1SCALING / 2NOHYSTR sample outputs of an older HYDRUS build; the compiled source keeps it,
+        // verified for 2NOHYSTR t = 13..24 and 1SCALING t >= 720.)
         let f2 = self.cap[0] * dx / dt;
         let rb = conb / dxb + f2;
         let sb = -conb / dxb;
@@ -581,7 +643,7 @@ impl Simulation {
             self.r_bot = d.flux(self.x[0] + self.h_new[0]);
         }
 		let w_f = self.w_fracture.max(0.001);
-        let mut pb = b - self.sink[0] * dx + f2 * self.h_new[0] - (self.th_new[0] - self.th_old[0]) * dx / dt + self.r_bot;
+        let mut pb = b - self.sink[0] * dx + f2 * self.h_new[0] - (self.th_new[0] - self.th_old[0]) * dx / dt + self.r_bot_fracture();
 		if self.i_dual_por > 0 {
 			pb -= self.sink_im[0] * dx;
 		}
@@ -642,7 +704,7 @@ impl Simulation {
         let dx = dxa / 2.0;
         let mut cona = (self.con[m] + self.con[m - 1]) / 2.0;
         let b = cona * grav;
-		
+
         if self.l_vapor {
             cona += (self.con_vh[m] + self.con_vh[m - 1]) / 2.0;
         }
@@ -667,7 +729,7 @@ impl Simulation {
             pt -= con_ta * (self.temp(m) - self.temp(m - 1)) / dxa + (self.th_v_new[m] - self.th_v_old[m]) * dx / dt;
         }
         self.v_top = -st * self.h_new[m - 1] - rt * self.h_new[m] + pt;
-        pt -= self.r_top;
+        pt -= self.r_top_fracture();
         if self.w_layer {
             if self.h_new[m] > 0.0 {
                 rt += 1.0 / dt;
@@ -765,7 +827,7 @@ impl Simulation {
     fn shift(&mut self) {
         let n = self.n;
         let grav = self.cos_alf;
-		
+
         if self.seep_f {
             let dx = self.x[1] - self.x[0];
             let v_bot = -(self.con[0] + self.con[1]) / 2.0 * ((self.h_new[1] - self.h_new[0]) / dx + grav)
@@ -791,6 +853,9 @@ impl Simulation {
                 if self.i_dual_por > 0 {
 					v_top -= self.sink_im[n - 1] * dx / 2.0;
 				}
+                if self.l_dual_perm {
+                    v_top -= self.sink_im[n - 1] / self.w_fracture.max(0.001) * dx / 2.0;
+                }
 				if self.prj.water.l_w_dep {
                     v_top -= (self.con_lt[n - 1] + self.con_lt[m]) / 2.0 * (self.temp(n - 1) - self.temp(m)) / dx;
                 }
@@ -799,7 +864,8 @@ impl Simulation {
                         + (self.con_vt[n - 1] + self.con_vt[m]) / 2.0 * (self.temp(n - 1) - self.temp(m)) / dx;
                 }
 
-                if v_top.abs() > self.r_top.abs() || v_top * self.r_top <= 0.0 {
+                let r_top_f = self.r_top_fracture();
+                if v_top.abs() > r_top_f.abs() || v_top * r_top_f <= 0.0 {
                     if self.kod_top.abs() == 4 {
                         self.kod_top = -4;
                     }
@@ -843,6 +909,7 @@ impl Simulation {
             }
             if self.l_dual_perm {
                 self.dual_perm();
+                self.dual_por_matrix();
             }
             if self.w_layer
                 && self.h_new[n - 1] > 0.0
@@ -878,6 +945,7 @@ impl Simulation {
                     self.set_mat_matrix();
                     let sys_m = self.build_matrix_system();
                     self.solve_matrix(&sys_m);
+                    self.shift_matrix();
                     self.dual_perm();
                 }
                 for i in 0..n {
@@ -923,6 +991,20 @@ impl Simulation {
                         break;
                     }
                 }
+                if it_crit && self.l_dual_perm {
+                    // the matrix continuum has to converge as well
+                    for i in 0..n {
+                        let par = &self.par_d[self.mat[i]];
+                        let span = (par[7] - par[6]).abs().max(1e-6);
+                        let eps_th = self.cap_matrix[i] * (self.h_matrix_new[i] - h_m_temp[i]).abs() / span;
+                        let sat = self.h_sat[self.mat[i]];
+                        let eps_h = if h_m_temp[i] >= sat || self.h_matrix_new[i] >= sat { (self.h_matrix_new[i] - h_m_temp[i]).abs() } else { 0.0 };
+                        if eps_th > self.tol_th || eps_h > self.tol_h {
+                            it_crit = false;
+                            break;
+                        }
+                    }
+                }
                 if !it_crit || self.iter_w <= 1 || (self.iter_w <= 2 && self.i_hyst > 0) {
                     if self.iter_w < self.max_it {
                         continue;
@@ -944,10 +1026,14 @@ impl Simulation {
                             }
                         }
                         self.kod_top = self.k_top_old;
+                        self.kod_top_m = self.k_top_old_m;
                         self.kod_bot = self.k_bot_old;
-                        self.dt = (self.dt / 3.0).max(self.dt_min);
+                        self.dt = ((self.dt / 3.0).max(self.dt_min)) as f32 as f64; // amax1(dt/3,dtMin), REAL*4
                         self.dt_opt = self.dt;
                         self.t = self.t_old + self.dt;
+                        // WATFLOW.FOR: `iTemp=0` before `goto 11` (iTemp is shared with the
+                        // water-heat coupling loop in the main program).
+                        self.i_temp = 0;
                         continue 'outer;
                     }
                 }
@@ -982,7 +1068,7 @@ impl Simulation {
             return;
         }
     }
-	
+
 	/// Mass transfer between mobile and immobile water domains (DualPor in WATFLOW.FOR).
     pub fn dual_por(&mut self) {
         if self.i_dual_por == 0 {
@@ -1075,7 +1161,75 @@ impl Simulation {
             }
         }
     }
-	
+
+    /// Dual porosity inside the matrix domain of the dual-permeability model: transient immobile water content of the
+    /// matrix with water-content driven transfer (port of the iDualPor = 1 branch of DualPor in WATFLOW.FOR for the
+    /// matrix continuum). `sink_imm` > 0: water from the mobile matrix water to the immobile region (per matrix volume).
+    pub fn dual_por_matrix(&mut self) {
+        if !self.matrix_dual_por {
+            return;
+        }
+        let (n, dt) = (self.n, self.dt);
+        let w = self.w_fracture;
+        let head_driven = self.prj.water.dual_perm.matrix_dual_por_head;
+        let mut w_tr = 0.0;
+        for i in 0..n {
+            let m = self.mat[i];
+            let dm = self.prj.water.dual_perm.material(m);
+            let par = self.par_d[m];
+            let (thr_m, ths_m) = (par[6], par[7]);
+            let (thr_im, ths_im, omega) = (dm.thr_im, dm.ths_im, dm.omega_w);
+            let se_im = ((self.th_im_mat_old[i] - thr_im) / (ths_im - thr_im)).clamp(0.0, 1.0);
+            let mut delta_th = 0.0;
+            let mut s;
+            if !head_driven {
+                // water-content driven exchange (iDualPor = 1)
+                let se = ((self.th_matrix_old[i] - thr_m) / (ths_m - thr_m)).clamp(0.0, 1.0);
+                s = omega * (se - se_im);
+                delta_th = (se - se_im) / (ths_m - thr_m + ths_im - thr_im) * (ths_m - thr_m) * (ths_im - thr_im);
+            } else {
+                // pressure-head driven exchange (iDualPor = 2): the immobile region has its own retention function; the
+                // interface conductivity is the mean of K_im(h_im) and K_im(h_mobile)
+                let par_im: Par = [thr_im, ths_im, dm.alpha_im, dm.n_im, dm.ks_im, dm.l_matrix, 0.0, 0.0, 0.0, 0.0, 0.0];
+                let h_im = fh(SoilModel::VanGenuchten, se_im, &par_im);
+                let h_m = self.h_matrix_new[i];
+                let cond_m = fk(SoilModel::VanGenuchten, h_im, &par_im);
+                let cond_f = fk(SoilModel::VanGenuchten, h_m, &par_im);
+                s = 0.5 * (cond_m + cond_f) * (h_m - h_im);
+                // near-surface cut-off under strong evaporation
+                if i == n - 1
+                    && (self.h_crit_a - h_m).abs() < -0.001 * self.h_crit_a
+                    && (self.h_crit_a - h_im).abs() < -0.01 * self.h_crit_a
+                {
+                    s = 0.0;
+                }
+            }
+            if s > 0.0 {
+                let mut tr_max = (ths_im - self.th_im_mat_old[i]) / dt;
+                if !head_driven {
+                    tr_max = tr_max.min(delta_th / dt);
+                }
+                if s > tr_max {
+                    s = tr_max;
+                }
+            } else if s < 0.0 {
+                let mut tr_max = -(ths_m - self.th_matrix_old[i]) / dt;
+                if !head_driven {
+                    tr_max = tr_max.max(delta_th / dt);
+                }
+                if s < tr_max {
+                    s = tr_max;
+                }
+            }
+            self.sink_imm[i] = s;
+            self.th_im_mat_new[i] = (self.th_im_mat_old[i] + s * dt).clamp(thr_im, ths_im);
+            if i >= 1 {
+                w_tr += (1.0 - w) * (self.sink_imm[i - 1] + self.sink_imm[i]) / 2.0 * (self.x[i] - self.x[i - 1]);
+            }
+        }
+        self.w_transf += w_tr;
+    }
+
 	/// Calculate water transfer Gamma_w between fracture and matrix domains.
     pub fn dual_perm(&mut self) {
         if !self.l_dual_perm {
@@ -1087,24 +1241,80 @@ impl Simulation {
         for i in 0..n {
             let m = self.mat[i];
             let par = &self.par_d[m];
-            let par_m: Par = [par[6], par[7], par[8], par[9], par[10], par[5], 0.0, 0.0, 0.0, 0.0, 0.0];
+            let dm = self.prj.water.dual_perm.material(m);
+            let par_m: Par = [par[6], par[7], par[8], par[9], par[10], dm.l_matrix, 0.0, 0.0, 0.0, 0.0, 0.0];
 
             let h_f = self.h_new[i];
             let h_m = self.h_matrix_new[i];
 
-            // Effective interface conductivity K_a
+            // Effective interface conductivity K_a = [K_a(h_f) + K_a(h_m)] / 2 with K_a(h) = K_as * Kr_m(h)
+            // (K_as = 0: the matrix Ks is used, i.e. K_a(h) = K_m(h))
             let k_m = fk(SoilModel::VanGenuchten, h_m, &par_m);
             let k_f_eval = fk(SoilModel::VanGenuchten, h_f, &par_m);
-            let k_a = 0.5 * (k_m + k_f_eval);
+            let scale = if dm.ks_a > 0.0 && par_m[4] > 0.0 { dm.ks_a / par_m[4] } else { 1.0 };
+            let k_a = 0.5 * (k_m + k_f_eval) * scale;
 
-            // Gamma_w = alpha_dw * K_a * (h_f - h_m)
-            self.sink_im[i] = self.alpha_dw * k_a * (h_f - h_m);
+            // Gamma_w = alpha_w (h_f - h_m),  alpha_w = beta / a^2 * gamma_w * K_a  (> 0: fracture -> matrix)
+            let alpha_w = dm.beta / (dm.a * dm.a).max(1e-12) * dm.gamma_w * k_a;
+            self.sink_im[i] = alpha_w * (h_f - h_m);
 
             if i >= 1 {
                 self.w_transf += (self.sink_im[i - 1] + self.sink_im[i]) / 2.0 * (self.x[i] - self.x[i - 1]);
             }
         }
     }
+    /// (w, fraction of the boundary flux entering the fracture domain)
+    fn dp_split(&self) -> (f64, f64) {
+        let w = self.w_fracture.clamp(0.001, 0.999);
+        let f = self.prj.water.dual_perm.flux_frac_fracture;
+        (w, if f < 0.0 { w } else { f.clamp(0.0, 1.0) })
+    }
+
+    /// Top boundary flux demand of the fracture domain per unit fracture area: f * rTop / w
+    pub fn r_top_fracture(&self) -> f64 {
+        if self.l_dual_perm {
+            let (w, f) = self.dp_split();
+            self.r_top * f / w
+        } else {
+            self.r_top
+        }
+    }
+
+    /// Top boundary flux of the matrix domain per unit matrix area: (1 - f) * rTop / (1 - w)
+    pub fn r_top_matrix(&self) -> f64 {
+        let (w, f) = self.dp_split();
+        self.r_top * (1.0 - f) / (1.0 - w)
+    }
+
+    fn bottom_flux_is_specified(&self) -> bool {
+        !self.free_d && !self.gwl_f && self.prj.water.bc.drains.is_none()
+    }
+
+    /// Specified bottom flux per unit fracture area (free drainage, GW-level and drain fluxes are domain properties)
+    pub fn r_bot_fracture(&self) -> f64 {
+        if self.l_dual_perm && self.bottom_flux_is_specified() {
+            let (w, f) = self.dp_split();
+            self.r_bot * f / w
+        } else {
+            self.r_bot
+        }
+    }
+
+    pub fn r_bot_matrix(&self) -> f64 {
+        if self.bottom_flux_is_specified() {
+            let (w, f) = self.dp_split();
+            self.r_bot * (1.0 - f) / (1.0 - w)
+        } else {
+            0.0
+        }
+    }
+
+    /// Darcy flux of the matrix domain between two nodes (upward positive), incl. gravity
+    pub fn matrix_flux(&self, a: usize, b: usize) -> f64 {
+        let dx = self.x[b] - self.x[a];
+        -(self.con_matrix[a] + self.con_matrix[b]) / 2.0 * ((self.h_matrix_new[b] - self.h_matrix_new[a]) / dx + self.cos_alf)
+    }
+
     fn it_cum_start(&mut self) {}
 }
 
@@ -1118,9 +1328,9 @@ mod tests {
         let mut prj = Project::default();
         prj.processes.vapor = true;
         prj.processes.heat = true;
-        
+
         let mut sim = Simulation::new(prj).expect("Simulation should initialize");
-        
+
         // Setup simple 3-node column: bottom = -10, mid = -5, top = 0
         sim.n = 3;
         sim.x = vec![-10.0, -5.0, 0.0];

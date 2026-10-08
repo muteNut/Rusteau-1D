@@ -1,18 +1,13 @@
 [package]
 name = "hydrus-gui"
-version.workspace = true
-edition.workspace = true
-license.workspace = true
+version = "0.1.0"
+edition = "2021"
 
-[[bin]]
-name = "hydrus1d"
-path = "src/main.rs"
-
+# Keep the egui / eframe versions of your existing manifest if they differ; the sources were compile-checked with 0.31.
 [dependencies]
 hydrus-core = { path = "../hydrus-core" }
 hydrus-io = { path = "../hydrus-io" }
-serde_json.workspace = true
-eframe = { version = "0.31", default-features = false, features = ["glow", "default_fonts", "x11", "wayland"] }
+eframe = { version = "0.31", default-features = false, features = ["glow", "default_fonts", "x11"] }
 egui = "0.31"
 egui_plot = "0.31"
-egui_extras = { version = "0.31", default-features = false }
+egui_extras = "0.31"

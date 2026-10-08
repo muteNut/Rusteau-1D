@@ -16,30 +16,21 @@ pub fn read_moist_dep<P: AsRef<Path>>(path: P, prj: &mut Project) -> Result<(), 
 
     let n_mat = prj.water.materials.len();
     let n_sol = prj.n_solutes();
-    let mut tables = Vec::with_capacity(n_sol);
-
+    // MoistDepIn: per material a header line; per solute a header line followed by 13 rows of
+    // (ReacMin0, Theta0, Theta1, Theta2, Theta3, ReacMin1). Stored material-major.
+    let mut tables = Vec::with_capacity(n_mat * n_sol);
     for _ in 0..n_mat {
-        lines.next(); // Skip "Material M"
+        lines.next(); // "Material M"
         for _ in 0..n_sol {
-            lines.next(); // Skip "Solute j"
+            lines.next(); // "Solute j"
             let mut tab = MoistDepTable::default();
-            for r in 0..9 {
-                if let Some(line) = lines.next() {
-                    let vals: Vec<f64> = line
-                        .split_whitespace()
-                        .filter_map(|s| s.parse().ok())
-                        .collect();
-                    if vals.len() >= 6 {
-                        if r == 0 && tab.theta.is_empty() {
-                            tab.theta = vec![vals[1], vals[2], vals[3], vals[4]];
-                        }
-                        tab.factors[r] = vec![vals[0], 1.0, 1.0, vals[5]];
-                    }
+            for _ in 0..13 {
+                let row = lines.next().ok_or_else(|| HydrusError::Parse("MoistDep.in: unexpected end of file".into()))?;
+                let vals: Vec<f64> = row.split_whitespace().filter_map(|s| s.parse().ok()).collect();
+                if vals.len() < 6 {
+                    return Err(HydrusError::Parse(format!("MoistDep.in: expected 6 values, found '{}'", row.trim())));
                 }
-            }
-            // Skip trailing reaction rows (10..13) if present
-            for _ in 9..13 {
-                lines.next();
+                tab.react.push([vals[0], vals[1], vals[2], vals[3], vals[4], vals[5]]);
             }
             tables.push(tab);
         }
@@ -51,28 +42,17 @@ pub fn read_moist_dep<P: AsRef<Path>>(path: P, prj: &mut Project) -> Result<(), 
 
 pub fn write_moist_dep<P: AsRef<Path>>(path: P, prj: &Project) -> Result<(), HydrusError> {
     let mut file = File::create(path).map_err(|e| HydrusError::Io(e.to_string()))?;
-    writeln!(file, "Heading: Reaction rate dependence on water content")
-        .map_err(|e| HydrusError::Io(e.to_string()))?;
-
+    let io = |e: std::io::Error| HydrusError::Io(e.to_string());
+    writeln!(file, "Heading: Reaction rate dependence on water content").map_err(io)?;
+    let n_sol = prj.solute.species.len();
     for (m_idx, _) in prj.water.materials.iter().enumerate() {
-        writeln!(file, "Material {}", m_idx + 1).map_err(|e| HydrusError::Io(e.to_string()))?;
-        for (j_idx, _) in prj.solute.species.iter().enumerate() {
-            writeln!(file, "Solute {}", j_idx + 1).map_err(|e| HydrusError::Io(e.to_string()))?;
-            let tab = prj.solute.moist_tables.get(j_idx);
-
+        writeln!(file, "Material {}", m_idx + 1).map_err(io)?;
+        for j_idx in 0..n_sol {
+            writeln!(file, "Solute {}", j_idx + 1).map_err(io)?;
+            let tab = prj.solute.moist_tables.get(m_idx * n_sol + j_idx);
             for r in 0..13 {
-                if let Some(t) = tab {
-                    if r < 9 && t.factors[r].len() >= 4 && t.theta.len() >= 4 {
-                        writeln!(
-                            file,
-                            "{:10.4} {:10.4} {:10.4} {:10.4} {:10.4} {:10.4}",
-                            t.factors[r][0], t.theta[0], t.theta[1], t.theta[2], t.theta[3], t.factors[r][3]
-                        ).map_err(|e| HydrusError::Io(e.to_string()))?;
-                        continue;
-                    }
-                }
-                writeln!(file, "    1.0000     0.0000     0.0000     0.0000     0.0000     1.0000")
-                    .map_err(|e| HydrusError::Io(e.to_string()))?;
+                let p = tab.and_then(|t| t.react.get(r)).copied().unwrap_or([1.0, 0.0, 0.0, 0.0, 0.0, 1.0]);
+                writeln!(file, "{:10.4} {:10.4} {:10.4} {:10.4} {:10.4} {:10.4}", p[0], p[1], p[2], p[3], p[4], p[5]).map_err(io)?;
             }
         }
     }

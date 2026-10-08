@@ -62,7 +62,7 @@ pub fn solute_pulse() -> Project {
         t_pulse: 10.0,
         k_top: -1,
         k_bot: 0,
-        materials: vec![SoluteMaterial { bulk_density: 1.3, disp_l: 2.0, frac: 1.0, th_immobile: 0.0 }],
+        materials: vec![SoluteMaterial { bulk_density: 1.3, disp_l: 2.0, frac: 1.0, th_immobile: 0.0, th_im_matrix: 0.0 }],
         species: vec![Species {
             name: "Tracer".into(),
             diff_w: 0.5,

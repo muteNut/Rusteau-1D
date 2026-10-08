@@ -17,6 +17,7 @@ pub mod sim;
 pub mod solute;
 pub mod water;
 pub mod vapor;
+pub mod inverse;
 
 pub use error::HydrusError;
 pub use model::*;

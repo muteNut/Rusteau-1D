@@ -26,11 +26,7 @@ pub fn saturated_vapor_density(t_kelv: f64) -> f64 {
 
 /// Relative humidity from pressure head h [m] and temperature T [K]
 pub fn relative_humidity(h_m: f64, t_kelv: f64) -> f64 {
-    if h_m >= 0.0 {
-        1.0
-    } else {
-        (h_m * X_MOL * G / R_GAS / t_kelv).exp()
-    }
+    (h_m * X_MOL * G / R_GAS / t_kelv).exp()
 }
 
 /// ConVapor: Compute ConLT, ConVT, and ConVh across the profile
@@ -44,6 +40,7 @@ pub fn relative_humidity(h_m: f64, t_kelv: f64) -> f64 {
 /// * `t_conv`: Time conversion to seconds (e.g. 1/86400 for days)
 /// * `l_vapor`: Flag indicating if vapor transport is active
 /// * `i_enhanc`: 1 = Campbell enhancement factor, 0 = 1.0
+/// * `_h_crit_a`: critical (dry limit) surface head; unused, the lLimit line of ConVapor is commented out in the source
 pub fn con_vapor(
     n: usize,
     mat: &[usize],
@@ -59,6 +56,7 @@ pub fn con_vapor(
     t_conv: f64,
     l_vapor: bool,
     i_enhanc: i32,
+    _h_crit_a: f64,
 ) {
     for i in 0..n {
         let h = h_new[i] / x_conv; // [m]
@@ -86,8 +84,10 @@ pub fn con_vapor(
             let diff = tau * theta_a * diff_t;
             let row = (1.0 - 7.37e-6 * (t - 4.0).powi(2) + 3.79e-8 * (t - 4.0).powi(3)) * 1000.0;
             let rovs = saturated_vapor_density(t_kelv);
+            // ConVapor (WATFLOW.FOR): the lLimit line `if(lLimit) Hr=0.000001` is commented out in the source, so the relative
+            // humidity is never limited at the dry surface.  (A former deviation applied it to all nodes, fitted to the
+            // EnBal2b output of an older build; the HYDRUS 4.17 EnBal2b output follows the source.)
             let hr = relative_humidity(h, t_kelv);
-
             // Isothermal vapor conductivity [m/s]
             con_vh[i] = diff / row * rovs * X_MOL * G / R_GAS / t_kelv * hr;
 
@@ -206,6 +206,7 @@ mod tests {
             t_conv,
             true,
             1, // Campbell enhancement
+            f64::NEG_INFINITY,
         );
 
         // Node 0 (dry): air-filled porosity is high (0.30) -> non-zero vapor conductivities
@@ -249,5 +250,29 @@ mod tests {
 
         // Augmented capacity should remain strictly positive and finite
         assert!(cap[0] > 0.0 && cap[0].is_finite());
+    }
+
+    /// ConVapor: the relative humidity is not limited at the dry surface (the lLimit line is commented out in WATFLOW.FOR,
+    /// HYDRUS 4.17 EnBal2b follows the source); `h_crit_a` has no influence on the conductivities.
+    #[test]
+    fn test_convapor_does_not_limit_the_relative_humidity_at_the_dry_limit() {
+        let n = 3;
+        let mat = vec![0, 0, 0];
+        let ths = vec![0.40];
+        let (x_conv, t_conv) = (100.0, 1.0 / 86400.0);
+        let temp = vec![20.0; n];
+        let con = vec![1e-5; n];
+        let theta = vec![0.10; n];
+        let run = |h_top: f64, h_crit_a: f64| {
+            let h_new = vec![-500.0, -800.0, h_top];
+            let (mut lt, mut vt, mut vh) = (vec![0.0; n], vec![0.0; n], vec![0.0; n]);
+            con_vapor(n, &mat, &h_new, &temp, &con, &theta, &ths, &mut lt, &mut vt, &mut vh, x_conv, t_conv, true, 1, h_crit_a);
+            (vt, vh)
+        };
+        let (vt_free, vh_free) = run(-1.0e5, f64::NEG_INFINITY);
+        let (vt_dry, vh_dry) = run(-1.0e5, -1.0e5); // surface at hCritA
+        assert_eq!(vh_dry, vh_free);
+        assert_eq!(vt_dry, vt_free);
+        assert!(vh_free.iter().all(|v| *v > 0.0) && vt_free.iter().all(|v| *v > 0.0));
     }
 }

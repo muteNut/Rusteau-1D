@@ -23,7 +23,8 @@ fn rad_global(lat: f64, day_no: f64) -> (f64, f64, f64, f64) {
     (ra, omega, xx, yy)
 }
 
-/// Cloudiness: cloudiness factor from sunshine hours / cloudiness / transmission coeff. / solar radiation.
+/// Cloudiness: cloudiness factor CloudF and relative sunshine duration n/N.
+/// Returns `(cloud_f, n_n)`.
 fn cloudiness(
     i_sun_sh: i32,
     sun_hours: f64,
@@ -34,36 +35,37 @@ fn cloudiness(
     rad_cs: f64, // clear-sky radiation: Ra*(as + bs)
     ac: f64,
     bc: f64,
-) -> f64 {
+) -> (f64, f64) {
     let pi = std::f64::consts::PI;
     match i_sun_sh {
         0 => {
             let nn = 24.0 / pi * omega;
-            let n_n = (sun_hours / nn).min(1.0);
-            long_wave_b + long_wave_a * n_n
+            let n_n = if nn > 0.0 { (sun_hours / nn).min(1.0) } else { 0.0 };
+            (long_wave_b + long_wave_a * n_n, n_n)
         }
-        1 => sun_hours,
+        1 => {
+            // CloudF = SunHours; n_N = (CloudF - b)/a (not clamped, as in Cloudiness)
+            (sun_hours, (sun_hours - long_wave_b) / long_wave_a.max(1e-12))
+        }
         2 => {
             let cover = (2.330 - 3.330 * sun_hours).clamp(0.0001, 1.0);
-            long_wave_b + long_wave_a * (1.0 - cover)
+            (long_wave_b + long_wave_a * (1.0 - cover), 1.0 - cover)
         }
         _ => {
-            // iSunSh = 3: cloudiness from measured solar radiation (Eq. 57), no clamp
-            if rad_cs > 0.0 {
-                ac * rad / rad_cs + bc
-            } else {
-                long_wave_b
-            }
+            // iSunSh = 3: cloudiness from measured solar radiation (Eq. 57), no clamp;
+            // n_N = 1 - Cover with Cover from Tt = Rad/Ra
+            let cf = if rad_cs > 0.0 { ac * rad / rad_cs + bc } else { long_wave_b };
+            (cf, 0.0)
         }
     }
 }
 
-/// CropRes: crop canopy resistance and soil-cover fraction from LAI / crop height.
-/// Returns (rc, scf).
-fn crop_res(i_lai: i32, lai_in: f64, r_extinct: f64, i_crop: i32, crop_height: f64) -> (f64, f64) {
+/// CropRes: crop canopy resistance, soil-cover fraction and the LAI actually used.
+/// Returns `(rc, scf, lai)`.
+fn crop_res(i_lai: i32, lai_in: f64, r_extinct: f64, i_crop: i32, crop_height: f64) -> (f64, f64, f64) {
     let l_crop = i_crop != 0 && crop_height > 0.0;
     if !l_crop {
-        return (0.0, 0.0);
+        return (0.0, 0.0, lai_in);
     }
     let lai = match i_lai {
         1 => 0.24 * crop_height,                // clipped grass
@@ -83,7 +85,7 @@ fn crop_res(i_lai: i32, lai_in: f64, r_extinct: f64, i_crop: i32, crop_height: f
         rc = 200.0 / lai;
         scf = (1.0 - (-r_extinct.max(0.1) * lai).exp()).max(0.0);
     }
-    (rc, scf)
+    (rc, scf, lai)
 }
 
 /// RadLongNet: net longwave radiation.
@@ -109,7 +111,7 @@ fn aero(
     ea_min: f64,
     ea_dew: f64,
 ) -> Option<(f64, f64)> {
-    let ch = crop_height.max(0.1);
+    let ch = crop_height;
     let dl0 = 0.667 * ch;
     if dl0 >= wind_height || dl0 >= temp_height {
         return None;
@@ -131,23 +133,93 @@ fn aero(
     Some((aero_term, rad_term))
 }
 
+/// Table: linear interpolation of the crop growth table (columns 2..5 of
+/// `[time, height, albedo, LAI, root depth]`), constant outside the table.
+pub fn growth_table(tab: &[[f64; 5]], t: f64) -> (f64, f64, f64, f64) {
+    let pick = |r: &[f64; 5]| (r[1], r[2], r[3], r[4]);
+    if tab.is_empty() {
+        return (0.0, 0.0, 0.0, 0.0);
+    }
+    if t <= tab[0][0] {
+        return pick(&tab[0]);
+    }
+    if t >= tab[tab.len() - 1][0] {
+        return pick(&tab[tab.len() - 1]);
+    }
+    let mut out = pick(&tab[0]);
+    for w in tab.windows(2) {
+        if t > w[0][0] && t <= w[1][0] {
+            let f = (t - w[0][0]) / (w[1][0] - w[0][0]);
+            out = (
+                w[0][1] + (w[1][1] - w[0][1]) * f,
+                w[0][2] + (w[1][2] - w[0][2]) * f,
+                w[0][3] + (w[1][3] - w[0][3]) * f,
+                w[0][4] + (w[1][4] - w[0][4]) * f,
+            );
+        }
+    }
+    out
+}
+
+/// Crop properties valid at time `t`: iCrop = 3 record values, iCrop = 2 growth table,
+/// iCrop = 1 constants of Meteo.in. Returns `(crop_height [cm], albedo, LAI, root depth)`.
+fn crop_state(
+    mp: &MeteoSettings,
+    t: f64,
+    h: Option<f64>,
+    a: Option<f64>,
+    l: Option<f64>,
+    xr: Option<f64>,
+) -> (f64, f64, f64, Option<f64>) {
+    match mp.i_crop {
+        3 => (h.unwrap_or(mp.crop_height), a.unwrap_or(mp.albedo), l.unwrap_or(mp.lai), xr),
+        2 if !mp.growth.is_empty() => {
+            let (ch, al, lai, x) = growth_table(&mp.growth, t);
+            (ch, al, lai, Some(x))
+        }
+        1 => (mp.crop_height, mp.albedo, mp.lai, if mp.x_root > 0.0 { Some(mp.x_root) } else { None }),
+        _ => (mp.crop_height, mp.albedo, mp.lai, None),
+    }
+}
+
+/// Result of SetMeteo for one record.
+#[derive(Clone, Copy, Debug, Default)]
+pub struct PotEt {
+    /// Potential evaporation [mm/d]
+    pub evap_p: f64,
+    /// Potential transpiration [mm/d]
+    pub trans_p: f64,
+    /// LAI after CropRes (used by the interception model)
+    pub lai: f64,
+    /// Soil cover fraction
+    pub scf: f64,
+    /// Root depth supplied with the meteo data, if any
+    pub x_root: Option<f64>,
+    /// Combined (reference/crop) evapotranspiration ETcomb [mm/d] and its terms (Meteo.out)
+    pub et_comb: f64,
+    pub rns: f64,
+    pub rnl: f64,
+    pub rad_term: f64,
+    pub aero_term: f64,
+}
+
 /// SetMeteo: potential evaporation and transpiration [mm/d] for one meteorological record.
-pub fn potential_et(mp: &MeteoSettings, rec: &MeteoRecord, t_conv: f64) -> (f64, f64) {
+/// `is_hourly` is iMetHour (first record closer than one day to the initial time).
+/// Returns `None` when `Aero` fails (crop height above the measurement heights, ierr = 3).
+pub fn potential_et_ex(mp: &MeteoSettings, rec: &MeteoRecord, t_conv: f64, is_hourly: bool) -> Option<PotEt> {
     let tt_conv = 24.0 * 3600.0 * t_conv;
     let day_no = (rec.t / tt_conv).rem_euclid(365.0);
     let t_aver = (rec.t_max + rec.t_min) / 2.0;
 
-    // Use dynamic daily crop properties when available (iCrop == 3)
-    let crop_height = rec.crop_height.unwrap_or(mp.crop_height);
-    let albedo = rec.albedo.unwrap_or(mp.albedo);
-    let lai = rec.lai.unwrap_or(mp.lai);
-
-    let (rc, scf) = crop_res(mp.i_lai, lai, mp.r_extinct, mp.i_crop, crop_height);
+    let (crop_height, albedo, lai_in, x_root) = crop_state(mp, rec.t, rec.crop_height, rec.albedo, rec.lai, rec.x_root);
+    let (rc, scf, lai) = crop_res(mp.i_lai, lai_in, mp.r_extinct, mp.i_crop, crop_height);
+    // CropRes sets the crop height to 0.1 cm when there is no crop
+    let ch_eff = if mp.i_crop == 0 || crop_height <= 0.0 { 0.1 } else { crop_height };
 
     if mp.hargreaves {
         let (ra, _, _, _) = rad_global(mp.latitude, day_no);
         let etcomb = 0.0023 * 0.408 * ra * (t_aver + 17.8) * (rec.t_max - rec.t_min).max(0.0).sqrt();
-        return (etcomb * (1.0 - scf), etcomb * scf);
+        return Some(PotEt { evap_p: etcomb * (1.0 - scf), trans_p: etcomb * scf, lai, scf, x_root, et_comb: etcomb, ..Default::default() });
     }
 
     let ea_max = ea(rec.t_max);
@@ -158,72 +230,64 @@ pub fn potential_et(mp: &MeteoSettings, rec: &MeteoRecord, t_conv: f64) -> (f64,
         rec.rh_mean
     };
 
-    let rn = if mp.i_radiation != 2 {
+    let (rn, rns_o, rnl_o) = if mp.i_radiation != 2 {
         let (ra, omega, xx, yy) = rad_global(mp.latitude, day_no);
+        let rad_cs = ra * (mp.short_wave_a + mp.short_wave_b * 1.0);
 
-        // Detect sub-daily / hourly interval (iMetHour == 1 in TIME.FOR)
-        let is_hourly = mp.records.len() > 1 && (mp.records[1].t - mp.records[0].t) <= (0.9999 * tt_conv);
+        let (mut cloud_f, mut n_n) = cloudiness(
+            mp.i_sun_sh,
+            rec.sun_hours,
+            omega,
+            mp.long_wave_b,
+            mp.long_wave_a,
+            rec.rad,
+            rad_cs,
+            mp.cloud_fact_ac,
+            mp.cloud_fact_bc,
+        );
 
-        let cloud_f = if mp.i_radiation == 1 && mp.i_sun_sh == 3 && is_hourly {
-            // Sub-daily clear-sky radiation diurnal variation (TIME.FOR lines 485-507)
+        let mut rad = rec.rad;
+        if mp.i_radiation == 0 {
+            rad = ra * (mp.short_wave_a + mp.short_wave_b * n_n); // Equation 52
+        }
+        if mp.i_sun_sh == 3 {
+            let tt = rad / ra;
+            n_n = 1.0 - (2.330 - 3.330 * tt).clamp(0.1, 1.0);
+        }
+        let _ = n_n;
+
+        if mp.i_radiation == 1 && mp.i_sun_sh == 3 && is_hourly {
+            // Sub-daily clear-sky radiation diurnal variation
             let pi = std::f64::consts::PI;
-            let rad_cs = ra * (mp.short_wave_a + mp.short_wave_b * 1.0);
-
             let mut sum_sine = 0.0;
             for k in 1..=24 {
                 let sine1 = xx + yy * (2.0 * pi / 24.0 * (k as f64 - 12.0)).cos();
                 sum_sine += sine1.max(0.0) / 24.0;
             }
-
             let hour_no = 24.0 * day_no.fract();
             let sine = xx + yy * (2.0 * pi / 24.0 * (hour_no - 12.0)).cos();
-            let rad_csh = if sum_sine > 0.0 {
-                (sine * rad_cs / sum_sine).max(0.0)
-            } else {
-                0.0
-            };
-
-            if rad_csh <= 0.0001 {
-                // Nighttime default
-                mp.cloud_fact_ac * 0.6 + mp.cloud_fact_bc
+            let rad_csh = if sum_sine > 0.0 { (sine * rad_cs / sum_sine).max(0.0) } else { 0.0 };
+            cloud_f = if rad_csh <= 0.0001 {
+                mp.cloud_fact_ac * 0.6 + mp.cloud_fact_bc // night time
             } else if rec.rad >= rad_csh {
                 mp.cloud_fact_ac * 1.0 + mp.cloud_fact_bc
             } else {
                 (mp.cloud_fact_ac * rec.rad / rad_csh + mp.cloud_fact_bc).max(0.01)
-            }
-        } else {
-			cloudiness(
-				mp.i_sun_sh,
-				rec.sun_hours,
-				omega,
-				mp.long_wave_b,
-				mp.long_wave_a,
-				rec.rad,
-				ra * (mp.short_wave_a + mp.short_wave_b),
-				mp.cloud_fact_ac,
-				mp.cloud_fact_bc,
-			)
-        };
-
-        let rad = if mp.i_radiation == 0 {
-            let rel_sun = ((cloud_f - mp.long_wave_b) / mp.long_wave_a.max(1e-12)).clamp(0.0, 1.0);
-            ra * (mp.short_wave_a + mp.short_wave_b * rel_sun)
-        } else {
-            rec.rad
-        };
+            };
+        }
 
         let rns = (1.0 - albedo) * rad;
         let rnl = rad_long_net(rec.t_max, rec.t_min, mp.long_wave_a1, mp.long_wave_b1, ea_dew, cloud_f);
-        rns - rnl
+        (rns - rnl, rns, rnl)
     } else {
-        rec.rad
+        (rec.rad, 0.0, 0.0)
     };
 
     let wind_ms = rec.wind_kmd / 86.4;
-    let Some((aero_term, rad_term)) = aero(
+    let (aero_term, rad_term) = aero(
         rn,
         rc,
-        crop_height,
+        ch_eff,
         mp.wind_height,
         mp.temp_height,
         wind_ms,
@@ -233,14 +297,22 @@ pub fn potential_et(mp: &MeteoSettings, rec: &MeteoRecord, t_conv: f64) -> (f64,
         ea_max,
         ea_min,
         ea_dew,
-    ) else {
-        return (0.0, 0.0);
-    };
+    )?;
 
     let mut etcomb = (rad_term + aero_term).max(0.0);
     let row = (1.0 - 7.37e-6 * (t_aver - 4.0).powi(2) + 3.79e-8 * (t_aver - 4.0).powi(3)) * 1000.0;
     etcomb = etcomb / row * 1000.0;
-    (etcomb * (1.0 - scf), etcomb * scf)
+    Some(PotEt { evap_p: etcomb * (1.0 - scf), trans_p: etcomb * scf, lai, scf, x_root, et_comb: etcomb, rns: rns_o, rnl: rnl_o, rad_term, aero_term })
+}
+
+/// SetMeteo: potential evaporation and transpiration [mm/d] for one meteorological record
+/// (iMetHour is guessed from the spacing of the first two records).
+pub fn potential_et(mp: &MeteoSettings, rec: &MeteoRecord, t_conv: f64) -> (f64, f64) {
+    let tt_conv = 24.0 * 3600.0 * t_conv;
+    let is_hourly = mp.records.len() > 1 && (mp.records[1].t - mp.records[0].t) <= (0.9999 * tt_conv);
+    potential_et_ex(mp, rec, t_conv, is_hourly)
+        .map(|p| (p.evap_p, p.trans_p))
+        .unwrap_or((0.0, 0.0))
 }
 
 /// Interception state container holding carry-over water between time steps.
@@ -267,24 +339,22 @@ pub fn calculate_interception(
     scf: f64,
     state: &mut InterceptionState,
 ) -> (f64, f64, f64) {
-    if lai <= 0.0 || a_interc <= 0.0 {
-        return (prec_in, trans_p, 0.0);
-    }
-
+    // Intercept: new interception only with LAI > 0 (and a meaningful capacity)
     let mut new_interc = 0.0;
-    if prec_in > 0.0 {
-        let denom = 1.0 + (scf * prec_in) / (a_interc * lai);
-        new_interc = (a_interc * lai * (1.0 - 1.0 / denom)).min(prec_in);
-    }
-
-    // Capacity limit
-    let max_interc = a_interc * lai;
-    if new_interc + state.excess > max_interc {
-        new_interc = (max_interc - state.excess).max(0.0);
+    if lai > 0.0 && a_interc > 0.0 {
+        if prec_in > 0.0 {
+            let denom = 1.0 + (scf * prec_in) / (a_interc * lai);
+            new_interc = (a_interc * lai * (1.0 - 1.0 / denom)).min(prec_in);
+        }
+        // Capacity limit
+        let max_interc = a_interc * lai;
+        if new_interc + state.excess > max_interc {
+            new_interc = (max_interc - state.excess).max(0.0);
+        }
     }
 
     let net_prec = (prec_in - new_interc).max(0.0);
-    let total_interc = state.excess + new_interc;
+    let total_interc = state.excess + new_interc; // old + new interception
     state.excess = 0.0;
 
     // Transpiration consumes intercepted water first
@@ -455,106 +525,515 @@ pub fn aero_res(
     r_v
 }
 
-/// Cloud cover fraction (Cloudiness in TIME.FOR, daily-interval branch).
-pub fn cloud_cover(mp: &MeteoSettings, rec: &MeteoRecord, t_conv: f64) -> f64 {
-    let pi = std::f64::consts::PI;
-    let tt_conv = 24.0 * 3600.0 * t_conv;
-    let day_no = (rec.t / tt_conv).rem_euclid(365.0);
-    let (ra, omega, _, _) = rad_global(mp.latitude, day_no);
-    match mp.i_sun_sh {
-        0 => {
-            let nn = 24.0 / pi * omega;
-            if nn > 0.0 { 1.0 - (rec.sun_hours / nn).min(1.0) } else { 1.0 }
-        }
-        1 => (1.0 - (rec.sun_hours - mp.long_wave_b) / mp.long_wave_a.max(1e-12)).clamp(0.0, 1.0),
-        2 => (2.330 - 3.330 * rec.sun_hours).clamp(0.0001, 1.0),
-        _ => {
-            let tt = if ra > 0.0 { rec.rad / ra } else { 0.0 };
-            (2.330 - 3.330 * tt).clamp(0.1, 1.0)
-        }
-    }
+/// Result of one call of `evapor` (port of subroutine Evapor in TIME.FOR).
+#[derive(Clone, Copy, Debug, Default)]
+pub struct EvaporOut {
+    /// Evaporation flux [kg/m2/s]
+    pub evap: f64,
+    /// Heat flux into the soil, positive downward [W/m2]
+    pub heat_flux: f64,
+    /// Sensible heat flux [W/m2]
+    pub sens_flux: f64,
+    /// Latent heat of vaporization xLatent(TempA)/rho_w(TempS) [J/kg]
+    pub lat: f64,
+    /// Aerodynamic resistance to heat flow [s/m]
+    pub r_h: f64,
+    pub rn: f64,
+    pub rns: f64,
+    pub rnl: f64,
+    pub temp_a: f64,
+    /// Density of soil water at the surface temperature [kg/m3]
+    pub row: f64,
 }
 
-/// Surface energy balance (port of Evapor + RadLongNet1 from TIME.FOR).
-/// `rad` = incoming solar radiation [MJ/m2/d]; `cover` = cloud cover fraction [-].
-/// Returns `(evap_m_s, heat_flux_w_m2, sens_flux, evap_kg_m2_s, r_v, r_s)`
+/// Port of subroutine Evapor (non daily-generated meteo data, i.e. lMetDaily = false):
+/// surface energy balance including the hourly variation of air temperature and of
+/// shortwave radiation.
+///
+/// * `t_days`   - time in days (for DayNo / hour of day)
+/// * `t_proj`   - time in project time units (for the air temperature sine)
+/// * `period`   - period of the temperature sine (heat tPeriod, project time units)
+/// * `is_hourly`- iMetHour = 1 (meteo data given at intervals of one day or less)
+/// * `daily`    - lMetDaily: `Some((TempA, RH_A, Rst))` from `DailyMet`/`SetDayMet`
+///   (air temperature, relative humidity and net shortwave input at the current time)
 #[allow(clippy::too_many_arguments)]
-pub fn surface_energy_balance(
+pub fn evapor(
+    mp: &MeteoSettings,
+    t_days: f64,
+    t_proj: f64,
+    period: f64,
     temp_s: f64,
-    temp_a: f64,
+    t_max_a: f64,
+    t_min_a: f64,
+    rad_in: f64,
+    sun_hours: f64,
     rh_mean: f64,
-    rad: f64,
+    wind_ms: f64,
     h_top: f64,
     theta_top: f64,
-    cover: f64,
-    wind_ms: f64,
-    wind_height: f64,
-    temp_height: f64,
+    is_hourly: bool,
     x_conv: f64,
-) -> (f64, f64, f64, f64, f64, f64) {
+    daily: Option<(f64, f64, f64)>,
+) -> EvaporOut {
+    let pi = std::f64::consts::PI;
     let g = 9.81;
     let x_mol = 0.018015;
     let r_gas = 8.314;
     let ca = 1200.0;
-    let sigma = 4.899e-9; // Stefan-Boltzmann [MJ/d/m2/K4]
-    let r_conv = 1.0e6 / 86400.0; // MJ/m2/d -> W/m2
 
+    // Hourly variations of atmospheric temperature
+    let t_mean = (t_max_a + t_min_a) / 2.0;
+    let mut temp_a = t_mean;
+    if period > 0.0 {
+        temp_a = t_mean + (t_max_a - t_min_a) / 2.0 * (2.0 * pi * t_proj / period - 7.0 * pi / 12.0).sin();
+    }
+    let mut rh_mean = rh_mean;
+    if let Some((ta, rha, _)) = daily {
+        temp_a = ta; // lMetDaily: RHMean = RH_A, TempA from DailyMet
+        rh_mean = rha;
+    }
     let t_kelv_s = temp_s + 273.15;
     let t_kelv_a = temp_a + 273.15;
-
-    // Atmospheric vapor density
     let rovs_a = 0.001 * (31.3716 - 6014.79 / t_kelv_a - 0.00792495 * t_kelv_a).exp() / t_kelv_a;
     let roa = rh_mean / 100.0 * rovs_a;
 
-    // Aerodynamic resistance and soil surface resistance (van de Griend & Owe)
-    let r_v = aero_res(temp_height, wind_height, wind_ms, t_kelv_s, t_kelv_a);
-    let r_h = r_v;
-    let r_s = if theta_top < 0.15 { 10.0 * (35.63 * (0.15 - theta_top)).exp() } else { 10.0 };
+    let (rn, rns, rnl);
+    if mp.i_radiation != 2 {
+        let day_no = t_days.rem_euclid(365.0);
+        let (ra, omega, xx, yy) = rad_global(mp.latitude, day_no);
+        let sc = 118.08;
+        let mut rad = rad_in;
 
-    // Surface albedo, van Bavel & Hillel (1976)
-    let albedo = if theta_top > 0.25 {
-        0.1
-    } else if theta_top > 0.1 {
-        0.35 - theta_top
+        // Cloudiness
+        let (mut n_n, mut cover, mut tt) = (0.0_f64, 0.0_f64, 0.0_f64);
+        match mp.i_sun_sh {
+            0 => {
+                let nn = 24.0 / pi * omega;
+                n_n = if nn > 0.0 { (sun_hours / nn).min(1.0) } else { 0.0 };
+                cover = 1.0 - n_n;
+            }
+            1 => {
+                n_n = (sun_hours - mp.long_wave_b) / mp.long_wave_a;
+                cover = 1.0 - n_n;
+            }
+            2 => {
+                tt = sun_hours;
+                cover = (2.330 - 3.330 * tt).clamp(0.0001, 1.0);
+                n_n = 1.0 - cover;
+            }
+            _ => {}
+        }
+        let _ = n_n;
+
+        if mp.i_radiation == 0 || mp.i_sun_sh == 3 {
+            if mp.i_radiation == 0 {
+                rad = ra * (mp.short_wave_a + mp.short_wave_b * n_n); // Equation 52
+            }
+            if mp.i_sun_sh == 3 {
+                if is_hourly {
+                    let hour_no = 24.0 * day_no.fract();
+                    let sine = xx + yy * (2.0 * pi / 24.0 * (hour_no - 12.0)).cos();
+                    let ra_h = (sc * sine).max(0.0);
+                    if ra_h <= 0.0001 {
+                        cover = 0.6; // night time
+                    } else {
+                        tt = (rad / ra_h).min(1.0);
+                        cover = (2.330 - 3.330 * tt).clamp(0.1, 1.0);
+                    }
+                } else {
+                    tt = rad / ra;
+                    cover = (2.330 - 3.330 * tt).clamp(0.1, 1.0);
+                }
+            }
+        }
+        let rad_h = if let Some((_, _, rst)) = daily {
+            // lMetDaily: RadH = Rst (the albedo is still the soil-moisture dependent one)
+            let _ = (tt, sc);
+            rst
+        } else if mp.i_radiation == 0 || !is_hourly {
+            if mp.i_sun_sh != 2 {
+                tt = rad / ra;
+            }
+            let hour_no = 24.0 * day_no.fract();
+            let sine = xx + yy * (2.0 * pi / 24.0 * (hour_no - 12.0)).cos();
+            (sc * tt * sine).max(0.0) // Equation 12.7
+        } else {
+            rad
+        };
+
+        // Surface albedo, van Bavel and Hillel (1976)
+        let albedo = if theta_top > 0.25 {
+            0.1
+        } else if theta_top > 0.1 {
+            0.35 - theta_top
+        } else {
+            0.25
+        };
+        rns = (1.0 - albedo) * rad_h;
+
+        // RadLongNet1
+        let sigma = 4.899e-9;
+        let es = ea(temp_a);
+        let ea_act = rh_mean / 100.0 * es;
+        let epsi = 1.24 * (ea_act / t_kelv_a).powf(1.0 / 7.0); // Brutsaert (1975)
+        let epsi_a = ((1.0 - 0.84 * cover) * epsi + 0.84 * cover).clamp(0.0, 1.0);
+        let epsi_s = (0.9 + 0.18 * theta_top).min(1.0);
+        let rlu = epsi_s * sigma * t_kelv_s.powi(4);
+        let rld = epsi_a * sigma * t_kelv_a.powi(4);
+        rnl = rld - rlu;
+        rn = rns + rnl;
     } else {
-        0.25
-    };
-    let rns = (1.0 - albedo) * rad; // [MJ/m2/d]
+        rn = rad_in;
+        rns = 0.0;
+        rnl = 0.0;
+    }
 
-    // Net longwave radiation (RadLongNet1); Ea in kPa as in the Fortran
-    let es = ea(temp_a);
-    let ea_act = rh_mean / 100.0 * es;
-    let epsi = 1.24 * (ea_act / t_kelv_a).powf(1.0 / 7.0); // Brutsaert (1975)
-    let epsi_a = ((1.0 - 0.84 * cover) * epsi + 0.84 * cover).clamp(0.0, 1.0);
-    let epsi_s = (0.9 + 0.18 * theta_top).min(1.0);
-    let rlu = epsi_s * sigma * t_kelv_s.powi(4);
-    let rld = epsi_a * sigma * t_kelv_a.powi(4);
-    let rnl = rld - rlu; // already signed (net incoming)
-    let rn = rns + rnl; // Equation 50 as coded in Evapor
-
-    // Sensible heat
+    let r_v = aero_res(mp.temp_height, mp.wind_height, wind_ms, t_kelv_s, t_kelv_a);
+    let r_s = if theta_top < 0.15 { 10.0 * (35.63 * (0.15 - theta_top)).exp() } else { 10.0 };
+    let r_h = r_v;
     let sens_flux = ca * (temp_s - temp_a) / r_h;
 
-    // Evaporation
     let h_m = h_top / x_conv;
     let hr = (h_m * x_mol * g / r_gas / t_kelv_s).exp();
     let rovs_s = 0.001 * (31.3716 - 6014.79 / t_kelv_s - 0.00792495 * t_kelv_s).exp() / t_kelv_s;
     let rov = rovs_s * hr;
-    let evap_kg_m2_s = ((rov - roa) / (r_v + r_s)).max(0.0);
-
-    // Latent heat: Lat = xLatent(TempA)/row(TempS)  [J/kg]
+    let evap = ((rov - roa) / (r_v + r_s)).max(0.0);
     let row = (1.0 - 7.37e-6 * (temp_s - 4.0).powi(2) + 3.79e-8 * (temp_s - 4.0).powi(3)) * 1000.0;
     let lat = latent_heat_volumetric(temp_a) / row;
+    let r_conv = 1.0e6 / 86400.0;
+    let heat_flux = rn * r_conv - sens_flux - lat * evap;
 
-    let heat_flux_w_m2 = rn * r_conv - sens_flux - lat * evap_kg_m2_s;
-    let evap_m_s = evap_kg_m2_s / row;
+    EvaporOut { evap, heat_flux, sens_flux, lat, r_h, rn, rns, rnl, temp_a, row }
+}
 
-    (evap_m_s, heat_flux_w_m2, sens_flux, evap_kg_m2_s, r_v, r_s)
+// ------------------------------------------------------------------------------------
+// Daily-generated meteorological data (lMetDaily): DailyMet, DailyTemp, Humidity, SetDayMet
+// ------------------------------------------------------------------------------------
+
+/// One daily record with the estimated relative-humidity limits (output of `Humidity`).
+#[derive(Clone, Copy, Debug, Default)]
+pub struct DailyRec {
+    pub t: f64,
+    pub rad: f64,
+    pub t_max: f64,
+    pub t_min: f64,
+    pub rh_max: f64,
+    pub rh_min: f64,
+    pub ea_mean: f64,
+    pub wind_ms: f64,
+    pub sun_hours: f64,
+    pub crop_height: f64,
+    pub albedo: f64,
+    pub lai: f64,
+    pub x_root: f64,
+}
+
+/// State of DailyMet: current (`cur`), next (`next`) and previous day (`prev_*`).
+#[derive(Clone, Debug, Default)]
+pub struct DailyMetState {
+    /// Index of the current record (the one with time tAtm) in `MeteoSettings::records`
+    pub idx: usize,
+    pub cur: DailyRec,
+    pub next: DailyRec,
+    pub prev_t_max: f64,
+    pub prev_t_min: f64,
+    pub prev_rh_max: f64,
+    pub prev_rh_min: f64,
+    /// Air temperature [C] and relative humidity [%] at the current time step
+    pub temp_a: f64,
+    pub rh_a: f64,
+}
+
+/// Humidity: maximum and minimum relative humidity from daily values.
+/// Returns `(rh_max, rh_min, ea_mean)`.
+pub fn humidity(t_max: f64, t_min: f64, rh_mean_in: f64, i_rel_hum: i32) -> (f64, f64, f64) {
+    let mut rh_mean = rh_mean_in;
+    let es_tmax = ea(t_max);
+    let es_tmin = ea(t_min);
+    let (mut rh_max, mut rh_min, ea_mean);
+    if i_rel_hum == 0 {
+        rh_min = 2.0 * rh_mean * es_tmin / (es_tmax + es_tmin);
+        rh_max = 2.0 * rh_mean * es_tmax / (es_tmax + es_tmin);
+        ea_mean = rh_min / 100.0 * es_tmax;
+    } else {
+        ea_mean = rh_mean;
+        rh_min = ea_mean / es_tmax * 100.0;
+        rh_max = ea_mean / es_tmin * 100.0;
+    }
+    if rh_max >= 100.0 {
+        if i_rel_hum == 1 {
+            rh_mean = ea_mean * (50.0 / es_tmin + 50.0 / es_tmax); // Equation 13
+        }
+        rh_min = rh_mean - (100.0 - rh_mean);
+        rh_max = 100.0;
+    }
+    (rh_max, rh_min, ea_mean)
+}
+
+fn daily_rec(mp: &MeteoSettings, i: usize) -> DailyRec {
+    let r = &mp.records[i];
+    let (rh_max, rh_min, ea_mean) = humidity(r.t_max, r.t_min, r.rh_mean, mp.i_rel_hum);
+    DailyRec {
+        t: r.t,
+        rad: r.rad,
+        t_max: r.t_max,
+        t_min: r.t_min,
+        rh_max,
+        rh_min,
+        ea_mean,
+        wind_ms: r.wind_kmd / 86.4,
+        sun_hours: r.sun_hours,
+        crop_height: r.crop_height.unwrap_or(mp.crop_height),
+        albedo: r.albedo.unwrap_or(mp.albedo),
+        lai: r.lai.unwrap_or(mp.lai),
+        x_root: r.x_root.unwrap_or(mp.x_root),
+    }
+}
+
+/// DailyTemp: temperature (or, with swapped arguments, relative humidity) at time `t` from
+/// the daily extremes. The maximum occurs at 13:00 and the minimum at 01:00.
+#[allow(clippy::too_many_arguments)]
+pub fn daily_temp(
+    t: f64,
+    dt: f64,
+    t_init: f64,
+    t_end: f64,
+    t_atm: f64,
+    t_max: f64,
+    t_max_n: f64,
+    t_max_o: f64,
+    t_min: f64,
+    t_min_n: f64,
+    t_min_o: f64,
+) -> f64 {
+    let pi = std::f64::consts::PI;
+    let max_time = 13.0 / 24.0;
+    let min_time = 1.0 / 24.0;
+    let tol = dt * 0.001;
+    let blend = |mt: f64, cur: f64, next: f64, prev: f64| -> f64 {
+        if t < t_init + mt {
+            cur
+        } else if t >= t_end - 1.0 + mt {
+            cur
+        } else if t >= t_atm - 1.0 + mt && (t < t_atm || (t - t_atm).abs() <= tol) {
+            (next - cur) * (t - (t_atm - 1.0 + mt)) + cur
+        } else if (t > t_atm - 1.0 || (t - (t_atm - 1.0)).abs() <= tol) && t < t_atm - 1.0 + mt {
+            (cur - prev) * (t - (t_atm - 2.0 + mt)) + prev
+        } else {
+            cur
+        }
+    };
+    let t_max_a = blend(max_time, t_max, t_max_n, t_max_o);
+    let t_min_a = blend(min_time, t_min, t_min_n, t_min_o);
+    (t_max_a + t_min_a) / 2.0 + (t_max_a - t_min_a) / 2.0 * (2.0 * pi * (t - max_time)).cos()
+}
+
+/// DailyMet: `i_kod` = 1 (initialise: read the first two days), 2 (move to the next day at
+/// a record time), 4 (only evaluate TempA / RH_A at time `t`).
+///
+/// All times are given in project time units; `tt_conv` converts days to project units
+/// (86400 * tConv) so that the 13:00 / 01:00 extremes are right for any time unit.
+#[allow(clippy::too_many_arguments)]
+pub fn daily_met(mp: &MeteoSettings, st: &mut DailyMetState, i_kod: i32, t: f64, dt: f64, t_init: f64, t_end: f64, tt_conv: f64) {
+    let (t, dt, t_init, t_end) = (t / tt_conv, dt / tt_conv, t_init / tt_conv, t_end / tt_conv);
+    let n = mp.records.len();
+    if n == 0 || (t_end - t).abs() <= 0.001 * dt {
+        return;
+    }
+    let mut i_daily = i_kod;
+    if ((t_end - 1.0) - t).abs() <= 0.001 * dt {
+        i_daily = 3; // last day: do not read further data
+    }
+    if i_daily == 1 {
+        st.idx = 0;
+        st.cur = daily_rec(mp, 0);
+        st.prev_t_max = st.cur.t_max;
+        st.prev_t_min = st.cur.t_min;
+        st.prev_rh_max = st.cur.rh_max;
+        st.prev_rh_min = st.cur.rh_min;
+    }
+    if i_daily == 2 || i_daily == 3 {
+        st.prev_t_max = st.cur.t_max;
+        st.prev_t_min = st.cur.t_min;
+        st.prev_rh_max = st.cur.rh_max;
+        st.prev_rh_min = st.cur.rh_min;
+        st.cur = st.next;
+        st.idx = (st.idx + 1).min(n - 1);
+    }
+    if i_daily <= 2 {
+        let ni = st.idx + 1;
+        st.next = if ni < n { daily_rec(mp, ni) } else { st.cur };
+    }
+    if i_daily == 2 {
+        return; // do not calculate temperature and RH
+    }
+    let (c, nx) = (st.cur, st.next);
+    st.temp_a = daily_temp(t, dt, t_init, t_end, c.t / tt_conv, c.t_max, nx.t_max, st.prev_t_max, c.t_min, nx.t_min, st.prev_t_min);
+    // relative humidity is lowest when the temperature is highest
+    st.rh_a = daily_temp(t, dt, t_init, t_end, c.t / tt_conv, c.rh_min, nx.rh_min, st.prev_rh_min, c.rh_max, nx.rh_max, st.prev_rh_max);
+}
+
+/// Output of `SetDayMet`.
+#[derive(Clone, Copy, Debug, Default)]
+pub struct DayMetOut {
+    /// Potential evaporation / transpiration [mm/d] (zero when the energy balance is used)
+    pub evap_p: f64,
+    pub trans_p: f64,
+    /// Solar radiation at the current time step [MJ/m2/d] and the (possibly recomputed) daily Rad
+    pub rst: f64,
+    pub rad: f64,
+    pub rns: f64,
+    pub rnl: f64,
+    pub lai: f64,
+    pub scf: f64,
+    pub x_root: Option<f64>,
+    pub et_comb: f64,
+    pub rad_term: f64,
+    pub aero_term: f64,
+}
+
+/// SetDayMet: potential evapotranspiration (Penman-Monteith) or the radiation terms for the
+/// energy balance from the daily-generated temperature and humidity at time `t`.
+/// Returns `None` when `Aero` fails.
+pub fn set_day_met(mp: &MeteoSettings, st: &DailyMetState, t: f64, t_conv: f64, l_en_bal: bool) -> Option<DayMetOut> {
+    let pi = std::f64::consts::PI;
+    let tt_conv = 24.0 * 3600.0 * t_conv;
+    let t_days = t / tt_conv;
+    let cur = st.cur;
+
+    let (crop_height, albedo, lai_in, x_root) = match mp.i_crop {
+        2 if !mp.growth.is_empty() => {
+            let (h, a, l, x) = growth_table(&mp.growth, t);
+            (h, a, l, Some(x))
+        }
+        3 => (cur.crop_height, cur.albedo, cur.lai, Some(cur.x_root)),
+        1 => (mp.crop_height, mp.albedo, mp.lai, if mp.x_root > 0.0 { Some(mp.x_root) } else { None }),
+        _ => (mp.crop_height, mp.albedo, mp.lai, None),
+    };
+    let (rc, scf, lai) = crop_res(mp.i_lai, lai_in, mp.r_extinct, mp.i_crop, crop_height);
+    let ch_eff = if mp.i_crop == 0 || crop_height <= 0.0 { 0.1 } else { crop_height };
+
+    let temp_a = st.temp_a;
+    let es = ea(temp_a);
+    let ea_act = es * st.rh_a / 100.0;
+
+    let day_no = (cur.t / tt_conv).rem_euclid(365.0);
+    let mut out = DayMetOut { lai, scf, x_root, rad: cur.rad, ..Default::default() };
+    let rn;
+    if mp.i_radiation != 2 {
+        let (ra, omega, xx, yy) = rad_global(mp.latitude, day_no);
+        let rad_cs = ra * (mp.short_wave_a + mp.short_wave_b * 1.0);
+        let mut rad = cur.rad;
+        if mp.i_radiation == 0 {
+            let (_, n_n) = cloudiness(mp.i_sun_sh, cur.sun_hours, omega, mp.long_wave_b, mp.long_wave_a, rad, rad_cs, mp.cloud_fact_ac, mp.cloud_fact_bc);
+            rad = ra * (mp.short_wave_a + mp.short_wave_b * n_n); // Equation 52
+        }
+        // The average of Rst over the 24 hours equals the daily mean Rad
+        let mut sum = 0.0;
+        for k in 1..=24 {
+            let sine1 = xx + yy * (2.0 * pi / 24.0 * (k as f64 - 12.0)).cos();
+            sum += sine1.max(0.0) / 24.0;
+        }
+        let t2 = (t_days - day_no) * 24.0;
+        let sine = xx + yy * (2.0 * pi / 24.0 * (t2 - 12.0)).cos();
+        let rst = if sum > 0.0 { (sine * rad / sum).max(0.0) } else { 0.0 };
+        let rns = (1.0 - albedo) * rst;
+
+        let (mut cloud_f, _) = cloudiness(mp.i_sun_sh, cur.sun_hours, omega, mp.long_wave_b, mp.long_wave_a, rad, rad_cs, mp.cloud_fact_ac, mp.cloud_fact_bc);
+        if mp.i_radiation == 1 && mp.i_sun_sh == 3 && rad_cs > 0.0 {
+            cloud_f = mp.cloud_fact_ac * rad / rad_cs + mp.cloud_fact_bc; // Equation 57
+        }
+        let rnl = rad_long_net(temp_a, temp_a, mp.long_wave_a1, mp.long_wave_b1, ea_act, cloud_f);
+        rn = rns - rnl;
+        out.rst = rst;
+        out.rad = rad;
+        out.rns = rns;
+        out.rnl = rnl;
+    } else {
+        rn = cur.rad;
+    }
+    if l_en_bal {
+        return Some(out);
+    }
+
+    let (aero_term, rad_term) = aero(
+        rn,
+        rc,
+        ch_eff,
+        mp.wind_height,
+        mp.temp_height,
+        cur.wind_ms,
+        mp.altitude,
+        temp_a,
+        temp_a,
+        es,
+        es,
+        ea_act,
+    )?;
+    let mut etcomb = (rad_term + aero_term).max(0.0);
+    let row = (1.0 - 7.37e-6 * (temp_a - 4.0).powi(2) + 3.79e-8 * (temp_a - 4.0).powi(3)) * 1000.0;
+    etcomb = etcomb / row * 1000.0; // [kg/m2/d] -> [mm/d]
+    out.evap_p = etcomb * (1.0 - scf);
+    out.trans_p = etcomb * scf;
+    out.et_comb = etcomb;
+    out.rad_term = rad_term;
+    out.aero_term = aero_term;
+    Some(out)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_evapor_outputs_are_finite_and_consistent() {
+        let mp = MeteoSettings { i_radiation: 1, i_sun_sh: 3, latitude: 40.0, ..Default::default() };
+        for &(t_days, is_hourly) in &[(180.25_f64, true), (180.5, true), (180.75, false), (181.0, false)] {
+            let o = evapor(&mp, t_days, t_days, 1.0, 22.0, 30.0, 15.0, 20.0, 0.0, 50.0, 2.0, -100.0, 0.2, is_hourly, 100.0, None);
+            assert!(o.evap >= 0.0 && o.evap.is_finite());
+            assert!(o.heat_flux.is_finite() && o.rn.is_finite() && o.r_h > 0.0);
+            let closure = o.rn * 1.0e6 / 86400.0 - (o.heat_flux + o.sens_flux + o.lat * o.evap);
+            assert!(closure.abs() < 1e-9);
+        }
+    }
+
+    #[test]
+    fn test_daily_temp_reaches_daily_extremes() {
+        let (tmax, tmin) = (20.0, 10.0);
+        let t_hot = 13.0 / 24.0;
+        let t_cold = 1.0 / 24.0;
+        let a = daily_temp(t_hot, 0.01, 0.0, 10.0, 1.0, tmax, tmax, tmax, tmin, tmin, tmin);
+        let b = daily_temp(t_cold, 0.01, 0.0, 10.0, 1.0, tmax, tmax, tmax, tmin, tmin, tmin);
+        assert!((a - tmax).abs() < 1e-9, "T(13:00) = {a}");
+        assert!((b - tmin).abs() < 1e-9, "T(01:00) = {b}");
+    }
+
+    #[test]
+    fn test_daily_met_is_independent_of_the_time_unit() {
+        let rec = |t: f64, tmax: f64, tmin: f64| MeteoRecord { t, rad: 15.0, t_max: tmax, t_min: tmin, rh_mean: 60.0, wind_kmd: 100.0, sun_hours: 0.0, ..Default::default() };
+        let temp = |scale: f64, tt_conv: f64| {
+            let mut mp = MeteoSettings::default();
+            mp.records = vec![rec(1.0 * scale, 20.0, 10.0), rec(2.0 * scale, 26.0, 12.0), rec(3.0 * scale, 22.0, 9.0)];
+            let mut st = DailyMetState::default();
+            let (t_end, dt) = (3.0 * scale, 0.01 * scale);
+            daily_met(&mp, &mut st, 1, 0.5 * scale, dt, 0.0, t_end, tt_conv);
+            daily_met(&mp, &mut st, 2, 1.0 * scale, dt, 0.0, t_end, tt_conv); // day 1 ends
+            daily_met(&mp, &mut st, 4, 1.6 * scale, dt, 0.0, t_end, tt_conv);
+            (st.temp_a, st.rh_a)
+        };
+        let (ta_d, rh_d) = temp(1.0, 1.0); // days
+        let (ta_h, rh_h) = temp(24.0, 24.0); // hours
+        assert!((ta_d - ta_h).abs() < 1e-9 && (rh_d - rh_h).abs() < 1e-9, "{ta_d} vs {ta_h}");
+    }
+
+    #[test]
+    fn test_humidity_limits() {
+        let (rh_max, rh_min, ea_mean) = humidity(25.0, 10.0, 60.0, 0);
+        assert!(rh_max <= 100.0 && rh_min >= 0.0 && rh_min < rh_max && ea_mean > 0.0);
+        // very humid day: RHMax is capped at 100 % and RHMin moves symmetrically
+        let (rh_max, rh_min, _) = humidity(25.0, 10.0, 95.0, 0);
+        assert!((rh_max - 100.0).abs() < 1e-12 && (rh_min - 90.0).abs() < 1e-12);
+    }
 
     #[test]
     fn test_snow_partition_and_melting() {
@@ -763,36 +1242,26 @@ mod tests {
     }
 	
 #[test]
-fn test_surface_energy_balance_and_aero_res() {
+fn test_evapor_energy_balance_and_aero_res() {
     let rv = aero_res(150.0, 200.0, 2.5, 20.0 + 273.15, 18.0 + 273.15);
     assert!(rv > 0.0 && rv < 500.0);
 
-    let (temp_s, temp_a, rh, rad, theta, cover) = (22.0, 20.0, 50.0, 15.0, 0.20, 0.3);
-    let (evap_m_s, g_flux, sens_flux, evap_kg, _, _) = surface_energy_balance(
-        temp_s, temp_a, rh, rad, -100.0, theta, cover, 2.5, 200.0, 150.0, 100.0,
-    );
+    // Net radiation given (iRadiation = 2), constant air temperature (period = 0)
+    let mp = MeteoSettings { i_radiation: 2, wind_height: 200.0, temp_height: 150.0, ..Default::default() };
+    let (temp_s, temp_a, rh, rad, theta) = (22.0, 20.0, 50.0, 15.0, 0.20);
+    let o = evapor(&mp, 180.5, 180.5, 0.0, temp_s, temp_a, temp_a, rad, 0.0, rh, 2.5, -100.0, theta, false, 100.0, None);
+    assert!(o.evap > 0.0);
+    assert!(o.sens_flux > 0.0); // soil warmer than air
+    assert!((o.temp_a - temp_a).abs() < 1e-12);
 
-    assert!(evap_m_s > 0.0);
-    assert!(evap_kg > 0.0);
-    assert!(sens_flux > 0.0); // soil warmer than air
-
-    // Independently reconstruct Rn = Rns + (Rld - Rlu) and check G + H + LE = Rn
-    let (tks, tka) = (temp_s + 273.15, temp_a + 273.15);
-    let albedo = 0.35 - theta; // 0.10 < theta <= 0.25
-    let rns = (1.0 - albedo) * rad;
-    let ea_act = rh / 100.0 * ea(temp_a);
-    let epsi = 1.24 * (ea_act / tka).powf(1.0 / 7.0);
-    let eps_a = ((1.0 - 0.84 * cover) * epsi + 0.84 * cover).clamp(0.0, 1.0);
-    let eps_s = (0.9 + 0.18 * theta).min(1.0);
-    let sigma = 4.899e-9;
-    let rn_w = (rns + eps_a * sigma * tka.powi(4) - eps_s * sigma * tks.powi(4)) * 1e6 / 86400.0;
+    // G + H + LE = Rn with an independently evaluated latent heat
     let row = (1.0 - 7.37e-6 * (temp_s - 4.0).powi(2) + 3.79e-8 * (temp_s - 4.0).powi(3)) * 1000.0;
     let lat = (2.501e6 - 2369.2 * temp_a) * (1.0 - 7.37e-6 * (temp_a - 4.0).powi(2)
         + 3.79e-8 * (temp_a - 4.0).powi(3)) * 1000.0 / row;
-    let latent = evap_kg * lat;
-    assert!((rn_w - (g_flux + sens_flux + latent)).abs() < 1e-6);
+    let rn_w = rad * 1e6 / 86400.0;
+    assert!((rn_w - (o.heat_flux + o.sens_flux + lat * o.evap)).abs() < 1e-6);
 }
-	
+
 	#[test]
     fn test_hourly_radiation_imethour_diurnal_curve() {
         let t_conv = 1.0 / 86400.0; // days
@@ -924,12 +1393,13 @@ fn test_surface_energy_balance_and_aero_res() {
 
 		// Run across multiple cycles up to t = 10.0
 		let mut steps = 0;
-		while sim.t < 10.0 && steps < 200 {
+		while !sim.done && steps < 200 {
 			sim.step();
 			steps += 1;
 		}
 
-		assert!(sim.t >= 10.0, "Simulation should reach t = 10.0 via repeating cycles");
+		// dt is REAL*4 and t double (TmCont), so the run ends within 0.5*dtMin of tMax (lEnd), not exactly at it.
+		assert!(sim.done && (sim.t - 10.0).abs() <= 0.5 * 0.01, "Simulation should reach t = 10.0 via repeating cycles (t = {})", sim.t);
 		assert!(!sim.failed);
 	}
 }

@@ -4,6 +4,7 @@
 //! (BasInf, NodInf, MatIn, TmIn, RootIn, TempIn, ChemIn, SinkIn) and SetBC.
 
 use hydrus_core::material::MatTable;
+use hydrus_core::inverse::{InverseSettings, ObservationPoint, ParamKind, ParamSpec, SolField, SolMatField, WaterField,};
 use hydrus_core::*;
 use std::path::Path;
 use std::fs::File;
@@ -317,6 +318,7 @@ pub fn read_legacy_project(dir: &Path) -> R<Project> {
     s.skip()?;
     let t = s.read(2)?;
     prj.water.h_tab1 = t.f(0)?;
+    prj.water.use_tables = true; // HYDRUS-1D always interpolates from the tables (lTable decides from hTab1 / hTabN)
     prj.water.h_tab_n = t.f(1)?;
     s.skip()?;
     let t = s.read(2)?;
@@ -770,8 +772,10 @@ fn read_atmosphere(path: &Path, prj: &mut Project, l_temp: bool, l_chem: bool, n
             Some(l) if l.trim_start().to_ascii_lowercase().starts_with("end") => break,
             _ => {}
         }
+        // TIME.FOR / SetBC: tTop, tBot and Ampl are read whenever heat OR solute transport is simulated
+        // (`if(.not.lChem.and..not.lTemp) ... else ... tTop,tBot,Ampl,(cT(jj),cB(jj),jj=1,NS)`)
         let mut ncol = 8;
-        if l_temp {
+        if l_temp || l_chem {
             ncol += 3;
         }
         if l_chem {
@@ -793,7 +797,7 @@ fn read_atmosphere(path: &Path, prj: &mut Project, l_temp: bool, l_chem: bool, n
             ..Default::default()
         };
         let mut k = 8;
-        if l_temp {
+        if l_temp || l_chem {
             r.t_top = t.f(k)?;
             r.t_bot = t.f(k + 1)?;
             r.ampl = t.f(k + 2)?;
@@ -880,7 +884,7 @@ fn read_chem(s: &mut Rd, prj: &mut Project, ver: i32, n_mat: usize, l_equil_flag
     sol.materials.clear();
     for _ in 0..n_mat {
         let t = s.read(4)?;
-        sol.materials.push(SoluteMaterial { bulk_density: t.f(0)?, disp_l: t.f(1)?, frac: t.f(2)?, th_immobile: t.f(3)? });
+        sol.materials.push(SoluteMaterial { bulk_density: t.f(0)?, disp_l: t.f(1)?, frac: t.f(2)?, th_immobile: t.f(3)?, th_im_matrix: 0.0 });
     }
     sol.species.clear();
     for j in 0..ns {
@@ -908,23 +912,30 @@ fn read_chem(s: &mut Rd, prj: &mut Project, ver: i32, n_mat: usize, l_equil_flag
                 ..Default::default()
             };
             if sol.l_bact {
-                sp_mat.s_max2 = sp_mat.mu0_s;
-                sp_mat.r_ka2 = sp_mat.mu0_g;
-                sp_mat.r_kd2 = sp_mat.omega;
-                sp_mat.r_ka1 = sp_mat.ks;
-                sp_mat.r_kd1 = sp_mat.nu;
-            }
-            if t.len() >= 24 {
-                sp_mat.s_max1 = t.f(14)?;
-                sp_mat.r_ka1 = t.f(15)?;
-                sp_mat.r_kd1 = t.f(16)?;
-                sp_mat.s_max2 = t.f(17)?;
-                sp_mat.r_ka2 = t.f(18)?;
-                sp_mat.r_kd2 = t.f(19)?;
-                sp_mat.i_psi1 = t.i(20)?;
-                sp_mat.i_psi2 = t.i(21)?;
-                sp_mat.d_c = t.f(22)?;
-                sp_mat.d_p = t.f(23)?;
+                // ChemIn always reads 14 values; the filtration model reuses the columns
+                // (SOLUTE.FOR / Coeff): slot 13 = iPsi2 or Dc, 14 = iPsi1 or Dp, 15 = SMax2,
+                // 16 = rKa2, 17 = rKd2, 18 = SMax1, 19 = rKa1, 20 = rKd1
+                sp_mat.s_max2 = t.f(8)?;
+                sp_mat.r_ka2 = t.f(9)?;
+                sp_mat.r_kd2 = t.f(10)?;
+                sp_mat.s_max1 = t.f(11)?;
+                sp_mat.r_ka1 = t.f(12)?;
+                sp_mat.r_kd1 = t.f(13)?;
+                if sol.l_filtr {
+                    sp_mat.d_c = t.f(6)?;
+                    sp_mat.d_p = t.f(7)?;
+                    sp_mat.i_psi1 = 0;
+                    sp_mat.i_psi2 = 0;
+                } else {
+                    sp_mat.i_psi2 = t.f(6)? as i32;
+                    sp_mat.i_psi1 = t.f(7)? as i32;
+                }
+                if sp_mat.i_psi1 == 0 && sp_mat.s_max1 > 0.0 {
+                    sp_mat.i_psi1 = 1;
+                }
+                if sp_mat.i_psi2 == 0 && sp_mat.s_max2 > 0.0 {
+                    sp_mat.i_psi2 = 1;
+                }
             }
             sp.per_material.push(sp_mat);
         }
@@ -1002,74 +1013,106 @@ fn read_chem(s: &mut Rd, prj: &mut Project, ver: i32, n_mat: usize, l_equil_flag
     prj.solute = sol;
     Ok(())
 }
+/// Meteo.in (port of subroutine MeteoIn in INPUT.FOR, including the conditional blocks).
 fn read_meteo(path: &Path, prj: &mut Project) -> R<()> {
     let mut m = Rd::open(path, "Meteo.in")?;
-    let _ver = m.version();
+    let ver = m.version();
+    let x_conv = prj.units.x_conv(); // crop height conversion to cm: *100/xConv
 
     m.skip()?;
     m.skip()?;
     let t = m.read(3)?;
-    let num_records = t.i(0)? as usize;
+    let num_records = t.i(0)?.max(0) as usize; // MaxALMet
     let i_radiation = t.i(1)?;
     let hargreaves = t.b(2)?;
 
-    // Line 4 & 5: Flags (lEnBal, lDaily, ...)
-    m.skip()?;
-    let flags = m.read(10)?;
-	let l_en_bal = flags.b(0)?;
-    let l_daily = flags.b(1)?;
+    // lEnBal, lMetDaily (file version >= 4)
+    let (mut l_en_bal, mut l_daily) = (false, false);
+    if ver >= 4 {
+        m.skip()?;
+        let f = m.read(2)?;
+        l_en_bal = f.b(0)?;
+        l_daily = f.b(1)?;
+    }
 
-    // Latitude, Altitude
-    m.skip()?;
-    let t = m.read(2)?;
-    let latitude = t.f(0)?;
-    let altitude = t.f(1)?;
-
-    // ShortWaveRadA, ShortWaveRadB
-    m.skip()?;
-    let t = m.read(2)?;
-    let short_wave_a = t.f(0)?;
-    let short_wave_b = t.f(1)?;
-
-    // LongWaveRadA, LongWaveRadB
-    m.skip()?;
-    let t = m.read(2)?;
-    let long_wave_a = t.f(0)?;
-    let long_wave_b = t.f(1)?;
-
-    // LongWaveRadA1, LongWaveRadB1
-    m.skip()?;
-    let t = m.read(2)?;
-    let long_wave_a1 = t.f(0)?;
-    let long_wave_b1 = t.f(1)?;
-
-    // WindHeight, TempHeight
+    let mut d = MeteoSettings::default();
+    d.altitude = 0.0;
+    if i_radiation != 2 {
+        m.skip()?;
+        let t = m.read(2)?;
+        d.latitude = t.f(0)?;
+        d.altitude = t.f(1)?;
+        m.skip()?;
+        let t = m.read(2)?;
+        d.short_wave_a = t.f(0)?;
+        d.short_wave_b = t.f(1)?;
+        m.skip()?;
+        let t = m.read(2)?;
+        d.long_wave_a = t.f(0)?;
+        d.long_wave_b = t.f(1)?;
+        m.skip()?;
+        let t = m.read(2)?;
+        d.long_wave_a1 = t.f(0)?;
+        d.long_wave_b1 = t.f(1)?;
+    }
     m.skip()?;
     let t = m.read(2)?;
-    let wind_height = t.f(0)?;
-    let temp_height = t.f(1)?;
+    d.wind_height = t.f(0)?;
+    d.temp_height = t.f(1)?;
 
-    // iCrop, SunShine, RelativeHum
     m.skip()?;
     let t = m.read(3)?;
     let i_crop = t.i(0)?;
     let i_sun_sh = t.i(1)?;
     let i_rel_hum = t.i(2)?;
 
-    // Albedo
-    m.skip()?;
-    let albedo = m.read(1)?.f(0)?;
-
-    // Daily values header rows (2 lines)
-    m.skip()?;
-    m.skip()?;
-	if let Some(next_line) = m.peek() {
-        if next_line.trim().starts_with('[') {
-            m.skip()?; // Skip units row if present
-        }
+    if i_radiation == 1 && i_sun_sh == 3 {
+        m.skip()?;
+        let t = m.read(2)?;
+        d.cloud_fact_ac = t.f(0)?;
+        d.cloud_fact_bc = t.f(1)?;
     }
 
-    let x_conv = prj.units.x_conv(); // For crop height unit conversion (to cm)
+    let (mut i_lai, mut r_extinct, mut i_interc, mut a_interc) = (0, d.r_extinct, 0, d.a_interc);
+    let (mut crop_height, mut albedo, mut lai, mut x_root) = (0.0, d.albedo, 0.0, 0.0);
+    let mut growth: Vec<[f64; 5]> = Vec::new();
+    if i_crop >= 1 {
+        m.skip()?;
+        let t = m.read(2)?;
+        i_lai = t.i(0)?;
+        r_extinct = t.f(1)?;
+        m.skip()?;
+        i_interc = m.read(1)?.i(0)?;
+        if i_crop == 1 {
+            m.skip()?;
+            let t = m.read(4)?;
+            crop_height = t.f(0)? * 100.0 / x_conv; // cm
+            albedo = t.f(1)?;
+            lai = t.f(2)?;
+            x_root = t.f(3)?;
+        } else if i_crop == 2 {
+            m.skip()?;
+            let n_growth = m.read(1)?.i(0)?.max(0) as usize;
+            m.skip()?;
+            for _ in 0..n_growth {
+                let t = m.read(5)?;
+                growth.push([t.f(0)?, t.f(1)? * 100.0 / x_conv, t.f(2)?, t.f(3)?, t.f(4)?]);
+            }
+        }
+        if i_interc == 1 {
+            m.skip()?;
+            a_interc = m.read(1)?.f(0)?;
+        }
+    } else {
+        m.skip()?;
+        albedo = m.read(1)?.f(0)?;
+    }
+
+    // Three header records in front of the daily/hourly data
+    m.skip()?;
+    m.skip()?;
+    m.skip()?;
+
     let mut records = Vec::with_capacity(num_records);
     loop {
         match m.peek() {
@@ -1078,7 +1121,7 @@ fn read_meteo(path: &Path, prj: &mut Project) -> R<()> {
             _ => {}
         }
 
-        // iCrop = 3 (daily) has 11 columns; otherwise standard 7 columns
+        // iCrop = 3 (daily crop data) has 11 columns; otherwise 7 columns
         let ncols = if i_crop == 3 { 11 } else { 7 };
         let t = match m.read_opt(ncols) {
             Ok(toks) => toks,
@@ -1103,7 +1146,7 @@ fn read_meteo(path: &Path, prj: &mut Project) -> R<()> {
         };
 
         if i_crop == 3 && t.len() >= 11 {
-            // Conversion to cm as in TIME.FOR: CropHeight * 100. / xConv
+            // Conversion to cm as in SetMeteo: CropHeight * 100. / xConv
             r.crop_height = Some(t.f(7)? * 100.0 / x_conv);
             r.albedo = Some(t.f(8)?);
             r.lai = Some(t.f(9)?);
@@ -1112,22 +1155,24 @@ fn read_meteo(path: &Path, prj: &mut Project) -> R<()> {
 
         records.push(r);
 
-        if records.len() >= num_records {
+        if num_records > 0 && records.len() >= num_records {
             break;
         }
     }
 
     let settings = MeteoSettings {
-		latitude,
-        altitude,
-        short_wave_a,
-        short_wave_b,
-        long_wave_a,
-        long_wave_b,
-        long_wave_a1,
-        long_wave_b1,
-        wind_height,
-        temp_height,
+        short_wave_a: d.short_wave_a,
+        short_wave_b: d.short_wave_b,
+        long_wave_a: d.long_wave_a,
+        long_wave_b: d.long_wave_b,
+        long_wave_a1: d.long_wave_a1,
+        long_wave_b1: d.long_wave_b1,
+        latitude: d.latitude,
+        altitude: d.altitude,
+        cloud_fact_ac: d.cloud_fact_ac,
+        cloud_fact_bc: d.cloud_fact_bc,
+        wind_height: d.wind_height,
+        temp_height: d.temp_height,
         i_radiation,
         i_sun_sh,
         i_rel_hum,
@@ -1135,9 +1180,16 @@ fn read_meteo(path: &Path, prj: &mut Project) -> R<()> {
         l_en_bal,
         l_daily,
         i_crop,
+        crop_height,
         albedo,
+        i_lai,
+        lai,
+        r_extinct,
+        i_interc,
+        a_interc,
+        x_root,
+        growth,
         records,
-        ..Default::default()
     };
 
     prj.atmosphere.meteo = Some(settings);
@@ -1191,10 +1243,360 @@ pub fn read_mater_in(path: &Path, n_mat: usize) -> R<Vec<MatTable>> {
     Ok(tabs)
 }
 
-// ---------------------------------------------------------------------------
-// Legacy Output File Readers (Nod_Inf.out)
-// ---------------------------------------------------------------------------
+pub fn read_fit_in(path: &Path) -> Result<InverseSettings, HydrusError> {
+    let file = File::open(path)
+        .map_err(|e| HydrusError::Io(format!("Could not open FIT.IN at {:?}: {}", path, e)))?;
+    let reader = BufReader::new(file);
+    let mut lines = reader.lines().filter_map(|l| l.ok());
 
+    let mut settings = InverseSettings::default();
+
+    // 1. Skip comment/title blocks until NOBB / MIT record
+    let mut nobb = 0;
+    let mut mit = 50;
+    let mut i_weight = 0;
+
+    while let Some(line) = lines.next() {
+        let tr = line.trim();
+        if tr.is_empty() || tr.starts_with('*') {
+            continue;
+        }
+        let upper = tr.to_ascii_uppercase();
+        if upper.contains("NOBB") || upper.contains("MIT") {
+            if let Some(data_line) = lines.next() {
+                let parts: Vec<&str> = data_line.split_whitespace().collect();
+                if parts.len() >= 3 {
+                    nobb = parts[0].parse().unwrap_or(0);
+                    mit = parts[1].parse().unwrap_or(50);
+                    i_weight = parts[2].parse().unwrap_or(0);
+                }
+            }
+            break;
+        }
+    }
+
+    settings.n_obs = nobb;
+    settings.max_iter = mit;
+    settings.weight_option = i_weight;
+
+    // 2. Control switches: lWatF, lChemF, NMat
+    let mut l_wat = true;
+    let mut l_chem = false;
+    let mut n_mat = 1;
+
+    while let Some(line) = lines.next() {
+        let tr = line.trim();
+        if tr.is_empty() || tr.starts_with('*') {
+            continue;
+        }
+        let upper = tr.to_ascii_uppercase();
+        if upper.contains("LWATF") || upper.contains("LCHEMF") {
+            if let Some(data_line) = lines.next() {
+                let parts: Vec<&str> = data_line.split_whitespace().collect();
+                if parts.len() >= 3 {
+                    l_wat = parts[0].eq_ignore_ascii_case("t") || parts[0] == "1";
+                    l_chem = parts[1].eq_ignore_ascii_case("t") || parts[1] == "1";
+                    n_mat = parts[2].parse().unwrap_or(1);
+                }
+            }
+            break;
+        }
+    }
+
+    settings.l_water_flow = l_wat;
+    settings.l_solute = l_chem;
+
+    // Skip optional Model / Hysteresis records
+    let mut next_line_opt = lines.next();
+    while let Some(ref line) = next_line_opt {
+        let tr = line.trim();
+        if tr.to_ascii_uppercase().contains("MODEL") {
+            let _ = lines.next();
+            next_line_opt = lines.next();
+            break;
+        }
+        if tr.to_ascii_uppercase().contains("THR") || tr.to_ascii_uppercase().contains("BULK") {
+            break;
+        }
+        next_line_opt = lines.next();
+    }
+
+    // Skip optional NS (number of solutes) record
+    let mut current_line = next_line_opt;
+    while let Some(ref line) = current_line {
+        let tr = line.trim();
+        if tr.to_ascii_uppercase().starts_with("NS") {
+            let _ = lines.next();
+            current_line = lines.next();
+            break;
+        }
+        if tr.to_ascii_uppercase().contains("THR") || tr.to_ascii_uppercase().contains("BULK") {
+            break;
+        }
+        current_line = lines.next();
+    }
+
+    // 3. Water flow parameter blocks (for each material)
+    if l_wat {
+        for mat_idx in 0..n_mat {
+            let mut col_names: Vec<String> = Vec::new();
+            while let Some(line) = current_line.take().or_else(|| lines.next()) {
+                let tr = line.trim();
+                if tr.is_empty() || tr.starts_with('*') {
+                    continue;
+                }
+                let upper = tr.to_ascii_uppercase();
+                if upper.contains("THR") && upper.contains("THS") {
+                    col_names = tr.split_whitespace().map(String::from).collect();
+                    break;
+                }
+            }
+
+            if col_names.is_empty() {
+                break;
+            }
+
+            let num_cols = col_names.len();
+            let initial_line = lines.next().unwrap_or_default();
+            let fitted_line = lines.next().unwrap_or_default();
+            let min_line = lines.next().unwrap_or_default();
+            let max_line = lines.next().unwrap_or_default();
+
+            let inits = parse_f64_row(&initial_line);
+            let fits = parse_i32_row(&fitted_line);
+            let mins = parse_f64_row(&min_line);
+            let maxs = parse_f64_row(&max_line);
+
+            for c in 0..num_cols {
+                let raw_name = col_names.get(c).cloned().unwrap_or_else(|| format!("Par{}", c));
+                let name = if n_mat > 1 {
+                    format!("{}({})", raw_name, mat_idx + 1)
+                } else {
+                    raw_name
+                };
+                let init = inits.get(c).copied().unwrap_or(0.0);
+                let ifix_val = fits.get(c).copied().unwrap_or(0);
+                let is_fit = ifix_val != 0;
+                let is_log = ifix_val < 0 || ifix_val == 2;
+                let mut min_v = mins.get(c).copied().unwrap_or(0.0);
+                let mut max_v = maxs.get(c).copied().unwrap_or(0.0);
+
+                let field = match name.trim().to_ascii_uppercase().split('(').next().unwrap_or("") {
+                    "THR" | "QR" | "WCR" => WaterField::Qr,
+                    "THS" | "QS" | "WCS" => WaterField::Qs,
+                    "ALFA" | "ALPHA" => WaterField::Alpha,
+                    "N" => WaterField::N,
+                    "KS" | "CONDS" => WaterField::Ks,
+                    "L" | "TOR" => WaterField::L,
+                    "ALFAW" | "ALPHA_W" => WaterField::AlphaW,
+                    _ => WaterField::Ks,
+                };
+
+                // Hydrus-1D Fortran Standards (INPUT.FOR Subroutine Invers)
+                let (def_min, def_max) = match field {
+                    WaterField::Qr => (0.0, 0.3),
+                    WaterField::Qs => (0.2, 0.9),
+                    WaterField::Alpha | WaterField::AlphaW => (1e-4, 1.0),
+                    WaterField::N => (1.05, 10.0),
+                    WaterField::Ks => (1e-5, 1000.0),
+                    WaterField::L => (-10.0, 10.0),
+                };
+
+                if min_v == 0.0 && field != WaterField::Qr {
+                    min_v = def_min;
+                }
+                if max_v == 0.0 || max_v <= min_v {
+                    max_v = def_max;
+                }
+
+                let kind = ParamKind::Water { mat: mat_idx, field };
+                settings.param_specs.push(ParamSpec {
+                    name,
+                    initial_val: init,
+                    is_fitted: is_fit,
+                    is_log_transformed: is_log,
+                    min_val: min_v,
+                    max_val: max_v,
+                    kind: Some(kind),
+                });
+            }
+            current_line = None;
+        }
+    }
+
+    // 4. Solute transport parameter blocks
+    if l_chem {
+        for mat_idx in 0..n_mat {
+            let mut col_names: Vec<String> = Vec::new();
+            while let Some(line) = current_line.take().or_else(|| lines.next()) {
+                let tr = line.trim();
+                if tr.is_empty() || tr.starts_with('*') {
+                    continue;
+                }
+                let upper = tr.to_ascii_uppercase();
+                if upper.contains("BULK") || upper.contains("DISP") || upper.contains("FRAC") {
+                    col_names = tr.split_whitespace().map(String::from).collect();
+                    break;
+                }
+            }
+
+            if col_names.is_empty() {
+                break;
+            }
+
+            let num_cols = col_names.len();
+            let initial_line = lines.next().unwrap_or_default();
+            let fitted_line = lines.next().unwrap_or_default();
+            let min_line = lines.next().unwrap_or_default();
+            let max_line = lines.next().unwrap_or_default();
+
+            let inits = parse_f64_row(&initial_line);
+            let fits = parse_i32_row(&fitted_line);
+            let mins = parse_f64_row(&min_line);
+            let maxs = parse_f64_row(&max_line);
+
+            for c in 0..num_cols {
+                let raw_name = col_names.get(c).cloned().unwrap_or_else(|| format!("SolPar{}", c));
+                let name = if n_mat > 1 {
+                    format!("{}({})", raw_name, mat_idx + 1)
+                } else {
+                    raw_name
+                };
+                let init = inits.get(c).copied().unwrap_or(0.0);
+                let ifix_val = fits.get(c).copied().unwrap_or(0);
+                let is_fit = ifix_val != 0;
+                let is_log = ifix_val < 0 || ifix_val == 2;
+                let mut min_v = mins.get(c).copied().unwrap_or(0.0);
+                let mut max_v = maxs.get(c).copied().unwrap_or(0.0);
+
+                let upper = name.trim().to_ascii_uppercase();
+                let clean = upper.split('(').next().unwrap_or("").replace(|ch: char| !ch.is_alphanumeric(), "");
+
+                let is_prime = upper.contains('\'') || upper.contains('`') || upper.contains("PRIME");
+
+                let kind = if clean.starts_with("BULK") || clean == "RO" {
+                    ParamKind::SoluteMaterial { mat: mat_idx, field: SolMatField::BulkDensity }
+                } else if clean.starts_with("DISP") {
+                    ParamKind::SoluteMaterial { mat: mat_idx, field: SolMatField::DispL }
+                } else if clean == "FRAC" {
+                    ParamKind::SoluteMaterial { mat: mat_idx, field: SolMatField::Frac }
+                } else if clean.starts_with("THIMOB") || clean.starts_with("MOBILEWC") {
+                    ParamKind::SoluteMaterial { mat: mat_idx, field: SolMatField::ThImmobile }
+                } else if clean == "DIFW" {
+                    ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::DiffW }
+                } else if clean == "DIFG" {
+                    ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::DiffG }
+                } else if clean == "KS" || clean == "KD" {
+                    ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::Ks }
+                } else if clean == "NU" {
+                    ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::Nu }
+                } else if clean == "BETA" {
+                    ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::Beta }
+                } else if clean == "HENRY" {
+                    ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::Henry }
+                } else if clean.starts_with("SNKL") {
+                    if clean.ends_with('0') {
+                        ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::Mu0W }
+                    } else if is_prime {
+                        ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::GamW }
+                    } else {
+                        ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::MuW }
+                    }
+                } else if clean.starts_with("SNKS") {
+                    if clean.ends_with('0') {
+                        ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::Mu0S }
+                    } else if is_prime {
+                        ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::GamS }
+                    } else {
+                        ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::MuS }
+                    }
+                } else if clean.starts_with("SNKG") {
+                    if clean.ends_with('0') {
+                        ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::Mu0G }
+                    } else if is_prime {
+                        ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::GamG }
+                    } else {
+                        ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::MuG }
+                    }
+                } else if clean == "ALFA" || clean == "ALPHA" {
+                    ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::Omega }
+                } else {
+                    ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::Ks }
+                };
+
+                if min_v >= max_v || (min_v == 0.0 && max_v == 0.0) {
+                    min_v = 1e-5;
+                    max_v = 1e5;
+                }
+
+                settings.param_specs.push(ParamSpec {
+                    name,
+                    initial_val: init,
+                    is_fitted: is_fit,
+                    is_log_transformed: is_log,
+                    min_val: min_v,
+                    max_val: max_v,
+                    kind: Some(kind),
+                });
+            }
+            current_line = None;
+        }
+    }
+
+    // 5. Observation points: HO(N), FOS, ITYPE(N), POS, WTS
+    while let Some(line) = lines.next() {
+        let tr = line.trim();
+        if tr.is_empty() || tr.starts_with('*') {
+            continue;
+        }
+        let upper = tr.to_ascii_uppercase();
+        if upper.contains("HO(N)") || upper.contains("ITYPE") || upper.contains("FOS") {
+            break;
+        }
+    }
+
+    let mut obs_id = 1;
+    for line in lines {
+        let tr = line.trim();
+        if tr.is_empty() || tr.starts_with('*') || tr.to_ascii_uppercase().contains("END") {
+            continue;
+        }
+        let parts: Vec<&str> = tr.split_whitespace().collect();
+        if parts.len() >= 5 {
+            let time: f64 = parts[0].replace(['d', 'D'], "e").parse().unwrap_or(0.0);
+            let val: f64 = parts[1].replace(['d', 'D'], "e").parse().unwrap_or(0.0);
+            let q_type: i32 = parts[2].parse().unwrap_or(0);
+            let pos: usize = parts[3].parse().unwrap_or(1);
+            let weight: f64 = parts[4].replace(['d', 'D'], "e").parse().unwrap_or(1.0);
+
+            settings.observations.push(ObservationPoint {
+                id: obs_id,
+                time,
+                value: val,
+                q_type,
+                position: pos,
+                weight,
+            });
+            obs_id += 1;
+        }
+    }
+
+    Ok(settings)
+}
+
+fn parse_f64_row(line: &str) -> Vec<f64> {
+    line.split_whitespace()
+        .filter_map(|s| s.replace(['d', 'D'], "e").parse::<f64>().ok())
+        .collect()
+}
+
+fn parse_i32_row(line: &str) -> Vec<i32> {
+    line.split_whitespace()
+        .filter_map(|s| s.parse::<i32>().ok())
+        .collect()
+}
+
+// Legacy Output File Readers (Nod_Inf.out)
 #[derive(Clone, Debug, Default)]
 pub struct LegacyProfileNode {
     pub node: usize,
@@ -1380,4 +1782,152 @@ pub fn read_nod_inf(path: &Path) -> R<Vec<LegacyProfileTimeBlock>> {
     }
 
     Ok(blocks)
+}
+#[cfg(test)]
+mod meteo_reader_tests {
+    use super::*;
+
+    fn write_tmp(name: &str, text: &str) -> std::path::PathBuf {
+        let p = std::env::temp_dir().join(format!("hydrus_meteo_{}_{}", std::process::id(), name));
+        std::fs::write(&p, text).unwrap();
+        p
+    }
+
+    /// Meteo.in with all conditional blocks present (iRadiation = 1, iSunSh = 3, iCrop = 1,
+    /// iInterc = 1) and the two flags of file version 4.
+    const FULL: &str = "Pcp_File_Version=4
+*** BLOCK K: METEOROLOGICAL INFORMATION
+   MaxAL   iRadiation  lHargr
+     3        1          f
+ lEnBal lMetDaily
+   f        t
+ Latitude Altitude
+   40.0    110.0
+ ShortWaveRadA ShortWaveRadB
+   0.25  0.50
+ LongWaveRadA LongWaveRadB
+   0.90  0.10
+ LongWaveRadA1 LongWaveRadB1
+   0.34 -0.139
+ WindHeight TempHeight
+   200.0   190.0
+ iCrop iSunSh iRelHum
+   1     3     0
+ CloudF_Ac CloudF_Bc
+   1.35  -0.35
+ iLAI rExtinct
+   1   0.463
+ iInterc
+   1
+ CropHeight Albedo LAI xRoot
+   12.0  0.23  2.0  30.0
+ aInterc
+   0.25
+*** Daily values
+   Time  Rad  TMax TMin RHmean Wind Sunhours
+   [d]  [MJ/m2/d] [C] [C] [%] [km/d] [h]
+   1.0  14.0  25.0  12.0  60.0  180.0  0.0
+   2.0  15.0  26.0  11.0  55.0  170.0  0.0
+   3.0  16.0  27.0  13.0  50.0  160.0  0.0
+end
+";
+
+    #[test]
+    fn meteo_in_with_all_conditional_blocks() {
+        let p = write_tmp("full.in", FULL);
+        let mut prj = Project::default();
+        read_meteo(&p, &mut prj).expect("Meteo.in");
+        let mp = prj.atmosphere.meteo.unwrap();
+        assert_eq!(mp.records.len(), 3);
+        assert!(!mp.l_en_bal && mp.l_daily);
+        assert_eq!((mp.i_radiation, mp.i_sun_sh, mp.i_crop, mp.i_lai, mp.i_interc), (1, 3, 1, 1, 1));
+        assert!((mp.cloud_fact_ac - 1.35).abs() < 1e-12 && (mp.cloud_fact_bc + 0.35).abs() < 1e-12);
+        assert!((mp.crop_height - 12.0).abs() < 1e-9, "crop height in cm: {}", mp.crop_height);
+        assert!((mp.lai - 2.0).abs() < 1e-12 && (mp.x_root - 30.0).abs() < 1e-12);
+        assert!((mp.a_interc - 0.25).abs() < 1e-12 && (mp.r_extinct - 0.463).abs() < 1e-12);
+        assert!((mp.records[2].rad - 16.0).abs() < 1e-12 && (mp.records[1].t_max - 26.0).abs() < 1e-12);
+    }
+
+    /// iRadiation = 2 (net radiation): no latitude / radiation-coefficient blocks; iCrop = 0:
+    /// only the albedo follows.
+    #[test]
+    fn meteo_in_net_radiation_without_crop() {
+        let txt = "Pcp_File_Version=4
+*** BLOCK K
+   MaxAL iRadiation lHargr
+     2      2         f
+ lEnBal lMetDaily
+   t       f
+ WindHeight TempHeight
+   200.0   190.0
+ iCrop iSunSh iRelHum
+   0     0     0
+ Albedo
+   0.23
+*** Daily values
+   Time Rad TMax TMin RHmean Wind Sunhours
+   [d]
+   1.0  8.0  25.0  12.0  60.0  180.0  0.0
+   2.0  9.0  26.0  11.0  55.0  170.0  0.0
+end
+";
+        let p = write_tmp("net.in", txt);
+        let mut prj = Project::default();
+        read_meteo(&p, &mut prj).expect("Meteo.in");
+        let mp = prj.atmosphere.meteo.unwrap();
+        assert_eq!(mp.records.len(), 2);
+        assert!(mp.l_en_bal && !mp.l_daily);
+        assert_eq!((mp.i_radiation, mp.i_crop), (2, 0));
+        assert!((mp.albedo - 0.23).abs() < 1e-12);
+        assert!((mp.wind_height - 200.0).abs() < 1e-12 && (mp.temp_height - 190.0).abs() < 1e-12);
+    }
+}
+
+#[cfg(test)]
+mod atmosphere_reader_tests {
+    use super::*;
+
+    const TEST9: &str = "*** BLOCK I: ATMOSPHERIC INFORMATION  **********************************
+   MaxAL                    (MaxAL = number of atmospheric data-records)
+      2
+ hCritS                 (max. allowed pressure head at the soil surface)
+      0
+       tAtm        Prec       rSoil       rRoot      hCritA          rB          hB          ht        tTop        tBot        Ampl        cTop        cBot
+       5400           0           0           0           0           0           0           1           0           0           0           1           0
+       7200           0           0           0           0           0           0           1           0           0           0           1           0
+end*** END OF INPUT FILE 'ATMOSPH.IN' **********************************
+";
+
+    #[test]
+    fn solute_without_heat_still_has_the_three_temperature_columns() {
+        // Test9 of HYDRUS-1D: lChem = t, lTemp = f. cTop is the 12th column, not the 9th.
+        let p = std::env::temp_dir().join(format!("hydrus_atm_{}_t9", std::process::id()));
+        std::fs::write(&p, TEST9).unwrap();
+        let mut prj = Project::default();
+        read_atmosphere(&p, &mut prj, false, true, 1, 1, false).unwrap();
+        let r = &prj.atmosphere.records;
+        assert_eq!(r.len(), 2);
+        assert_eq!(r[0].t, 5400.0);
+        assert_eq!(r[0].h_top, 1.0);
+        assert_eq!(r[0].c_top, vec![1.0], "cTop");
+        assert_eq!(r[0].c_bot, vec![0.0], "cBot");
+    }
+
+    #[test]
+    fn neither_heat_nor_solute_reads_only_eight_columns() {
+        let text = "*** BLOCK I
+   MaxAL
+      1
+ hCritS
+      0
+ tAtm Prec rSoil rRoot hCritA rB hB ht
+ 10 1 2 3 4 5 6 7
+end
+";
+        let p = std::env::temp_dir().join(format!("hydrus_atm_{}_plain", std::process::id()));
+        std::fs::write(&p, text).unwrap();
+        let mut prj = Project::default();
+        read_atmosphere(&p, &mut prj, false, false, 0, 1, false).unwrap();
+        assert_eq!(prj.atmosphere.records[0].h_top, 7.0);
+    }
 }

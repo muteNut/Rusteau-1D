@@ -130,6 +130,11 @@ impl Simulation {
             }
         }
 
+        // if(lOmegaW.and.TPot.gt.0.) OmegaW=vRoot/TPot
+        if root.l_omega_w && t_pot > 0.0 {
+            self.omega_w = self.v_root / t_pot;
+        }
+
         if a_root > 0.001 {
             self.h_root /= a_root;
             self.set_c_root(&c_root_sum, a_root);
@@ -162,7 +167,7 @@ impl Simulation {
                 }
             }
             RootGrowthMode::Logistic { t_min, t_med, t_harv, x_min, x_med, x_max, period, .. } => {
-                let (t_min, t_med, t_harv, mut x_min, x_med, x_max, period) = (*t_min, *t_med, *t_harv, *x_min, *x_med, *x_max, *period);
+                let (t_min, t_med, t_harv, x_min_raw, x_med, x_max, period) = (*t_min, *t_med, *t_harv, *x_min, *x_med, *x_max, *period);
                 let t_root = if period > 0.0 { self.t % period } else { self.t };
                 if t_root < t_min || t_root > t_harv {
                     for b in self.beta.iter_mut() {
@@ -170,14 +175,17 @@ impl Simulation {
                     }
                     return;
                 }
-                if x_min <= 0.001 {
-                    x_min = 0.001;
-                }
+                // RGR is computed once (per call, but always from the same unclamped
+                // xRMin) exactly as Fortran's RootIn does a single time at start-up —
+                // SetRG's `if(xRMin.le.0.001) xRMin=0.001` clamp in the real Fortran
+                // only ever affects the xR formula below, never the RGR that was
+                // already baked in from RootIn's original value.
                 let rtm = t_med - t_min;
-                let rgr = -(1.0 / rtm) * ((0.0001f64).max(x_min * (x_max - x_med)) / (x_med * (x_max - x_min))).ln();
+                let rgr = -(1.0 / rtm) * ((0.0001f64).max(x_min_raw * (x_max - x_med)) / (x_med * (x_max - x_min_raw))).ln();
                 self.rg = rgr;
+                let x_min_floor = if x_min_raw <= 0.001 { 0.001 } else { x_min_raw };
                 let tt = t_root - t_min;
-                x_r = (x_max * x_min) / (x_min + (x_max - x_min) * (-rgr * tt).exp());
+                x_r = (x_max * x_min_floor) / (x_min_floor + (x_max - x_min_floor) * (-rgr * tt).exp());
                 self.x_root = x_r;
             }
         }

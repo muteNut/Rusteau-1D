@@ -1,4 +1,4 @@
-//! Heat transport (port of TEMPER.FOR, without vapor flow / energy balance).
+//! Heat transport (port of TEMPER.FOR incl. vapor-flow terms from TempAdj and the energy-balance dt limit).
 
 use crate::error::HydrusError;
 use crate::sim::Simulation;
@@ -30,7 +30,11 @@ pub fn thomas(b: &[f64], d: &mut [f64], e: &[f64], f: &mut [f64]) {
 
 impl Simulation {
     pub fn temp(&self, i: usize) -> f64 {
-        self.heat.as_ref().map(|h| h.temp_n[i]).unwrap_or(0.0)
+        match self.heat.as_ref() {
+            Some(h) => h.temp_n[i],
+            // without heat transport HYDRUS keeps the temperatures of the profile (Temp column of Profile.dat)
+            None => self.prj.profile.nodes.get(self.n - 1 - i).map(|nd| nd.temp).unwrap_or(20.0),
+        }
     }
 
     pub fn heat_init(&mut self) -> Result<(), HydrusError> {
@@ -39,7 +43,8 @@ impl Simulation {
         self.heat = Some(HeatState {
             temp_o: temp.clone(),
             temp_n: temp,
-            k_top: ht.k_top,
+            // HYDRUS.FOR: `if(lEnBal) kTopT=-1`
+            k_top: if self.l_en_bal { -1 } else { ht.k_top },
             k_bot: ht.k_bot,
             t_top: ht.t_top,
             t_bot: ht.t_bot,
@@ -85,19 +90,32 @@ impl Simulation {
         let cw = ht.materials[0].cw;
         let pi = std::f64::consts::PI;
         let (t, sink) = (self.t, self.sink.clone());
+        let l_en_bal = self.prj.atmosphere.meteo.as_ref().map(|m| m.l_en_bal).unwrap_or(false);
         let hs = self.heat.as_mut().unwrap();
         let mut t_top_a = hs.t_top;
         if ht.period > 0.0 {
             t_top_a = hs.t_top + hs.ampl * (2.0 * pi * t / ht.period - 7.0 * pi / 12.0).sin();
         }
-        if hs.k_top < 0 {
-            hs.heat_fl = cw * t_top_a * (self.v_new[n - 1] + self.v_old[n - 1]) / 2.0;
-            // Dampffluss-Beitrag zur oberen Wärmestrom-Randbedingung
+        // TEMPER.FOR: `if(kTopT.lt.0.and..not.lEnBal)`; with energy balance HeatFl is
+        // supplied by Evapor/UpdateEnergy in the main loop.
+        if hs.k_top < 0 && !l_en_bal {
+            // DEVIATION FROM THE 2009 SOURCE, confirmed by HYDRUS 4.17: TEMPER.FOR uses `HeatFl=Cw*tTopA*(vNew(N)+vOld(N))/2`
+            // with tTopA at the new time only; 4.17 weights the old and the new flux with the surface temperature of its own
+            // time level, HeatFl = Cw*(tTopA(t-dt)*vOld(N) + tTopA(t)*vNew(N))/2 (5SEASON, daily temperature wave with
+            // dt up to 0.5 d: temperatures agree to 0.001 C with this form, they were 0.1-0.9 C low with the source form).
+            // The same weighting is used for the advective part of the vapor flux.
+            let t_top_old = if ht.period > 0.0 {
+                hs.t_top + hs.ampl * (2.0 * pi * (t - self.dt) / ht.period - 7.0 * pi / 12.0).sin()
+            } else {
+                t_top_a
+            };
+            hs.heat_fl = cw * (t_top_old * self.v_old[n - 1] + t_top_a * self.v_new[n - 1]) / 2.0;
+            // vapor flux contribution to the top heat flux boundary condition
             if self.l_vapor {
                 let cv = 1.8e6 / self.x_conv / self.t_conv.powi(2);
                 let x_lat = crate::vapor::latent_heat_volumetric(hs.temp_n[n - 1]) / self.x_conv / self.t_conv.powi(2);
                 let v_v_mean = (self.v_v_new[n - 1] + self.v_v_old[n - 1]) / 2.0;
-                hs.heat_fl += cv * t_top_a * v_v_mean + x_lat * v_v_mean;
+                hs.heat_fl += cv * (t_top_old * self.v_v_old[n - 1] + t_top_a * self.v_v_new[n - 1]) / 2.0 + x_lat * v_v_mean;
             }
         }
         let heat_fl = hs.heat_fl;
@@ -110,8 +128,12 @@ impl Simulation {
         let mut f = vec![0.0; n];
 
         // 1. Basis-Matrixaufbau für Level 1 (alt) und Level 2 (neu)
+        let mut cap_l2: Vec<f64> = Vec::new();
         for level in 1..=2 {
             let (cap, cond) = if level == 1 { self.temp_cap(&self.th_old, &self.v_old) } else { self.temp_cap(&self.th_new, &self.v_new) };
+            if level == 2 {
+                cap_l2 = cap.clone();
+            }
             let (v_new, v_old) = (&self.v_new, &self.v_old);
             let dx = x[1] - x[0];
             if k_bot > 0 {
@@ -171,8 +193,10 @@ impl Simulation {
                         + temp_o[m]
                             * (dx / 2.0 / dt * cap[m] - (cond[m - 1] + cond[m]) / 4.0 / dx + cw * (2.0 * v_old[m] + v_old[m - 1]) / 12.0
                                 - dx / 24.0 * cw * (sink[m - 1] + 3.0 * sink[m]));
+                    // The Fortran source also subtracts `min(0, HeatFl)` here when the energy balance is off. That doubles the heat
+                    // carried in by infiltrating water (surface temperature 2 x TTop in 4HEAT) and contradicts the HYDRUS reference
+                    // output, so it is not applied.
                     f[m] -= heat_fl;
-                    f[m] -= heat_fl.min(0.0);
                 }
             }
         }
@@ -188,7 +212,12 @@ impl Simulation {
 					} else if i == n - 1 {
 						(vv[n - 1] - vv[n - 2]) / (x[n - 1] - x[n - 2])
 					} else {
-						(vv[i + 1] - vv[i - 1]) / (x[i + 1] - x[i - 1]) * 2.0
+						// DEVIATION FROM THE 2009 SOURCE, confirmed by HYDRUS 4.17: TempAdj multiplies the central difference
+						// (vV(i+1)-vV(i-1))/(x(i+1)-x(i-1)) by 2, which doubles the latent-heat term of the interior nodes.  4.17
+						// uses the plain central difference (TEST11, vapor flow with heat transport: the observation-node
+						// temperatures after the first steps agree to 0.001 C, e.g. 17.285 / 19.349 / 20.187 / 21.365 C; 81 -> 8
+						// reported differences).
+						(vv[i + 1] - vv[i - 1]) / (x[i + 1] - x[i - 1])
 					};
                     let temp_eval = if i_level == 1 { self.heat.as_ref().unwrap().temp_o[i] } else { self.heat.as_ref().unwrap().temp_n[i] };
                     let lat = crate::vapor::latent_heat_volumetric(temp_eval) / self.x_conv / self.t_conv.powi(2);
@@ -250,7 +279,7 @@ impl Simulation {
         }
         // ====================================================================
 
-        // 3. Tridiagonales Gleichungssystem lösen
+        // 3. solve the tridiagonal system
         let mut bb = b.clone();
         bb[0] = 0.0;
         let mut ee = e.clone();
@@ -260,8 +289,15 @@ impl Simulation {
         hs.temp_n.copy_from_slice(&f);
 		// Update dt_max_t matching TEMPER.FOR
         self.dt_max_t = 1e30;
-        let l_en_bal = self.prj.atmosphere.meteo.as_ref().map(|m| m.l_en_bal).unwrap_or(false);
         if l_en_bal {
+            // TEMPER.FOR: on the first coupling pass (iTemp = 0) estimate dtMaxT from the
+            // surface heat capacity and the advective heat flux. (In the main loop this
+            // value is overwritten by the second pass, exactly as in the Fortran code.)
+            if self.i_temp == 0 {
+                let cv = 1.8e6 / self.x_conv / self.t_conv.powi(2);
+                let denom = hs.temp_n[n - 1].max(0.1) * (cw * self.v_new[n - 1] + cv * self.v_v_new[n - 1]);
+                self.dt_max_t = (cap_l2[n - 1] * (self.x[n - 1] - self.x[n - 2]) / denom).abs();
+            }
             let d_temp_max = 2.0;
             let d_temp = (hs.temp_n[n - 1] - hs.temp_o[n - 1]).abs();
             self.dt_max_t = (d_temp_max / d_temp.max(0.1) * dt).min(self.dt_max_t);

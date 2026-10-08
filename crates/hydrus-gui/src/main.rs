@@ -28,6 +28,7 @@ pub enum Page {
     SoluteGeneral,
     SoluteMaterials,
     SoluteReactions,
+    SoluteAdvanced,
     SoluteBc,
     Heat,
     Profile,
@@ -39,6 +40,7 @@ pub enum Page {
     SoilProps,
     RunTime,
     MassBalance,
+	Inverse,
 }
 
 struct RunHandle {
@@ -47,6 +49,11 @@ struct RunHandle {
     cancel: Arc<AtomicBool>,
     t_init: f64,
     t_max: f64,
+    started: Instant,
+}
+
+struct OptHandle {
+    rx: Receiver<Result<f64, String>>,
     started: Instant,
 }
 
@@ -182,6 +189,7 @@ pub struct App {
     pub page: Page,
     pub results: Option<Results>,
     run: Option<RunHandle>,
+	opt_run: Option<OptHandle>,
     pub status: String,
     pub dialog: Option<FileDialog>,
     pub problems: Vec<String>,
@@ -232,6 +240,7 @@ impl App {
             page: Page::Main,
             results: None,
             run: None,
+			opt_run: None,
             status: "Ready. Load an example, import a HYDRUS-1D project folder, or edit the current project.".into(),
             dialog: None,
             problems: vec![],
@@ -489,6 +498,17 @@ impl App {
                         ));
                         ui.close_menu();
                     }
+					if ui.button("Import optimization file (Fit.in)…").clicked() {
+                        self.dialog = Some(FileDialog::new(
+                            Purpose::ImportLegacy,
+                            Mode::OpenFile,
+                            "Select optimization input file (Fit.in)",
+                            self.last_dir.clone(),
+                            "Fit.in",
+                            &["in"],
+                        ));
+                        ui.close_menu();
+                    }
                     ui.separator();
                     if ui
                         .add_enabled(self.path.is_some(), egui::Button::new("Save   (Ctrl+S)"))
@@ -663,28 +683,40 @@ impl App {
                             Err(e) => self.status = e.to_string(),
                         },
                         Purpose::ImportLegacy => {
-                            match hydrus_io::read_legacy_project(&path) {
-                                Ok(mut p) => {
-                                    if p.title.trim().is_empty() {
-                                        p.title = path
-                                            .file_name()
-                                            .map(|s| s.to_string_lossy().to_string())
-                                            .unwrap_or_default();
+							if path.file_name().map_or(false, |n| n.to_string_lossy().eq_ignore_ascii_case("Fit.in")) {
+								match hydrus_io::read_fit_in(&path) {
+									Ok(settings) => {
+										self.status = format!("Loaded calibration file with {} observations from {}", settings.observations.len(), path.display());
+										self.dirty = true;
+									}
+									Err(e) => {
+										self.status = format!("Failed to parse Fit.in: {}", e);
+									}
+								}
+							} else {
+                                match hydrus_io::read_legacy_project(&path) {
+                                    Ok(mut p) => {
+                                        if p.title.trim().is_empty() {
+                                            p.title = path
+                                                .file_name()
+                                                .map(|s| s.to_string_lossy().to_string())
+                                                .unwrap_or_default();
+                                        }
+                                        self.set_project(p, None);
+                                        self.dirty = true;
+                                        self.status = format!(
+                                            "Imported HYDRUS-1D project from {}",
+                                            path.display()
+                                        );
                                     }
-                                    self.set_project(p, None);
-                                    self.dirty = true;
-                                    self.status = format!(
-                                        "Imported HYDRUS-1D project from {}",
-                                        path.display()
-                                    );
-                                }
-                                Err(e) => {
-                                    self.status = format!("Import failed: {}", e);
-                                    self.problems = vec![format!(
-                                        "Failed to import from {}: {}",
-                                        path.display(),
-                                        e
-                                    )];
+                                    Err(e) => {
+                                        self.status = format!("Import failed: {}", e);
+                                        self.problems = vec![format!(
+                                            "Failed to import from {}: {}",
+                                            path.display(),
+                                            e
+                                        )];
+                                    }
                                 }
                             }
                         }
@@ -760,6 +792,7 @@ impl App {
                         items.push((Page::SoluteGeneral, "Solute: general"));
                         items.push((Page::SoluteMaterials, "Solute: transport parameters"));
                         items.push((Page::SoluteReactions, "Solute: reaction parameters"));
+                        items.push((Page::SoluteAdvanced, "Solute: T / θ dependence, colloids"));
                         items.push((Page::SoluteBc, "Solute: boundary conditions"));
                     }
                     if pr.heat {
@@ -767,6 +800,7 @@ impl App {
                     }
                     items.push((Page::Profile, "Soil profile editor"));
                     items.push((Page::NodeTable, "Nodal table"));
+					items.push((Page::Inverse, "Inverse modeling (Fit.in)"));
                     items.push((Page::Summary, "Check & summary"));
 
                     for (p, label) in items {
@@ -811,6 +845,44 @@ impl App {
             });
         });
     }
+	fn start_optimization(&mut self) {
+        let prj = self.prj.clone();
+        let (tx, rx) = channel();
+        std::thread::spawn(move || {
+            let mut opt_state = hydrus_core::inverse::OptimizationState::default();
+            let res = match opt_state.optimize(&mut prj.clone()) {
+                Ok(_) => Ok(opt_state.current_ssq),
+                Err(e) => Err(e.to_string()),
+            };
+            let _ = tx.send(res);
+        });
+        self.opt_run = Some(OptHandle {
+            rx,
+            started: Instant::now(),
+        });
+        self.status = "Parameter optimization running…".into();
+    }
+
+    fn poll_optimization(&mut self, ctx: &egui::Context) {
+        let mut finished = None;
+        if let Some(r) = &self.opt_run {
+            ctx.request_repaint_after(std::time::Duration::from_millis(80));
+            if let Ok(res) = r.rx.try_recv() {
+                finished = Some((res, r.started.elapsed().as_secs_f64()));
+            }
+        }
+        if let Some((res, secs)) = finished {
+            self.opt_run = None;
+            match res {
+                Ok(ssq) => {
+                    self.status = format!("Optimization finished in {:.2} s – Final SSQ: {:.4}", secs, ssq);
+                }
+                Err(e) => {
+                    self.status = format!("Optimization error: {}", e);
+                }
+            }
+        }
+    }
 }
 
 impl eframe::App for App {
@@ -835,6 +907,7 @@ impl eframe::App for App {
 
         self.handle_shortcuts(ctx);
         self.poll_run(ctx);
+		self.poll_optimization(ctx);
         self.menu(ctx);
         self.status_bar(ctx);
         self.nav(ctx);
@@ -866,10 +939,12 @@ impl App {
             Page::SoluteGeneral => self.page_sol_general(ui, &mut ch),
             Page::SoluteMaterials => self.page_sol_materials(ui, &mut ch),
             Page::SoluteReactions => self.page_sol_reactions(ui, &mut ch),
+            Page::SoluteAdvanced => self.page_sol_advanced(ui, &mut ch),
             Page::SoluteBc => self.page_sol_bc(ui, &mut ch),
             Page::Heat => self.page_heat(ui, &mut ch),
             Page::Profile => self.page_profile(ui, &mut ch),
             Page::NodeTable => self.page_nodes(ui, &mut ch),
+			Page::Inverse => self.page_inverse(ui),
             Page::Summary => self.page_summary(ui),
             Page::Obs => self.page_obs(ui),
             Page::ProfileInfo => self.page_profile_info(ui),
