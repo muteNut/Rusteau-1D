@@ -1,0 +1,13 @@
+[package]
+name = "rusteau-gui"
+version = "0.1.0"
+edition = "2021"
+license = "GPL-3.0-or-later"
+
+[dependencies]
+rusteau-core = { path = "../rusteau-core" }
+rusteau-io = { path = "../rusteau-io" }
+eframe = { version = "0.31", default-features = false, features = ["glow", "default_fonts", "x11"] }
+egui = "0.31"
+egui_plot = "0.31"
+egui_extras = "0.31"

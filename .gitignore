@@ -1,4 +1,4 @@
-target/
-*.results/
+/target
+**/reference_comparison_report.txt
 rust_out/
-desktop.ini
+*.results/
