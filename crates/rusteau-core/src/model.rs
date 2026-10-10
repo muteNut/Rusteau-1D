@@ -197,6 +197,11 @@ pub enum Hysteresis {
     Lenhard,
 }
 impl Hysteresis {
+    /// Kool & Parker scanning curves (iHyst 1 or 2): the models that use the initial hysteresis state (`Hysteresis.in`).
+    pub fn is_kool_parker(self) -> bool {
+        matches!(self, Hysteresis::Retention | Hysteresis::RetentionAndConductivity)
+    }
+
     pub fn code(self) -> i32 {
         match self {
             Hysteresis::None => 0,
@@ -935,17 +940,117 @@ pub struct Profile {
     /// Fixed points of the discretization (only used to generate nodes; the surface and the bottom are always nodes)
     #[serde(default)]
     pub fixed_points: Vec<FixedPoint>,
+    /// Initial state of the hysteresis model of Kool & Parker (HYDRUS `Hysteresis.in`), one entry per node in the
+    /// order of `nodes`: typically the end of a previous run. Used with hysteresis in the retention curve (and the
+    /// conductivity); the initial condition must be given in pressure heads.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hysteresis: Option<Vec<HysteresisNode>>,
 }
 impl Default for Profile {
     fn default() -> Self {
         let n = 101;
         let nodes = (0..n).map(|i| ProfileNode::new(i as f64, -100.0, 1)).collect();
-        Profile { nodes, observation_nodes: vec![], fixed_points: vec![FixedPoint::new(0.0), FixedPoint::new(100.0)] }
+        Profile { nodes, observation_nodes: vec![], fixed_points: vec![FixedPoint::new(0.0), FixedPoint::new(100.0)], hysteresis: None }
     }
+}
+
+/// Hysteresis state of a node (a line of HYDRUS `Hysteresis.in`).
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+pub struct HysteresisNode {
+    /// Water content
+    pub theta: f64,
+    /// Direction of the last change of the water content: -1 drying, +1 wetting (Kappa). At the start the scanning
+    /// curve of the opposite direction begins at (h, θ) of the node, as after a reversal.
+    pub kappa: i32,
+    /// Hydraulic conductivity of the node (Rusteau; not in `Hysteresis.in`): the conductivity of the reversal point
+    /// for the scanning curves of K (hysteresis in the conductivity). Without it the main curve of the given
+    /// direction is used.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub k: Option<f64>,
 }
 impl Profile {
     pub fn depth(&self) -> f64 {
         self.nodes.last().map(|n| n.depth).unwrap_or(0.0) - self.nodes.first().map(|n| n.depth).unwrap_or(0.0)
+    }
+}
+
+/// Options of the HYDRUS code that the HYDRUS-1D interface does not offer (INPUT.FOR, "New Options - Not supported by
+/// GUI": lExtrap, iEnhanc, TauW, lCentrif / Radius, lDensity). The computational module opens a file `Options.in` for
+/// them but never reads it, so in HYDRUS-1D they keep their defaults; Rusteau stores them in the project.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct AdvancedOptions {
+    /// lExtrap: the pressure heads of a new time step start from a linear extrapolation of the two previous steps
+    /// (unsaturated nodes); off: from the heads of the previous step
+    pub extrapolate_heads: bool,
+    /// iEnhanc: enhancement factor of the thermal vapor flux (Cass et al., 1984); off: factor 1
+    pub vapor_enhancement: bool,
+    /// TauW: time constant of non-equilibrium water flow (Ross & Smettem, 2000) [T]: the water content approaches the
+    /// equilibrium water content of the pressure head at the rate 1 − exp(−dt/τw) per time step; 0: equilibrium
+    pub tau_w: f64,
+    /// lCentrif: flow in a centrifuge
+    pub centrifuge: Option<Centrifuge>,
+    /// lDensity: density-dependent flow (density and viscosity of the solution functions of solute 1)
+    pub density: Option<DensityDependence>,
+}
+
+impl Default for AdvancedOptions {
+    fn default() -> Self {
+        AdvancedOptions { extrapolate_heads: true, vapor_enhancement: true, tau_w: 0.0, centrifuge: None, density: None }
+    }
+}
+
+impl AdvancedOptions {
+    pub fn is_default(&self) -> bool {
+        *self == Self::default()
+    }
+}
+
+/// Flow in a centrifuge (lCentrif of HYDRUS): the gravity term of the flux becomes ω² (R + d) / g with the angular
+/// velocity ω, the distance R of the soil surface from the axis of rotation and the depth d below the surface.
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Centrifuge {
+    /// Rotation speed [rpm]. With a time-variable bottom boundary condition the hBot column of the time-variable
+    /// boundary conditions gives the speed instead (in rpm) and the bottom pressure head is 0 (SetBC of TIME.FOR).
+    pub rpm: f64,
+    /// Distance of the soil surface from the axis of rotation [L]
+    pub radius: f64,
+}
+
+impl Default for Centrifuge {
+    fn default() -> Self {
+        Centrifuge { rpm: 1000.0, radius: 10.0 }
+    }
+}
+
+/// Density-dependent flow (lDensity of HYDRUS): density and dynamic viscosity of the solution relative to pure water
+/// as cubic polynomials of the liquid concentration c of solute 1 (fRo of WATFLOW.FOR). The conductivity scales with
+/// ρ/μ, the gravity term and the storage with ρ.
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+pub struct DensityDependence {
+    /// ρ(c)/ρ(0) = a0 + a1 c + a2 c² + a3 c³ (HYDRUS: 1 + 0.75 c)
+    pub density: [f64; 4],
+    /// μ(c)/μ(0) = b0 + b1 c + b2 c² + b3 c³ (HYDRUS: 1)
+    pub viscosity: [f64; 4],
+}
+
+impl Default for DensityDependence {
+    fn default() -> Self {
+        DensityDependence { density: [1.0, 0.75, 0.0, 0.0], viscosity: [1.0, 0.0, 0.0, 0.0] }
+    }
+}
+
+impl DensityDependence {
+    fn poly(a: &[f64; 4], c: f64) -> f64 {
+        a[0] + c * (a[1] + c * (a[2] + c * a[3]))
+    }
+    /// ρ(c)/ρ(0) (fRo(1, c))
+    pub fn rho(&self, c: f64) -> f64 {
+        Self::poly(&self.density, c)
+    }
+    /// μ(c)/μ(0) (fRo(2, c))
+    pub fn mu(&self, c: f64) -> f64 {
+        Self::poly(&self.viscosity, c)
     }
 }
 
@@ -966,6 +1071,9 @@ pub struct Project {
     /// Inverse solution settings (Fit.in); used when `processes.inverse` is set
     #[serde(default)]
     pub inverse: Option<crate::inverse::InverseSettings>,
+    /// Options the HYDRUS-1D interface does not offer (`Options.in`)
+    #[serde(default, skip_serializing_if = "AdvancedOptions::is_default")]
+    pub options: AdvancedOptions,
 }
 
 impl Default for Project {
@@ -983,6 +1091,7 @@ impl Default for Project {
             solute: SoluteSettings::default(),
             profile: Profile::default(),
             inverse: None,
+            options: AdvancedOptions::default(),
         }
     }
 }
@@ -1043,6 +1152,34 @@ impl Project {
             if nd.mat == 0 || nd.mat > self.water.materials.len() {
                 e.push(format!("Node {} refers to undefined material {}.", i + 1, nd.mat));
                 break;
+            }
+        }
+        let o = &self.options;
+        let dual_perm = self.water.model == SoilModel::DualPermeability;
+        if !(o.tau_w >= 0.0 && o.tau_w.is_finite()) {
+            e.push("The time constant τw of the non-equilibrium water flow must be ≥ 0.".into());
+        }
+        if let Some(c) = &o.centrifuge {
+            if !(c.rpm > 0.0 && c.radius >= 0.0) {
+                e.push("Centrifuge: the rotation speed must be > 0 and the radius ≥ 0.".into());
+            }
+        }
+        if let Some(d) = &o.density {
+            if d.rho(0.0) <= 0.0 || d.mu(0.0) <= 0.0 {
+                e.push("Density-dependent flow: the density and viscosity ratios at c = 0 must be > 0.".into());
+            }
+        }
+        if dual_perm && (o.tau_w > 0.0 || o.centrifuge.is_some() || o.density.is_some()) {
+            e.push("Non-equilibrium water flow, centrifuge and density-dependent flow are not available with the dual-permeability model.".into());
+        }
+        if let Some(st) = &self.profile.hysteresis {
+            if self.water.hysteresis.is_kool_parker() {
+                if st.len() != n {
+                    e.push(format!("The initial hysteresis state (Hysteresis.in) has {} nodes, the profile {}.", st.len(), n));
+                }
+                if self.water.init_in_water_content {
+                    e.push("The initial hysteresis state (Hysteresis.in) needs the initial condition in pressure heads.".into());
+                }
             }
         }
         for w in self.profile.nodes.windows(2) {

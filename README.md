@@ -24,6 +24,8 @@ pedotransfer functions (Rosetta 3 and the Rosetta 1 models of HYDRUS' Rosetta Li
 - [Unit conversion](#unit-conversion)
 - [Parameter estimation](#parameter-estimation)
 - [HYDRUS-1D project files](#hydrus-1d-project-files)
+- [Restart with hysteresis (Hysteresis.in)](#restart-with-hysteresis-hysteresisin)
+- [Further options of the HYDRUS code (Options.in)](#further-options-of-the-hydrus-code-optionsin)
 - [Pedotransfer functions (Rosetta)](#pedotransfer-functions-rosetta)
 - [Testing](#testing)
 - [Differences to HYDRUS-1D](#differences-to-hydrus-1d)
@@ -53,6 +55,7 @@ of the test set):
 | 1DRAINAG, TEST1, 1INFILTR with TolTh = 1e-5, TolH = 0.01 | precision / convergence check | see known differences |
 | 2NOHYSTR_DUR, 2NOHYSTR_AE, 1SCALING_BC | Durner dual-porosity, van Genuchten with −2 cm air entry, Brooks–Corey | identical |
 | 2NOHYSTR_LN, 2HYSTER_RET | Kosugi log-normal; hysteresis in the retention curve only | identical except the first steps after the end of ponding (within the iteration tolerance) |
+| ROOTUPTK_ACT, ROOTUPTK_ACT2 | active solute uptake: one solute; the second of two solutes | identical except the single-precision differences of ROOTUPTK (cRoot at two times, one node of the concentration front) |
 
 End-of-run water and solute totals agree with HYDRUS 4.17 within 0.07 % in all examples.
 
@@ -120,7 +123,7 @@ folder), edits all inputs, runs the simulation and plots the results. *File → 
 - **Workflow:** the input pages are grouped in the order of a project: 1 Project (processes & units, time & output),
   2 Soil (hydraulic model, materials & parameters, soil profile), 3 Boundary conditions (water flow, time-variable
   data, meteorological data), 4 Uptake & transport (root water uptake, heat, solute pages; shown when the process is
-  switched on), 5 Run (iteration criteria, check & run), and Parameter estimation. A bar at the bottom leads to the
+  switched on), 5 Run (iteration criteria, further options, check & run), and Parameter estimation. A bar at the bottom leads to the
   previous and next step; the last step runs the calculation and opens the results.
 - **Soil profile editor** (graphical view and nodal table on one page):
   - The selected quantity is drawn as a coloured column next to its profile: material, sub-region (mass balance),
@@ -132,11 +135,17 @@ folder), edits all inputs, runs the simulation and plots the results. *File → 
   - Values in the selection: constant, linear between top and bottom, hydrostatic equilibrium from the lowest selected
     node (initial pressure head, with cos α), root distribution after Hoffman & van Genuchten (1983) or Vrugt et al.
     (2001), or the simulated values of the last run at any print time (initial h / θ, temperature, concentrations).
+    With hysteresis, *Restart from these results* takes the heads and the hysteresis state of all nodes, see
+    [Restart with hysteresis](#restart-with-hysteresis-hysteresisin).
   - Observation nodes and fixed points are added and removed by clicking (or by depth).
   - Discretization: profile depth, number of nodes and fixed points with the relative element size above and below
     each point (fixed points are always nodes; they can be placed at all material boundaries). Generating the nodes
     interpolates all nodal values onto the new nodes; observation nodes keep their depth. The fixed points are read
     from and kept with the project (header of `PROFILE.DAT`).
+- **Soil hydraulic model** follows the *Soil Hydraulic Model* dialog of HYDRUS 4.17: single-porosity models (van
+  Genuchten–Mualem with the option *air-entry value of −2 cm*, modified van Genuchten, Brooks–Corey, Kosugi),
+  dual-porosity models (Durner; mobile–immobile with water-content or head mass transfer), dual permeability, look-up
+  tables, and the hysteresis models with the initial branch.
 - **Root water and solute uptake** follows the *Root Water and Solute Uptake Model* dialog of HYDRUS 4.17: water uptake
   reduction model (Feddes / S-shape) with its parameters (POpt per material), solute stress model (none, additive,
   multiplicative with threshold or S-shape) with the osmotic coefficients, critical stress index for water uptake,
@@ -328,7 +337,8 @@ project*, the option *Save also writes a HYDRUS-1D project*, or `rusteau … --s
 
 - `SELECTOR.IN` (file version 4, the blocks and header lines of 4.17), `PROFILE.DAT`, `ATMOSPH.IN` (with time-variable
   boundary conditions), `METEO.IN` (meteorological data), `FIT.IN` (inverse settings), `MATER.IN` (tabular hydraulic
-  properties), `HYDRUS1D.DAT` (the project summary of the HYDRUS interface: processes, units, numbers of materials,
+  properties), `Hysteresis.in` (the initial hysteresis state, see
+  [Restart with hysteresis](#restart-with-hysteresis-hysteresisin)), `HYDRUS1D.DAT` (the project summary of the HYDRUS interface: processes, units, numbers of materials,
   nodes and print times) and `DESCRIPT.TXT`, with Windows line ends. The project file `<name>.h1d` holds only the window
   layout of the HYDRUS interface (an OLE compound file); Rusteau writes the same layout for every project.
 - Input files of the folder that the project does not need any more (e.g. an old `ATMOSPH.IN`) are removed; output
@@ -336,17 +346,71 @@ project*, the option *Save also writes a HYDRUS-1D project*, or `rusteau … --s
 - Settings HYDRUS-1D cannot store are listed as notes: the interface parameters of the dual-permeability model, the
   irrigation mode *full duration*, flux-averaged output concentrations, the trapezoidal water-content dependence of
   reactions (`MoistDep.in` is written but HYDRUS does not use it), the extra flux output, the analytic evaluation of
-  the hydraulic functions (HYDRUS always uses tables) and the Rusteau iteration of the parameter estimation. Material
-  and solute names are not stored either.
+  the hydraulic functions (HYDRUS always uses tables), the Rusteau iteration of the parameter estimation and the
+  [further options](#further-options-of-the-hydrus-code-optionsin). Material and solute names are not stored either.
 
 A project written and read back equals the saved one and gives identical results (`tests/legacy_save.rs`: the
 built-in examples and all HYDRUS-1D examples, direct and inverse).
+
+## Restart with hysteresis (Hysteresis.in)
+
+With hysteresis in the retention curve (and the conductivity) after Kool & Parker, the state of the soil is more than
+its pressure heads: each node lies on a scanning curve that depends on its history. HYDRUS reads this state from the
+file `Hysteresis.in` of the project folder (HysterIn of INPUT.FOR): two header lines, then `n  Theta  Kappa` for every
+node, the bottom node first (the lines are assigned in the internal node order, `n` is not used); Kappa is the
+direction of the last change of the water content (−1 drying, +1 wetting). Every node then starts on the scanning curve
+of the opposite direction through its (h, θ), as after a reversal, so a run continues from the end of a previous one.
+
+Rusteau reads and writes `Hysteresis.in` with HYDRUS projects and keeps the state in the project (*Soil hydraulic
+model* shows it and clears it; it is dropped when the profile gets new nodes). *Soil profile → Initial h →
+Restart from these results* takes the heads and the state of all nodes at a print time of the last run.
+
+- In HYDRUS the conductivity at the reversal point (ConO, needed for the scanning curves of K) is still zero when
+  `Hysteresis.in` is read, so the drying curves of K vanish. Rusteau stores the conductivities with the state of a
+  Rusteau restart (not in `Hysteresis.in`) and otherwise uses the conductivity of the main curve of the given direction.
+- The water contents at the start equal those of the file exactly (`tests/hysteresis_restart.rs`); a run restarted
+  during the rain of the infiltration example ends within 0.007 (retention) and 0.004 (retention and conductivity) of
+  the uninterrupted run, against 0.32 and 0.011 without the state.
+
+## Further options of the HYDRUS code (Options.in)
+
+The HYDRUS code contains options its interface does not offer (INPUT.FOR: "New Options - Not supported by GUI"). The
+computational module opens a file `Options.in` for them, but never reads it; the format is not documented, so HYDRUS-1D
+always runs with the defaults. Rusteau offers them on the page *Run → Further options* and stores them in the project
+(not in HYDRUS project files):
+
+- **Extrapolation of the heads** (lExtrap, default on): each time step starts from heads extrapolated linearly from
+  the two previous steps.
+- **Enhancement factor of the thermal vapor flux** (iEnhanc, default on; Cass, A., G. S. Campbell, and T. L. Jones
+  (1984). Enhancement of thermal water vapor diffusion in soil. *Soil Science Society of America Journal* 48: 25–32.
+  <https://doi.org/10.2136/sssaj1984.03615995004800010005x>); off: factor 1.
+- **Non-equilibrium water flow** (TauW; Ross, P. J., and K. R. J. Smettem (2000). A simple treatment of physical
+  nonequilibrium water flow in soils. *Soil Science Society of America Journal* 64: 1926–1930.
+  <https://doi.org/10.2136/sssaj2000.6461926x>; the source cites it as 2001): the water content
+  approaches the equilibrium water content of the pressure head, θ − θold = (θeq(h) − θold)(1 − e^(−Δt/τw)).
+  The convergence test uses the change of the equilibrium water content; the source multiplies it by the rate, which
+  accepts large head changes when the rate is small (the infiltration example diverges with τw = 0.05 d). The iteration
+  still gets harder: a smaller time step no longer increases the storage term, so strong infiltration may not
+  converge.
+- **Centrifuge** (lCentrif, Radius): the gravity term becomes ω²(R + depth)/g with the rotation speed (rpm) and the
+  distance R of the surface from the axis; with a time-variable bottom condition the hBot column gives the speed and
+  the bottom head is 0, as in HYDRUS. Rusteau writes the centrifugal term in conservative form (the flux of each element
+  with ω²(R + depth)/g of its midpoint); the source form leaks at equilibrium (8 % balance error after 200 h in the test
+  column). A column draining to a bottom at h = 0 reaches the analytic equilibrium h = −ω²/(2g)((R + L)² − (R + d)²)
+  (`tests/advanced_options.rs`).
+- **Density-dependent flow** (lDensity): density and viscosity of the solution relative to water as cubic polynomials
+  of the liquid concentration of solute 1 (HYDRUS hard-codes ρ/ρ0 = 1 + 0.75 c, μ/μ0 = 1; Rusteau starts with these
+  coefficients). The conductivity scales with ρ/μ, the gravity term and the storage with ρ. This is the formulation of
+  the source: it solves ρ ∂θ/∂t = ∂/∂z[K(∂h/∂z + ρ)] − S, while the mass balance sums ρθ, so the balance error equals
+  the solution mass gained by changes of the density.
+
+Non-equilibrium flow, centrifuge and density-dependent flow are not available with the dual-permeability model.
 
 ## Pedotransfer functions (Rosetta)
 
 *Neural network prediction (Rosetta)* on the page *Materials & parameters* (and *Rosetta…* next to the soil catalog
 of the parameter estimation, for initial estimates) predicts θr, θs, α, n and Ks from the soil texture, as the Rosetta
-Lite dialog of HYDRUS-1D. Input: sand, silt and clay in % (SSC; sum 99–101 %), optionally the bulk density (BD,
+Lite dialog of HYDRUS-1D. Input: the textural class, or sand, silt and clay in % (SSC; sum 99–101 %), optionally the bulk density (BD,
 0.5–2 g/cm³), the water content at 33 kPa (field capacity) and at 1500 kPa (wilting point). The dialog shows the
 prediction with the standard deviation of the ensemble, the USDA texture class, and the unsaturated conductivity
 parameters K0 and L of Schaap & Leij (2000); *Accept* writes θr, θs, α, n and Ks (converted to the project units) into
@@ -373,8 +437,11 @@ The network weights are those of the Python package rosetta-soil 0.3.2 of the US
 (<https://github.com/usda-ars-ussl/rosetta-soil>, CC0 1.0), converted with `tools/rosetta_export.py` into
 `crates/rusteau-core/data/rosetta.bin` (single-precision weights). The unit tests reproduce the predictions of
 rosetta-soil (Rosetta 3 with arithmetic, geometric and log means, Rosetta 1 and 2; values and standard deviations) within 2e-5
-(relative). The *textural classes* model of Rosetta Lite (class averages) is not included; the soil catalog offers
-the class averages of Carsel & Parrish (1988).
+(relative).
+
+The model *Textural class* gives the class averages of the 12 USDA textural classes in the Rosetta database (model H1
+of Schaap et al. 2001), as the *Textural classes* of Rosetta Lite; the values are those HYDRUS 4.17 shows. The soil
+catalog offers the class averages of Carsel & Parrish (1988).
 
 ## Testing
 
@@ -394,8 +461,8 @@ cargo test --release --workspace
 `test_all_direct_examples_comparison` runs every subfolder with a `SELECTOR.IN` and compares all reference files found
 there. Differences listed in the table `KNOWN` of `crates/rusteau-io/tests/reference_comparison.rs` are accepted within
 an envelope: at most 1.5 times the deviation and 1.25 times the number of differing values found on 9 Oct 2026. The
-table covers the 23 examples of `Examples/Direct` and the check runs EnBal2b_A, EnBal2b_B, 5SEASON_IRR, 2NOHYSTR_LN
-and 2HYSTER_RET; any other folder (including the check runs 2NOHYSTR_DUR, 2NOHYSTR_AE and 1SCALING_BC) must match
+table covers the 23 examples of `Examples/Direct` and the check runs EnBal2b_A, EnBal2b_B, 5SEASON_IRR, 2NOHYSTR_LN,
+2HYSTER_RET, ROOTUPTK_ACT and ROOTUPTK_ACT2; any other folder (including the check runs 2NOHYSTR_DUR, 2NOHYSTR_AE and 1SCALING_BC) must match
 exactly. Any other difference, or a known one that grows, fails the test. A run that stops on non-convergence counts as known only
 when the HYDRUS reference run stopped as well (`Error.msg` in the folder). The report lists both kinds.
 
@@ -442,7 +509,9 @@ properties are interpolated from tables (`hTab1` to `hTabN`) as in HYDRUS.
    same weighting for the vapor part. The source uses `tTopA(t)` for both.
 6. **Temperature adjustment at interior nodes**: `vVGrad = (vV(i+1) - vV(i-1)) / (x(i+1) - x(i-1))`, without the factor 2.
 7. **Runoff only with a head top condition** (`KodTop > 0`). With a flux top, `rTop - vTop` is storage, not runoff.
-8. **Relative solute balance error** of each solute is based on that solute's own mass (the source uses solute 1 for all).
+8. **Relative solute balance error:** the change of the mass of solute 1 (DeltC) enters the relative error of solute 1
+   only; the other solutes are related to their cumulative absolute fluxes (the source uses the DeltC of solute 1 for
+   all solutes; TEST3, ROOTUPTK_ACT2).
 9. **Surface energy balance with vapor flow**: the latent heat carried through the surface by the soil vapor flux is
    returned to the top node, `F(N) = F(N) - HeatFl + xLat(T(N)) (vVNew(N) + vVOld(N)) / 2`. Without it the surface
    is 0.034 °C too cold after the first step of EnBal2b, and 231 values differ.
@@ -458,6 +527,13 @@ Points where the port follows the source and 4.17 confirms it, although a differ
 
 ### HYDRUS 4.17 features not in the 2009 source
 
+- **Active solute uptake of a chosen solute** (`iActSolU`, the 6th value of the active-uptake line in `SELECTOR.IN`;
+  the 2009 source allows active uptake with a single solute only). With time-variable boundary conditions the
+  potential uptake rate comes from the `cBot` column of `ATMOSPH.IN` (4.17 ROOTUPTK_ACT: identical). With several
+  solutes Rusteau takes the column of the solute with active uptake; the 4.17 check run with two solutes
+  (ROOTUPTK_ACT2) confirms the file layout and the passive uptake of both solutes, but had no potential rate, so this
+  column is not confirmed yet.
+
 - **Triggered irrigation** (`lIrrig`, the record `Node Pressure Irrig_rate Duration Lag_period` in `SELECTOR.IN`,
   `Irrig.out`).
   - **Trigger and timing:** an irrigation is triggered at the first time level with the pressure head at the observation
@@ -471,11 +547,6 @@ Points where the port follows the source and 4.17 confirms it, although a differ
 
 ### Rusteau only
 
-- **Active solute uptake with several solutes:** the 2009 source allows active uptake only with a single solute;
-  HYDRUS 4.17 lets the user choose the solute. Rusteau takes up the chosen solute actively (its `cBot` column in
-  `ATMOSPH.IN` gives the potential uptake rate). This is not yet compared with 4.17, and the setting is not written to
-  `SELECTOR.IN` (the 4.17 layout for this case is not known yet); projects read from HYDRUS files keep the 2009 rule.
-
 - **Boundary-condition cycles** (`lBCCycles`) count a cycle from `t + 0.001 dt`, because the time reaches a record time
   only within the synchronisation tolerance (e.g. 5.9999999925 for 6).
 - **Native project format** `.h1dr` (JSON), plus CSV output.
@@ -483,6 +554,9 @@ Points where the port follows the source and 4.17 confirms it, although a differ
   the HYDRUS iteration is available), see [Parameter estimation](#parameter-estimation).
 - **Rosetta 3** besides the Rosetta 1 models of HYDRUS' Rosetta Lite, see
   [Pedotransfer functions](#pedotransfer-functions-rosetta).
+- **Restart state with conductivities** and the **further options of the HYDRUS code**, see
+  [Restart with hysteresis](#restart-with-hysteresis-hysteresisin) and
+  [Further options](#further-options-of-the-hydrus-code-optionsin).
 
 ### Known differences to HYDRUS 4.17
 
@@ -491,7 +565,7 @@ These are the cases the test suite accepts (`Cause` in `reference_comparison.rs`
 
 | Cause | Examples | Size | Explanation |
 |---|---|---|---|
-| `RealPrecision` | TEST1, TEST2, TEST11, ROOTUPTK, VOLATILE | heads and fluxes ≤ 1.2 %, single values up to 4 % | Single precision in HYDRUS changes the iteration count near the TolTh / TolH limit, and with it the time steps. With 10× tighter tolerances TEST1 drops from 12 to 5 problems; on the time levels of 4.17 it agrees exactly (TEST11 5 → 2, ROOTUPTK 7 → 5; TEST2 and VOLATILE already take the same steps, their differences lie within single steps). |
+| `RealPrecision` | TEST1, TEST2, TEST11, ROOTUPTK (and ROOTUPTK_ACT, ROOTUPTK_ACT2), VOLATILE | heads and fluxes ≤ 1.2 %, single values up to 4 % | Single precision in HYDRUS changes the iteration count near the TolTh / TolH limit, and with it the time steps. With 10× tighter tolerances TEST1 drops from 12 to 5 problems; on the time levels of 4.17 it agrees exactly (TEST11 5 → 2, ROOTUPTK 7 → 5; TEST2 and VOLATILE already take the same steps, their differences lie within single steps). |
 | `NoFluxTopNoise` | 1DRAINAG | vTop where rTop = 0, early heads | HYDRUS 4.17 prints a top flux of up to 0.49 cm/h for a no-flux top, and its water balance error grows to 0.031 cm. With tighter tolerances it needs 47622 time steps. Rusteau keeps vTop = 0 (balance error 1e-13); the final outflow differs by 0.04 %. |
 | `PondingChaos` | 1INFILTR | after t ≈ 0.86 h | With TolH = 1 cm the onset of ponding is chaotic. With tighter tolerances both programs stop on non-convergence at the same transition (0.329 / 0.331 h). |
 | `HysteresisTopNode` | 2HYSTER | K of the top node 5 % (14 % with a 0.01 h first drying step) | After ponding, HYDRUS 4.17 starts the drying scanning curve of the top node from a lower conductivity at the reversal point than the 2009 source. The factor depends on the length of the first drying step and on the grid. The formulas in the manual (Eqs. 2.84–2.93) are those of the source. The rule 4.17 uses is unknown, so Rusteau keeps the source. Retention and all other nodes agree, and the run without ponding (2HYSTER_R2) is identical. |
@@ -501,9 +575,9 @@ These are the cases the test suite accepts (`Cause` in `reference_comparison.rs`
 
 ## Not supported
 
-- **HP1** (PHREEQC coupling) and **UnsatChem**.
-- **Restart from `Hysteresis.in`**: not read; scanning curves start from the initial condition.
-- **`Options.in`** (optional HYDRUS settings file): not read.
+- **HP1** (coupling with the geochemical code PHREEQC) and **UnsatChem** (major-ion chemistry): the decision was made
+  to leave both out. They are separate codes beside the HYDRUS-1D core (HP1 couples HYDRUS with PHREEQC; UnsatChem is
+  a different transport and chemistry module), and neither is part of the HYDRUS-1D source this port follows.
 
 ## Credits
 

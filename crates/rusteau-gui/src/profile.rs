@@ -1103,6 +1103,14 @@ impl App {
                 }
                 let tu = self.prj.units.time_str();
                 let mut use_it = false;
+                let mut restart = false;
+                // restart with the hysteresis state (Hysteresis.in): heads, water contents and branches of every node
+                let restart_on = q == Qty::Init && !self.prj.water.init_in_water_content && self.prj.water.hysteresis.is_kool_parker();
+                let same_nodes = {
+                    let prof = &r.profiles[self.pe.res_idx];
+                    prof.nodes.len() == self.prj.profile.nodes.len()
+                        && prof.nodes.iter().zip(&self.prj.profile.nodes).all(|(a, b)| (a.depth - b.depth).abs() <= 1e-6 * (1.0 + b.depth.abs()))
+                };
                 ui.horizontal(|ui| {
                     ui.label("Or take the results at");
                     ComboBox::from_id_salt("pe_res").selected_text(format!("t = {} {tu}", fmt_t(r.profiles[self.pe.res_idx].t))).show_ui(ui, |ui| {
@@ -1112,6 +1120,27 @@ impl App {
                     });
                     use_it = ui.button("Use").on_hover_text("Sets the selected nodes to the simulated values at this print time (interpolated in depth)").clicked();
                 });
+                if restart_on {
+                    restart = ui
+                        .add_enabled(same_nodes, egui::Button::new("Restart from these results"))
+                        .on_hover_text(
+                            "All nodes: the pressure heads and the hysteresis state (water contents, branches and conductivities; \
+                             Hysteresis.in) at this print time. The run then continues where the previous one was.",
+                        )
+                        .on_disabled_hover_text("The results belong to another discretization of the profile.")
+                        .clicked();
+                }
+                if restart {
+                    let prof = &r.profiles[self.pe.res_idx];
+                    for (nd, o) in self.prj.profile.nodes.iter_mut().zip(&prof.nodes) {
+                        nd.h = o.h;
+                    }
+                    self.prj.profile.hysteresis = Some(
+                        prof.nodes.iter().map(|o| rusteau_core::HysteresisNode { theta: o.theta, kappa: if o.kappa > 0 { 1 } else { -1 }, k: Some(o.k) }).collect(),
+                    );
+                    self.pe.fill_key = None;
+                    *ch = true;
+                }
                 if use_it {
                     let prof = &r.profiles[self.pe.res_idx];
                     let theta = self.prj.water.init_in_water_content;

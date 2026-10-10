@@ -648,18 +648,37 @@ pub fn read_legacy_project(dir: &Path) -> R<Project> {
                 }
             }
         }
-		if ncr > 1 {
-			prj.root.l_act_rsu = false; // Fortran: only for NS = 1
-		}
-		if prj.root.l_act_rsu && ncr == 1 {
-			s.skip()?;
-			let t = s.read(5)?; // OmegaS, SPot, rKM, cMin, lOmegaW
-			prj.root.omega_act = vec![t.f(0)?];
-			prj.root.s_pot = t.f(1)?;
-			prj.root.r_km = vec![t.f(2)?];
-			prj.root.c_min = vec![t.f(3)?];
-			prj.root.l_omega_w = t.b(4)?;
-		}
+        // Active solute uptake: `OmegaS SPot KM cMin OmegaW iActSolU`. HYDRUS 4.17 adds iActSolU, the solute taken up
+        // actively (ROOTUPTK_ACT2: 2 solutes, iActSolU = 2); the 2009 code reads the first five values and allows
+        // active uptake for a single solute only.
+        let block = prj.root.l_act_rsu && ncr >= 1 && s.peek().is_some_and(|l| !l.trim_start().starts_with("***"));
+        if block {
+            s.skip()?;
+            let t = s.read_opt(5)?;
+            prj.root.omega_act = vec![t.f(0)?];
+            prj.root.s_pot = t.f(1)?;
+            prj.root.r_km = vec![t.f(2)?];
+            prj.root.c_min = vec![t.f(3)?];
+            prj.root.l_omega_w = t.b(4)?;
+            match t.i(5) {
+                Ok(k) if t.len() > 5 => prj.root.active_solute = (k.max(1) as usize - 1).min(ncr - 1),
+                _ => {
+                    prj.root.active_solute = 0;
+                    if ncr > 1 {
+                        prj.root.l_act_rsu = false; // 2009 file: only for NS = 1
+                    }
+                }
+            }
+        } else if ncr > 1 {
+            prj.root.l_act_rsu = false;
+        }
+    }
+
+    // ---------------- Hysteresis.in (HysterIn): initial hysteresis state, read with Kool & Parker hysteresis
+    if prj.water.hysteresis.is_kool_parker() {
+        if let Ok(p) = find("hysteresis.in") {
+            prj.profile.hysteresis = read_hysteresis_in(&p, prj.profile.nodes.len())?;
+        }
     }
 
     // ---------------- Fit.in (inverse problem): read whenever present, used when lInverse is set
@@ -1303,6 +1322,30 @@ fn read_meteo(path: &Path, prj: &mut Project) -> R<()> {
 
     prj.atmosphere.meteo = Some(settings);
     Ok(())
+}
+
+/// Reads `Hysteresis.in` (HysterIn of INPUT.FOR): two header lines, then `n  Theta  Kappa` for the `n_nodes` nodes in
+/// the internal order of HYDRUS (bottom node first; `n` is not used). Returns the state in the order of the profile
+/// nodes (top first), or `None` when the file has fewer lines than nodes: HYDRUS then skips the hysteresis
+/// initialization (it only keeps the branches read so far).
+pub fn read_hysteresis_in(path: &Path, n_nodes: usize) -> R<Option<Vec<HysteresisNode>>> {
+    let text = std::fs::read_to_string(path).map_err(|e| HydrusError::Io(format!("{}: {}", path.display(), e)))?;
+    let mut st = Vec::with_capacity(n_nodes);
+    for line in text.lines().skip(2) {
+        if st.len() == n_nodes {
+            break;
+        }
+        let v: Vec<f64> = line.split(|c: char| c.is_whitespace() || c == ',').filter(|t| !t.is_empty()).map_while(|t| t.parse::<f64>().ok()).collect();
+        if v.len() < 3 {
+            return Ok(None);
+        }
+        st.push(HysteresisNode { theta: v[1], kappa: if v[2] > 0.0 { 1 } else { -1 }, k: None });
+    }
+    if st.len() < n_nodes {
+        return Ok(None);
+    }
+    st.reverse();
+    Ok(Some(st))
 }
 
 /// Read an external user-defined material table file (Mater.in, Model 10).

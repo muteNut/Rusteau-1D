@@ -74,7 +74,8 @@ const fn k(cause: Cause, example: &'static str, file: &'static str, column: &'st
 /// Examples of the HYDRUS-1D distribution (Examples/Direct) and the HYDRUS 4.17 check runs kept with them
 /// (EnBal2b_A / EnBal2b_B: observation nodes at the surface, 5SEASON_IRR: triggered irrigation, 1SCALING_BC /
 /// 2NOHYSTR_AE / 2NOHYSTR_DUR / 2NOHYSTR_LN: Brooks-Corey, air-entry, Durner and Kosugi models, 2HYSTER_RET: hysteresis
-/// in the retention curve only).  Examples that are not listed here (1SCALING, 2NOHYSTR, 3LAIJURI, 3SELIM, 4HEAT,
+/// in the retention curve only, ROOTUPTK_ACT / ROOTUPTK_ACT2 / ROOTUPTK_ACT3: active solute uptake with one solute, of
+/// the second of two solutes without and with a potential uptake rate).  Examples that are not listed here (1SCALING, 2NOHYSTR, 3LAIJURI, 3SELIM, 4HEAT,
 /// 5SEASON, DRAINAGE, EnBal2b_B, TEST3, TEST4, TEST5, TEST9a, Test9, Test10, UPINFIL, 1SCALING_BC, 2NOHYSTR_AE,
 /// 2NOHYSTR_DUR, and any other folder) must match without any problem.
 const KNOWN: &[Known] = &[
@@ -82,6 +83,14 @@ const KNOWN: &[Known] = &[
     k(RealPrecision, "ROOTUPTK", "Solute1.out", "cRoot", 0.0054, 6, 3),
     k(RealPrecision, "ROOTUPTK", "Nod_Inf.out", "Conc(1)", 0.0068, 5, 8),
     k(RealPrecision, "ROOTUPTK", "Obs_Node.out", "Conc1(5)", 0.004, 14, 3),
+    k(RealPrecision, "ROOTUPTK_ACT", "Solute1.out", "cRoot", 0.003, 3, 2),
+    k(RealPrecision, "ROOTUPTK_ACT", "Nod_Inf.out", "Conc(1)", 0.0018, 2, 2),
+    k(RealPrecision, "ROOTUPTK_ACT2", "Solute1.out", "cRoot", 0.003, 3, 2),
+    k(RealPrecision, "ROOTUPTK_ACT2", "Solute2.out", "cRoot", 0.0019, 2, 2),
+    k(RealPrecision, "ROOTUPTK_ACT2", "Nod_Inf.out", "Conc(1)", 0.0019, 2, 2),
+    k(RealPrecision, "ROOTUPTK_ACT3", "Solute1.out", "cRoot", 0.0032, 3, 2),
+    k(RealPrecision, "ROOTUPTK_ACT3", "Solute2.out", "cRoot", 0.0028, 2, 2),
+    k(RealPrecision, "ROOTUPTK_ACT3", "Nod_Inf.out", "Conc(1)", 0.0019, 2, 2),
     k(RealPrecision, "TEST1", "Nod_Inf.out", "Head", 0.012, 7, 8),
     k(RealPrecision, "TEST1", "Nod_Inf.out", "v/KsTop", 0.0071, 11, 8),
     k(RealPrecision, "TEST1", "Obs_Node.out", "h(1)", 0.0018, 4, 3),

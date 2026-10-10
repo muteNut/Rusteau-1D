@@ -24,6 +24,7 @@ pub enum Page {
     Main,
     Time,
     Iteration,
+    Options,
     HydModel,
     SoilParams,
     WaterBc,
@@ -228,11 +229,13 @@ pub struct App {
     pub ros: Option<rosetta_ui::RosettaDlg>,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub enum PendingAction {
     Quit,
     NewProject,
     OpenProject,
+    /// open this project (dropped onto the window)
+    OpenPath(PathBuf),
 }
 
 impl App {
@@ -264,7 +267,7 @@ impl App {
             run: None,
             inv: Default::default(),
             inv_paste: false,
-            status: "Ready. Load an example, import a HYDRUS-1D project folder, or edit the current project.".into(),
+            status: "Ready. Load an example, open a project (or drag a .h1dr, .h1d or HYDRUS-1D project folder onto the window), or edit the current project.".into(),
             dialog: None,
             problems: vec![],
             sel_mat: 0,
@@ -285,22 +288,69 @@ impl App {
             ros: None,
         };
         if let Some(arg) = std::env::args().nth(1) {
-            let p = PathBuf::from(&arg);
-            if rusteau_io::is_legacy_project_path(&p) {
-                // same as File → Import (reads a Fit.in in the folder as measured data)
-                app.import_legacy(&p);
-            } else {
-                match rusteau_io::load_project(&p) {
-                    Ok(prj) => {
-                        app.set_project(prj, Some(p.clone()));
-                        app.status = format!("Opened {}", p.display());
-                        app.last_dir = p.parent().map(|d| d.to_path_buf());
-                    }
-                    Err(e) => app.status = format!("Could not open {}: {}", arg, e),
-                }
-            }
+            app.open_path(&PathBuf::from(&arg));
         }
         app
+    }
+
+    /// Opens a project: a Rusteau project (`.h1dr`, `.json`) or a HYDRUS-1D project (the `.h1d` file, its folder or any
+    /// file in the folder; as File → Import, a Fit.in in the folder gives measured data).
+    fn open_path(&mut self, path: &std::path::Path) {
+        self.last_dir = if path.is_dir() { Some(path.to_path_buf()) } else { path.parent().map(|d| d.to_path_buf()) };
+        if rusteau_io::is_legacy_project_path(path) {
+            self.import_legacy(path);
+            return;
+        }
+        match rusteau_io::load_project(path) {
+            Ok(prj) => {
+                self.set_project(prj, Some(path.to_path_buf()));
+                self.status = format!("Opened {}", path.display());
+            }
+            Err(e) => self.status = format!("Could not open {}: {}", path.display(), e),
+        }
+    }
+
+    /// Files and folders dragged onto the window: the first project among them is opened (after asking about unsaved
+    /// changes).
+    fn handle_dropped_files(&mut self, ctx: &egui::Context) {
+        let dropped: Vec<PathBuf> = ctx.input(|i| i.raw.dropped_files.iter().filter_map(|f| f.path.clone()).collect());
+        if dropped.is_empty() {
+            return;
+        }
+        let Some(path) = dropped.iter().find(|p| is_project_path(p)).cloned() else {
+            let names: Vec<String> = dropped.iter().map(|p| p.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_default()).collect();
+            self.status = format!("Not a project: {} (drop a .h1dr, a .h1d or a HYDRUS-1D project folder)", names.join(", "));
+            return;
+        };
+        if self.run.is_some() || self.inv.run.is_some() {
+            self.status = "A calculation is running: stop it before opening another project.".into();
+            return;
+        }
+        if self.dirty {
+            self.pending_action = Some(PendingAction::OpenPath(path));
+            self.show_close_confirm = true;
+        } else {
+            self.open_path(&path);
+        }
+    }
+
+    /// While files are dragged over the window: a veil with what a drop would do.
+    fn drop_overlay(&self, ctx: &egui::Context) {
+        let hovered: Vec<egui::HoveredFile> = ctx.input(|i| i.raw.hovered_files.clone());
+        if hovered.is_empty() {
+            return;
+        }
+        // the path is not known on every platform while dragging
+        let text = match hovered.iter().find_map(|f| f.path.clone()) {
+            Some(p) if is_project_path(&p) => format!("Drop to open {}", p.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_default()),
+            Some(p) => format!("{} is not a project\n(.h1dr, .h1d or a HYDRUS-1D project folder)", p.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_default()),
+            None => "Drop to open the project".into(),
+        };
+        let painter = ctx.layer_painter(egui::LayerId::new(egui::Order::Foreground, egui::Id::new("drop_overlay")));
+        let rect = ctx.screen_rect();
+        painter.rect_filled(rect, 0.0, egui::Color32::from_black_alpha(170));
+        painter.rect_stroke(rect.shrink(12.0), 12.0, egui::Stroke::new(3.0_f32, egui::Color32::from_rgb(90, 160, 230)), egui::StrokeKind::Inside);
+        painter.text(rect.center(), egui::Align2::CENTER_CENTER, text, egui::FontId::proportional(24.0), egui::Color32::WHITE);
     }
 
     pub fn set_project(&mut self, p: Project, path: Option<PathBuf>) {
@@ -767,6 +817,7 @@ impl App {
                                         &["h1dr", "h1d", "json"],
                                     ));
                                 }
+                                Some(PendingAction::OpenPath(p)) => self.open_path(&p),
                                 None => {}
                             }
                         }
@@ -789,14 +840,7 @@ impl App {
                         path.parent().map(|p| p.to_path_buf())
                     };
                     match d.purpose {
-                        Purpose::OpenProject if rusteau_io::is_legacy_project_path(&path) => self.import_legacy(&path),
-                        Purpose::OpenProject => match rusteau_io::load_project(&path) {
-                            Ok(p) => {
-                                self.set_project(p, Some(path.clone()));
-                                self.status = format!("Opened {}", path.display());
-                            }
-                            Err(e) => self.status = format!("Could not open {}: {}", path.display(), e),
-                        },
+                        Purpose::OpenProject => self.open_path(&path),
                         Purpose::ImportLegacy => {
 							if path.file_name().map_or(false, |n| n.to_string_lossy().eq_ignore_ascii_case("Fit.in")) {
 								match self.load_fit_measurements(&path) {
@@ -924,7 +968,7 @@ impl App {
         if !t.is_empty() {
             steps.push(("Uptake & transport", t));
         }
-        steps.push(("Run", vec![(Page::Iteration, "Iteration criteria"), (Page::Summary, "Check & run")]));
+        steps.push(("Run", vec![(Page::Iteration, "Iteration criteria"), (Page::Options, "Further options"), (Page::Summary, "Check & run")]));
         steps.push(("Parameter estimation", vec![(Page::Inverse, "Inverse problem (Fit.in)")]));
         steps
     }
@@ -1055,6 +1099,7 @@ impl eframe::App for App {
             self.show_close_confirm = true;
         }
 
+        self.handle_dropped_files(ctx);
         self.handle_shortcuts(ctx);
         self.poll_run(ctx);
         self.poll_inverse(ctx);
@@ -1076,6 +1121,7 @@ impl eframe::App for App {
         });
         self.dialogs(ctx);
         self.rosetta_window(ctx);
+        self.drop_overlay(ctx);
     }
 }
 
@@ -1087,6 +1133,7 @@ impl App {
             Page::Main => self.page_main(ui, &mut ch),
             Page::Time => self.page_time(ui, &mut ch),
             Page::Iteration => self.page_iteration(ui, &mut ch),
+            Page::Options => self.page_options(ui, &mut ch),
             Page::HydModel => self.page_hydmodel(ui, &mut ch),
             Page::SoilParams => self.page_soil(ui, &mut ch),
             Page::WaterBc => self.page_waterbc(ui, &mut ch),
@@ -1117,12 +1164,25 @@ impl App {
     }
 }
 
+/// A project file or folder: Rusteau (`.h1dr`, `.json`) or HYDRUS-1D (`.h1d`, a project folder or a file in one).
+fn is_project_path(p: &std::path::Path) -> bool {
+    let ext = p.extension().map(|e| e.to_string_lossy().to_ascii_lowercase()).unwrap_or_default();
+    if matches!(ext.as_str(), "h1dr" | "json" | "h1d") {
+        return true;
+    }
+    // a HYDRUS-1D project folder, or a file inside one
+    let dir = if p.is_dir() { Some(p) } else { p.parent() };
+    dir.and_then(|d| std::fs::read_dir(d).ok())
+        .is_some_and(|rd| rd.flatten().any(|e| e.file_name().to_string_lossy().eq_ignore_ascii_case("selector.in")))
+}
+
 fn main() -> eframe::Result<()> {
     let opts = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_inner_size([1280.0, 800.0])
             .with_min_inner_size([920.0, 600.0])
             .with_resizable(true)
+            .with_drag_and_drop(true)
             .with_title("Rusteau-1D"),
         ..Default::default()
     };

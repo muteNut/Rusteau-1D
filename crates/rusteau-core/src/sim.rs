@@ -125,6 +125,16 @@ pub struct Simulation {
     pub r_soil_raw: f64,
     pub r_root_raw: f64,
     pub cos_alf: f64,
+    /// lCentrif: distance of the surface from the axis of a centrifuge; `cos_alf` is then ω²/g
+    pub centrif_radius: Option<f64>,
+    /// lDensity: density and viscosity of the solution as functions of solute 1
+    pub density: Option<crate::model::DensityDependence>,
+    /// TauW: time constant of the non-equilibrium water flow (0: equilibrium)
+    pub tau_w: f64,
+    /// Rate = 1 − exp(−dt/TauW) of the non-equilibrium water flow (1 without)
+    pub rate: f64,
+    /// iEnhanc: enhancement factor of the thermal vapor flux (1) or not (0)
+    pub i_enhanc: i32,
     pub v_top: f64,
     pub v_bot: f64,
     pub h_seep: f64,
@@ -599,7 +609,15 @@ impl Simulation {
             prec_raw: 0.0,
             r_soil_raw: 0.0,
             r_root_raw: 0.0,
-            cos_alf: prj.cos_alpha,
+            cos_alf: match &prj.options.centrifuge {
+                Some(c) => centrifuge_cos_alf(c.rpm, x_conv),
+                None => prj.cos_alpha,
+            },
+            centrif_radius: prj.options.centrifuge.map(|c| c.radius),
+            density: prj.options.density,
+            tau_w: prj.options.tau_w.max(0.0),
+            rate: 1.0,
+            i_enhanc: if prj.options.vapor_enhancement { 1 } else { 0 },
             v_top: 0.0,
             v_bot: 0.0,
             h_seep: bc.h_seep,
@@ -608,9 +626,12 @@ impl Simulation {
             t_old: tm.t_init,
             dt: tm.dt as f32 as f64,
             dt_old: tm.dt as f32 as f64,
-            l_extrap: true, // HYDRUS.FOR: lExtrap=.true. (tested: the reference outputs need it, Test10 fails without)
+            // HYDRUS.FOR: lExtrap=.true. (tested: the reference outputs need it, Test10 fails without)
+            l_extrap: prj.options.extrapolate_heads,
             dt_opt: tm.dt as f32 as f64,
-            dt_min: tm.dt_min,
+            // dtMin is REAL*4 in the Fortran code: rounded as dt is, so that `dt <= dtMin` holds after the step has
+            // been reduced to dtMin (1e-7 as f32 is larger than 1e-7: the failed iteration used to repeat forever)
+            dt_min: tm.dt_min as f32 as f64,
             dt_max: tm.dt_max,
             d_mul: tm.d_mul,
             d_mul2: tm.d_mul2,
@@ -773,8 +794,52 @@ impl Simulation {
         Ok(())
     }
 
+    /// Initial hysteresis state (HysterIn of INPUT.FOR, `Hysteresis.in`): the water content and the direction of the
+    /// last change of every node; each node then starts on the scanning curve of the opposite direction through its
+    /// (h, θ) (Hyster called with TolTh = -1 reverses every node).
+    ///
+    /// HysterIn runs before the first SetMat, so ConO (the conductivity at the reversal point, used for the scanning
+    /// curves of K, iHyst = 2) is still zero there and the drying curves of K vanish. Here ConO is the conductivity
+    /// stored with the state (a Rusteau restart), else the conductivity of the main curve of the given direction at
+    /// the initial head.
+    fn apply_hysteresis_state(&mut self, st: &[crate::model::HysteresisNode]) {
+        let n = self.n;
+        for i in 0..n {
+            let k = if st[n - 1 - i].kappa > 0 { 1 } else { -1 };
+            self.kappa[i] = k;
+            self.kappa_o[i] = k;
+        }
+        self.set_mat(0); // ConO on the main curves
+        for i in 0..n {
+            let s = &st[n - 1 - i];
+            self.th_old[i] = s.theta;
+            self.th_new[i] = s.theta;
+            if let Some(k) = s.k.filter(|k| *k > 0.0 && k.is_finite()) {
+                self.con_o[i] = k;
+            }
+        }
+        let tol = self.tol_th;
+        self.tol_th = -1.0;
+        self.hyster_kp();
+        self.tol_th = tol;
+    }
+
+    /// The hysteresis state at the current time in the order of the profile nodes (top first), for a restart
+    /// (`Hysteresis.in`); `None` without Kool & Parker hysteresis.
+    pub fn hysteresis_state(&self) -> Option<Vec<crate::model::HysteresisNode>> {
+        if !matches!(self.i_hyst, 1 | 2) {
+            return None;
+        }
+        Some((0..self.n).rev().map(|i| crate::model::HysteresisNode { theta: self.th_new[i], kappa: self.kappa[i], k: Some(self.con[i]) }).collect())
+    }
+
     /// Initial hydraulic properties, water contents and immobile water.
     fn init_water_state(&mut self) {
+        if matches!(self.i_hyst, 1 | 2) && !self.prj.water.init_in_water_content {
+            if let Some(st) = self.prj.profile.hysteresis.clone().filter(|s| s.len() == self.n) {
+                self.apply_hysteresis_state(&st);
+            }
+        }
         if self.i_hyst == 3 {
             let ik = self.prj.water.init_kappa;
             self.lenhard_hyst(ik, 1, crate::lenhard::ThetaTarget::Old);
@@ -1563,4 +1628,11 @@ impl Simulation {
             });
         }
     }
+}
+
+/// CosAlf of a centrifuge (BasInf / SetBC of HYDRUS: CosAlf = ω²/g) for a rotation speed in rpm: ω²/g in 1/L of the
+/// project length unit (the time unit cancels).
+pub fn centrifuge_cos_alf(rpm: f64, x_conv: f64) -> f64 {
+    let w = rpm * 2.0 * std::f64::consts::PI / 60.0; // rad/s
+    w * w / (9.80665 * x_conv)
 }

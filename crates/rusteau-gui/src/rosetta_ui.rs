@@ -19,8 +19,10 @@ pub enum RosettaTarget {
 pub struct RosettaDlg {
     pub target: RosettaTarget,
     pub version: RosettaVersion,
-    /// model code 2..5
+    /// model code 1 (textural classes) .. 5
     pub model: u8,
+    /// textural class of model 1 (index in `TEXTURAL_CLASSES`)
+    pub class: usize,
     pub sand: f64,
     pub silt: f64,
     pub clay: f64,
@@ -32,7 +34,7 @@ pub struct RosettaDlg {
 
 impl RosettaDlg {
     pub fn new(target: RosettaTarget) -> Self {
-        RosettaDlg { target, version: RosettaVersion::V3, model: 2, sand: 40.0, silt: 40.0, clay: 20.0, bd: 1.4, th33: 0.3, th1500: 0.1, geometric: false }
+        RosettaDlg { target, version: RosettaVersion::V3, model: 2, class: 2, sand: 40.0, silt: 40.0, clay: 20.0, bd: 1.4, th33: 0.3, th1500: 0.1, geometric: false }
     }
 
     fn data(&self) -> SoilData {
@@ -47,6 +49,10 @@ impl RosettaDlg {
     }
 
     fn prediction(&self) -> Result<Prediction, String> {
+        if self.model == 1 {
+            let (c, _) = TEXTURAL_CLASSES[self.class.min(TEXTURAL_CLASSES.len() - 1)];
+            return class_average(c).ok_or_else(|| format!("no class averages for {c}"));
+        }
         let est = if self.geometric { Estimate::Geometric } else { Estimate::Arithmetic };
         predict(self.version, &self.data(), Some(self.model), est)
     }
@@ -89,18 +95,37 @@ impl App {
             ui.label(RichText::new(format!("Predicts θr, θs, α, n and Ks for {target}.")).weak());
             ui.horizontal(|ui| {
                 ui.label("Model");
-                egui::ComboBox::from_id_salt("ros_ver").width(340.0).selected_text(d.version.name()).show_ui(ui, |ui| {
-                    for v in RosettaVersion::ALL {
-                        ui.selectable_value(&mut d.version, v, v.name());
-                    }
+                ui.add_enabled_ui(d.model >= 2, |ui| {
+                    egui::ComboBox::from_id_salt("ros_ver").width(340.0).selected_text(d.version.name()).show_ui(ui, |ui| {
+                        for v in RosettaVersion::ALL {
+                            ui.selectable_value(&mut d.version, v, v.name());
+                        }
+                    });
                 });
             });
             ui.add_space(4.0);
             ui.columns(2, |cols| {
                 let ui = &mut cols[0];
                 ui.label(RichText::new("Input data").strong());
-                for code in 2..=5u8 {
+                for code in 1..=5u8 {
+                    let was = d.model;
                     ui.radio_value(&mut d.model, code, model_name(code));
+                    if code == 1 && d.model == 1 && was != 1 {
+                        // start from the class of the texture entered
+                        let c = texture_class(d.sand, d.silt, d.clay);
+                        d.class = TEXTURAL_CLASSES.iter().position(|(n, _)| *n == c).unwrap_or(d.class);
+                    }
+                }
+                if d.model == 1 {
+                    ui.horizontal(|ui| {
+                        ui.label("Textural class");
+                        egui::ComboBox::from_id_salt("ros_class").selected_text(TEXTURAL_CLASSES[d.class].0).show_ui(ui, |ui| {
+                            for (k, (c, _)) in TEXTURAL_CLASSES.iter().enumerate() {
+                                ui.selectable_value(&mut d.class, k, *c);
+                            }
+                        });
+                    });
+                    ui.label(RichText::new("Average parameters of the class in the Rosetta database (Schaap et al., 2001), as Rosetta Lite of HYDRUS-1D.").weak());
                 }
                 ui.add_space(4.0);
                 egui::Grid::new("ros_in").num_columns(3).spacing([8.0, 4.0]).show(ui, |ui| {
@@ -110,9 +135,10 @@ impl App {
                         ui.label(unit);
                         ui.end_row();
                     };
-                    row(ui, "Sand", &mut d.sand, "%", true, 0.5);
-                    row(ui, "Silt", &mut d.silt, "%", true, 0.5);
-                    row(ui, "Clay", &mut d.clay, "%", true, 0.5);
+                    let tx = d.model >= 2;
+                    row(ui, "Sand", &mut d.sand, "%", tx, 0.5);
+                    row(ui, "Silt", &mut d.silt, "%", tx, 0.5);
+                    row(ui, "Clay", &mut d.clay, "%", tx, 0.5);
                     row(ui, "Bulk density", &mut d.bd, "g/cm³", d.model >= 3, 0.01);
                     row(ui, "θ at 33 kPa (field capacity)", &mut d.th33, "cm³/cm³", d.model >= 4, 0.005);
                     row(ui, "θ at 1500 kPa (wilting point)", &mut d.th1500, "cm³/cm³", d.model >= 5, 0.005);
@@ -123,7 +149,7 @@ impl App {
                 } else {
                     ui.colored_label(Color32::from_rgb(230, 120, 50), format!("sand + silt + clay = {sum:.1} %"));
                 }
-                ui.checkbox(&mut d.geometric, "geometric means of α, n and Ks")
+                ui.add_enabled(d.model >= 2, egui::Checkbox::new(&mut d.geometric, "geometric means of α, n and Ks"))
                     .on_hover_text("Off: arithmetic means of the ensemble (as rosetta-soil and the Rosetta web site). On: 10 to the mean of the logarithms.");
                 let ui = &mut cols[1];
                 ui.label(RichText::new("Prediction").strong());
@@ -145,9 +171,10 @@ impl App {
                             ];
                             for (k, (name, v, s)) in rows.iter().enumerate() {
                                 let t = |x: &str| if k >= 5 { RichText::new(x).weak() } else { RichText::new(x) };
+                                let num = |x: f64| if x.is_finite() { sig(x) } else { "–".into() };
                                 ui.label(t(name));
-                                ui.label(t(&sig(*v)));
-                                ui.label(t(&sig(*s)));
+                                ui.label(t(&num(*v)));
+                                ui.label(t(&num(*s)));
                                 ui.end_row();
                             }
                         });
@@ -179,7 +206,11 @@ impl App {
                         if let Some(m) = self.prj.water.materials.get_mut(i) {
                             apply(m, model, &p, lf, tf);
                             self.dirty = true;
-                            self.status = format!("Rosetta: parameters of material {} predicted ({}, {})", i + 1, texture_class(d.sand, d.silt, d.clay), d.version.name());
+                            self.status = if d.model == 1 {
+                                format!("Rosetta: class averages of {} for material {}", TEXTURAL_CLASSES[d.class].0, i + 1)
+                            } else {
+                                format!("Rosetta: parameters of material {} predicted ({}, {})", i + 1, texture_class(d.sand, d.silt, d.clay), d.version.name())
+                            };
                         }
                     }
                     RosettaTarget::Inverse(mat) => {

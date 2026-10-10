@@ -331,6 +331,14 @@ impl Simulation {
             } else {
                 (1.0, 1.0)
             };
+            // density-dependent flow: K scales with density / dynamic viscosity of the solution
+            let bt = match &self.density {
+                Some(d) => {
+                    let c = self.conc1(i);
+                    bt * d.rho(c) / d.mu(c)
+                }
+                None => bt,
+            };
 
             // Fortran SetMat: compound AhW on the wetting branch regardless of Ah(i)
             let a_scale = if self.kappa[i] == 1 {
@@ -429,7 +437,7 @@ impl Simulation {
                 self.x_conv,
                 self.t_conv,
                 self.l_vapor,
-                1,
+                self.i_enhanc,
                 self.h_crit_a,
             );
             if self.l_vapor {
@@ -449,7 +457,7 @@ impl Simulation {
     }
 
     /// Kool & Parker style reversal detection and scanning-curve parameters (Hyster in WATFLOW.FOR).
-    fn hyster_kp(&mut self) {
+    pub(crate) fn hyster_kp(&mut self) {
         let model = self.model;
         for i in 0..self.n {
             self.kappa_o[i] = self.kappa[i];
@@ -539,16 +547,18 @@ impl Simulation {
         let n = self.n;
         let x = &self.x;
         let con = &self.con;
-        let g = self.cos_alf;
         let dt = self.dt;
         let mut v = vec![0.0; n];
         let mut v_v = vec![0.0; n];
+        // density-dependent flow: fRE = mean density ratio of the two nodes (Veloc of WATFLOW.FOR)
+        let fre = |a: usize, b: usize| if self.density.is_some() { (self.f_ro(self.conc1(a)) + self.f_ro(self.conc1(b))) / 2.0 } else { 1.0 };
 
         // Top node (m = n - 1)
         let m = n - 1;
         let dxn = x[m] - x[m - 1];
-        v[m] = -(con[m] + con[m - 1]) / 2.0 * ((h[m] - h[m - 1]) / dxn + g)
-            - dxn / 2.0 * ((th_new[m] - th_old[m]) / dt + self.sink[m]);
+        let (g, f) = (self.grav_ab(m, m - 1), fre(m, m - 1));
+        v[m] = -(con[m] + con[m - 1]) / 2.0 * ((h[m] - h[m - 1]) / dxn + f * g)
+            - dxn / 2.0 * (f * (th_new[m] - th_old[m]) / dt + self.sink[m]);
 
         if self.prj.water.l_w_dep {
             v[m] -= (self.con_lt[m] + self.con_lt[m - 1]) / 2.0 * (temp[m] - temp[m - 1]) / dxn;
@@ -565,8 +575,8 @@ impl Simulation {
             let dxa = x[i + 1] - x[i];
             let dxb = x[i] - x[i - 1];
 
-            let va = -(con[i] + con[i + 1]) / 2.0 * ((h[i + 1] - h[i]) / dxa + g);
-            let vb = -(con[i] + con[i - 1]) / 2.0 * ((h[i] - h[i - 1]) / dxb + g);
+            let va = -(con[i] + con[i + 1]) / 2.0 * ((h[i + 1] - h[i]) / dxa + fre(i, i + 1) * self.grav_ab(i, i + 1));
+            let vb = -(con[i] + con[i - 1]) / 2.0 * ((h[i] - h[i - 1]) / dxb + fre(i, i - 1) * self.grav_ab(i, i - 1));
             let mut vi = (va * dxb + vb * dxa) / (dxa + dxb);
 
             if self.prj.water.l_w_dep {
@@ -587,8 +597,9 @@ impl Simulation {
 
         // Bottom node (i = 0)
         let dx1 = x[1] - x[0];
-        v[0] = -(con[0] + con[1]) / 2.0 * ((h[1] - h[0]) / dx1 + g)
-            + dx1 / 2.0 * ((th_new[0] - th_old[0]) / dt + self.sink[0]);
+        let (g, f) = (self.grav_ab(0, 1), fre(1, 0));
+        v[0] = -(con[0] + con[1]) / 2.0 * ((h[1] - h[0]) / dx1 + f * g)
+            + dx1 / 2.0 * (f * (th_new[0] - th_old[0]) / dt + self.sink[0]);
 
         if self.prj.water.l_w_dep {
             v[0] -= (self.con_lt[0] + self.con_lt[1]) / 2.0 * (temp[1] - temp[0]) / dx1;
@@ -606,10 +617,15 @@ impl Simulation {
     fn build_system(&mut self) -> Sys {
         let n = self.n;
         let dt = self.dt;
-        let grav = self.cos_alf;
+        let rate = self.rate;
+        let dens = self.density.is_some();
+        let centrif = self.centrif_radius.is_some();
+        // concentration of solute 1 (density-dependent flow)
+        let c1: Vec<f64> = if dens { (0..n).map(|i| self.conc1(i)).collect() } else { Vec::new() };
 
+        // non-equilibrium water flow (TauW): the water content approaches the equilibrium one at the given rate
         for i in 0..n {
-            self.th_new[i] = self.th_old[i] + (self.th_eq[i] - self.th_old[i]);
+            self.th_new[i] = self.th_old[i] + (self.th_eq[i] - self.th_old[i]) * rate;
         }
 
         let mut p = vec![0.0; n];
@@ -620,20 +636,26 @@ impl Simulation {
         let dxb = self.x[1] - self.x[0];
         let dx = dxb / 2.0;
         let mut conb = (self.con[0] + self.con[1]) / 2.0;
-        let b = conb * grav;
+        let grav = self.grav_ab(0, 1);
+        let mut b = conb * grav;
+        let mut fre = 1.0;
+        if dens {
+            b = conb * grav * self.f_ro((c1[0] + c1[1]) / 2.0);
+            fre = self.f_ro(c1[0]);
+        }
 
         if self.l_vapor {
             conb += (self.con_vh[0] + self.con_vh[1]) / 2.0;
         }
         s[0] = -conb / dxb;
         if self.free_d {
-            self.r_bot = -conb * grav;
+            self.r_bot = -conb * grav * fre;
         }
         // WATFLOW.FOR `Reset`: the bottom half-cell keeps its storage term (F2 and (ThNew-ThOld)*dx/dt) for every bottom
         // condition, free drainage included.  (A former deviation dropped it for a free-drainage bottom node wetted from
         // above to follow the 1SCALING / 2NOHYSTR sample outputs of an older HYDRUS build; the compiled source keeps it,
         // verified for 2NOHYSTR t = 13..24 and 1SCALING t >= 720.)
-        let f2 = self.cap[0] * dx / dt;
+        let f2 = self.cap[0] * dx / dt * fre * rate;
         let rb = conb / dxb + f2;
         let sb = -conb / dxb;
         if self.gwl_f {
@@ -643,7 +665,7 @@ impl Simulation {
             self.r_bot = d.flux(self.x[0] + self.h_new[0]);
         }
 		let w_f = self.w_fracture.max(0.001);
-        let mut pb = b - self.sink[0] * dx + f2 * self.h_new[0] - (self.th_new[0] - self.th_old[0]) * dx / dt + self.r_bot_fracture();
+        let mut pb = b - self.sink[0] * dx + f2 * self.h_new[0] - (self.th_new[0] - self.th_old[0]) * dx / dt * fre + self.r_bot_fracture();
 		if self.i_dual_por > 0 {
 			pb -= self.sink_im[0] * dx;
 		}
@@ -668,16 +690,32 @@ impl Simulation {
             let dx = (dxa + dxb) / 2.0;
             let mut cona = (self.con[i] + self.con[i - 1]) / 2.0;
             let mut conb = (self.con[i] + self.con[i + 1]) / 2.0;
-            let b = (cona - conb) * grav;
+            let mut b = (cona - conb) * self.cos_alf;
+            let (ro_a, ro_b) = if dens {
+                fre = self.f_ro(c1[i]);
+                (self.f_ro((c1[i] + c1[i - 1]) / 2.0), self.f_ro((c1[i] + c1[i + 1]) / 2.0))
+            } else {
+                (1.0, 1.0)
+            };
+            if dens {
+                b = (cona * ro_a - conb * ro_b) * self.cos_alf;
+            }
+            if centrif {
+                // DEVIATION FROM THE 2009 SOURCE: Reset writes the centrifugal term in the non-conservative form
+                // (ConA - ConB) G(x_i) + ω²/g K_i dx; here the fluxes of the two elements carry G of the element
+                // midpoints, as the boundary fluxes of TLInf do. The source form leaks at equilibrium (a column at 100
+                // rpm drains 0.001 cm/h through a bottom at h = 0 forever, 8 % balance error after 200 h).
+                b = cona * ro_a * self.grav_ab(i, i - 1) - conb * ro_b * self.grav_ab(i, i + 1);
+            }
             if self.l_vapor {
                 cona += (self.con_vh[i] + self.con_vh[i - 1]) / 2.0;
                 conb += (self.con_vh[i] + self.con_vh[i + 1]) / 2.0;
             }
             let a2 = cona / dxa + conb / dxb;
             let a3 = -conb / dxb;
-            let f2 = self.cap[i] * dx / dt;
+            let f2 = self.cap[i] * dx / dt * fre * rate;
             r[i] = a2 + f2;
-            p[i] = f2 * self.h_new[i] - (self.th_new[i] - self.th_old[i]) * dx / dt - b - self.sink[i] * dx;
+            p[i] = f2 * self.h_new[i] - (self.th_new[i] - self.th_old[i]) * dx / dt * fre - b - self.sink[i] * dx;
 			if self.i_dual_por > 0 { p[i] -= self.sink_im[i] * dx; }
 			if self.l_dual_perm   { p[i] -= (self.sink_im[i] / w_f) * dx; }
             s[i] = a3;
@@ -703,15 +741,21 @@ impl Simulation {
         let dxa = self.x[m] - self.x[m - 1];
         let dx = dxa / 2.0;
         let mut cona = (self.con[m] + self.con[m - 1]) / 2.0;
-        let b = cona * grav;
+        let grav = self.grav_ab(m, m - 1);
+        let mut b = cona * grav;
 
         if self.l_vapor {
             cona += (self.con_vh[m] + self.con_vh[m - 1]) / 2.0;
         }
-        let f2 = self.cap[m] * dx / dt;
+        if dens {
+            // (Reset adds the vapor conductivity before this term)
+            b = cona * grav * self.f_ro((c1[m] + c1[m - 1]) / 2.0);
+            fre = self.f_ro(c1[m]);
+        }
+        let f2 = self.cap[m] * dx / dt * fre * rate;
         let mut rt = cona / dxa + f2;
         let st = -cona / dxa;
-        let mut pt = f2 * self.h_new[m] - (self.th_new[m] - self.th_old[m]) * dx / dt - self.sink[m] * dx - b;
+        let mut pt = f2 * self.h_new[m] - (self.th_new[m] - self.th_old[m]) * dx / dt * fre - self.sink[m] * dx - b;
 		if self.i_dual_por > 0 {
             pt -= self.sink_im[m] * dx;
         }
@@ -823,15 +867,39 @@ impl Simulation {
         }
     }
 
+    /// Liquid concentration of solute 1 at node `i` (Conc(1,i)); 0 without solute transport.
+    pub(crate) fn conc1(&self, i: usize) -> f64 {
+        self.sol.as_ref().and_then(|s| s.conc.first()).and_then(|c| c.get(i)).copied().unwrap_or(0.0)
+    }
+
+    /// fRo(1, c): density of the solution relative to water (1 without density-dependent flow).
+    pub(crate) fn f_ro(&self, c: f64) -> f64 {
+        self.density.map_or(1.0, |d| d.rho(c))
+    }
+
+    /// Gravity factor at the coordinate `x` (Grav of HYDRUS): cos α, or ω²(R + |x|)/g in a centrifuge.
+    pub(crate) fn grav_x(&self, x: f64) -> f64 {
+        match self.centrif_radius {
+            Some(r) => self.cos_alf * (r + x.abs()),
+            None => self.cos_alf,
+        }
+    }
+
+    /// Gravity factor of the element between nodes `a` and `b`.
+    pub(crate) fn grav_ab(&self, a: usize, b: usize) -> f64 {
+        self.grav_x((self.x[a] + self.x[b]) / 2.0)
+    }
+
     /// Change boundary condition types depending on the solution (Shift in Fortran).
     fn shift(&mut self) {
         let n = self.n;
-        let grav = self.cos_alf;
 
         if self.seep_f {
             let dx = self.x[1] - self.x[0];
-            let v_bot = -(self.con[0] + self.con[1]) / 2.0 * ((self.h_new[1] - self.h_new[0]) / dx + grav)
-                - dx / 2.0 * ((self.th_new[0] - self.th_old[0]) / self.dt + self.sink[0]);
+            let grav = self.grav_ab(1, 0);
+            let fre = if self.density.is_some() { self.f_ro(self.conc1(0)) } else { 1.0 };
+            let v_bot = -(self.con[0] + self.con[1]) / 2.0 * ((self.h_new[1] - self.h_new[0]) / dx + grav * fre)
+                - dx / 2.0 * fre * ((self.th_new[0] - self.th_old[0]) / self.dt + self.sink[0]);
             if self.kod_bot >= 0 {
                 if v_bot > 0.0 {
                     self.kod_bot = -2;
@@ -846,8 +914,10 @@ impl Simulation {
             if self.kod_top > 0 {
                 let m = n - 2;
                 let dx = self.x[n - 1] - self.x[m];
-                let mut v_top = -(self.con[n - 1] + self.con[m]) / 2.0 * ((self.h_new[n - 1] - self.h_new[m]) / dx + grav)
-                    - (self.th_new[n - 1] - self.th_old[n - 1]) * dx / 2.0 / self.dt
+                let grav = self.grav_ab(n - 1, m);
+                let fre = if self.density.is_some() { self.f_ro(self.conc1(n - 1)) } else { 1.0 };
+                let mut v_top = -(self.con[n - 1] + self.con[m]) / 2.0 * ((self.h_new[n - 1] - self.h_new[m]) / dx + grav * fre)
+                    - (self.th_new[n - 1] - self.th_old[n - 1]) * fre * dx / 2.0 / self.dt
                     - self.sink[n - 1] * dx / 2.0;
 
                 if self.i_dual_por > 0 {
@@ -901,6 +971,9 @@ impl Simulation {
         let n = self.n;
         let rmax = 1e10;
         self.it_cum_start();
+        // non-equilibrium water flow (Ross & Smettem, 2000): Rate of WatFlow
+        let rate_of = |dt: f64, tau: f64| if tau > 0.0 { (1.0 - (-dt / tau).exp()).clamp(0.000001, 1.0) } else { 1.0 };
+        self.rate = rate_of(self.dt, self.tau_w);
         'outer: loop {
             self.iter_w = 0;
             self.convg = true;
@@ -972,6 +1045,11 @@ impl Simulation {
                     let mut eps_th = 0.0;
                     let mut eps_h = 0.0;
                     if self.h_temp[i] < self.h_sat[m] && self.h_new[i] < self.h_sat[m] {
+                        // DEVIATION FROM THE 2009 SOURCE (Th = ThNew + Cap dh/(ths-thr)/ATh*Rate): with non-equilibrium
+                        // flow (TauW > 0) the change of the equilibrium water content decides, without Rate. With
+                        // Rate the test accepts large head changes once Rate is small and the iteration of a nearly
+                        // saturated profile diverges (infiltration example, τw = 0.05 d: h = 1e10 at t = 10.09); the
+                        // source has a disabled pressure-head test for this case.
                         let th = self.th_new[i]
                             + self.cap[i] * (self.h_new[i] - self.h_temp[i])
                                 / (self.ths[m] - self.thr[m])
@@ -1031,6 +1109,7 @@ impl Simulation {
                         self.dt = ((self.dt / 3.0).max(self.dt_min)) as f32 as f64; // amax1(dt/3,dtMin), REAL*4
                         self.dt_opt = self.dt;
                         self.t = self.t_old + self.dt;
+                        self.rate = rate_of(self.dt, self.tau_w);
                         // WATFLOW.FOR: `iTemp=0` before `goto 11` (iTemp is shared with the
                         // water-heat coupling loop in the main program).
                         self.i_temp = 0;
@@ -1040,7 +1119,7 @@ impl Simulation {
                 break;
             }
             for i in 0..n {
-                self.th_new[i] += self.cap[i] * (self.h_new[i] - self.h_temp[i]);
+                self.th_new[i] += self.cap[i] * (self.h_new[i] - self.h_temp[i]) * self.rate;
             }
             if self.l_dual_perm {
                 for i in 0..n {

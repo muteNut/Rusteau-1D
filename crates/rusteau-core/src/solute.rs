@@ -2471,8 +2471,10 @@ impl Simulation {
         let w_m = (1.0 - w_f).max(0.0);
 
         // DEVIATION FROM THE 2009 SOURCE, confirmed by HYDRUS 4.17: the 2009 SubReg accumulates DeltC with the concentration of
-        // solute 1 only (`if(jS.eq.1) cEl=cNewi`) and uses it for every solute; 4.17 uses the change of each solute's own mass
-        // (TEST3 CncBalR2: 0.252 % at t = 50 and 0.125 % at t = 100; with the solute-1 DeltC 0.055 % / 0.062 %).
+        // solute 1 only (`if(jS.eq.1) cEl=cNewi`) and uses it in CncBalR of every solute; 4.17 uses it for solute 1 only, the
+        // other solutes are related to cCumA alone (TEST3 CncBalR2: 0.252 % at t = 50 and 0.125 % at t = 100, with the
+        // solute-1 DeltC 0.055 % / 0.062 %; ROOTUPTK_ACT2 CncBalR2 0.069 % at t = 20, with the own DeltC of solute 2
+        // 0.0136 %, with the solute-1 DeltC 0.0077 %).
         for js in 0..ns {
             let (mut vol, mut vol_im, mut vol_im2) = (0.0, 0.0, 0.0);
             let (mut delt_c, mut c_tot, mut c_tot_im, mut a_tot) = (0.0, 0.0, 0.0, 0.0);
@@ -2608,7 +2610,8 @@ impl Simulation {
             } else {
                 let bal_t = total - st.c_vol_i[js] + st.c_cum_t[js];
                 rec.sol_bal_t[js] = bal_t;
-                let cc = delt_c.max(st.c_cum_a[js]);
+                let dc = if js == 0 { delt_c } else { 0.0 };
+                let cc = dc.max(st.c_cum_a[js]);
                 if cc > 1e-25 {
                     rec.sol_bal_r[js] = bal_t.abs() / cc * 100.0;
                 }

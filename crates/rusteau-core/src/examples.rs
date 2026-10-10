@@ -13,7 +13,7 @@ fn uniform_profile(depth: f64, n: usize, h: f64, mat_of: impl Fn(f64) -> usize) 
             nd
         })
         .collect();
-    Profile { nodes, observation_nodes: vec![], fixed_points: vec![FixedPoint::new(0.0), FixedPoint::new(depth)] }
+    Profile { nodes, observation_nodes: vec![], fixed_points: vec![FixedPoint::new(0.0), FixedPoint::new(depth)], hysteresis: None }
 }
 
 /// Infiltration and evaporation in a two-layer soil with root water uptake.

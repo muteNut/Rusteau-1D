@@ -1,5 +1,5 @@
 //! Writer for HYDRUS-1D 4.x projects ("legacy save"): the input files of a project folder (SELECTOR.IN, PROFILE.DAT,
-//! ATMOSPH.IN, METEO.IN, FIT.IN, MATER.IN, MoistDep.in, HYDRUS1D.DAT, DESCRIPT.TXT) and the project file `<name>.h1d`
+//! ATMOSPH.IN, METEO.IN, FIT.IN, MATER.IN, MoistDep.in, Hysteresis.in, HYDRUS1D.DAT, DESCRIPT.TXT) and the project file `<name>.h1d`
 //! next to the folder `<name>/`, the layout HYDRUS-1D 4.17 opens.
 //!
 //! The files follow the layout HYDRUS-1D 4.17 writes (file version 4, the header lines of 4.17, Windows line ends);
@@ -157,12 +157,6 @@ pub fn legacy_save_warnings(prj: &Project) -> Vec<String> {
             w.push("Flux-averaged output concentrations are a Rusteau setting and are not saved.".into());
         }
     }
-    if prj.processes.root_water_uptake && prj.root.l_act_rsu && prj.n_solutes() > 1 {
-        w.push(format!(
-            "Active solute uptake with several solutes (solute {}): the SELECTOR.IN layout of HYDRUS 4.17 for this case is not known yet, the active uptake is not saved.",
-            prj.root.active_solute + 1
-        ));
-    }
     if prj.time.flux_out {
         w.push("The extra flux output (T_Level1) is a Rusteau setting and is not saved.".into());
     }
@@ -172,10 +166,33 @@ pub fn legacy_save_warnings(prj: &Project) -> Vec<String> {
     if !prj.water.use_tables {
         w.push("HYDRUS-1D always interpolates the hydraulic functions from tables; the analytic evaluation is a Rusteau setting.".into());
     }
+    if !prj.options.is_default() {
+        w.push(
+            "The further options of the HYDRUS code (head extrapolation, vapor enhancement factor, non-equilibrium flow, centrifuge, density-dependent flow) are not saved: HYDRUS-1D does not read Options.in."
+                .into(),
+        );
+    }
     if prj.inverse.as_ref().is_some_and(|s| !s.hydrus_stop) && prj.processes.inverse {
         w.push("The Rusteau iteration of the parameter estimation (frozen time levels, several starting points) is not stored; HYDRUS-1D runs its own.".into());
     }
     w
+}
+
+/// `Hysteresis.in` (HysterIn of INPUT.FOR): two header lines, then `n  Theta  Kappa` for every node, the bottom
+/// node first (HysterIn assigns the lines to the nodes in the internal order and ignores `n`). `None` without an
+/// initial hysteresis state or without Kool & Parker hysteresis.
+pub fn hysteresis_text(prj: &Project) -> Option<String> {
+    let st = prj.profile.hysteresis.as_ref()?;
+    if !prj.water.hysteresis.is_kool_parker() || st.len() != prj.profile.nodes.len() {
+        return None;
+    }
+    let mut o = String::new();
+    let _ = writeln!(o, "Hysteresis.in - initial water contents and branches (Kappa: -1 drying, 1 wetting), bottom node first");
+    let _ = writeln!(o, "    n           Theta  Kappa");
+    for (k, h) in st.iter().rev().enumerate() {
+        let _ = writeln!(o, "{:5} {:>15} {:6}", k + 1, g(h.theta), if h.kappa > 0 { 1 } else { -1 });
+    }
+    Some(o)
 }
 
 /// SELECTOR.IN.
@@ -510,16 +527,18 @@ pub fn selector_text(prj: &Project) -> String {
                 }
             }
         }
-        if r.l_act_rsu && ns == 1 {
-            let _ = writeln!(o, "     OmegaS        SPot         rKM        cMin   lOmegaW");
+        if r.l_act_rsu && ns >= 1 {
+            // HYDRUS 4.17 layout with the solute taken up actively (iActSolU, 1-based)
+            let _ = writeln!(o, "      OmegaS     SPot     KM       cMin    OmegaW  iActSolU");
             let v = vec![
                 g(r.omega_act.first().copied().unwrap_or(0.0)),
                 g(r.s_pot),
                 g(r.r_km.first().copied().unwrap_or(0.0)),
                 g(r.c_min.first().copied().unwrap_or(0.0)),
                 lg(r.l_omega_w).to_string(),
+                (r.active_solute.min(ns - 1) + 1).to_string(),
             ];
-            let _ = writeln!(o, "{} ", row(&v, 11));
+            let _ = writeln!(o, "{} ", row(&v, 9));
         }
     }
     let _ = writeln!(o, "*** END OF INPUT FILE 'SELECTOR.IN' ************************************");
@@ -793,7 +812,8 @@ pub fn write_legacy_project(prj: &Project, dir: &Path) -> R<(Vec<PathBuf>, Vec<S
     std::fs::create_dir_all(dir).map_err(|e| HydrusError::Io(format!("{}: {}", dir.display(), e)))?;
     let mut files = vec![];
     // remove input files of another spelling (e.g. ATMOSPH.IN next to Atmosph.in) that the new ones replace
-    const NAMES: [&str; 9] = ["SELECTOR.IN", "PROFILE.DAT", "ATMOSPH.IN", "METEO.IN", "FIT.IN", "MATER.IN", "MOISTDEP.IN", "HYDRUS1D.DAT", "DESCRIPT.TXT"];
+    const NAMES: [&str; 10] =
+        ["SELECTOR.IN", "PROFILE.DAT", "ATMOSPH.IN", "METEO.IN", "FIT.IN", "MATER.IN", "MOISTDEP.IN", "HYSTERESIS.IN", "HYDRUS1D.DAT", "DESCRIPT.TXT"];
     if let Ok(rd) = std::fs::read_dir(dir) {
         for e in rd.flatten() {
             let n = e.file_name().to_string_lossy().to_ascii_uppercase();
@@ -819,6 +839,9 @@ pub fn write_legacy_project(prj: &Project, dir: &Path) -> R<(Vec<PathBuf>, Vec<S
         let p = dir.join("MoistDep.in");
         crate::moist_dep::write_moist_dep(&p, prj)?;
         files.push(p);
+    }
+    if let Some(text) = hysteresis_text(prj) {
+        write_file(dir, "Hysteresis.in", &text, &mut files)?;
     }
     if let Some(s) = &prj.inverse {
         let p = dir.join("FIT.IN");

@@ -33,7 +33,16 @@ fn normalize_project(p: &Project) -> Project {
             p_optm.resize(n_mat, last);
         }
     }
+    // Hysteresis.in: water contents and branches (no conductivities), only with Kool & Parker hysteresis
+    if !p.water.hysteresis.is_kool_parker() {
+        p.profile.hysteresis = None;
+    }
+    if let Some(st) = p.profile.hysteresis.as_mut() {
+        st.iter_mut().for_each(|s| s.k = None);
+    }
     p.time.flux_out = false;
+    // Options.in: not read by HYDRUS-1D, not saved
+    p.options = Default::default();
     if p.time.print_times.is_empty() {
         p.time.print_times = vec![p.time.t_max];
     }
@@ -158,6 +167,77 @@ fn builtin_examples_round_trip() {
     }
     let _ = std::fs::remove_dir_all(&dir);
     assert!(problems.is_empty(), "{}", problems.join("\n"));
+}
+
+/// Active uptake of the second of two solutes: SELECTOR.IN of HYDRUS 4.17 with iActSolU (ROOTUPTK_ACT2).
+#[test]
+fn active_uptake_of_the_second_solute_round_trip() {
+    use rusteau_core::*;
+    let dir = tmp("act2");
+    let mut p = examples::infiltration_evaporation();
+    p.processes.solute = true;
+    let ns = 2;
+    let mut sol = SoluteSettings { species: vec![], materials: vec![SoluteMaterial::default(); 2], max_iter: 1, ..Default::default() };
+    for j in 0..ns {
+        sol.species.push(Species { name: format!("Solute {}", j + 1), per_material: vec![SpeciesMaterial { beta: 1.0, ..Default::default() }; 2], ..Default::default() });
+    }
+    sol.k_top = -1;
+    p.solute = sol;
+    for r in p.atmosphere.records.iter_mut() {
+        r.c_top = vec![1.0, 0.0];
+        r.c_bot = vec![0.0, 0.1];
+    }
+    for nd in p.profile.nodes.iter_mut() {
+        nd.conc = vec![1.0; ns];
+        nd.sorb = vec![0.0; ns];
+    }
+    p.root.c_root_max = vec![0.1; ns];
+    p.root.l_act_rsu = true;
+    p.root.active_solute = 1;
+    p.root.r_km = vec![0.5];
+    p.root.c_min = vec![0.0];
+    p.root.omega_act = vec![1.0];
+    assert!(legacy_save_warnings(&p).iter().all(|w| !w.contains("ctive")), "{:?}", legacy_save_warnings(&p));
+    let problems = round_trip(&p, &dir, "act2", true);
+    assert!(problems.is_empty(), "{}", problems.join("\n"));
+    let sel = std::fs::read_to_string(dir.join("act2").join("SELECTOR.IN")).unwrap();
+    let mut lines = sel.lines().skip_while(|l| !l.contains("iActSolU"));
+    lines.next();
+    let v: Vec<&str> = lines.next().unwrap().split_whitespace().collect();
+    assert_eq!(v.len(), 6);
+    assert_eq!(v[5], "2");
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn hysteresis_state_round_trip() {
+    let dir = tmp("hyst");
+    let mut prj = examples::all()[0].1();
+    prj.water.hysteresis = rusteau_core::Hysteresis::RetentionAndConductivity;
+    for m in prj.water.materials.iter_mut() {
+        m.qm = m.qs;
+        m.qs_w = m.qs - 0.02;
+        m.alpha_w = 2.0 * m.alpha;
+        m.ks_w = 0.8 * m.ks;
+    }
+    let n = prj.profile.nodes.len();
+    // distinct values, so that the node order is checked
+    let st: Vec<rusteau_core::HysteresisNode> =
+        (0..n).map(|j| rusteau_core::HysteresisNode { theta: 0.1 + 0.002 * j as f64, kappa: if j % 3 == 0 { 1 } else { -1 }, k: Some(1.0) }).collect();
+    prj.profile.hysteresis = Some(st.clone());
+    let problems = round_trip(&prj, &dir, "hyst", true);
+    assert!(problems.is_empty(), "{}", problems.join("\n"));
+    // the file lists the bottom node first (HysterIn assigns the lines in the internal order)
+    let text = std::fs::read_to_string(dir.join("hyst").join("Hysteresis.in")).unwrap();
+    let first: Vec<f64> = text.lines().nth(2).unwrap().split_whitespace().map(|t| t.parse().unwrap()).collect();
+    assert_eq!(first, vec![1.0, st[n - 1].theta, st[n - 1].kappa as f64]);
+    assert!(text.contains("\r\n"));
+    // without hysteresis no file; a stale one is removed
+    prj.water.hysteresis = rusteau_core::Hysteresis::None;
+    let (files, _) = save_h1d_project(&prj, &dir.join("hyst.h1d")).unwrap();
+    assert!(!dir.join("hyst").join("Hysteresis.in").exists());
+    assert!(files.iter().all(|f| !f.to_string_lossy().contains("Hysteresis")));
+    let _ = std::fs::remove_dir_all(&dir);
 }
 
 #[test]

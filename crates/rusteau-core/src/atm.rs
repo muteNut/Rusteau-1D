@@ -134,14 +134,22 @@ impl Simulation {
         }
 
         if self.bot_inf {
+            let mut h_b = rec.h_bot;
+            if self.centrif_radius.is_some() {
+                // centrifuge (SetBC of TIME.FOR): the hBot column holds the rotation speed (rpm in Rusteau), the
+                // bottom pressure head is 0
+                self.cos_alf = crate::sim::centrifuge_cos_alf(h_b, self.x_conv);
+                h_b = 0.0;
+                self.min_step = true;
+            }
             if (self.r_bot - rec.r_bot).abs() > self.r_bot.abs() * 0.2 {
                 self.min_step = true;
             }
             self.r_bot = rec.r_bot;
-            if (self.h_bot - rec.h_bot - self.gwl0l).abs() > self.h_bot.abs() * 0.2 {
+            if (self.h_bot - h_b - self.gwl0l).abs() > self.h_bot.abs() * 0.2 {
                 self.min_step = true;
             }
-            self.h_bot = rec.h_bot + self.gwl0l;
+            self.h_bot = h_b + self.gwl0l;
         }
         Ok(())
     }

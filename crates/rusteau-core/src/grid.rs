@@ -157,6 +157,11 @@ impl Profile {
     /// bottom node. Observation nodes keep their depth (they move to the nearest new node).
     pub fn regrid(&mut self, depths: &[f64]) {
         let old = std::mem::take(&mut self.nodes);
+        // the initial hysteresis state belongs to the old nodes
+        let same = old.len() == depths.len() && old.iter().zip(depths).all(|(a, &z)| a.depth == z);
+        if !same {
+            self.hysteresis = None;
+        }
         if old.is_empty() {
             self.nodes = depths.iter().map(|&z| ProfileNode::new(z, -100.0, 1)).collect();
             return;

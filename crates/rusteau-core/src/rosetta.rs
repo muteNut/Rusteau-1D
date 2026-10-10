@@ -123,9 +123,10 @@ impl SoilData {
     }
 }
 
-/// Name of the input data of model `code` (2–5).
+/// Name of the input data of model `code` (1–5).
 pub fn model_name(code: u8) -> &'static str {
     match code {
+        1 => "Textural class (class averages)",
         2 => "Sand, silt and clay (SSC)",
         3 => "SSC + bulk density (BD)",
         4 => "SSC + BD + θ at 33 kPa",
@@ -398,6 +399,31 @@ pub fn predict(version: RosettaVersion, data: &SoilData, code: Option<u8>, estim
 }
 
 /// USDA soil texture class of a sand / silt / clay composition (percent).
+/// Class averages of θr, θs [cm³/cm³], α [1/cm], n [-] and Ks [cm/day] of the 12 USDA textural classes in the Rosetta
+/// database (model H1 of Rosetta, Schaap et al. 2001; the "Textural classes" of the Rosetta Lite dialog of HYDRUS-1D,
+/// values as 4.17 shows them).
+pub const TEXTURAL_CLASSES: [(&str, [f64; 5]); 12] = [
+    ("Clay", [0.0982, 0.4588, 0.0150, 1.2529, 14.75]),
+    ("Clay loam", [0.0792, 0.4418, 0.0158, 1.4145, 8.18]),
+    ("Loam", [0.0609, 0.3991, 0.0111, 1.4737, 12.04]),
+    ("Loamy sand", [0.0485, 0.3904, 0.0347, 1.7466, 105.12]),
+    ("Sand", [0.0530, 0.3747, 0.0353, 3.1798, 642.98]),
+    ("Sandy clay", [0.1169, 0.3854, 0.0334, 1.2067, 11.35]),
+    ("Sandy clay loam", [0.0633, 0.3837, 0.0211, 1.3298, 13.19]),
+    ("Sandy loam", [0.0387, 0.3870, 0.0267, 1.4484, 38.25]),
+    ("Silt", [0.0501, 0.4887, 0.0066, 1.6769, 43.74]),
+    ("Silty clay", [0.1108, 0.4808, 0.0162, 1.3207, 9.61]),
+    ("Silty clay loam", [0.0901, 0.4820, 0.0084, 1.5202, 11.11]),
+    ("Silt loam", [0.0645, 0.4387, 0.0051, 1.6626, 18.26]),
+];
+
+/// Class averages of a textural class (model 1; no K0, L or standard deviations: NaN).
+pub fn class_average(class: &str) -> Option<Prediction> {
+    let (_, v) = TEXTURAL_CLASSES.iter().find(|(c, _)| c.eq_ignore_ascii_case(class))?;
+    Some(Prediction { model: 1, theta_r: v[0], theta_s: v[1], alpha: v[2], n: v[3], ks: v[4], k0: f64::NAN, l: f64::NAN, std: [f64::NAN; 7] })
+}
+
+/// USDA textural class of a texture (sand, silt and clay in %).
 pub fn texture_class(sand: f64, silt: f64, clay: f64) -> &'static str {
     if silt + 1.5 * clay < 15.0 {
         "Sand"
@@ -429,6 +455,18 @@ pub fn texture_class(sand: f64, silt: f64, clay: f64) -> &'static str {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn textural_classes() {
+        // every class of the texture triangle has class averages
+        for (sand, silt, clay) in [(90.0, 5.0, 5.0), (40.0, 40.0, 20.0), (20.0, 70.0, 10.0), (10.0, 85.0, 5.0), (30.0, 30.0, 40.0)] {
+            let c = texture_class(sand, silt, clay);
+            assert!(class_average(c).is_some(), "{c}");
+        }
+        let p = class_average("loam").unwrap();
+        assert_eq!((p.model, p.theta_r, p.ks), (1, 0.0609, 12.04));
+        assert!(class_average("Peat").is_none());
+    }
 
     fn data() -> Vec<SoilData> {
         vec![

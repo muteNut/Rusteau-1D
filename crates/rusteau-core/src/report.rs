@@ -8,15 +8,18 @@ impl Simulation {
     pub fn tl_inf(&mut self, j_print: bool) {
         let n = self.n;
         let m = n - 1;
-        let grav = self.cos_alf;
         let dxn = self.x[m] - self.x[m - 1];
         let dt = self.dt;
-        let v_t = -(self.con[m] + self.con[m - 1]) / 2.0 * ((self.h_new[m] - self.h_new[m - 1]) / dxn + grav)
-            - (self.th_new[m] - self.th_old[m]) * dxn / 2.0 / dt
+        // density-dependent flow and centrifuge (TLInf): density ratio of the boundary node, gravity of the element
+        let fre = |i: usize| if self.density.is_some() { self.f_ro(self.conc1(i)) } else { 1.0 };
+        let (grav, f) = (self.grav_ab(m, m - 1), fre(m));
+        let v_t = -(self.con[m] + self.con[m - 1]) / 2.0 * ((self.h_new[m] - self.h_new[m - 1]) / dxn + grav * f)
+            - (self.th_new[m] - self.th_old[m]) * f * dxn / 2.0 / dt
             - self.sink[m] * dxn / 2.0;
         let dx1 = self.x[1] - self.x[0];
-        let mut v_b = -(self.con[0] + self.con[1]) / 2.0 * ((self.h_new[1] - self.h_new[0]) / dx1 + grav)
-            + (self.th_new[0] - self.th_old[0]) * dx1 / 2.0 / dt
+        let (grav, f) = (self.grav_ab(1, 0), fre(0));
+        let mut v_b = -(self.con[0] + self.con[1]) / 2.0 * ((self.h_new[1] - self.h_new[0]) / dx1 + grav * f)
+            + (self.th_new[0] - self.th_old[0]) * f * dx1 / 2.0 / dt
             + self.sink[0] * dx1 / 2.0;
 
         let mut v_t = v_t;
@@ -126,6 +129,10 @@ impl Simulation {
             let dx = self.x[i + 1] - self.x[i];
             // TLInf: the T_Level volume holds no vapor (SubReg / Balance.out does); 4.17 EnBal2b: 6.5332 at t = 328.001.
             let mut v = dx * (self.th_new[i] + self.th_new[i + 1]) / 2.0;
+            if self.density.is_some() {
+                // density-dependent flow: mass of the solution in water-volume units
+                v = dx * (self.th_new[i] * self.f_ro(self.conc1(i)) + self.th_new[i + 1] * self.f_ro(self.conc1(i + 1))) / 2.0;
+            }
             if self.i_dual_por > 0 {
                 v += dx * (self.th_new_im[i] + self.th_new_im[i + 1]) / 2.0;
             }
@@ -204,9 +211,13 @@ impl Simulation {
     /// Nodal profile output (NodOut). Fluxes use the NodOut formula.
     pub fn profile_out(&mut self, t: f64) {
         let n = self.n;
-        let grav = self.cos_alf;
         let ns = self.n_species();
         let con_sn = self.con_sat[self.mat[n - 1]] * self.ak[n - 1];
+        // density-dependent flow and centrifuge (NodOut): density ratio and gravity factor of an element
+        let dens = self.density.is_some();
+        let fre1 = |i: usize| if dens { self.f_ro(self.conc1(i)) } else { 1.0 };
+        let fre2 = |a: usize, b: usize| if dens { (self.f_ro(self.conc1(a)) + self.f_ro(self.conc1(b))) / 2.0 } else { 1.0 };
+        let gf = |a: usize, b: usize, f: f64| self.grav_ab(a, b) * f;
 
         let flux_concs = if self.l_chem && self.prj.solute.i_conc_type == 2 {
             let mut fc = vec![vec![0.0; ns]; n];
@@ -231,7 +242,7 @@ impl Simulation {
             let (mut v_iso, mut v_term) = (0.0, 0.0);
             if i == 0 {
                 let dx = self.x[1] - self.x[0];
-                vi = -(self.con[0] + self.con[1]) / 2.0 * ((self.h_new[1] - self.h_new[0]) / dx + grav);
+                vi = -(self.con[0] + self.con[1]) / 2.0 * ((self.h_new[1] - self.h_new[0]) / dx + gf(1, 0, fre1(0)));
                 if l_w_dep {
                     vi -= (self.con_lt[0] + self.con_lt[1]) / 2.0 * (self.temp(1) - self.temp(0)) / dx;
                 }
@@ -247,8 +258,9 @@ impl Simulation {
                 // NodOut: `-(ThN(N)-ThOldT)*dx/2/dt - Sink(N)*dx/2`: with the storage term the printed flux of the top node equals the
                 // boundary flux (2HYSTER: -9). The reference files contain solver noise in this one value (1DRAINAG prints -0.055 for a
                 // no-flux top, 2NOHYSTR -8.69 for a flux of -9), so the comparison does not check the top-node flux.
-                vi = -(self.con[n - 1] + self.con[n - 2]) / 2.0 * ((self.h_new[n - 1] - self.h_new[n - 2]) / dx + grav)
-                    - (self.th_new[n - 1] - self.th_old[n - 1]) * dx / 2.0 / self.dt
+                let f = fre1(n - 1);
+                vi = -(self.con[n - 1] + self.con[n - 2]) / 2.0 * ((self.h_new[n - 1] - self.h_new[n - 2]) / dx + gf(n - 1, n - 2, f))
+                    - (self.th_new[n - 1] - self.th_old[n - 1]) * f * dx / 2.0 / self.dt
                     - self.sink[n - 1] * dx / 2.0;
                 if l_w_dep {
                     vi -= (self.con_lt[n - 1] + self.con_lt[n - 2]) / 2.0 * (self.temp(n - 1) - self.temp(n - 2)) / dx;
@@ -263,8 +275,8 @@ impl Simulation {
             } else {
                 let dxa = self.x[i + 1] - self.x[i];
                 let dxb = self.x[i] - self.x[i - 1];
-                let va = -(self.con[i] + self.con[i + 1]) / 2.0 * ((self.h_new[i + 1] - self.h_new[i]) / dxa + grav);
-                let vb = -(self.con[i] + self.con[i - 1]) / 2.0 * ((self.h_new[i] - self.h_new[i - 1]) / dxb + grav);
+                let va = -(self.con[i] + self.con[i + 1]) / 2.0 * ((self.h_new[i + 1] - self.h_new[i]) / dxa + gf(i + 1, i, fre2(i, i + 1)));
+                let vb = -(self.con[i] + self.con[i - 1]) / 2.0 * ((self.h_new[i] - self.h_new[i - 1]) / dxb + gf(i, i - 1, fre2(i, i - 1)));
                 vi = (va * dxa + vb * dxb) / (dxa + dxb);
                 if l_w_dep {
                     let vat = -(self.con_lt[i] + self.con_lt[i + 1]) / 2.0 * (self.temp(i + 1) - self.temp(i)) / dxa;
@@ -420,6 +432,16 @@ impl Simulation {
             let he = (self.h_new[i] + self.h_new[j]) / 2.0;
             let mut vnew = dx * (self.th_new[i] + self.th_new[j]) / 2.0;
             let mut vold = dx * (self.th_old[i] + self.th_old[j]) / 2.0;
+            if let (Some(d), Some(sol)) = (&self.density, self.sol.as_ref().filter(|s| !s.conc.is_empty())) {
+                // density-dependent flow: mass of the solution in water-volume units (old concentrations: the
+                // beginning of the step)
+                let (c, co) = (&sol.conc[0], sol.conc_old_step.first().unwrap_or(&sol.conc[0]));
+                vnew = dx * (self.th_new[i] * d.rho(c[i]) + self.th_new[j] * d.rho(c[j])) / 2.0;
+                vold = dx * (self.th_old[i] * d.rho(co[i]) + self.th_old[j] * d.rho(co[j])) / 2.0;
+            } else if let Some(d) = &self.density {
+                vnew *= d.rho(0.0);
+                vold *= d.rho(0.0);
+            }
 
             if self.l_vapor {
                 // The initial SubReg call (PLevel = 0) comes before ThVNew is set (HYDRUS.FOR copies ThVOld to ThVNew after
@@ -504,11 +526,12 @@ impl Simulation {
 
         // Fluxes at the boundaries (v1 at the bottom, vN at the top), including the
         // temperature-dependent liquid flux and the vapor flux terms of SubReg
-        let grav = self.cos_alf;
+        let fre = |i: usize| if self.density.is_some() { self.f_ro(self.conc1(i)) } else { 1.0 };
         let dx1 = self.x[1] - self.x[0];
-        let mut v1 = -(self.con[0] + self.con[1]) / 2.0 * ((self.h_new[1] - self.h_new[0]) / dx1 + grav);
+        let mut v1 = -(self.con[0] + self.con[1]) / 2.0 * ((self.h_new[1] - self.h_new[0]) / dx1 + self.grav_ab(1, 0) * fre(0));
         let dxn = self.x[n - 1] - self.x[n - 2];
-        let mut vn = -(self.con[n - 1] + self.con[n - 2]) / 2.0 * ((self.h_new[n - 1] - self.h_new[n - 2]) / dxn + grav);
+        let mut vn =
+            -(self.con[n - 1] + self.con[n - 2]) / 2.0 * ((self.h_new[n - 1] - self.h_new[n - 2]) / dxn + self.grav_ab(n - 1, n - 2) * fre(n - 1));
         if self.prj.water.l_w_dep {
             v1 -= (self.con_lt[0] + self.con_lt[1]) / 2.0 * (self.temp(1) - self.temp(0)) / dx1;
             vn -= (self.con_lt[n - 1] + self.con_lt[n - 2]) / 2.0 * (self.temp(n - 1) - self.temp(n - 2)) / dxn;

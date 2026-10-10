@@ -327,72 +327,229 @@ impl App {
         ui.label(RichText::new("Hydraulic properties are pre-tabulated (100 log-spaced points) and interpolated within this interval, as in HYDRUS-1D.").weak());
     }
 
+    /// Options of the HYDRUS code that the HYDRUS-1D interface does not offer (`Options.in`).
+    pub fn page_options(&mut self, ui: &mut Ui, ch: &mut bool) {
+        page_title(ui, "Further options of the HYDRUS code");
+        ui.label(
+            RichText::new(
+                "The HYDRUS code contains these options, but the HYDRUS-1D interface does not offer them (INPUT.FOR: \"not supported by GUI\"; \
+                 the computational module opens a file Options.in for them but never reads it). They are stored in the Rusteau project; \
+                 a HYDRUS-1D project (legacy save) cannot hold them.",
+            )
+            .weak(),
+        );
+        let tu = self.prj.units.time_str().to_string();
+        let lu = self.prj.units.length_str().to_string();
+        let dual_perm = self.prj.water.model == SoilModel::DualPermeability;
+        let o = &mut self.prj.options;
+
+        section(ui, "Water flow");
+        check(ui, ch, &mut o.extrapolate_heads, "Start each time step from heads extrapolated from the two previous steps (lExtrap)");
+        let mut neq = o.tau_w > 0.0;
+        ui.add_enabled_ui(!dual_perm || neq, |ui| {
+            if ui.checkbox(&mut neq, "Non-equilibrium water flow (Ross & Smettem, 2000; TauW)").changed() {
+                o.tau_w = if neq { 1.0 } else { 0.0 };
+                *ch = true;
+            }
+        });
+        if neq {
+            ui.indent("tauw", |ui| {
+                egui::Grid::new("tauw_g").num_columns(2).show(ui, |ui| {
+                    field_u(ui, ch, "Time constant τw", &mut o.tau_w, &tu);
+                });
+                o.tau_w = o.tau_w.max(0.0);
+                ui.label(
+                    RichText::new(
+                        "The water content approaches the equilibrium water content of the pressure head, θ − θold = (θeq(h) − θold)(1 − e^(−Δt/τw)). \
+                         The iteration gets harder: a smaller time step no longer increases the storage term, so strong infiltration may not converge.",
+                    )
+                    .weak(),
+                );
+            });
+        }
+
+        section(ui, "Centrifuge");
+        let mut cf = o.centrifuge.is_some();
+        ui.add_enabled_ui(!dual_perm || cf, |ui| {
+            if ui.checkbox(&mut cf, "Flow in a centrifuge (lCentrif)").changed() {
+                o.centrifuge = cf.then(Centrifuge::default);
+                *ch = true;
+            }
+        });
+        if let Some(c) = o.centrifuge.as_mut() {
+            ui.indent("centrif", |ui| {
+                egui::Grid::new("centrif_g").num_columns(2).show(ui, |ui| {
+                    field_u(ui, ch, "Rotation speed", &mut c.rpm, "rpm");
+                    field_u(ui, ch, "Distance of the soil surface from the axis", &mut c.radius, &lu);
+                });
+                ui.label(
+                    RichText::new(
+                        "The gravity term of the flux becomes ω²(R + depth)/g (the inclination cos α is not used). With a time-variable \
+                         bottom boundary condition the hBot column of the time-variable boundary conditions gives the speed in rpm and the \
+                         bottom pressure head is 0.",
+                    )
+                    .weak(),
+                );
+            });
+        }
+
+        section(ui, "Density-dependent flow");
+        let mut dd = o.density.is_some();
+        ui.add_enabled_ui(!dual_perm || dd, |ui| {
+            if ui.checkbox(&mut dd, "Density and viscosity depend on the concentration of solute 1 (lDensity)").changed() {
+                o.density = dd.then(DensityDependence::default);
+                *ch = true;
+            }
+        });
+        if let Some(d) = o.density.as_mut() {
+            ui.indent("dens", |ui| {
+                egui::Grid::new("dens_g").num_columns(5).show(ui, |ui| {
+                    ui.label("");
+                    for h in ["a0", "a1 · c", "a2 · c²", "a3 · c³"] {
+                        ui.strong(h);
+                    }
+                    ui.end_row();
+                    ui.label("ρ(c)/ρ(0)");
+                    for v in d.density.iter_mut() {
+                        dv(ui, ch, v);
+                    }
+                    ui.end_row();
+                    ui.label("μ(c)/μ(0)");
+                    for v in d.viscosity.iter_mut() {
+                        dv(ui, ch, v);
+                    }
+                    ui.end_row();
+                });
+                ui.label(
+                    RichText::new(
+                        "c: liquid concentration of solute 1 (HYDRUS: ρ/ρ0 = 1 + 0.75 c, μ/μ0 = 1). The conductivity scales with ρ/μ, the \
+                         gravity term and the storage with ρ. HYDRUS solves ρ ∂θ/∂t = ∂/∂z[K(∂h/∂z + ρ)] − S while the mass balance sums ρθ: \
+                         the balance error equals the solution mass gained by changes of the density.",
+                    )
+                    .weak(),
+                );
+            });
+        }
+
+        section(ui, "Vapor flow");
+        check(ui, ch, &mut o.vapor_enhancement, "Enhancement factor of the thermal vapor flux (Cass et al., 1984; iEnhanc)");
+
+        if dual_perm && (o.tau_w > 0.0 || o.centrifuge.is_some() || o.density.is_some()) {
+            ui.colored_label(egui::Color32::from_rgb(230, 120, 50), "Non-equilibrium flow, centrifuge and density-dependent flow are not available with the dual-permeability model.");
+        }
+        ui.add_space(8.0);
+        if ui.add_enabled(!o.is_default(), egui::Button::new("HYDRUS defaults")).clicked() {
+            *o = AdvancedOptions::default();
+            *ch = true;
+        }
+    }
+
     pub fn page_hydmodel(&mut self, ui: &mut Ui, ch: &mut bool) {
         page_title(ui, "Soil hydraulic model");
-        ui.horizontal(|ui| {
-            ui.label("Soil hydraulic model");
-            ComboBox::from_id_salt("model").selected_text(self.prj.water.model.name()).show_ui(ui, |ui| {
-                for m in [
-                    SoilModel::VanGenuchten,
-                    SoilModel::ModifiedVG,
-                    SoilModel::BrooksCorey,
-                    SoilModel::VGAirEntry,
-                    SoilModel::Kosugi,
-                    SoilModel::Durner,
-                    SoilModel::DualPorosityW,
-                    SoilModel::DualPorosityH,
-                    SoilModel::DualPermeability,
-                    SoilModel::Tabular,
-                ] {
-                    if ui.selectable_value(&mut self.prj.water.model, m, m.name()).changed() {
-                        *ch = true;
-                    }
+        // layout of the "Soil Hydraulic Model" dialog of HYDRUS-1D 4.17: models on the left, hysteresis on the right
+        let mut model = self.prj.water.model;
+        let radio = |ui: &mut Ui, model: &mut SoilModel, m: SoilModel, label: &str| {
+            let on = *model == m || (m == SoilModel::VanGenuchten && *model == SoilModel::VGAirEntry);
+            if ui.radio(on, label).clicked() && !on {
+                *model = m;
+            }
+        };
+        ui.columns(2, |cols| {
+            let ui = &mut cols[0];
+            section(ui, "Single-porosity models");
+            radio(ui, &mut model, SoilModel::VanGenuchten, "van Genuchten – Mualem");
+            ui.indent("air_entry", |ui| {
+                let vg = matches!(model, SoilModel::VanGenuchten | SoilModel::VGAirEntry);
+                let mut ae = model == SoilModel::VGAirEntry;
+                if ui
+                    .add_enabled(vg, egui::Checkbox::new(&mut ae, "With air-entry value of −2 cm"))
+                    .on_hover_text("Modified van Genuchten function with hs = −2 cm (Vogel et al., 2001): improves the description of fine-textured soils with n close to 1 (SELECTOR.IN model 3).")
+                    .changed()
+                {
+                    model = if ae { SoilModel::VGAirEntry } else { SoilModel::VanGenuchten };
                 }
             });
-        });
-        if self.prj.water.model == SoilModel::Tabular {
-            ui.horizontal(|ui| {
+            radio(ui, &mut model, SoilModel::ModifiedVG, "Modified van Genuchten (Vogel & Císlerová, 1988)");
+            radio(ui, &mut model, SoilModel::BrooksCorey, "Brooks – Corey");
+            radio(ui, &mut model, SoilModel::Kosugi, "Kosugi (log-normal)");
+            section(ui, "Dual-porosity models");
+            radio(ui, &mut model, SoilModel::Durner, "Dual-porosity (Durner, dual van Genuchten – Mualem)");
+            radio(ui, &mut model, SoilModel::DualPorosityW, "Dual-porosity (mobile–immobile, water-content mass transfer)");
+            radio(ui, &mut model, SoilModel::DualPorosityH, "Dual-porosity (mobile–immobile, head mass transfer)");
+            section(ui, "Dual-permeability models");
+            radio(ui, &mut model, SoilModel::DualPermeability, "Dual-permeability (Gerke & van Genuchten, 1993)");
+            section(ui, "Look-up tables");
+            radio(ui, &mut model, SoilModel::Tabular, "Look-up tables of θ(h), K(h) and C(h) (Mater.in)");
+            if model == SoilModel::Tabular {
                 let status = if self.prj.water.tabs.is_some() {
                     RichText::new("✔ External tables (Mater.in) loaded").color(egui::Color32::LIGHT_GREEN)
                 } else {
                     RichText::new("⚠ No external tables loaded (Mater.in required)").color(egui::Color32::LIGHT_RED)
                 };
                 ui.label(status);
-            });
-        }
-        ui.horizontal(|ui| {
-            ui.label("Hysteresis");
-            let cur = match self.prj.water.hysteresis {
-				Hysteresis::None => "No hysteresis",
-				Hysteresis::Retention => "Hysteresis in the retention curve",
-				Hysteresis::RetentionAndConductivity => "Hysteresis in retention and conductivity",
-				Hysteresis::Lenhard => "Lenhard et al. air-entrapment hysteresis",
-			};
-			ComboBox::from_id_salt("hyst").selected_text(cur).show_ui(ui, |ui| {
-				for (h, n) in [
-					(Hysteresis::None, "No hysteresis"),
-					(Hysteresis::Retention, "Hysteresis in the retention curve"),
-					(Hysteresis::RetentionAndConductivity, "Hysteresis in retention and conductivity"),
-					(Hysteresis::Lenhard, "Lenhard et al. air-entrapment hysteresis"),
-				] {
-					if ui.selectable_value(&mut self.prj.water.hysteresis, h, n).changed() {
-						*ch = true;
-					}
-				}
-			});
+            }
+
+            let ui = &mut cols[1];
+            section(ui, "Hysteresis");
+            for (h, n) in [
+                (Hysteresis::None, "No hysteresis"),
+                (Hysteresis::Retention, "Hysteresis in the retention curve"),
+                (Hysteresis::RetentionAndConductivity, "Hysteresis in the retention curve and the conductivity"),
+                (Hysteresis::Lenhard, "Hysteresis in the retention curve (no pumping, Lenhard et al.)"),
+            ] {
+                if ui.radio_value(&mut self.prj.water.hysteresis, h, n).changed() {
+                    *ch = true;
+                }
+            }
+            if self.prj.water.hysteresis != Hysteresis::None {
+                ui.add_space(4.0);
+                if ui.radio_value(&mut self.prj.water.init_kappa, -1, "Initially drying curve").changed() {
+                    *ch = true;
+                }
+                if ui.radio_value(&mut self.prj.water.init_kappa, 1, "Initially wetting curve").changed() {
+                    *ch = true;
+                }
+            }
+            if self.prj.water.hysteresis.is_kool_parker() {
+                section(ui, "Initial hysteresis state (Hysteresis.in)");
+                let n = self.prj.profile.nodes.len();
+                match &self.prj.profile.hysteresis {
+                    Some(st) => {
+                        let wet = st.iter().filter(|s| s.kappa > 0).count();
+                        let txt = format!("{} nodes: {} last wetting, {} last drying", st.len(), wet, st.len() - wet);
+                        let mut clear = false;
+                        ui.horizontal_wrapped(|ui| {
+                            if st.len() == n {
+                                ui.label(RichText::new(txt).strong());
+                            } else {
+                                ui.colored_label(egui::Color32::from_rgb(230, 120, 50), format!("{txt} – the profile has {n} nodes"));
+                            }
+                            clear = ui.button("Clear").on_hover_text("Start on the main curve chosen above").clicked();
+                        });
+                        if clear {
+                            self.prj.profile.hysteresis = None;
+                            *ch = true;
+                        }
+                    }
+                    None => {
+                        ui.label("none: the initial condition lies on the main curve chosen above");
+                    }
+                }
+                ui.label(
+                    RichText::new(
+                        "A run can continue from the water contents and branches of a previous run: Soil profile → Initial h → \
+                         \"Restart from these results\". Each node then starts on the scanning curve through its (h, θ), as after a reversal.",
+                    )
+                    .weak(),
+                );
+            }
+            ui.add_space(8.0);
+            check(ui, ch, &mut self.prj.water.l_w_dep, "Temperature dependence of the hydraulic properties (surface tension, viscosity)");
         });
-        if self.prj.water.hysteresis != Hysteresis::None {
-            ui.horizontal(|ui| {
-                ui.label("Initial condition lies on the");
-                if ui.selectable_value(&mut self.prj.water.init_kappa, -1, "main drying curve").changed() {
-                    *ch = true;
-                }
-                if ui.selectable_value(&mut self.prj.water.init_kappa, 1, "main wetting curve").changed() {
-                    *ch = true;
-                }
-            });
+        if model != self.prj.water.model {
+            self.prj.water.model = model;
+            *ch = true;
         }
-        check(ui, ch, &mut self.prj.water.l_w_dep, "Temperature dependence of the hydraulic properties (surface tension, viscosity)");
         if self.prj.water.model == SoilModel::DualPermeability {
             self.dual_perm_ui(ui, ch);
         }
@@ -1385,8 +1542,8 @@ impl App {
                         if ns > 1 {
                             ui.colored_label(
                                 egui::Color32::from_rgb(230, 160, 60),
-                                "Several solutes: HYDRUS-1D 2009 allows active uptake only with a single solute; HYDRUS 4.17 lets you choose the solute. \
-                                 Rusteau follows 4.17 here; the result is not yet checked against 4.17, and the setting is not saved to SELECTOR.IN.",
+                                "Several solutes: HYDRUS-1D 2009 allows active uptake only with a single solute; HYDRUS 4.17 lets you choose the solute \
+                                 (iActSolU in SELECTOR.IN), as Rusteau does.",
                             );
                         }
                     });
