@@ -21,33 +21,33 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y libxkbcommon-dev libwayland-dev libx11-dev libxcb1-dev libgl1-mesa-dev
       - name: Test engine
-        run: cargo test -p hydrus-core --release
+        run: cargo test -p rusteau-core --release
       - name: Build release binaries
-        run: cargo build --release -p hydrus-gui -p hydrus-cli
+        run: cargo build --release -p rusteau-gui -p rusteau-cli
       - name: Package (Linux)
         if: runner.os == 'Linux'
         run: |
-          mkdir dist && cp target/release/hydrus1d target/release/hydrus1d-cli dist/
-          tar czf hydrus1d-linux-x86_64.tar.gz -C dist .
+          mkdir dist && cp target/release/rusteau target/release/rusteau-cli dist/
+          tar czf rusteau-linux-x86_64.tar.gz -C dist .
       - name: Package (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           mkdir dist
-          copy target\release\hydrus1d.exe dist\
-          copy target\release\hydrus1d-cli.exe dist\
-          Compress-Archive -Path dist\* -DestinationPath hydrus1d-windows-x86_64.zip
+          copy target\release\rusteau.exe dist\
+          copy target\release\rusteau-cli.exe dist\
+          Compress-Archive -Path dist\* -DestinationPath rusteau-windows-x86_64.zip
       - uses: actions/upload-artifact@v4
         with:
-          name: hydrus1d-${{ runner.os }}
+          name: rusteau-${{ runner.os }}
           path: |
-            hydrus1d-linux-x86_64.tar.gz
-            hydrus1d-windows-x86_64.zip
+            rusteau-linux-x86_64.tar.gz
+            rusteau-windows-x86_64.zip
           if-no-files-found: ignore
       - name: Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            hydrus1d-linux-x86_64.tar.gz
-            hydrus1d-windows-x86_64.zip
+            rusteau-linux-x86_64.tar.gz
+            rusteau-windows-x86_64.zip
