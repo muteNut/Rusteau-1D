@@ -4,7 +4,6 @@
 //! (BasInf, NodInf, MatIn, TmIn, RootIn, TempIn, ChemIn, SinkIn) and SetBC.
 
 use rusteau_core::material::MatTable;
-use rusteau_core::inverse::{InverseSettings, ObservationPoint, ParamKind, ParamSpec, SolField, SolMatField, WaterField,};
 use rusteau_core::*;
 use std::path::Path;
 use std::fs::File;
@@ -229,6 +228,7 @@ pub fn read_legacy_project(dir: &Path) -> R<Project> {
     let t = s.read(10)?;
     let (l_wat, l_chem, l_temp, sink_f, l_root, short_o) = (t.b(0)?, t.b(1)?, t.b(2)?, t.b(3)?, t.b(4)?, t.b(5)?);
     let (l_wdep, atm_bc, l_equil) = (t.b(6)?, t.b(8)?, t.b(9)?);
+    let l_inverse = t.b(10).unwrap_or(false);
     let (mut l_snow, mut l_meteo, mut l_vapor, mut l_act_rsu, mut _l_flux, mut l_irrig) = (false, false, false, false, false, false);
     if ver == 3 {
         s.skip()?;
@@ -257,6 +257,7 @@ pub fn read_legacy_project(dir: &Path) -> R<Project> {
         equilibrium_adsorption: l_equil,
         short_output: short_o,
 		vapor: l_vapor,
+        inverse: l_inverse,
     };
     s.skip()?;
     let t = s.read(3)?;
@@ -567,11 +568,14 @@ pub fn read_legacy_project(dir: &Path) -> R<Project> {
             ht.amplitude = t.f(0)?;
             ht.period = t.f(1)?;
             ht.campbell = t.i(2)? == 1;
+            prj.atmosphere.snow_mf = t.f(3)?;
         } else {
             let t = s.read(5)?;
             ht.amplitude = t.f(0)?;
             ht.period = t.f(1)?;
             ht.campbell = t.i(2)? == 1;
+            // SnowMF (TempIn): the degree-day factor of the snow model
+            prj.atmosphere.snow_mf = t.f(3)?;
             if t.b(4)? {
                 s.skip()?;
                 s.skip()?;
@@ -658,6 +662,14 @@ pub fn read_legacy_project(dir: &Path) -> R<Project> {
 		}
     }
 
+    // ---------------- Fit.in (inverse problem): read whenever present, used when lInverse is set
+    if let Ok(fit) = find("fit.in") {
+        match crate::fit::read_fit_in(&fit) {
+            Ok(settings) => prj.inverse = Some(settings),
+            Err(e) if l_inverse => return Err(e),
+            Err(_) => {}
+        }
+    }
     // observation nodes etc. done in read_profile. Layers:
     let errs = prj.validate();
     if !errs.is_empty() {
@@ -1338,359 +1350,6 @@ pub fn read_mater_in(path: &Path, n_mat: usize) -> R<Vec<MatTable>> {
         tabs.push(t);
     }
     Ok(tabs)
-}
-
-pub fn read_fit_in(path: &Path) -> Result<InverseSettings, HydrusError> {
-    let file = File::open(path)
-        .map_err(|e| HydrusError::Io(format!("Could not open FIT.IN at {:?}: {}", path, e)))?;
-    let reader = BufReader::new(file);
-    let mut lines = reader.lines().filter_map(|l| l.ok());
-
-    let mut settings = InverseSettings::default();
-
-    // 1. Skip comment/title blocks until NOBB / MIT record
-    let mut nobb = 0;
-    let mut mit = 50;
-    let mut i_weight = 0;
-
-    while let Some(line) = lines.next() {
-        let tr = line.trim();
-        if tr.is_empty() || tr.starts_with('*') {
-            continue;
-        }
-        let upper = tr.to_ascii_uppercase();
-        if upper.contains("NOBB") || upper.contains("MIT") {
-            if let Some(data_line) = lines.next() {
-                let parts: Vec<&str> = data_line.split_whitespace().collect();
-                if parts.len() >= 3 {
-                    nobb = parts[0].parse().unwrap_or(0);
-                    mit = parts[1].parse().unwrap_or(50);
-                    i_weight = parts[2].parse().unwrap_or(0);
-                }
-            }
-            break;
-        }
-    }
-
-    settings.n_obs = nobb;
-    settings.max_iter = mit;
-    settings.weight_option = i_weight;
-
-    // 2. Control switches: lWatF, lChemF, NMat
-    let mut l_wat = true;
-    let mut l_chem = false;
-    let mut n_mat = 1;
-
-    while let Some(line) = lines.next() {
-        let tr = line.trim();
-        if tr.is_empty() || tr.starts_with('*') {
-            continue;
-        }
-        let upper = tr.to_ascii_uppercase();
-        if upper.contains("LWATF") || upper.contains("LCHEMF") {
-            if let Some(data_line) = lines.next() {
-                let parts: Vec<&str> = data_line.split_whitespace().collect();
-                if parts.len() >= 3 {
-                    l_wat = parts[0].eq_ignore_ascii_case("t") || parts[0] == "1";
-                    l_chem = parts[1].eq_ignore_ascii_case("t") || parts[1] == "1";
-                    n_mat = parts[2].parse().unwrap_or(1);
-                }
-            }
-            break;
-        }
-    }
-
-    settings.l_water_flow = l_wat;
-    settings.l_solute = l_chem;
-
-    // Skip optional Model / Hysteresis records
-    let mut next_line_opt = lines.next();
-    while let Some(ref line) = next_line_opt {
-        let tr = line.trim();
-        if tr.to_ascii_uppercase().contains("MODEL") {
-            let _ = lines.next();
-            next_line_opt = lines.next();
-            break;
-        }
-        if tr.to_ascii_uppercase().contains("THR") || tr.to_ascii_uppercase().contains("BULK") {
-            break;
-        }
-        next_line_opt = lines.next();
-    }
-
-    // Skip optional NS (number of solutes) record
-    let mut current_line = next_line_opt;
-    while let Some(ref line) = current_line {
-        let tr = line.trim();
-        if tr.to_ascii_uppercase().starts_with("NS") {
-            let _ = lines.next();
-            current_line = lines.next();
-            break;
-        }
-        if tr.to_ascii_uppercase().contains("THR") || tr.to_ascii_uppercase().contains("BULK") {
-            break;
-        }
-        current_line = lines.next();
-    }
-
-    // 3. Water flow parameter blocks (for each material)
-    if l_wat {
-        for mat_idx in 0..n_mat {
-            let mut col_names: Vec<String> = Vec::new();
-            while let Some(line) = current_line.take().or_else(|| lines.next()) {
-                let tr = line.trim();
-                if tr.is_empty() || tr.starts_with('*') {
-                    continue;
-                }
-                let upper = tr.to_ascii_uppercase();
-                if upper.contains("THR") && upper.contains("THS") {
-                    col_names = tr.split_whitespace().map(String::from).collect();
-                    break;
-                }
-            }
-
-            if col_names.is_empty() {
-                break;
-            }
-
-            let num_cols = col_names.len();
-            let initial_line = lines.next().unwrap_or_default();
-            let fitted_line = lines.next().unwrap_or_default();
-            let min_line = lines.next().unwrap_or_default();
-            let max_line = lines.next().unwrap_or_default();
-
-            let inits = parse_f64_row(&initial_line);
-            let fits = parse_i32_row(&fitted_line);
-            let mins = parse_f64_row(&min_line);
-            let maxs = parse_f64_row(&max_line);
-
-            for c in 0..num_cols {
-                let raw_name = col_names.get(c).cloned().unwrap_or_else(|| format!("Par{}", c));
-                let name = if n_mat > 1 {
-                    format!("{}({})", raw_name, mat_idx + 1)
-                } else {
-                    raw_name
-                };
-                let init = inits.get(c).copied().unwrap_or(0.0);
-                let ifix_val = fits.get(c).copied().unwrap_or(0);
-                let is_fit = ifix_val != 0;
-                let is_log = ifix_val < 0 || ifix_val == 2;
-                let mut min_v = mins.get(c).copied().unwrap_or(0.0);
-                let mut max_v = maxs.get(c).copied().unwrap_or(0.0);
-
-                let field = match name.trim().to_ascii_uppercase().split('(').next().unwrap_or("") {
-                    "THR" | "QR" | "WCR" => WaterField::Qr,
-                    "THS" | "QS" | "WCS" => WaterField::Qs,
-                    "ALFA" | "ALPHA" => WaterField::Alpha,
-                    "N" => WaterField::N,
-                    "KS" | "CONDS" => WaterField::Ks,
-                    "L" | "TOR" => WaterField::L,
-                    "ALFAW" | "ALPHA_W" => WaterField::AlphaW,
-                    _ => WaterField::Ks,
-                };
-
-                // Hydrus-1D Fortran Standards (INPUT.FOR Subroutine Invers)
-                let (def_min, def_max) = match field {
-                    WaterField::Qr => (0.0, 0.3),
-                    WaterField::Qs => (0.2, 0.9),
-                    WaterField::Alpha | WaterField::AlphaW => (1e-4, 1.0),
-                    WaterField::N => (1.05, 10.0),
-                    WaterField::Ks => (1e-5, 1000.0),
-                    WaterField::L => (-10.0, 10.0),
-                };
-
-                if min_v == 0.0 && field != WaterField::Qr {
-                    min_v = def_min;
-                }
-                if max_v == 0.0 || max_v <= min_v {
-                    max_v = def_max;
-                }
-
-                let kind = ParamKind::Water { mat: mat_idx, field };
-                settings.param_specs.push(ParamSpec {
-                    name,
-                    initial_val: init,
-                    is_fitted: is_fit,
-                    is_log_transformed: is_log,
-                    min_val: min_v,
-                    max_val: max_v,
-                    kind: Some(kind),
-                });
-            }
-            current_line = None;
-        }
-    }
-
-    // 4. Solute transport parameter blocks
-    if l_chem {
-        for mat_idx in 0..n_mat {
-            let mut col_names: Vec<String> = Vec::new();
-            while let Some(line) = current_line.take().or_else(|| lines.next()) {
-                let tr = line.trim();
-                if tr.is_empty() || tr.starts_with('*') {
-                    continue;
-                }
-                let upper = tr.to_ascii_uppercase();
-                if upper.contains("BULK") || upper.contains("DISP") || upper.contains("FRAC") {
-                    col_names = tr.split_whitespace().map(String::from).collect();
-                    break;
-                }
-            }
-
-            if col_names.is_empty() {
-                break;
-            }
-
-            let num_cols = col_names.len();
-            let initial_line = lines.next().unwrap_or_default();
-            let fitted_line = lines.next().unwrap_or_default();
-            let min_line = lines.next().unwrap_or_default();
-            let max_line = lines.next().unwrap_or_default();
-
-            let inits = parse_f64_row(&initial_line);
-            let fits = parse_i32_row(&fitted_line);
-            let mins = parse_f64_row(&min_line);
-            let maxs = parse_f64_row(&max_line);
-
-            for c in 0..num_cols {
-                let raw_name = col_names.get(c).cloned().unwrap_or_else(|| format!("SolPar{}", c));
-                let name = if n_mat > 1 {
-                    format!("{}({})", raw_name, mat_idx + 1)
-                } else {
-                    raw_name
-                };
-                let init = inits.get(c).copied().unwrap_or(0.0);
-                let ifix_val = fits.get(c).copied().unwrap_or(0);
-                let is_fit = ifix_val != 0;
-                let is_log = ifix_val < 0 || ifix_val == 2;
-                let mut min_v = mins.get(c).copied().unwrap_or(0.0);
-                let mut max_v = maxs.get(c).copied().unwrap_or(0.0);
-
-                let upper = name.trim().to_ascii_uppercase();
-                let clean = upper.split('(').next().unwrap_or("").replace(|ch: char| !ch.is_alphanumeric(), "");
-
-                let is_prime = upper.contains('\'') || upper.contains('`') || upper.contains("PRIME");
-
-                let kind = if clean.starts_with("BULK") || clean == "RO" {
-                    ParamKind::SoluteMaterial { mat: mat_idx, field: SolMatField::BulkDensity }
-                } else if clean.starts_with("DISP") {
-                    ParamKind::SoluteMaterial { mat: mat_idx, field: SolMatField::DispL }
-                } else if clean == "FRAC" {
-                    ParamKind::SoluteMaterial { mat: mat_idx, field: SolMatField::Frac }
-                } else if clean.starts_with("THIMOB") || clean.starts_with("MOBILEWC") {
-                    ParamKind::SoluteMaterial { mat: mat_idx, field: SolMatField::ThImmobile }
-                } else if clean == "DIFW" {
-                    ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::DiffW }
-                } else if clean == "DIFG" {
-                    ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::DiffG }
-                } else if clean == "KS" || clean == "KD" {
-                    ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::Ks }
-                } else if clean == "NU" {
-                    ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::Nu }
-                } else if clean == "BETA" {
-                    ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::Beta }
-                } else if clean == "HENRY" {
-                    ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::Henry }
-                } else if clean.starts_with("SNKL") {
-                    if clean.ends_with('0') {
-                        ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::Mu0W }
-                    } else if is_prime {
-                        ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::GamW }
-                    } else {
-                        ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::MuW }
-                    }
-                } else if clean.starts_with("SNKS") {
-                    if clean.ends_with('0') {
-                        ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::Mu0S }
-                    } else if is_prime {
-                        ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::GamS }
-                    } else {
-                        ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::MuS }
-                    }
-                } else if clean.starts_with("SNKG") {
-                    if clean.ends_with('0') {
-                        ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::Mu0G }
-                    } else if is_prime {
-                        ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::GamG }
-                    } else {
-                        ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::MuG }
-                    }
-                } else if clean == "ALFA" || clean == "ALPHA" {
-                    ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::Omega }
-                } else {
-                    ParamKind::SoluteSpecies { mat: mat_idx, sol: 0, field: SolField::Ks }
-                };
-
-                if min_v >= max_v || (min_v == 0.0 && max_v == 0.0) {
-                    min_v = 1e-5;
-                    max_v = 1e5;
-                }
-
-                settings.param_specs.push(ParamSpec {
-                    name,
-                    initial_val: init,
-                    is_fitted: is_fit,
-                    is_log_transformed: is_log,
-                    min_val: min_v,
-                    max_val: max_v,
-                    kind: Some(kind),
-                });
-            }
-            current_line = None;
-        }
-    }
-
-    // 5. Observation points: HO(N), FOS, ITYPE(N), POS, WTS
-    while let Some(line) = lines.next() {
-        let tr = line.trim();
-        if tr.is_empty() || tr.starts_with('*') {
-            continue;
-        }
-        let upper = tr.to_ascii_uppercase();
-        if upper.contains("HO(N)") || upper.contains("ITYPE") || upper.contains("FOS") {
-            break;
-        }
-    }
-
-    let mut obs_id = 1;
-    for line in lines {
-        let tr = line.trim();
-        if tr.is_empty() || tr.starts_with('*') || tr.to_ascii_uppercase().contains("END") {
-            continue;
-        }
-        let parts: Vec<&str> = tr.split_whitespace().collect();
-        if parts.len() >= 5 {
-            let time: f64 = parts[0].replace(['d', 'D'], "e").parse().unwrap_or(0.0);
-            let val: f64 = parts[1].replace(['d', 'D'], "e").parse().unwrap_or(0.0);
-            let q_type: i32 = parts[2].parse().unwrap_or(0);
-            let pos: usize = parts[3].parse().unwrap_or(1);
-            let weight: f64 = parts[4].replace(['d', 'D'], "e").parse().unwrap_or(1.0);
-
-            settings.observations.push(ObservationPoint {
-                id: obs_id,
-                time,
-                value: val,
-                q_type,
-                position: pos,
-                weight,
-            });
-            obs_id += 1;
-        }
-    }
-
-    Ok(settings)
-}
-
-fn parse_f64_row(line: &str) -> Vec<f64> {
-    line.split_whitespace()
-        .filter_map(|s| s.replace(['d', 'D'], "e").parse::<f64>().ok())
-        .collect()
-}
-
-fn parse_i32_row(line: &str) -> Vec<i32> {
-    line.split_whitespace()
-        .filter_map(|s| s.parse::<i32>().ok())
-        .collect()
 }
 
 // Legacy Output File Readers (Nod_Inf.out)

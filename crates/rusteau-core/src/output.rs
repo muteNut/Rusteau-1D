@@ -191,27 +191,6 @@ pub struct BalanceOut {
     pub sol_bal_r: Vec<f64>,
 }
 
-#[derive(Clone, Debug, Default, Serialize, Deserialize)]
-pub struct ParameterStat {
-    pub name: String,
-    pub value: f64,
-    pub se: f64,
-    pub lower_95: f64,
-    pub upper_95: f64,
-}
-
-#[derive(Clone, Debug, Default, Serialize, Deserialize)]
-pub struct InverseOutputData {
-    pub title: String,
-    pub final_ssq: f64,
-    pub iterations_run: usize,
-    pub observations: Vec<crate::inverse::ObservationPoint>,
-    pub simulated_values: Vec<f64>,
-    pub r_squared: f64,
-    pub parameters: Vec<crate::inverse::ParameterStat>,
-    pub correlation_matrix: Vec<Vec<f64>>,
-}
-
 /// One row of Meteo.out. Which columns are meaningful depends on `Results::meteo_mode`:
 /// 0 = Penman-Monteith with meteo records (ET .. ExInterc), 1 = Penman-Monteith with daily-generated data
 /// (+ AirTemp, AirRH, SolarRad), 2 = surface energy balance (Rns, Rnl, Rn, Sensible, Latent, HeatFlux, Balance),
@@ -290,7 +269,6 @@ pub struct Results {
     pub obs_nodes: Vec<usize>,
     pub finished: bool,
     pub failed: bool,
-    pub inverse_results: Option<InverseOutputData>,
     /// Triggered irrigation events (Irrig.out)
     #[serde(default)]
     pub irrigation: Vec<IrrigationEvent>,

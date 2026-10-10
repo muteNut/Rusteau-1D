@@ -82,6 +82,9 @@ pub struct Processes {
     /// Report only at print times (lShort).
     pub short_output: bool,
     pub vapor: bool,
+    /// Inverse problem (lInverse): estimate parameters with the settings of `Project::inverse`
+    #[serde(default)]
+    pub inverse: bool,
 }
 
 impl Default for Processes {
@@ -95,6 +98,7 @@ impl Default for Processes {
             equilibrium_adsorption: true,
             short_output: false,
             vapor: false,
+            inverse: false,
         }
     }
 }
@@ -653,6 +657,11 @@ pub struct RootUptake {
 	/// SPot: initial potential root solute uptake (afterwards taken from the cB column of Atmosph.in)
 	pub s_pot: f64,
     pub l_omega_w: bool,
+    /// Solute with active uptake (0-based; "Solute with Active Uptake" of HYDRUS 4.17). The parameters of the active
+    /// uptake are the first elements of `omega_act`, `r_km` and `c_min`. The 2009 code allows active uptake with a
+    /// single solute only.
+    #[serde(default)]
+    pub active_solute: usize,
 }
 impl Default for RootUptake {
     fn default() -> Self {
@@ -676,6 +685,7 @@ impl Default for RootUptake {
 			c_min: vec![0.0],
 			s_pot: 0.0, 
 			l_omega_w: false,
+            active_solute: 0,
         }
     }
 }
@@ -953,6 +963,9 @@ pub struct Project {
     pub heat: HeatSettings,
     pub solute: SoluteSettings,
     pub profile: Profile,
+    /// Inverse solution settings (Fit.in); used when `processes.inverse` is set
+    #[serde(default)]
+    pub inverse: Option<crate::inverse::InverseSettings>,
 }
 
 impl Default for Project {
@@ -969,6 +982,7 @@ impl Default for Project {
             heat: HeatSettings::default(),
             solute: SoluteSettings::default(),
             profile: Profile::default(),
+            inverse: None,
         }
     }
 }
@@ -995,6 +1009,9 @@ impl Project {
     pub fn validate(&self) -> Vec<String> {
         let mut e = vec![];
         let n = self.profile.nodes.len();
+        if self.processes.inverse && self.inverse.is_none() {
+            e.push("The inverse problem is selected but there are no inverse settings (Fit.in).".into());
+        }
 		if let Some(meteo) = &self.atmosphere.meteo {
 			if meteo.records.is_empty() {
 				e.push("Meteorological ET is active, but no meteo records were provided.".into());

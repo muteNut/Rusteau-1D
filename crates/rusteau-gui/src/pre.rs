@@ -257,8 +257,7 @@ impl App {
             *ch = true;
         }
         self.sync();
-        section(ui, "Modules in Development");
-        ui.label("inverse (parameter estimation) optimization, and major ion chemistry (UnsatChem).");
+        check(ui, ch, &mut self.prj.processes.inverse, "Inverse problem: estimate parameters (see Parameter estimation)");
     }
 
     pub fn page_time(&mut self, ui: &mut Ui, ch: &mut bool) {
@@ -542,6 +541,14 @@ impl App {
                     }
                 }
             });
+            ui.add_space(12.0);
+            if ui
+                .button("Neural network prediction (Rosetta)…")
+                .on_hover_text("θr, θs, α, n and Ks from the texture, the bulk density and the water contents at 33 and 1500 kPa")
+                .clicked()
+            {
+                self.ros = Some(crate::rosetta_ui::RosettaDlg::new(crate::rosetta_ui::RosettaTarget::Material(i)));
+            }
         });
         egui::Grid::new("soilp").num_columns(2).show(ui, |ui| {
             let m = &mut self.prj.water.materials[i];
@@ -1161,42 +1168,232 @@ impl App {
     }
 
     pub fn page_root(&mut self, ui: &mut Ui, ch: &mut bool) {
-        page_title(ui, "Root water uptake");
+        page_title(ui, "Root water and solute uptake");
         self.sync();
         let lu = self.prj.units.length_str().to_string();
-        let is_feddes = matches!(self.prj.root.stress, RootStress::Feddes { .. });
+        let tu = self.prj.units.time_str().to_string();
+        let mu = self.prj.units.mass.clone();
+        let conc_u = format!("{mu}/{lu}³");
+        let solute = self.prj.processes.solute;
+        let ns = self.prj.solute.species.len();
+        let n_mat = self.prj.water.materials.len();
+
+        // ------------------------------------------------------------------ the dialog of HYDRUS 4.17
+        section(ui, "Root water uptake model");
         ui.horizontal(|ui| {
-            ui.label("Water stress response function");
-            if ui.selectable_label(is_feddes, "Feddes et al. (1978)").clicked() && !is_feddes {
-                self.prj.root.stress = RootUptake::default().stress;
-                self.sync();
+            ui.label("Water uptake reduction model");
+            let is_feddes = matches!(self.prj.root.stress, RootStress::Feddes { .. });
+            if ui.radio(is_feddes, "Feddes et al. (1978)").clicked() && !is_feddes {
+                let mut st = RootUptake::default().stress;
+                if let RootStress::Feddes { p_optm, .. } = &mut st {
+                    *p_optm = vec![-25.0; n_mat];
+                }
+                self.prj.root.stress = st;
                 *ch = true;
             }
-            if ui.selectable_label(!is_feddes, "van Genuchten (1987) S-shaped").clicked() && is_feddes {
+            if ui.radio(!is_feddes, "S-shape (van Genuchten 1987)").clicked() && is_feddes {
                 self.prj.root.stress = RootStress::SShaped { p50: -800.0, exponent: 3.0 };
                 *ch = true;
             }
         });
-        egui::Grid::new("root").num_columns(2).show(ui, |ui| match &mut self.prj.root.stress {
-            RootStress::Feddes { p0, p2h, p2l, p3, r2h, r2l, p_optm } => {
-                field_u(ui, ch, "P0 (anaerobiosis)", p0, &lu);
-                for (i, po) in p_optm.iter_mut().enumerate() {
-                    field_u(ui, ch, &format!("POptm – material {}", i + 1), po, &lu);
+        if solute {
+            ui.horizontal(|ui| {
+                ui.label("Solute stress model");
+                let kind = match &self.prj.root.solute_stress {
+                    None => 0,
+                    Some(s) if s.additive => 1,
+                    Some(_) => 2,
+                };
+                let mut k2 = kind;
+                ui.radio_value(&mut k2, 0, "No solute stress");
+                ui.radio_value(&mut k2, 1, "Additive");
+                ui.radio_value(&mut k2, 2, "Multiplicative");
+                if k2 != kind {
+                    let a_osm = self.prj.root.solute_stress.as_ref().map(|s| s.a_osm.clone()).unwrap_or_else(|| vec![0.0; ns]);
+                    let (c50, p3c, s_shaped) = self.prj.root.solute_stress.as_ref().map(|s| (s.c50, s.p3c, s.s_shaped)).unwrap_or((3000.0, 3.0, false));
+                    self.prj.root.solute_stress = match k2 {
+                        0 => None,
+                        1 => Some(SoluteStress { additive: true, a_osm, c50, p3c, s_shaped }),
+                        _ => Some(SoluteStress { additive: false, a_osm, c50, p3c, s_shaped }),
+                    };
+                    *ch = true;
                 }
-                field_u(ui, ch, "P2H (high demand)", p2h, &lu);
-                field_u(ui, ch, "P2L (low demand)", p2l, &lu);
-                field_u(ui, ch, "P3 (wilting)", p3, &lu);
-                field(ui, ch, "r2H (potential transpiration, high)", r2h);
-                field(ui, ch, "r2L (potential transpiration, low)", r2l);
+                if let Some(s) = self.prj.root.solute_stress.as_mut().filter(|s| !s.additive) {
+                    ui.add_space(12.0);
+                    if ui.radio(!s.s_shaped, "threshold").clicked() {
+                        s.s_shaped = false;
+                        *ch = true;
+                    }
+                    if ui.radio(s.s_shaped, "S-shape").clicked() {
+                        s.s_shaped = true;
+                        *ch = true;
+                    }
+                }
+            });
+        }
+        egui::Grid::new("root_wc").num_columns(2).show(ui, |ui| {
+            field(ui, ch, "Critical stress index for water uptake ωc (1 = no compensation)", &mut self.prj.root.omega_c);
+        });
+
+        // ------------------------------------------------------------------ water stress parameters
+        section(ui, "Water uptake reduction parameters");
+        match &mut self.prj.root.stress {
+            RootStress::Feddes { p0, p2h, p2l, p3, r2h, r2l, p_optm } => {
+                p_optm.resize(n_mat, p_optm.last().copied().unwrap_or(-25.0));
+                egui::Grid::new("root_feddes").striped(true).spacing([14.0, 4.0]).show(ui, |ui| {
+                    for h in ["", "P0", "POpt", "P2H", "P2L", "P3", "r2H", "r2L"] {
+                        ui.strong(h);
+                    }
+                    ui.end_row();
+                    ui.label(RichText::new(format!("[{lu}], r [{lu}/{tu}]")).weak());
+                    ui.end_row();
+                    for (m, po) in p_optm.iter_mut().enumerate() {
+                        ui.label(format!("material {}", m + 1));
+                        if m == 0 {
+                            dv(ui, ch, p0);
+                        } else {
+                            ui.label(RichText::new(sig(*p0)).weak());
+                        }
+                        dv(ui, ch, po);
+                        if m == 0 {
+                            dv(ui, ch, p2h);
+                            dv(ui, ch, p2l);
+                            dv(ui, ch, p3);
+                            dv(ui, ch, r2h);
+                            dv(ui, ch, r2l);
+                        } else {
+                            for v in [*p2h, *p2l, *p3, *r2h, *r2l] {
+                                ui.label(RichText::new(sig(v)).weak());
+                            }
+                        }
+                        ui.end_row();
+                    }
+                });
+                ui.label(
+                    RichText::new(
+                        "Uptake is zero above P0 (anaerobiosis) and below P3 (wilting), optimal between POpt and P2H (potential transpiration \
+                         ≥ r2H) or P2L (≤ r2L), linear in between. POpt can differ between materials; the other values hold for all.",
+                    )
+                    .weak(),
+                );
             }
             RootStress::SShaped { p50, exponent } => {
-                field_u(ui, ch, "P50", p50, &lu);
-                field(ui, ch, "Exponent p", exponent);
+                egui::Grid::new("root_s").num_columns(2).show(ui, |ui| {
+                    field_u(ui, ch, "P50 – pressure head of 50 % uptake", p50, &lu);
+                    field(ui, ch, "p – exponent", exponent);
+                });
             }
-        });
-        egui::Grid::new("root2").num_columns(2).show(ui, |ui| {
-            field(ui, ch, "ωc – critical stress index for compensated uptake (1 = none)", &mut self.prj.root.omega_c);
-        });
+        }
+
+        // ------------------------------------------------------------------ solute stress parameters
+        if solute {
+            if let Some(s) = self.prj.root.solute_stress.as_mut() {
+                section(ui, "Solute stress parameters");
+                s.a_osm.resize(ns, 0.0);
+                if !s.additive {
+                    egui::Grid::new("root_ss").num_columns(2).show(ui, |ui| {
+                        if s.s_shaped {
+                            field_u(ui, ch, "c50 – osmotic head of 50 % uptake", &mut s.c50, &lu);
+                            field(ui, ch, "p – exponent", &mut s.p3c);
+                        } else {
+                            field_u(ui, ch, "Threshold osmotic head", &mut s.c50, &lu);
+                            field(ui, ch, "Slope (relative reduction per unit osmotic head)", &mut s.p3c);
+                        }
+                    });
+                }
+                ui.label("Osmotic coefficients (osmotic head per unit concentration):");
+                egui::Grid::new("root_aosm").striped(true).show(ui, |ui| {
+                    for (j, a) in s.a_osm.iter_mut().enumerate() {
+                        ui.label(format!("solute {}", j + 1));
+                        dv(ui, ch, a);
+                        ui.end_row();
+                    }
+                });
+            }
+        }
+
+        // ------------------------------------------------------------------ root solute uptake
+        if solute {
+            section(ui, "Root solute uptake model");
+            let r = &mut self.prj.root;
+            r.c_root_max.resize(ns, 0.0);
+            ui.columns(2, |cols| {
+                {
+                    let ui = &mut cols[0];
+                    ui.label(RichText::new("Maximum allowed concentration for passive root solute uptake").strong());
+                    egui::Grid::new("root_croot").striped(true).show(ui, |ui| {
+                        ui.strong("Sol. No.");
+                        ui.strong(format!("cRoot [{conc_u}]"));
+                        ui.end_row();
+                        for (j, c) in r.c_root_max.iter_mut().enumerate() {
+                            ui.label(format!("{}", j + 1));
+                            dv(ui, ch, c);
+                            ui.end_row();
+                        }
+                    });
+                    ui.label(RichText::new("Passive uptake = water uptake × min(c, cRoot); 0 = no passive uptake.").weak());
+                }
+                {
+                    let ui = &mut cols[1];
+                    check(ui, ch, &mut r.l_act_rsu, "Active solute uptake (Michaelis-Menten)");
+                    for v in [&mut r.omega_act, &mut r.r_km, &mut r.c_min] {
+                        if v.is_empty() {
+                            v.push(0.0);
+                        }
+                    }
+                    if r.omega_act[0] <= 0.0 {
+                        r.omega_act[0] = 1.0;
+                    }
+                    r.active_solute = r.active_solute.min(ns.saturating_sub(1));
+                    ui.add_enabled_ui(r.l_act_rsu, |ui| {
+                        egui::Grid::new("root_act").num_columns(3).spacing([10.0, 4.0]).show(ui, |ui| {
+                            ui.label("Solute with active uptake");
+                            egui::ComboBox::from_id_salt("root_act_sol").selected_text(format!("{}", r.active_solute + 1)).show_ui(ui, |ui| {
+                                for j in 0..ns {
+                                    if ui.selectable_value(&mut r.active_solute, j, format!("{}", j + 1)).changed() {
+                                        *ch = true;
+                                    }
+                                }
+                            });
+                            ui.label("");
+                            ui.end_row();
+                            ui.label("Potential solute uptake rate");
+                            dv(ui, ch, &mut r.s_pot);
+                            ui.label(format!("{mu}/{lu}²/{tu}"));
+                            ui.end_row();
+                            ui.label("Michaelis-Menten constant");
+                            dv(ui, ch, &mut r.r_km[0]);
+                            ui.label(conc_u.clone());
+                            ui.end_row();
+                            ui.label("Minimum concentration for uptake");
+                            dv(ui, ch, &mut r.c_min[0]);
+                            ui.label(conc_u.clone());
+                            ui.end_row();
+                            ui.label("Critical stress index for active solute uptake");
+                            dv(ui, ch, &mut r.omega_act[0]);
+                            ui.label("1 = none");
+                            ui.end_row();
+                        });
+                        check(ui, ch, &mut r.l_omega_w, "Reduced potential solute uptake due to reduced water uptake");
+                        ui.label(
+                            RichText::new(
+                                "With time-variable boundary conditions the potential uptake rate is taken from the cBot column of this \
+                                 solute in the atmospheric data (as in HYDRUS).",
+                            )
+                            .weak(),
+                        );
+                        if ns > 1 {
+                            ui.colored_label(
+                                egui::Color32::from_rgb(230, 160, 60),
+                                "Several solutes: HYDRUS-1D 2009 allows active uptake only with a single solute; HYDRUS 4.17 lets you choose the solute. \
+                                 Rusteau follows 4.17 here; the result is not yet checked against 4.17, and the setting is not saved to SELECTOR.IN.",
+                            );
+                        }
+                    });
+                }
+            });
+        }
+
         section(ui, "Root distribution / growth");
         if !self.prj.processes.root_growth {
             ui.label("Root growth is off: the nodal distribution b(x) from the profile is used.");
@@ -1255,36 +1452,6 @@ impl App {
                 _ => {}
             }
         }
-        if self.prj.processes.solute {
-            section(ui, "Solute stress");
-            let mut on = self.prj.root.solute_stress.is_some();
-            if ui.checkbox(&mut on, "Reduce uptake by osmotic / solute stress").changed() {
-                self.prj.root.solute_stress = if on { Some(SoluteStress { additive: true, a_osm: vec![0.0; self.prj.solute.species.len()], c50: 3000.0, p3c: 3.0, s_shaped: true }) } else { None };
-                *ch = true;
-            }
-            if let Some(s) = self.prj.root.solute_stress.as_mut() {
-                check(ui, ch, &mut s.additive, "Additive (osmotic head added to pressure head)");
-                if !s.additive {
-                    check(ui, ch, &mut s.s_shaped, "S-shaped (else threshold-slope)");
-                    egui::Grid::new("ss").show(ui, |ui| {
-                        field(ui, ch, "c50 / threshold", &mut s.c50);
-                        field(ui, ch, "exponent / slope", &mut s.p3c);
-                    });
-                }
-                for (j, a) in s.a_osm.iter_mut().enumerate() {
-                    ui.horizontal(|ui| {
-                        ui.label(format!("Osmotic coefficient, solute {}", j + 1));
-                        dv(ui, ch, a);
-                    });
-                }
-            }
-            for (j, c) in self.prj.root.c_root_max.iter_mut().enumerate() {
-                ui.horizontal(|ui| {
-                    ui.label(format!("Maximum concentration for passive uptake, solute {}", j + 1));
-                    dv(ui, ch, c);
-                });
-            }
-        }
     }
 
     pub fn page_sol_general(&mut self, ui: &mut Ui, ch: &mut bool) {
@@ -1336,30 +1503,15 @@ impl App {
                 });
             });
         }
-        check(ui, ch, &mut self.prj.root.l_act_rsu, "Active root solute uptake (Michaelis-Menten kinetics)");
-
-        if self.prj.root.l_act_rsu {
-            ui.indent("act_rsu", |ui| {
-                ui.label("Active solute uptake (only for a single solute; SPot is read from the cB column of the atmospheric data):");
-                let ns = self.prj.solute.species.len();
-                while self.prj.root.omega_act.len() < ns { self.prj.root.omega_act.push(1.0); }
-                while self.prj.root.r_km.len() < ns { self.prj.root.r_km.push(0.5); }
-                while self.prj.root.c_min.len() < ns { self.prj.root.c_min.push(0.0); }
-                for j in 0..ns {
-                    ui.horizontal(|ui| {
-                        ui.label(format!("Solute {}:", j + 1));
-                        ui.add(egui::DragValue::new(&mut self.prj.root.omega_act[j]).speed(0.05).prefix("ω_S: "));
-                        ui.add(egui::DragValue::new(&mut self.prj.root.r_km[j]).speed(0.05).prefix("Km: "));
-                        ui.add(egui::DragValue::new(&mut self.prj.root.c_min[j]).speed(0.01).prefix("cMin: "));
-                    });
+        if self.prj.processes.root_water_uptake {
+            ui.horizontal(|ui| {
+                ui.label(RichText::new("Passive and active root solute uptake and solute stress are set on the page").weak());
+                if ui.link("Root water and solute uptake →").clicked() {
+                    self.page = Page::RootUptake;
                 }
-                ui.horizontal(|ui| {
-                    ui.add(egui::DragValue::new(&mut self.prj.root.s_pot).speed(0.01).prefix("SPot (initial): "));
-                    check(ui, ch, &mut self.prj.root.l_omega_w, "Scale SPot by the water stress ratio OmegaW (lOmegaW)");
-                });
             });
         }
-        
+
         let l = self.prj.solute.species.len();
         section(ui, "Solutes");
         for i in 0..l {
@@ -1660,8 +1812,48 @@ impl App {
                 ui.end_row();
             }
         });
-        check(ui, ch, &mut h.campbell, "Chung & Horton (Campbell) thermal conductivity: θn = solid fraction, b1/b2/b3 = quartz, other minerals, clay fractions");
+        check(ui, ch, &mut h.campbell, "Campbell (1985) thermal conductivity instead of Chung & Horton (1987): b1/b2/b3 = quartz, other minerals, clay fractions");
         ui.label("Thermal parameters must be given in the project's units (energy per length³ etc., as in HYDRUS-1D).");
+        // HYDRUS defaults: Chung & Horton (1987) coefficients [W/m/K] and volumetric heat capacities [J/m³/K]
+        let (xc, tc) = (self.prj.units.x_conv(), self.prj.units.t_conv());
+        let fb = xc / tc.powi(3);
+        let fcap = 1.0 / (xc * tc * tc);
+        let nm = h.materials.len();
+        ui.horizontal_wrapped(|ui| {
+            ui.add_enabled_ui(!h.campbell, |ui| {
+                ui.label("b1, b2, b3 of Chung & Horton (1987) for");
+                let mut target: Option<usize> = None;
+                egui::ComboBox::from_id_salt("ht_tex_mat").selected_text(format!("material {}", self.sel_mat.min(nm.saturating_sub(1)) + 1)).show_ui(ui, |ui| {
+                    for k in 0..nm {
+                        if ui.selectable_label(self.sel_mat == k, format!("material {}", k + 1)).clicked() {
+                            target = Some(k);
+                        }
+                    }
+                });
+                if let Some(k) = target {
+                    self.sel_mat = k;
+                }
+                for (name, b) in [("Sand", [0.228, -2.406, 4.909]), ("Loam", [0.243, 0.393, 1.534]), ("Clay", [-0.197, -0.962, 2.521])] {
+                    if ui.button(name).on_hover_text(format!("b1 = {} , b2 = {} , b3 = {} W/m/K", b[0], b[1], b[2])).clicked() {
+                        if let Some(m) = h.materials.get_mut(self.sel_mat.min(nm.saturating_sub(1))) {
+                            (m.b1, m.b2, m.b3) = (b[0] * fb, b[1] * fb, b[2] * fb);
+                            *ch = true;
+                        }
+                    }
+                }
+            });
+            ui.add_space(16.0);
+            if ui
+                .button("Default heat capacities")
+                .on_hover_text("Cn = 1.92, Co = 2.51, Cw = 4.18 MJ/m³/K (solid phase, organic matter, water) for all materials")
+                .clicked()
+            {
+                for m in h.materials.iter_mut() {
+                    (m.cn, m.co, m.cw) = (1.92e6 * fcap, 2.51e6 * fcap, 4.18e6 * fcap);
+                }
+                *ch = true;
+            }
+        });
         section(ui, "Boundary conditions");
         ui.horizontal(|ui| {
             ui.label("Upper");
@@ -1723,26 +1915,5 @@ impl App {
             pr.push("meteorological ET");
         }
         ui.label(format!("Processes: {}", pr.join(", ")));
-    }
-	pub fn page_inverse(&mut self, ui: &mut Ui) {
-        page_title(ui, "Parameter estimation & inverse modeling");
-        ui.label("Configure automated calibration of soil hydraulic or solute parameters against observed data (Fit.in).");
-        
-        section(ui, "Optimization Settings");
-        egui::Grid::new("inv_settings").num_columns(2).show(ui, |ui| {
-            ui.label("Algorithm");
-            ui.label("Levenberg-Marquardt (non-linear least squares)");
-            ui.end_row();
-            ui.label("Max iterations (MIT)");
-            ui.label("50");
-            ui.end_row();
-        });
-
-        section(ui, "Calibration Observations");
-        ui.label("Observation points and weights loaded from Fit.in will be processed during calibration runs.");
-        
-        if ui.button("▶ Run Parameter Optimization").clicked() {
-            self.start_optimization();
-        }
     }
 }

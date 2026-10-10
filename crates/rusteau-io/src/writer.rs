@@ -3,8 +3,6 @@
 use rusteau_core::{HydrusError, Results};
 use std::fmt::Write as _;
 use std::path::Path;
-use rusteau_core::output::InverseOutputData;
-use rusteau_core::inverse::OptimizationState;
 
 fn w(dir: &Path, name: &str, s: String) -> Result<(), HydrusError> {
     std::fs::write(dir.join(name), s).map_err(|e| HydrusError::Io(format!("{}: {}", name, e)))
@@ -101,55 +99,6 @@ pub fn alevel_csv(r: &Results) -> String {
         let _ = writeln!(s, "{},{},{},{},{},{},{},{},{}", a.t, a.cum[0], a.cum[1], a.cum[2], a.cum[3], a.cum[4], a.h_top, a.h_root, a.h_bot);
     }
     s
-}
-
-/// Generate FIT.OUT
-pub fn fit_out_string(inv: &InverseOutputData) -> String {
-    let mut s = String::new();
-    let _ = writeln!(s, "************************************************************************");
-    let _ = writeln!(s, " * Title: {:<60} *", inv.title);
-    let _ = writeln!(s, " ************************************************************************");
-    let _ = writeln!(s, "Number of iterations performed: {}", inv.iterations_run);
-    let _ = writeln!(s, "Final Sum of Squared Residuals (SSQ): {:.6e}", inv.final_ssq);
-    let _ = writeln!(s, "------------------------------------------------------------------------");
-    let _ = writeln!(s, "------------Observed & Fitted Quantity -----------------------------");
-    let _ = writeln!(s, "                                               Resi-");
-    let _ = writeln!(s, "    No     Time           Obs        Fitted    dual   Type  Position");
-
-    for (i, obs) in inv.observations.iter().enumerate() {
-        let sim = inv.simulated_values.get(i).copied().unwrap_or(0.0);
-        let residual = obs.value - sim;
-        let _ = writeln!(
-            s,
-            "   {:<4}   {:<10.3}   {:<10.3}   {:<10.3}   {:<8.3}   {:<3}   {:<4}",
-            obs.id, obs.time, obs.value, sim, residual, obs.q_type, obs.position
-        );
-    }
-
-    let _ = writeln!(s, "------------------------------------------------------------------------");
-    s
-}
-
-pub fn write_fit_out(
-    dir: &Path,
-    project_title: &str,
-    opt_state: &OptimizationState,
-) -> Result<(), HydrusError> {
-    std::fs::create_dir_all(dir).map_err(|e| HydrusError::Io(e.to_string()))?;
-    
-    let inv = InverseOutputData {
-        title: project_title.to_string(),
-        final_ssq: opt_state.current_ssq,
-        iterations_run: opt_state.iterations_run,
-        observations: opt_state.settings.observations.clone(),
-        simulated_values: opt_state.simulated_values.clone(),
-        r_squared: opt_state.r_squared,
-        parameters: opt_state.parameters.clone(),
-        correlation_matrix: opt_state.correlation_matrix.clone(),
-    };
-    
-    let content = fit_out_string(&inv);
-    w(dir, "FIT.OUT", content)
 }
 
 /// T_Level1 (lFluxOut): potential / actual fluxes and the cumulative values.
@@ -288,10 +237,6 @@ pub fn write_all(r: &Results, dir: &Path) -> Result<(), HydrusError> {
     }
     if !r.irrigation.is_empty() {
         w(dir, "IRRIG.csv", irrig_csv(r))?;
-    }
-	if let Some(inv) = &r.inverse_results {
-        let content = fit_out_string(inv);
-        w(dir, "FIT.OUT", content)?;
     }
     Ok(())
 }

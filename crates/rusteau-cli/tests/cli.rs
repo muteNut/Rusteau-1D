@@ -126,3 +126,29 @@ fn compare_without_directory_uses_the_project_folder() {
     let o = bin().arg(&prj).args(["-q", "-o"]).arg(&out).arg("--compare").output().unwrap();
     assert_eq!(o.status.code(), Some(0), "{}", text(&o));
 }
+
+#[test]
+fn inverse_project_writes_fit_out_and_the_final_run() {
+    let d = workdir("inverse");
+    let f = d.join("outflow.h1dr");
+    rusteau_io::save_project(&rusteau_core::examples::inverse_outflow(), &f).unwrap();
+    let out = d.join("out");
+    let o = bin().arg(&f).args(["-q", "-o"]).arg(&out).output().unwrap();
+    assert!(o.status.success(), "{}", text(&o));
+    let fit = std::fs::read_to_string(out.join("Fit.out")).expect("Fit.out");
+    assert!(fit.contains("Non-linear least-squares analysis: final results") && fit.contains("RSQUARE"), "{fit}");
+    let r = rusteau_io::parse_fit_out(&fit);
+    let alpha = r.params.iter().find(|p| p.0 == "ALPHA").expect("ALPHA").1;
+    assert!((alpha - 0.025).abs() < 0.0005, "alpha {alpha}");
+    assert!(out.join("T_LEVEL.csv").exists());
+    // the reference Fit.out of a run: --compare reports the fit and passes
+    std::fs::copy(out.join("Fit.out"), d.join("Fit.out")).unwrap();
+    let o = bin().arg(&f).args(["-q", "-o"]).arg(&out).arg("-c").output().unwrap();
+    assert_eq!(o.status.code(), Some(0), "{}", text(&o));
+    assert!(text(&o).contains("S.E."), "{}", text(&o));
+    // --direct: the initial estimates, no Fit.out
+    let out2 = d.join("out2");
+    let o = bin().arg(&f).args(["-q", "--direct", "-o"]).arg(&out2).output().unwrap();
+    assert!(o.status.success(), "{}", text(&o));
+    assert!(!out2.join("Fit.out").exists() && out2.join("T_LEVEL.csv").exists());
+}

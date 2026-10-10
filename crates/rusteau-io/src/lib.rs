@@ -1,9 +1,13 @@
+pub mod fit;
 pub mod legacy;
+pub mod legacy_write;
 pub mod moist_dep;
 pub mod reference;
 pub mod native;
 pub mod writer;
+pub use fit::*;
 pub use legacy::*;
+pub use legacy_write::*;
 pub use native::*;
 pub use writer::*;
 pub use reference::*;

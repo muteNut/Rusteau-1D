@@ -166,6 +166,12 @@ pub struct Simulation {
     pub dt_max_t: f64,
     pub target_times: Vec<f64>,
     pub target_idx: usize,
+    /// Prescribed time levels (not in HYDRUS): when set, every time step ends at the next of these times instead of
+    /// the time set by the adaptive control (a step reduced after a failed iteration still goes on to the next one).
+    /// Parameter estimation runs the derivative runs on the time levels of the run they are compared with, so the
+    /// derivatives are free of the jumps of the adaptive time steps.
+    pub fixed_levels: Option<std::sync::Arc<Vec<f64>>>,
+    pub fixed_idx: usize,
     // atmosphere
     pub atm_idx: usize,
     pub meteo_idx: usize,
@@ -637,6 +643,8 @@ impl Simulation {
             dt_max_t: 1e30,
             target_times: Vec::new(),
             target_idx: 0,
+            fixed_levels: None,
+            fixed_idx: 0,
             atm_idx: 0,
             meteo_idx: 0,
             r_root_d: 0.0,
@@ -1151,6 +1159,15 @@ impl Simulation {
         }
 
         self.tm_cont(iter, t_target, dt_max_a);
+        if let Some(lv) = &self.fixed_levels {
+            let eps = 1e-9 * self.t.abs().max(1.0);
+            while self.fixed_idx < lv.len() && lv[self.fixed_idx] <= self.t + eps {
+                self.fixed_idx += 1;
+            }
+            if self.fixed_idx < lv.len() {
+                self.dt = lv[self.fixed_idx] - self.t;
+            }
+        }
         self.t += self.dt;
 
         // Apply sub-daily variations (only modify r_top if atmospheric BC is enabled)

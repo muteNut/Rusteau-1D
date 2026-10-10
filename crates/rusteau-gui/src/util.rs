@@ -87,7 +87,7 @@ pub fn apply_catalog(m: &mut SoilMaterial, idx: usize, lf: f64, tf: f64) {
         m.name = c.0.to_string();
         m.qr = c.1;
         m.qs = c.2;
-        m.alpha = c.3 * lf;
+        m.alpha = c.3 / lf; // 1/cm -> 1/L
         m.n = c.4;
         m.ks = c.5 * lf / tf;
         m.l = 0.5;

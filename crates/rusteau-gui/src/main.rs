@@ -2,10 +2,12 @@
 
 mod files;
 mod hydro;
+mod inverse_ui;
 mod measured;
 mod post;
 mod pre;
 mod profile;
+mod rosetta_ui;
 mod util;
 
 use eframe::egui;
@@ -42,7 +44,8 @@ pub enum Page {
     SoilProps,
     RunTime,
     MassBalance,
-	Inverse,
+    Inverse,
+    InverseResults,
 }
 
 struct RunHandle {
@@ -54,10 +57,6 @@ struct RunHandle {
     started: Instant,
 }
 
-struct OptHandle {
-    rx: Receiver<Result<f64, String>>,
-    started: Instant,
-}
 
 
 pub struct PostState {
@@ -199,7 +198,10 @@ pub struct App {
     pub page: Page,
     pub results: Option<Results>,
     run: Option<RunHandle>,
-	opt_run: Option<OptHandle>,
+    /// parameter estimation (run, result)
+    pub inv: inverse_ui::InvState,
+    /// waiting for clipboard text for the observation table
+    pub inv_paste: bool,
     pub status: String,
     pub dialog: Option<FileDialog>,
     pub problems: Vec<String>,
@@ -220,6 +222,10 @@ pub struct App {
     pub measured_target: Option<measured::Target>,
     /// convert all values when a unit changes (otherwise only the unit label changes)
     pub convert_units: bool,
+    /// Save also writes a HYDRUS-1D project (`<name>.h1d` + folder `<name>`) next to the .h1dr
+    pub legacy_on_save: bool,
+    /// Rosetta dialog
+    pub ros: Option<rosetta_ui::RosettaDlg>,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -256,7 +262,8 @@ impl App {
             page: Page::Main,
             results: None,
             run: None,
-			opt_run: None,
+            inv: Default::default(),
+            inv_paste: false,
             status: "Ready. Load an example, import a HYDRUS-1D project folder, or edit the current project.".into(),
             dialog: None,
             problems: vec![],
@@ -274,6 +281,8 @@ impl App {
             measured: vec![],
             measured_target: None,
             convert_units: true,
+            legacy_on_save: false,
+            ros: None,
         };
         if let Some(arg) = std::env::args().nth(1) {
             let p = PathBuf::from(&arg);
@@ -305,6 +314,8 @@ impl App {
         self.pe.reset();
         self.post = PostState::default();
         self.measured.clear();
+        self.inv.result = None;
+        self.inv.settings = None;
         self.page = Page::Main;
         self.sync();
     }
@@ -320,6 +331,10 @@ impl App {
     }
 
     fn start_run(&mut self) {
+        if self.prj.processes.inverse {
+            self.start_inverse();
+            return;
+        }
         self.problems = self.prj.validate();
         if !self.problems.is_empty() {
             self.status = "The project has problems – see the Summary page.".into();
@@ -546,7 +561,7 @@ impl App {
                     }
 					if ui.button("Import optimization file (Fit.in)…").clicked() {
                         self.dialog = Some(FileDialog::new(
-                            Purpose::ImportLegacy,
+                            Purpose::ImportFitIn,
                             Mode::OpenFile,
                             "Select optimization input file (Fit.in)",
                             self.last_dir.clone(),
@@ -580,6 +595,25 @@ impl App {
                         ));
                         ui.close_menu();
                     }
+                    if ui.button("Save as HYDRUS-1D project (.h1d + folder)…").clicked() {
+                        let name = self
+                            .path
+                            .as_ref()
+                            .and_then(|p| p.file_stem())
+                            .map(|s| format!("{}.h1d", s.to_string_lossy()))
+                            .unwrap_or_else(|| "project.h1d".into());
+                        self.dialog = Some(FileDialog::new(
+                            Purpose::SaveLegacy,
+                            Mode::SaveFile,
+                            "Save as HYDRUS-1D project (the folder <name> with the input files is created next to <name>.h1d)",
+                            self.last_dir.clone(),
+                            &name,
+                            &["h1d"],
+                        ));
+                        ui.close_menu();
+                    }
+                    ui.checkbox(&mut self.legacy_on_save, "Save also writes a HYDRUS-1D project (.h1d)")
+                        .on_hover_text("Every Save also writes <name>.h1d and the folder <name> with the HYDRUS-1D input files next to the .h1dr, so the project opens in HYDRUS-1D 4.x.");
                     ui.separator();
                     if ui
                         .add_enabled(
@@ -613,10 +647,13 @@ impl App {
                         ui.close_menu();
                     }
                     if ui
-                        .add_enabled(self.run.is_some(), egui::Button::new("■ Stop"))
+                        .add_enabled(self.run.is_some() || self.inv.run.is_some(), egui::Button::new("■ Stop"))
                         .clicked()
                     {
                         if let Some(r) = &self.run {
+                            r.cancel.store(true, Ordering::Relaxed);
+                        }
+                        if let Some(r) = &self.inv.run {
                             r.cancel.store(true, Ordering::Relaxed);
                         }
                         ui.close_menu();
@@ -639,14 +676,17 @@ impl App {
                     }
                 });
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    let running = self.run.is_some();
+                    let running = self.run.is_some() || self.inv.run.is_some();
                     if running {
                         if ui.button("■ Stop").clicked() {
                             if let Some(r) = &self.run {
                                 r.cancel.store(true, Ordering::Relaxed);
                             }
+                            if let Some(r) = &self.inv.run {
+                                r.cancel.store(true, Ordering::Relaxed);
+                            }
                         }
-                    } else if ui.button("▶ Run").clicked() {
+                    } else if ui.button(if self.prj.processes.inverse { "▶ Run (inverse)" } else { "▶ Run" }).clicked() {
                         self.start_run();
                     }
                     let title = format!("{}{}", self.prj.title, if self.dirty { " *" } else { "" });
@@ -654,7 +694,7 @@ impl App {
                 });
             });
         });
-        if ctx.input(|i| i.key_pressed(egui::Key::F5)) && self.run.is_none() {
+        if ctx.input(|i| i.key_pressed(egui::Key::F5)) && self.run.is_none() && self.inv.run.is_none() {
             self.start_run();
         }
     }
@@ -665,9 +705,37 @@ impl App {
                 Ok(_) => {
                     self.dirty = false;
                     self.status = format!("Saved {}", p.display());
+                    if self.legacy_on_save {
+                        let msg = self.save_legacy(&p.with_extension("h1d"));
+                        self.status = format!("Saved {} – {}", p.display(), msg);
+                    }
                 }
                 Err(e) => self.status = e.to_string(),
             }
+        }
+    }
+
+    /// Writes the project as a HYDRUS-1D 4.x project (`<name>.h1d` and the folder `<name>` with the input files) and
+    /// returns a status message; settings HYDRUS-1D cannot store are listed with the problems.
+    fn save_legacy(&mut self, path: &std::path::Path) -> String {
+        match rusteau_io::save_h1d_project(&self.prj, path) {
+            Ok((files, warnings)) => {
+                let (h1d, dir) = rusteau_io::h1d_paths(path);
+                if let Some(d) = h1d.parent() {
+                    self.last_dir = Some(d.to_path_buf());
+                }
+                if !warnings.is_empty() {
+                    self.problems = warnings.iter().map(|w| format!("HYDRUS-1D project: {w}")).collect();
+                }
+                format!(
+                    "HYDRUS-1D project written: {} and {} files in {}{}",
+                    h1d.display(),
+                    files.len().saturating_sub(1),
+                    dir.display(),
+                    if warnings.is_empty() { String::new() } else { format!(" ({} settings not stored, see the problems)", warnings.len()) }
+                )
+            }
+            Err(e) => format!("Writing the HYDRUS-1D project failed: {e}"),
         }
     }
 
@@ -751,6 +819,9 @@ impl App {
                             self.path = Some(p);
                             self.save();
                         }
+                        Purpose::SaveLegacy => {
+                            self.status = self.save_legacy(&path);
+                        }
                         Purpose::ExportCsv => {
                             if let Some(r) = &self.results {
                                 self.status = match rusteau_io::writer::write_all(r, &path) {
@@ -760,6 +831,37 @@ impl App {
                             }
                         }
                         Purpose::ImportMeasured => self.import_measured(&path),
+                        Purpose::ImportFitIn => match rusteau_io::read_fit_in(&path) {
+                            Ok(settings) => {
+                                let n = settings.observations.len();
+                                let sets = measured::from_fit(&settings);
+                                self.measured.retain(|m| !m.name.starts_with("Fit.in"));
+                                self.measured.extend(sets);
+                                self.prj.inverse = Some(settings);
+                                self.prj.processes.inverse = true;
+                                self.dirty = true;
+                                self.page = Page::Inverse;
+                                self.status = format!("Inverse settings with {} observations read from {}", n, path.display());
+                            }
+                            Err(e) => self.status = format!("Failed to read Fit.in: {}", e),
+                        },
+                        Purpose::ExportFitIn => {
+                            if let Some(s) = &self.prj.inverse {
+                                self.status = match rusteau_io::write_fit_in(&path, s) {
+                                    Ok(_) => format!("Fit.in written to {}", path.display()),
+                                    Err(e) => e.to_string(),
+                                };
+                            }
+                        }
+                        Purpose::SaveFitOut => {
+                            if let (Some(r), Some(s)) = (&self.inv.result, &self.inv.settings) {
+                                let text = rusteau_io::fit_out_text(&self.prj, s, r);
+                                self.status = match std::fs::write(&path, text) {
+                                    Ok(_) => format!("Fit.out written to {}", path.display()),
+                                    Err(e) => e.to_string(),
+                                };
+                            }
+                        }
                         Purpose::ImportAtmosphere => {
                             self.status = match self.import_atmosphere_text(&path) {
                                 Ok(n) => format!("Imported {} atmospheric records", n),
@@ -805,7 +907,7 @@ impl App {
         steps.push(("Boundary conditions", b));
         let mut t = vec![];
         if pr.root_water_uptake {
-            t.push((Page::RootUptake, "Root water uptake"));
+            t.push((Page::RootUptake, "Root water & solute uptake"));
         }
         if pr.heat {
             t.push((Page::Heat, "Heat transport"));
@@ -823,7 +925,7 @@ impl App {
             steps.push(("Uptake & transport", t));
         }
         steps.push(("Run", vec![(Page::Iteration, "Iteration criteria"), (Page::Summary, "Check & run")]));
-        steps.push(("Parameter estimation", vec![(Page::Inverse, "Inverse modeling (Fit.in)")]));
+        steps.push(("Parameter estimation", vec![(Page::Inverse, "Inverse problem (Fit.in)")]));
         steps
     }
 
@@ -875,6 +977,15 @@ impl App {
                             }
                         });
                     }
+                    if self.inv.result.is_some() || self.inv.run.is_some() || self.prj.processes.inverse {
+                        let enabled = self.inv.result.is_some() || self.inv.run.is_some();
+                        ui.horizontal(|ui| {
+                            ui.add_space(8.0);
+                            if ui.add_enabled(enabled, egui::SelectableLabel::new(self.page == Page::InverseResults, "Parameter estimation")).clicked() {
+                                self.page = Page::InverseResults;
+                            }
+                        });
+                    }
                 });
             });
     }
@@ -921,58 +1032,21 @@ impl App {
             });
         });
     }
-	fn start_optimization(&mut self) {
-        let prj = self.prj.clone();
-        let (tx, rx) = channel();
-        std::thread::spawn(move || {
-            let mut opt_state = rusteau_core::inverse::OptimizationState::default();
-            let res = match opt_state.optimize(&mut prj.clone()) {
-                Ok(_) => Ok(opt_state.current_ssq),
-                Err(e) => Err(e.to_string()),
-            };
-            let _ = tx.send(res);
-        });
-        self.opt_run = Some(OptHandle {
-            rx,
-            started: Instant::now(),
-        });
-        self.status = "Parameter optimization running…".into();
-    }
-
-    fn poll_optimization(&mut self, ctx: &egui::Context) {
-        let mut finished = None;
-        if let Some(r) = &self.opt_run {
-            ctx.request_repaint_after(std::time::Duration::from_millis(80));
-            if let Ok(res) = r.rx.try_recv() {
-                finished = Some((res, r.started.elapsed().as_secs_f64()));
-            }
-        }
-        if let Some((res, secs)) = finished {
-            self.opt_run = None;
-            match res {
-                Ok(ssq) => {
-                    self.status = format!("Optimization finished in {:.2} s – Final SSQ: {:.4}", secs, ssq);
-                }
-                Err(e) => {
-                    self.status = format!("Optimization error: {}", e);
-                }
-            }
-        }
-    }
 }
 
 impl eframe::App for App {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         if self.first_frame {
             self.first_frame = false;
-            let screen_rect = ctx.screen_rect();
-            let screen_w = screen_rect.width();
-            let screen_h = screen_rect.height();
-            let target_w = (screen_w * 0.80).clamp(960.0, 1920.0);
-            let target_h = (screen_h * 0.82).clamp(620.0, 1200.0);
-            ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(
-                target_w, target_h,
-            )));
+            // 80 % of the monitor (the viewport itself is not the monitor); without monitor information the default
+            // size of the native options stays
+            if let Some(m) = ctx.input(|i| i.viewport().monitor_size) {
+                if m.x > 0.0 && m.y > 0.0 {
+                    let target_w = (m.x * 0.80).clamp(960.0_f32.min(m.x), 1920.0);
+                    let target_h = (m.y * 0.82).clamp(620.0_f32.min(m.y), 1200.0);
+                    ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(target_w, target_h)));
+                }
+            }
         }
 
         if ctx.input(|i| i.viewport().close_requested()) && self.dirty {
@@ -983,7 +1057,7 @@ impl eframe::App for App {
 
         self.handle_shortcuts(ctx);
         self.poll_run(ctx);
-		self.poll_optimization(ctx);
+        self.poll_inverse(ctx);
         self.menu(ctx);
         self.status_bar(ctx);
         self.flow_bar(ctx);
@@ -1001,6 +1075,7 @@ impl eframe::App for App {
                 });
         });
         self.dialogs(ctx);
+        self.rosetta_window(ctx);
     }
 }
 
@@ -1025,7 +1100,8 @@ impl App {
             Page::SoluteBc => self.page_sol_bc(ui, &mut ch),
             Page::Heat => self.page_heat(ui, &mut ch),
             Page::Profile => self.page_profile(ui, &mut ch),
-			Page::Inverse => self.page_inverse(ui),
+            Page::Inverse => self.page_inverse(ui, &mut ch),
+            Page::InverseResults => self.page_inverse_results(ui),
             Page::Summary => self.page_summary(ui),
             Page::Obs => self.page_obs(ui),
             Page::ProfileInfo => self.page_profile_info(ui),

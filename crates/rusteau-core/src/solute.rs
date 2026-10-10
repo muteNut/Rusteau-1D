@@ -177,13 +177,15 @@ impl Simulation {
             h.ampl = rec.ampl;
         }
         let act_rsu = self.prj.root.l_act_rsu;
+        let active = self.prj.root.active_solute;
         let mut s_pot = None;
         if let Some(s) = self.sol.as_mut() {
             for j in 0..s.ns {
                 s.c_t[j] = rec.c_top.get(j).copied().unwrap_or(0.0);
                 s.c_bot[j] = rec.c_bot.get(j).copied().unwrap_or(0.0);
-                if act_rsu && s.ns == 1 {
-                    // SetBC: `cBot(jj)=0.; SPot=cB(jj)`
+                // SetBC: `cBot(jj)=0.; SPot=cB(jj)` (2009: single solute; the cB column of the solute with active
+                // uptake carries SPot)
+                if act_rsu && j == active.min(s.ns - 1) {
                     s_pot = Some(s.c_bot[j]);
                     s.c_bot[j] = 0.0;
                 }
@@ -816,11 +818,11 @@ impl Simulation {
     /// Root solute uptake (port of SetSSnk in SINK.FOR): passive uptake S_w * min(c, cRootMax)
     /// and, with `lActRSU`, Michaelis-Menten type active uptake of the potential solute uptake
     /// `SPot*OmegaW` that the passive uptake does not cover (step 2), optionally compensated for
-    /// stress (step 3, `OmegaS < 1`). `omega_act[0]` is OmegaS.
+    /// stress (step 3, `OmegaS < 1`), for the solute `RootUptake::active_solute`. `omega_act[0]` is OmegaS.
     fn set_s_snk(&self, st: &mut SoluteState, js: usize) {
         let n = self.n;
         let root = &self.prj.root;
-        let act = root.l_act_rsu && js == 0 && !root.r_km.is_empty();
+        let act = root.l_act_rsu && js == root.active_solute.min(st.ns.saturating_sub(1)) && !root.r_km.is_empty();
         let omega_s = root.omega_act.first().copied().unwrap_or(1.0);
         let (r_km, c_min) = (root.r_km.first().copied().unwrap_or(0.0), root.c_min.first().copied().unwrap_or(0.0));
         let n_step = if act { if omega_s < 1.0 { 3 } else { 2 } } else { 1 };

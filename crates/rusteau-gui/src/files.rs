@@ -15,10 +15,15 @@ pub enum Mode {
 pub enum Purpose {
     OpenProject,
     SaveProject,
+    /// HYDRUS-1D 4.x project: `<name>.h1d` + folder `<name>`
+    SaveLegacy,
     ImportLegacy,
     ExportCsv,
     ImportAtmosphere,
     ImportMeasured,
+    ImportFitIn,
+    ExportFitIn,
+    SaveFitOut,
 }
 
 pub enum DialogResult {

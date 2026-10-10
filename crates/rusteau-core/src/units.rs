@@ -24,6 +24,15 @@ fn per_second(u: TimeUnit) -> f64 {
 
 /// Rescales all values of `prj` from its current units to `length` / `time` and sets the new units.
 pub fn convert_units(prj: &mut Project, length: LengthUnit, time: TimeUnit) {
+    if let Some(mut inv) = prj.inverse.take() {
+        let before = prj.clone();
+        convert_units(prj, length, time);
+        let fl = per_metre(length) / per_metre(before.units.length);
+        let ft = per_second(time) / per_second(before.units.time);
+        crate::inverse::convert_settings(&mut inv, &before, |p: &mut Project| convert_units(p, length, time), fl, ft);
+        prj.inverse = Some(inv);
+        return;
+    }
     let fl = per_metre(length) / per_metre(prj.units.length);
     let ft = per_second(time) / per_second(prj.units.time);
     prj.units.length = length;

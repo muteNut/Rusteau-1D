@@ -56,19 +56,20 @@ pub fn read_xy(path: &Path) -> Result<Vec<[f64; 2]>, String> {
 pub fn from_fit(s: &InverseSettings) -> Vec<Measured> {
     let mut out: Vec<Measured> = vec![];
     for o in &s.observations {
-        let (target, name) = match o.q_type {
-            1 if o.position > 0 => (Target::Obs { var: 0, obs: o.position - 1 }, format!("Fit.in h, obs. node {}", o.position)),
-            2 if o.position > 0 => (Target::Obs { var: 1, obs: o.position - 1 }, format!("Fit.in θ, obs. node {}", o.position)),
-            4 if o.position > 0 => (Target::Obs { var: 4, obs: o.position - 1 }, format!("Fit.in c, obs. node {}", o.position)),
-            0 => (Target::Flux { group: 1 }, format!("Fit.in cumulative flux {}", if o.position == 2 { "bottom" } else { "top" })),
-            3 => (Target::Flux { group: 0 }, format!("Fit.in flux {}", if o.position == 2 { "bottom" } else { "top" })),
+        let p = o.pos;
+        let (target, name) = match o.kind {
+            1 if p > 0 => (Target::Obs { var: 0, obs: p as usize - 1 }, format!("Fit.in h, obs. node {p}")),
+            2 if p > 0 => (Target::Obs { var: 1, obs: p as usize - 1 }, format!("Fit.in θ, obs. node {p}")),
+            4 if p > 0 => (Target::Obs { var: 4, obs: p as usize - 1 }, format!("Fit.in c, obs. node {p}")),
+            0 => (Target::Flux { group: 1 }, format!("Fit.in cumulative flux {}", if p == 2 { "bottom" } else { "top" })),
+            3 => (Target::Flux { group: 0 }, format!("Fit.in flux {}", if p == 2 { "bottom" } else { "top" })),
             5 => (Target::Retention, "Fit.in θ(h)".to_string()),
             6 => (Target::Conductivity, "Fit.in K(h)".to_string()),
             _ => continue,
         };
         match out.iter_mut().find(|m| m.name == name) {
-            Some(m) => m.pts.push([o.time, o.value]),
-            None => out.push(Measured { name, target, pts: vec![[o.time, o.value]], show: true }),
+            Some(m) => m.pts.push([o.x, o.value]),
+            None => out.push(Measured { name, target, pts: vec![[o.x, o.value]], show: true }),
         }
     }
     out

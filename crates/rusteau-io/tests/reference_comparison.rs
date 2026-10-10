@@ -46,6 +46,10 @@ enum Cause {
     LatentOscillation,
     /// Triggered irrigation: vTop ~ +-1e-6 is booked as infiltration or evaporation by its sign.
     IrrigationSign,
+    /// First time steps after the end of ponding: same time steps and iteration counts as HYDRUS 4.17, the heads near
+    /// the surface differ by less than the iteration tolerance (with 100x tighter TolTh / TolH the Rust result itself
+    /// moves 3 - 10 times more). The compiled 2009 source agrees with Rust.
+    PondingEndTolerance,
 }
 use Cause::*;
 
@@ -68,9 +72,11 @@ const fn k(cause: Cause, example: &'static str, file: &'static str, column: &'st
 }
 
 /// Examples of the HYDRUS-1D distribution (Examples/Direct) and the HYDRUS 4.17 check runs kept with them
-/// (EnBal2b_A / EnBal2b_B: observation nodes at the surface, 5SEASON_IRR: triggered irrigation).  Examples that are not
-/// listed here (1SCALING, 2NOHYSTR, 3LAIJURI, 3SELIM, 4HEAT, 5SEASON, DRAINAGE, EnBal2b_B, TEST3, TEST4, TEST5, TEST9a,
-/// Test9, Test10, UPINFIL, and any other folder) must match without any problem.
+/// (EnBal2b_A / EnBal2b_B: observation nodes at the surface, 5SEASON_IRR: triggered irrigation, 1SCALING_BC /
+/// 2NOHYSTR_AE / 2NOHYSTR_DUR / 2NOHYSTR_LN: Brooks-Corey, air-entry, Durner and Kosugi models, 2HYSTER_RET: hysteresis
+/// in the retention curve only).  Examples that are not listed here (1SCALING, 2NOHYSTR, 3LAIJURI, 3SELIM, 4HEAT,
+/// 5SEASON, DRAINAGE, EnBal2b_B, TEST3, TEST4, TEST5, TEST9a, Test9, Test10, UPINFIL, 1SCALING_BC, 2NOHYSTR_AE,
+/// 2NOHYSTR_DUR, and any other folder) must match without any problem.
 const KNOWN: &[Known] = &[
     // RealPrecision
     k(RealPrecision, "ROOTUPTK", "Solute1.out", "cRoot", 0.0054, 6, 3),
@@ -125,6 +131,14 @@ const KNOWN: &[Known] = &[
     // IrrigationSign
     k(IrrigationSign, "5SEASON_IRR", "T_Level.out", "sum(Infil)", 0.0072, 464, 3),
     k(IrrigationSign, "5SEASON_IRR", "T_Level.out", "sum(Evap)", 0.3, 464, 3),
+    // PondingEndTolerance (check runs 2HYSTER_RET: hysteresis in the retention curve only; 2NOHYSTR_LN: Kosugi model)
+    k(PondingEndTolerance, "2HYSTER_RET", "T_Level.out", "hTop", 0.0033, 2, 3),
+    k(PondingEndTolerance, "2HYSTER_RET", "A_Level.out", "hTop", 0.0033, 2, 3),
+    k(PondingEndTolerance, "2HYSTER_RET", "Obs_Node.out", "h(1)", 0.003, 3, 3),
+    k(PondingEndTolerance, "2HYSTER_RET", "Obs_Node.out", "h(2)", 0.039, 8, 3),
+    k(PondingEndTolerance, "2NOHYSTR_LN", "T_Level.out", "hTop", 0.0025, 2, 3),
+    k(PondingEndTolerance, "2NOHYSTR_LN", "Obs_Node.out", "h(1)", 0.002, 3, 3),
+    k(PondingEndTolerance, "2NOHYSTR_LN", "Obs_Node.out", "h(2)", 0.0064, 2, 3),
 ];
 
 /// A problem line of the comparison, reduced to what the envelope checks.
@@ -268,6 +282,11 @@ fn test_all_direct_examples_comparison() {
         let mut stopped_too = None;
         match read_legacy_project(&path) {
             Err(e) => problems.push(format!("[{name}] project parse error: {e}")),
+            Ok(prj) if prj.processes.inverse => {
+                // the outputs of an inverse example belong to the final run with the fitted parameters
+                println!("Skipping {name:<14} ... inverse problem (compared with its Fit.out by the inverse_test)");
+                continue;
+            }
             Ok(prj) => {
                 out.en_bal = prj.atmosphere.meteo.as_ref().map_or(false, |m| m.l_en_bal);
                 match Simulation::new(prj.clone()) {
@@ -398,6 +417,45 @@ fn test_all_direct_examples_comparison() {
     if en_run > 0 {
         assert!(en_ok > 0, "STRICTNESS FAILURE: no project with lEnBal = true was verified.");
     }
+}
+
+/// Replay of the HYDRUS time steps: examples whose difference to 4.17 comes only from a different sequence of time steps
+/// (iteration counts near the TolTh / TolH limit in single precision) are run on the time levels of the 4.17
+/// `T_Level.out` (`Simulation::fixed_levels`) and must then agree with all reference files within print precision.
+/// TEST1: 12 problems with its own time steps, none on those of 4.17.
+#[test]
+fn time_step_replay_of_hydrus_runs() {
+    const REPLAY_EXACT: &[&str] = &["TEST1"];
+    let base = examples_dir();
+    let mut fails = vec![];
+    let mut checked = 0;
+    for name in REPLAY_EXACT {
+        let dir = base.join(name);
+        if !has_selector_in(&dir) {
+            continue;
+        }
+        let Some(tl) = std::fs::read_dir(&dir).ok().and_then(|rd| rd.flatten().map(|e| e.path()).find(|p| p.file_name().is_some_and(|f| f.to_string_lossy().eq_ignore_ascii_case("t_level.out")))) else {
+            continue;
+        };
+        let prj = read_legacy_project(&dir).expect("project");
+        let t = read_t_level(&tl).expect("T_Level.out");
+        let mut levels: Vec<f64> = t.times.iter().copied().filter(|&x| x > prj.time.t_init + 1e-12).collect();
+        levels.dedup();
+        let mut sim = Simulation::new(prj.clone()).expect("project");
+        sim.fixed_levels = Some(std::sync::Arc::new(levels.clone()));
+        while sim.step() == StepStatus::Running {}
+        let rep = compare_folder(&dir, &prj, &sim.res);
+        println!("{name}: {} levels of 4.17, {} simulated, {} problems", levels.len(), sim.res.tlevel.len(), rep.errors.len());
+        if sim.res.tlevel.len() != levels.len() {
+            fails.push(format!("{name}: {} time levels on the 4.17 levels ({} expected)", sim.res.tlevel.len(), levels.len()));
+        }
+        fails.extend(rep.errors.iter().map(|e| format!("{name}: {e}")));
+        checked += 1;
+    }
+    if checked == 0 {
+        println!("skipped: no replay examples in {}", base.display());
+    }
+    assert!(fails.is_empty(), "{}", fails.join("\n"));
 }
 
 #[test]

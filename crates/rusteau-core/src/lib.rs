@@ -23,6 +23,7 @@ pub mod units;
 pub mod water;
 pub mod vapor;
 pub mod inverse;
+pub mod rosetta;
 
 pub use error::HydrusError;
 pub use model::*;
