@@ -7,6 +7,7 @@
 //! of nodes, fixed points with relative element sizes) regenerates the nodes and interpolates the nodal values. The
 //! table view lists all nodal values.
 
+use crate::tips::{hdr, lbl, TipExt};
 use crate::util::*;
 use crate::{App, Page};
 use egui::{Align2, Color32, ComboBox, Pos2, RichText, Stroke, Ui, Vec2b};
@@ -383,7 +384,7 @@ impl App {
             );
         });
         ui.horizontal_wrapped(|ui| {
-            ui.label("Quantity:");
+            lbl(ui, "Quantity:");
             for qq in &qtys {
                 if ui.selectable_label(self.pe.qty == *qq, qq.short(&self.prj)).on_hover_text(qq.label(&self.prj)).clicked() {
                     self.pe.qty = *qq;
@@ -831,9 +832,9 @@ impl App {
         ui.horizontal(|ui| {
             let (mut fa, mut fb) = (da, db);
             ui.label("From");
-            let ra = ui.add(egui::DragValue::new(&mut fa).speed(0.2).suffix(format!(" {lu}")));
+            let ra = ui.add(egui::DragValue::new(&mut fa).speed(0.2).suffix(format!(" {lu}"))).tip_text("Depth of the top of the selection (the nearest node is taken)");
             ui.label("to");
-            let rb = ui.add(egui::DragValue::new(&mut fb).speed(0.2).suffix(format!(" {lu}")));
+            let rb = ui.add(egui::DragValue::new(&mut fb).speed(0.2).suffix(format!(" {lu}"))).tip_text("Depth of the bottom of the selection (the nearest node is taken)");
             if ra.changed() || rb.changed() {
                 let ka = self.prj.profile.nearest_node(fa);
                 let kb = self.prj.profile.nearest_node(fb);
@@ -849,7 +850,7 @@ impl App {
         match q {
             Qty::Material => {
                 ui.horizontal(|ui| {
-                    ui.label("Material");
+                    lbl(ui, "Material");
                     let nm = self.prj.water.materials.len();
                     self.pe.mat = self.pe.mat.clamp(1, nm);
                     let names: Vec<(String, Color32)> = (1..=nm).map(|m| (self.mat_name(m), soil_mat_color(&self.prj, m))).collect();
@@ -861,7 +862,7 @@ impl App {
                             });
                         }
                     });
-                    if ui.button("Apply").clicked() {
+                    if ui.button("Apply").tip_text("Assigns the material to the selected nodes").clicked() {
                         self.apply_values(ch);
                     }
                 });
@@ -871,13 +872,13 @@ impl App {
             }
             Qty::SubRegion => {
                 ui.horizontal(|ui| {
-                    ui.label("Sub-region");
-                    ui.add(egui::DragValue::new(&mut self.pe.sub).range(1..=100));
-                    if ui.button("Apply").clicked() {
+                    lbl(ui, "Sub-region");
+                    ui.add(egui::DragValue::new(&mut self.pe.sub).range(1..=100)).tip("Sub-region");
+                    if ui.button("Apply").tip_text("Assigns the sub-region to the selected nodes").clicked() {
                         self.apply_values(ch);
                     }
                 });
-                if ui.button("Sub-regions = materials").on_hover_text("Set the sub-region of every node to its material number").clicked() {
+                if ui.button("Sub-regions = materials").tip("Sub-regions = materials").clicked() {
                     for nd in self.prj.profile.nodes.iter_mut() {
                         nd.layer = nd.mat;
                     }
@@ -908,8 +909,8 @@ impl App {
             *ch = true;
         }
         ui.horizontal(|ui| {
-            ui.label("Add at depth");
-            ui.add(egui::DragValue::new(&mut self.pe.obs_depth).speed(0.2).suffix(format!(" {lu}")));
+            lbl(ui, "Add at depth");
+            ui.add(egui::DragValue::new(&mut self.pe.obs_depth).speed(0.2).suffix(format!(" {lu}"))).tip("Add at depth");
             if ui.button("Add").clicked() {
                 let k = self.prj.profile.nearest_node(self.pe.obs_depth) + 1;
                 let obs = &mut self.prj.profile.observation_nodes;
@@ -929,13 +930,13 @@ impl App {
         // ---- discretization
         section(ui, "Profile depth & discretization");
         egui::Grid::new("pe_geo").num_columns(2).show(ui, |ui| {
-            ui.label("Profile depth");
-            if ui.add(egui::DragValue::new(&mut self.pe.g_depth).speed(0.5).range(1e-6..=1e9).suffix(format!(" {lu}"))).changed() {
+            lbl(ui, "Profile depth");
+            if ui.add(egui::DragValue::new(&mut self.pe.g_depth).speed(0.5).range(1e-6..=1e9).suffix(format!(" {lu}"))).tip("Profile depth").changed() {
                 self.pe.g_dirty = true;
             }
             ui.end_row();
-            ui.label("Number of nodes");
-            if ui.add(egui::DragValue::new(&mut self.pe.g_nodes).range(2..=1001)).changed() {
+            lbl(ui, "Number of nodes");
+            if ui.add(egui::DragValue::new(&mut self.pe.g_nodes).range(2..=1001)).tip("Number of nodes").changed() {
                 self.pe.g_dirty = true;
             }
             ui.end_row();
@@ -945,9 +946,9 @@ impl App {
         let mut remove = None;
         let mut dirty = false;
         egui::Grid::new("pe_fixed").num_columns(4).striped(true).show(ui, |ui| {
-            ui.strong(format!("depth ({lu})"));
-            ui.strong("size above");
-            ui.strong("size below");
+            ui.strong(format!("depth ({lu})")).tip_text("Depth of the fixed point (the surface and the bottom are always fixed points)");
+            hdr(ui, "size above");
+            hdr(ui, "size below");
             ui.label("");
             ui.end_row();
             let m = self.pe.g_fixed.len();
@@ -985,7 +986,7 @@ impl App {
             self.pe.g_fixed.sort_by(|a, b| a.depth.total_cmp(&b.depth));
         }
         ui.horizontal(|ui| {
-            ui.label("Add fixed point at");
+            lbl(ui, "Add fixed point at");
             ui.add(egui::DragValue::new(&mut self.pe.fixed_depth).speed(0.2).range(0.0..=total).suffix(format!(" {lu}")));
             if ui.button("Add").clicked() {
                 self.add_fixed_point(self.pe.fixed_depth);
@@ -1034,19 +1035,18 @@ impl App {
         let unit = q.unit(&self.prj);
         let lu = self.prj.units.length_str().to_string();
         let theta = self.prj.water.init_in_water_content;
-        if q == Qty::Init && ui.checkbox(&mut self.prj.water.init_in_water_content, "Initial condition as water content θ").changed() {
+        if q == Qty::Init && ui.checkbox(&mut self.prj.water.init_in_water_content, "Initial condition as water content θ").tip("Initial condition as water content θ").changed() {
             *ch = true;
         }
         ui.horizontal_wrapped(|ui| {
-            ui.radio_value(&mut self.pe.dist, Dist::Constant, "Constant");
-            ui.radio_value(&mut self.pe.dist, Dist::Linear, "Linear");
+            ui.radio_value(&mut self.pe.dist, Dist::Constant, "Constant").tip("Constant");
+            ui.radio_value(&mut self.pe.dist, Dist::Linear, "Linear").tip("Linear");
             if q == Qty::Init && !theta {
-                ui.radio_value(&mut self.pe.dist, Dist::Equilibrium, "Hydrostatic equilibrium")
-                    .on_hover_text("h = h(bottom) − (z(bottom) − z)·cos α from the lowest selected node");
+                ui.radio_value(&mut self.pe.dist, Dist::Equilibrium, "Hydrostatic equilibrium").tip("Hydrostatic equilibrium");
             }
             if q == Qty::Root {
-                ui.radio_value(&mut self.pe.dist, Dist::HoffmanVG, "Hoffman & van Genuchten (1983)");
-                ui.radio_value(&mut self.pe.dist, Dist::Vrugt, "Vrugt et al. (2001)");
+                ui.radio_value(&mut self.pe.dist, Dist::HoffmanVG, "Hoffman & van Genuchten (1983)").tip("Hoffman & van Genuchten (1983)");
+                ui.radio_value(&mut self.pe.dist, Dist::Vrugt, "Vrugt et al. (2001)").tip("Vrugt et al. (2001)");
             }
         });
         let dv_u = |ui: &mut Ui, v: &mut f64, u: &str| {
@@ -1056,41 +1056,41 @@ impl App {
         };
         egui::Grid::new("pe_val").num_columns(2).show(ui, |ui| match self.pe.dist {
             Dist::Constant => {
-                ui.label("Value");
+                ui.label("Value").tip_text("Value set at the selected nodes.");
                 dv_u(ui, &mut self.pe.v_top, &unit);
                 ui.end_row();
             }
             Dist::Linear => {
-                ui.label("Top of the selection");
+                lbl(ui, "Top of the selection");
                 dv_u(ui, &mut self.pe.v_top, &unit);
                 ui.end_row();
-                ui.label("Bottom of the selection");
+                lbl(ui, "Bottom of the selection");
                 dv_u(ui, &mut self.pe.v_bot, &unit);
                 ui.end_row();
             }
             Dist::Equilibrium => {
-                ui.label("h at the lowest selected node");
+                lbl(ui, "h at the lowest selected node");
                 dv_u(ui, &mut self.pe.v_bot, &unit);
                 ui.end_row();
             }
             Dist::HoffmanVG => {
-                ui.label("Rooting depth Lr");
+                lbl(ui, "Rooting depth Lr");
                 dv_u(ui, &mut self.pe.root_depth, &lu);
                 ui.end_row();
             }
             Dist::Vrugt => {
-                ui.label("Maximum rooting depth zm");
+                lbl(ui, "Maximum rooting depth zm");
                 dv_u(ui, &mut self.pe.root_depth, &lu);
                 ui.end_row();
-                ui.label("Depth of maximum intensity z*");
+                lbl(ui, "Depth of maximum intensity z*");
                 dv_u(ui, &mut self.pe.root_zstar, &lu);
                 ui.end_row();
-                ui.label("Shape parameter pz");
+                lbl(ui, "Shape parameter pz");
                 dv_u(ui, &mut self.pe.root_pz, "–");
                 ui.end_row();
             }
         });
-        if ui.button(RichText::new("Apply to selection").strong()).clicked() {
+        if ui.button(RichText::new("Apply to selection").strong()).tip_text("Sets the values of the selected nodes with the chosen distribution").clicked() {
             self.apply_values(ch);
         }
         // initial condition from the results of the last run (any print time), interpolated in depth
@@ -1230,7 +1230,7 @@ impl App {
             }
         }
         ui.horizontal(|ui| {
-            ui.checkbox(&mut self.pe.table_sel_only, "Only the selected nodes");
+            ui.checkbox(&mut self.pe.table_sel_only, "Only the selected nodes").tip("Only the selected nodes");
             let (a, b) = self.pe.sel;
             ui.label(RichText::new(format!("Selection: nodes {}–{}. Click a row to select it, Shift+click to extend.", a + 1, b + 1)).weak());
         });

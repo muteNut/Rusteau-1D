@@ -1,6 +1,7 @@
 //! Rosetta dialog: van Genuchten parameters and Ks predicted from texture, bulk density and two water contents
 //! (the "Rosetta Lite" dialog of HYDRUS-1D, with Rosetta 3 as the default model).
 
+use crate::tips::TipExt;
 use crate::util::*;
 use crate::App;
 use eframe::egui::{self, Color32, RichText};
@@ -92,9 +93,14 @@ impl App {
                 RosettaTarget::Material(i) => format!("material {} ({})", i + 1, self.prj.water.materials.get(i).map(|m| m.name.as_str()).unwrap_or("")),
                 RosettaTarget::Inverse(i) => format!("initial estimates of material {}", i + 1),
             };
-            ui.label(RichText::new(format!("Predicts θr, θs, α, n and Ks for {target}.")).weak());
             ui.horizontal(|ui| {
-                ui.label("Model");
+                ui.label(RichText::new(format!("Predicts θr, θs, α, n and Ks for {target}.")).weak());
+                if ui.small_button("?").on_hover_text("Help on Rosetta (F1)").clicked() {
+                    crate::help::request_topic(ui.ctx(), "rosetta");
+                }
+            });
+            ui.horizontal(|ui| {
+                crate::tips::lbl(ui, "Model");
                 ui.add_enabled_ui(d.model >= 2, |ui| {
                     egui::ComboBox::from_id_salt("ros_ver").width(340.0).selected_text(d.version.name()).show_ui(ui, |ui| {
                         for v in RosettaVersion::ALL {
@@ -109,7 +115,7 @@ impl App {
                 ui.label(RichText::new("Input data").strong());
                 for code in 1..=5u8 {
                     let was = d.model;
-                    ui.radio_value(&mut d.model, code, model_name(code));
+                    ui.radio_value(&mut d.model, code, model_name(code)).tip(model_name(code));
                     if code == 1 && d.model == 1 && was != 1 {
                         // start from the class of the texture entered
                         let c = texture_class(d.sand, d.silt, d.clay);
@@ -118,7 +124,7 @@ impl App {
                 }
                 if d.model == 1 {
                     ui.horizontal(|ui| {
-                        ui.label("Textural class");
+                        crate::tips::lbl(ui, "Textural class");
                         egui::ComboBox::from_id_salt("ros_class").selected_text(TEXTURAL_CLASSES[d.class].0).show_ui(ui, |ui| {
                             for (k, (c, _)) in TEXTURAL_CLASSES.iter().enumerate() {
                                 ui.selectable_value(&mut d.class, k, *c);
@@ -130,8 +136,8 @@ impl App {
                 ui.add_space(4.0);
                 egui::Grid::new("ros_in").num_columns(3).spacing([8.0, 4.0]).show(ui, |ui| {
                     let row = |ui: &mut egui::Ui, label: &str, v: &mut f64, unit: &str, on: bool, speed: f64| {
-                        ui.label(label);
-                        ui.add_enabled(on, egui::DragValue::new(v).speed(speed).max_decimals(4));
+                        crate::tips::lbl(ui, label);
+                        ui.add_enabled(on, egui::DragValue::new(v).speed(speed).max_decimals(4)).tip(label);
                         ui.label(unit);
                         ui.end_row();
                     };
@@ -149,8 +155,7 @@ impl App {
                 } else {
                     ui.colored_label(Color32::from_rgb(230, 120, 50), format!("sand + silt + clay = {sum:.1} %"));
                 }
-                ui.add_enabled(d.model >= 2, egui::Checkbox::new(&mut d.geometric, "geometric means of α, n and Ks"))
-                    .on_hover_text("Off: arithmetic means of the ensemble (as rosetta-soil and the Rosetta web site). On: 10 to the mean of the logarithms.");
+                ui.add_enabled(d.model >= 2, egui::Checkbox::new(&mut d.geometric, "geometric means of α, n and Ks")).tip("geometric means of α, n and Ks");
                 let ui = &mut cols[1];
                 ui.label(RichText::new("Prediction").strong());
                 match d.prediction() {

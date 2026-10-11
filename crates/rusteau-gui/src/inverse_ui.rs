@@ -2,6 +2,7 @@
 //! Fit.out (fitted parameters with their confidence limits, goodness of fit, observed against fitted values).
 
 use crate::files::{FileDialog, Mode, Purpose};
+use crate::tips::{hdr, lbl, TipExt};
 use crate::util::*;
 use crate::{App, Page};
 use eframe::egui::{self, Color32, RichText, Ui};
@@ -196,11 +197,11 @@ impl App {
             ui.add_space(6.0);
             ui.label("There are no inverse settings yet.");
             ui.horizontal(|ui| {
-                if ui.button("Create from the current project").clicked() {
+                if ui.button("Create from the current project").tip("Create from the current project").clicked() {
                     self.prj.inverse = Some(InverseSettings::from_project(&self.prj));
                     *ch = true;
                 }
-                if ui.button("Import Fit.in…").clicked() {
+                if ui.button("Import Fit.in…").tip("Import Fit.in…").clicked() {
                     self.dialog = Some(FileDialog::new(Purpose::ImportFitIn, Mode::OpenFile, "Select a Fit.in", self.last_dir.clone(), "Fit.in", &["in"]));
                 }
             });
@@ -220,10 +221,10 @@ impl App {
         sync_records(&mut s, &self.prj);
 
         ui.horizontal(|ui| {
-            if ui.button("Import Fit.in…").clicked() {
+            if ui.button("Import Fit.in…").tip("Import Fit.in…").clicked() {
                 self.dialog = Some(FileDialog::new(Purpose::ImportFitIn, Mode::OpenFile, "Select a Fit.in", self.last_dir.clone(), "Fit.in", &["in"]));
             }
-            if ui.button("Export Fit.in…").clicked() {
+            if ui.button("Export Fit.in…").tip("Export Fit.in…").clicked() {
                 self.dialog = Some(FileDialog::new(Purpose::ExportFitIn, Mode::SaveFile, "Save Fit.in", self.last_dir.clone(), "Fit.in", &["in"]));
             }
         });
@@ -234,10 +235,10 @@ impl App {
             check(ui, ch, &mut s.fit_water, "Soil hydraulic parameters");
             if hyst > 0 && s.fit_water {
                 ui.add_space(12.0);
-                ui.label(RichText::new("constraints:").weak());
+                ui.label(RichText::new("constraints:").weak()).tip("constraints:");
                 egui::ComboBox::from_id_salt("inv_qs").selected_text(Q_SAME[s.q_same.clamp(0, 2) as usize]).show_ui(ui, |ui| {
                     for (k, n) in Q_SAME.iter().enumerate() {
-                        if ui.selectable_value(&mut s.q_same, k as i32, *n).changed() {
+                        if ui.selectable_value(&mut s.q_same, k as i32, *n).tip(n).changed() {
                             *ch = true;
                         }
                     }
@@ -255,7 +256,7 @@ impl App {
                 ui.horizontal_wrapped(|ui| {
                     ui.label("from");
                     for (k, n) in CONC_TYPES.iter().enumerate() {
-                        if ui.radio_value(&mut s.conc_type, k as i32, *n).changed() {
+                        if ui.radio_value(&mut s.conc_type, k as i32, *n).tip(n).changed() {
                             *ch = true;
                         }
                     }
@@ -277,7 +278,7 @@ impl App {
         section(ui, "Weighting of the measurement sets");
         ui.horizontal_wrapped(|ui| {
             for (k, n) in WEIGHTING.iter().enumerate() {
-                if ui.radio_value(&mut s.weighting, k as i32, *n).changed() {
+                if ui.radio_value(&mut s.weighting, k as i32, *n).tip(n).changed() {
                     *ch = true;
                 }
             }
@@ -285,8 +286,8 @@ impl App {
 
         section(ui, "Iteration");
         ui.horizontal(|ui| {
-            ui.label("Maximum number of iterations (MIT)");
-            if ui.add(egui::DragValue::new(&mut s.max_iter).range(0..=1000)).changed() {
+            lbl(ui, "Maximum number of iterations (MIT)");
+            if ui.add(egui::DragValue::new(&mut s.max_iter).range(0..=1000)).tip("Maximum number of iterations (MIT)").changed() {
                 *ch = true;
             }
         });
@@ -383,24 +384,24 @@ impl App {
                         ui.strong(column_label(&s, p)).on_hover_text(s.param_name(p));
                     }
                     ui.end_row();
-                    ui.label("Initial estimate");
+                    lbl(ui, "Initial estimate");
                     for &i in &idx {
                         dv(ui, ch, &mut s.params[i].value);
                     }
                     ui.end_row();
-                    ui.label("Minimum value");
+                    lbl(ui, "Minimum value");
                     for &i in &idx {
                         let f = s.params[i].fit;
                         ui.add_enabled_ui(f, |ui| dv(ui, ch, &mut s.params[i].min));
                     }
                     ui.end_row();
-                    ui.label("Maximum value");
+                    lbl(ui, "Maximum value");
                     for &i in &idx {
                         let f = s.params[i].fit;
                         ui.add_enabled_ui(f, |ui| dv(ui, ch, &mut s.params[i].max));
                     }
                     ui.end_row();
-                    ui.label("Fitted?");
+                    lbl(ui, "Fitted?");
                     for &i in &idx {
                         check(ui, ch, &mut s.params[i].fit, "");
                     }
@@ -430,7 +431,7 @@ impl App {
                 .header(22.0, |mut h| {
                     for c in ["#", "Type", "Position", "Time / h / x", "Value", "Weight", ""] {
                         h.col(|ui| {
-                            ui.strong(c);
+                            hdr(ui, c);
                         });
                     }
                 })
@@ -472,7 +473,7 @@ impl App {
             *ch = true;
         }
         ui.horizontal(|ui| {
-            if ui.button("+ Add observation").clicked() {
+            if ui.button("+ Add observation").tip("+ Add observation").clicked() {
                 let o = s.observations.last().cloned().unwrap_or(Observation { x: self.prj.time.t_max, value: 0.0, kind: 2, pos: 1, weight: 1.0 });
                 s.observations.push(o);
                 *ch = true;
@@ -586,7 +587,7 @@ impl App {
             if ui.button("Apply the fitted parameters to the project").on_hover_text("Writes the fitted values into the materials and makes them the initial estimates of a new estimation").clicked() {
                 self.apply_fitted();
             }
-            if ui.button("Save Fit.out…").clicked() {
+            if ui.button("Save Fit.out…").tip("Save Fit.out…").clicked() {
                 self.dialog = Some(FileDialog::new(Purpose::SaveFitOut, Mode::SaveFile, "Save Fit.out", self.last_dir.clone(), "Fit.out", &["out"]));
             }
         });
@@ -595,7 +596,7 @@ impl App {
         section(ui, "Fitted parameters");
         egui::Grid::new("inv_res").striped(true).num_columns(6).spacing([18.0, 4.0]).show(ui, |ui| {
             for h in ["Parameter", "Initial", "Fitted", "S.E.", "Lower 95 %", "Upper 95 %"] {
-                ui.strong(h);
+                hdr(ui, h);
             }
             ui.end_row();
             for (j, p) in r.params.iter().enumerate() {
@@ -626,12 +627,13 @@ impl App {
                 ("Akaike information criterion AIC", m.aic),
                 ("Bayesian information criterion BIC", m.bic),
             ] {
-                ui.label(l);
+                lbl(ui, l);
                 ui.label(sig(v));
                 ui.end_row();
             }
             for (k, c) in &r.contributions {
-                ui.label(format!("Contribution of set {}", type_name(*k, s.observes_temperature())));
+                ui.label(format!("Contribution of set {}", type_name(*k, s.observes_temperature())))
+                    .tip_text("Part of the objective function SSQ contributed by this measurement set.");
                 ui.label(sig(*c));
                 ui.end_row();
             }
@@ -642,8 +644,8 @@ impl App {
         kinds.sort_unstable();
         kinds.dedup();
         ui.horizontal(|ui| {
-            ui.radio_value(&mut self.inv.plot_kind, 0, "Fitted against observed");
-            ui.radio_value(&mut self.inv.plot_kind, 1, "Against time / pressure head");
+            ui.radio_value(&mut self.inv.plot_kind, 0, "Fitted against observed").tip("Fitted against observed");
+            ui.radio_value(&mut self.inv.plot_kind, 1, "Against time / pressure head").tip("Against time / pressure head");
             if self.inv.plot_kind == 1 && !kinds.is_empty() {
                 self.inv.plot_set = self.inv.plot_set.min(kinds.len() - 1);
                 let heat = s.observes_temperature();
@@ -712,13 +714,13 @@ impl App {
             )).weak());
             egui::ScrollArea::horizontal().id_salt("inv_starts_scroll").show(ui, |ui| {
                 egui::Grid::new("inv_starts").striped(true).spacing([18.0, 3.0]).show(ui, |ui| {
-                    ui.strong("Start");
+                    hdr(ui, "Start");
                     for n in &r.names {
                         ui.strong(format!("{n} (initial)"));
                     }
-                    ui.strong("Final SSQ");
-                    ui.strong("Iterations");
-                    ui.strong("End");
+                    hdr(ui, "Final SSQ");
+                    hdr(ui, "Iterations");
+                    hdr(ui, "End");
                     ui.end_row();
                     for (k, st) in r.starts.iter().enumerate() {
                         let mark = |t: String| if k == r.best_start { RichText::new(t).strong() } else { RichText::new(t) };
@@ -826,8 +828,8 @@ fn pos_help(kind: i32) -> &'static str {
 /// Iteration table: (iteration, SSQ, parameters).
 fn iteration_grid(ui: &mut Ui, id: &str, names: &[String], rows: Vec<(usize, f64, Vec<f64>)>) {
     egui::Grid::new(id).striped(true).spacing([18.0, 3.0]).show(ui, |ui| {
-        ui.strong("Iteration");
-        ui.strong("SSQ");
+        hdr(ui, "Iteration");
+        hdr(ui, "SSQ");
         for n in names {
             ui.strong(n);
         }

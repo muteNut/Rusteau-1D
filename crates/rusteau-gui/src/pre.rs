@@ -1,5 +1,6 @@
 //! Pre-processing pages.
 
+use crate::tips::{hdr, lbl, TipExt};
 use crate::util::*;
 use crate::{App, Page};
 use egui::{ComboBox, RichText, Ui};
@@ -177,20 +178,20 @@ impl App {
     pub fn page_main(&mut self, ui: &mut Ui, ch: &mut bool) {
         page_title(ui, "Processes & units");
         egui::Grid::new("main").num_columns(2).show(ui, |ui| {
-            ui.label("Project title");
+            lbl(ui, "Project title");
             if ui.text_edit_singleline(&mut self.prj.title).changed() {
                 *ch = true;
             }
             ui.end_row();
             let (mut lu, mut tu) = (self.prj.units.length, self.prj.units.time);
-            ui.label("Length unit");
+            lbl(ui, "Length unit");
             ComboBox::from_id_salt("lu").selected_text(self.prj.units.length_str()).show_ui(ui, |ui| {
                 for (u, n) in [(LengthUnit::Mm, "mm"), (LengthUnit::Cm, "cm"), (LengthUnit::M, "m")] {
                     ui.selectable_value(&mut lu, u, n);
                 }
             });
             ui.end_row();
-            ui.label("Time unit");
+            lbl(ui, "Time unit");
             ComboBox::from_id_salt("tu").selected_text(self.prj.units.time_str()).show_ui(ui, |ui| {
                 for (u, n) in [(TimeUnit::Sec, "seconds"), (TimeUnit::Min, "minutes"), (TimeUnit::Hours, "hours"), (TimeUnit::Days, "days"), (TimeUnit::Years, "years")] {
                     ui.selectable_value(&mut tu, u, n);
@@ -213,13 +214,14 @@ impl App {
                 self.print_text_for.clear();
                 *ch = true;
             }
-            ui.label("Mass unit");
+            lbl(ui, "Mass unit");
             if ui.text_edit_singleline(&mut self.prj.units.mass).changed() {
                 *ch = true;
             }
             ui.end_row();
         });
-        ui.checkbox(&mut self.convert_units, "Convert all values when a unit changes (otherwise only the unit label changes)");
+        ui.checkbox(&mut self.convert_units, "Convert all values when a unit changes (otherwise only the unit label changes)")
+            .tip("Convert all values when a unit changes (otherwise only the unit label changes)");
         if self.prj.processes.vapor {
             ui.label(RichText::new("With vapor flow the results depend slightly on the length unit, as in HYDRUS (README, “Unit conversion”).").weak());
         }
@@ -232,7 +234,7 @@ impl App {
         check(ui, ch, &mut self.prj.processes.solute, "Solute transport");
         if self.prj.processes.solute {
             ui.horizontal(|ui| {
-                ui.label("Number of solutes:");
+                lbl(ui, "Number of solutes:");
                 let mut n = self.prj.solute.species.len();
                 if ui.add(egui::DragValue::new(&mut n).range(1..=11)).changed() {
                     while self.prj.solute.species.len() < n {
@@ -248,7 +250,7 @@ impl App {
         }
         check(ui, ch, &mut self.prj.processes.short_output, "Short output: write time-level information only at print times");
         let mut has_meteo = self.prj.atmosphere.meteo.is_some();
-        if ui.checkbox(&mut has_meteo, "Meteorological ET (Penman-Monteith / Hargreaves)").changed() {
+        if ui.checkbox(&mut has_meteo, "Meteorological ET (Penman-Monteith / Hargreaves)").tip("Meteorological ET (Penman-Monteith / Hargreaves)").changed() {
             self.prj.atmosphere.meteo = if has_meteo {
                 Some(MeteoSettings::default())
             } else {
@@ -270,12 +272,8 @@ impl App {
             field_u(ui, ch, "Maximum time step", &mut t.dt_max, &tu);
             field(ui, ch, "Multiplication factor (few iterations)", &mut t.d_mul);
             field(ui, ch, "Multiplication factor (many iterations)", &mut t.d_mul2);
-            ui.label("Lower optimal iteration range");
-            di(ui, ch, &mut t.it_min);
-            ui.end_row();
-            ui.label("Upper optimal iteration range");
-            di(ui, ch, &mut t.it_max);
-            ui.end_row();
+            field_i(ui, ch, "Lower optimal iteration range", &mut t.it_min);
+            field_i(ui, ch, "Upper optimal iteration range", &mut t.it_max);
             field_u(ui, ch, "Initial time", &mut t.t_init, &tu);
             field_u(ui, ch, "Final time", &mut t.t_max, &tu);
         });
@@ -284,15 +282,15 @@ impl App {
             self.print_text = self.prj.time.print_times.iter().map(|v| format!("{}", v)).collect::<Vec<_>>().join(", ");
             self.print_text_for = self.prj.time.print_times.clone();
         }
-        ui.label("Print times (profiles and mass balance are stored at these times), comma-separated:");
-        if ui.add(egui::TextEdit::multiline(&mut self.print_text).desired_width(500.0).desired_rows(2)).changed() {
+        ui.label("Print times (profiles and mass balance are stored at these times), comma-separated:").tip("Print times");
+        if ui.add(egui::TextEdit::multiline(&mut self.print_text).desired_width(500.0).desired_rows(2)).tip("Print times").changed() {
             let v: Vec<f64> = self.print_text.split(|c: char| c == ',' || c.is_whitespace() || c == ';').filter_map(|s| s.trim().parse().ok()).collect();
             self.prj.time.print_times = v.clone();
             self.print_text_for = v;
             *ch = true;
         }
         ui.horizontal(|ui| {
-            if ui.button("Generate equidistant print times").clicked() {
+            if ui.button("Generate equidistant print times").tip("Generate equidistant print times").clicked() {
                 let n = 10;
                 let (a, b) = (self.prj.time.t_init, self.prj.time.t_max);
                 self.prj.time.print_times = (1..=n).map(|i| a + (b - a) * i as f64 / n as f64).collect();
@@ -300,9 +298,7 @@ impl App {
             }
         });
         egui::Grid::new("time2").num_columns(2).show(ui, |ui| {
-            ui.label("Store time-level info every n-th step");
-            di(ui, ch, &mut self.prj.time.print_step);
-            ui.end_row();
+            field_i(ui, ch, "Store time-level info every n-th step", &mut self.prj.time.print_step);
         });
         check(ui, ch, &mut self.prj.time.flux_out, "Write extended flux table T_Level1 (potential/actual fluxes and cumulative values, lFluxOut)");
         check(ui, ch, &mut self.prj.time.print_at_interval, "Additionally print at regular intervals");
@@ -316,9 +312,7 @@ impl App {
         let lu = self.prj.units.length_str().to_string();
         egui::Grid::new("it").num_columns(2).show(ui, |ui| {
             let w = &mut self.prj.water;
-            ui.label("Maximum number of iterations");
-            di(ui, ch, &mut w.max_iter);
-            ui.end_row();
+            field_i(ui, ch, "Maximum number of iterations", &mut w.max_iter);
             field(ui, ch, "Water content tolerance", &mut w.tol_th);
             field_u(ui, ch, "Pressure head tolerance", &mut w.tol_h, &lu);
             field_u(ui, ch, "Lower limit of the tension interval (table)", &mut w.h_tab1, &lu);
@@ -347,7 +341,7 @@ impl App {
         check(ui, ch, &mut o.extrapolate_heads, "Start each time step from heads extrapolated from the two previous steps (lExtrap)");
         let mut neq = o.tau_w > 0.0;
         ui.add_enabled_ui(!dual_perm || neq, |ui| {
-            if ui.checkbox(&mut neq, "Non-equilibrium water flow (Ross & Smettem, 2000; TauW)").changed() {
+            if ui.checkbox(&mut neq, "Non-equilibrium water flow (Ross & Smettem, 2000; TauW)").tip("Non-equilibrium water flow (Ross & Smettem, 2000; TauW)").changed() {
                 o.tau_w = if neq { 1.0 } else { 0.0 };
                 *ch = true;
             }
@@ -371,7 +365,7 @@ impl App {
         section(ui, "Centrifuge");
         let mut cf = o.centrifuge.is_some();
         ui.add_enabled_ui(!dual_perm || cf, |ui| {
-            if ui.checkbox(&mut cf, "Flow in a centrifuge (lCentrif)").changed() {
+            if ui.checkbox(&mut cf, "Flow in a centrifuge (lCentrif)").tip("Flow in a centrifuge (lCentrif)").changed() {
                 o.centrifuge = cf.then(Centrifuge::default);
                 *ch = true;
             }
@@ -396,7 +390,7 @@ impl App {
         section(ui, "Density-dependent flow");
         let mut dd = o.density.is_some();
         ui.add_enabled_ui(!dual_perm || dd, |ui| {
-            if ui.checkbox(&mut dd, "Density and viscosity depend on the concentration of solute 1 (lDensity)").changed() {
+            if ui.checkbox(&mut dd, "Density and viscosity depend on the concentration of solute 1 (lDensity)").tip("Density and viscosity depend on the concentration of solute 1 (lDensity)").changed() {
                 o.density = dd.then(DensityDependence::default);
                 *ch = true;
             }
@@ -409,12 +403,12 @@ impl App {
                         ui.strong(h);
                     }
                     ui.end_row();
-                    ui.label("ρ(c)/ρ(0)");
+                    lbl(ui, "ρ(c)/ρ(0)");
                     for v in d.density.iter_mut() {
                         dv(ui, ch, v);
                     }
                     ui.end_row();
-                    ui.label("μ(c)/μ(0)");
+                    lbl(ui, "μ(c)/μ(0)");
                     for v in d.viscosity.iter_mut() {
                         dv(ui, ch, v);
                     }
@@ -438,7 +432,7 @@ impl App {
             ui.colored_label(egui::Color32::from_rgb(230, 120, 50), "Non-equilibrium flow, centrifuge and density-dependent flow are not available with the dual-permeability model.");
         }
         ui.add_space(8.0);
-        if ui.add_enabled(!o.is_default(), egui::Button::new("HYDRUS defaults")).clicked() {
+        if ui.add_enabled(!o.is_default(), egui::Button::new("HYDRUS defaults")).tip("HYDRUS defaults").clicked() {
             *o = AdvancedOptions::default();
             *ch = true;
         }
@@ -450,7 +444,7 @@ impl App {
         let mut model = self.prj.water.model;
         let radio = |ui: &mut Ui, model: &mut SoilModel, m: SoilModel, label: &str| {
             let on = *model == m || (m == SoilModel::VanGenuchten && *model == SoilModel::VGAirEntry);
-            if ui.radio(on, label).clicked() && !on {
+            if ui.radio(on, label).tip(label).clicked() && !on {
                 *model = m;
             }
         };
@@ -463,7 +457,7 @@ impl App {
                 let mut ae = model == SoilModel::VGAirEntry;
                 if ui
                     .add_enabled(vg, egui::Checkbox::new(&mut ae, "With air-entry value of −2 cm"))
-                    .on_hover_text("Modified van Genuchten function with hs = −2 cm (Vogel et al., 2001): improves the description of fine-textured soils with n close to 1 (SELECTOR.IN model 3).")
+                    .tip("With air-entry value of −2 cm")
                     .changed()
                 {
                     model = if ae { SoilModel::VGAirEntry } else { SoilModel::VanGenuchten };
@@ -497,16 +491,16 @@ impl App {
                 (Hysteresis::RetentionAndConductivity, "Hysteresis in the retention curve and the conductivity"),
                 (Hysteresis::Lenhard, "Hysteresis in the retention curve (no pumping, Lenhard et al.)"),
             ] {
-                if ui.radio_value(&mut self.prj.water.hysteresis, h, n).changed() {
+                if ui.radio_value(&mut self.prj.water.hysteresis, h, n).tip(n).changed() {
                     *ch = true;
                 }
             }
             if self.prj.water.hysteresis != Hysteresis::None {
                 ui.add_space(4.0);
-                if ui.radio_value(&mut self.prj.water.init_kappa, -1, "Initially drying curve").changed() {
+                if ui.radio_value(&mut self.prj.water.init_kappa, -1, "Initially drying curve").tip("Initially drying curve").changed() {
                     *ch = true;
                 }
-                if ui.radio_value(&mut self.prj.water.init_kappa, 1, "Initially wetting curve").changed() {
+                if ui.radio_value(&mut self.prj.water.init_kappa, 1, "Initially wetting curve").tip("Initially wetting curve").changed() {
                     *ch = true;
                 }
             }
@@ -566,18 +560,18 @@ impl App {
             dp.materials.push(DualPermMaterial::default());
         }
         ui.horizontal(|ui| {
-            ui.label("Fracture volume fraction w (same for all layers):");
+            lbl(ui, "Fracture volume fraction w (same for all layers):");
             dv(ui, ch, &mut dp.w);
             dp.w = dp.w.clamp(0.001, 0.999);
         });
         let mut proportional = dp.flux_frac_fracture < 0.0;
         ui.horizontal(|ui| {
-            if ui.checkbox(&mut proportional, "Distribute boundary fluxes in proportion to the volume fractions (f = w)").changed() {
+            if ui.checkbox(&mut proportional, "Distribute boundary fluxes in proportion to the volume fractions (f = w)").tip("Distribute boundary fluxes in proportion to the volume fractions (f = w)").changed() {
                 *ch = true;
                 dp.flux_frac_fracture = if proportional { -1.0 } else { 0.5 };
             }
             if !proportional {
-                ui.label("Fraction of the boundary flux into the fractures:");
+                lbl(ui, "Fraction of the boundary flux into the fractures:");
                 dv(ui, ch, &mut dp.flux_frac_fracture);
                 dp.flux_frac_fracture = dp.flux_frac_fracture.clamp(0.0, 1.0);
             }
@@ -585,8 +579,8 @@ impl App {
         check(ui, ch, &mut dp.matrix_dual_por, "Dual porosity inside the matrix: transient immobile matrix water");
         if dp.matrix_dual_por {
             ui.horizontal(|ui| {
-                ui.radio_value(&mut dp.matrix_dual_por_head, false, "water-content driven transfer (ωw)");
-                ui.radio_value(&mut dp.matrix_dual_por_head, true, "pressure-head driven transfer (van Genuchten immobile region)");
+                ui.radio_value(&mut dp.matrix_dual_por_head, false, "water-content driven transfer (ωw)").tip("water-content driven transfer (ωw)");
+                ui.radio_value(&mut dp.matrix_dual_por_head, true, "pressure-head driven transfer (van Genuchten immobile region)").tip("pressure-head driven transfer (van Genuchten immobile region)");
             });
         }
         let mdp = dp.matrix_dual_por;
@@ -602,7 +596,7 @@ impl App {
                 }
             }
             for h in heads {
-                ui.strong(h);
+                hdr(ui, h);
             }
             ui.end_row();
             for i in 0..nm {
@@ -663,7 +657,7 @@ impl App {
         });
         ui.horizontal(|ui| {
             let i = self.sel_mat;
-            ui.label("Name");
+            lbl(ui, "Name");
             if ui.add(egui::TextEdit::singleline(&mut self.prj.water.materials[i].name).desired_width(180.0)).changed() {
                 *ch = true;
             }
@@ -689,7 +683,7 @@ impl App {
         let i = self.sel_mat.min(self.prj.water.materials.len() - 1);
         ui.separator();
         ui.horizontal(|ui| {
-            ui.label("Load from catalog (Carsel & Parrish 1988):");
+            lbl(ui, "Load from catalog (Carsel & Parrish 1988):");
             ComboBox::from_id_salt("cat").selected_text("choose…").show_ui(ui, |ui| {
                 for (k, c) in SOIL_CATALOG.iter().enumerate() {
                     if ui.selectable_label(false, c.0).clicked() {
@@ -764,7 +758,7 @@ impl App {
         let cur = names.iter().find(|(k, _)| *k == tk).map(|x| x.1).unwrap_or("");
         ComboBox::from_id_salt("topbc").width(480.0).selected_text(cur).show_ui(ui, |ui| {
             for (k, n) in names {
-                if ui.selectable_value(&mut tk, k, n).changed() {
+                if ui.selectable_value(&mut tk, k, n).tip(n).changed() {
                     set_top_kind(bc, k);
                     *ch = true;
                 }
@@ -777,21 +771,19 @@ impl App {
             ui.label("Precipitation, potential evaporation/transpiration and critical head are read from the atmospheric data table.");
             // Triggered irrigation (HYDRUS 4.17): only with the atmospheric boundary condition
             let mut on = bc.irrigation.is_some();
-            if ui.checkbox(&mut on, "Triggered irrigation").changed() {
+            if ui.checkbox(&mut on, "Triggered irrigation").tip("Triggered irrigation").changed() {
                 bc.irrigation = if on { Some(TriggeredIrrigation::default()) } else { None };
                 *ch = true;
             }
             let n_obs = self.prj.profile.observation_nodes.len();
             if let Some(irr) = bc.irrigation.as_mut() {
                 egui::Grid::new("irrig").num_columns(2).show(ui, |ui| {
-                    ui.label("Observation node triggering irrigation (number in the observation-node list)");
-                    di(ui, ch, &mut irr.obs_node);
-                    ui.end_row();
+                    field_i(ui, ch, "Observation node triggering irrigation (number in the observation-node list)", &mut irr.obs_node);
                     field_u(ui, ch, "Pressure head triggering irrigation", &mut irr.h_trigger, &lu);
                     field_u(ui, ch, "Irrigation rate", &mut irr.rate, &fu);
                     field_u(ui, ch, "Irrigation duration", &mut irr.duration, &tu);
                     field_u(ui, ch, "Lag time", &mut irr.lag, &tu);
-                    ui.label("Behaviour");
+                    lbl(ui, "Behaviour");
                     let modes = [
                         (IrrigationMode::Hydrus417, "As HYDRUS 4.17 (the next atmospheric record ends it)"),
                         (IrrigationMode::FullDuration, "Full duration, added to the precipitation"),
@@ -799,7 +791,7 @@ impl App {
                     let cur = modes.iter().find(|(m, _)| *m == irr.mode).map(|x| x.1).unwrap_or("");
                     ComboBox::from_id_salt("irrmode").width(380.0).selected_text(cur).show_ui(ui, |ui| {
                         for (m, n) in modes {
-                            if ui.selectable_value(&mut irr.mode, m, n).changed() {
+                            if ui.selectable_value(&mut irr.mode, m, n).tip(n).changed() {
                                 *ch = true;
                             }
                         }
@@ -839,7 +831,7 @@ impl App {
         let cur = names.iter().find(|(k, _)| *k == bk).map(|x| x.1).unwrap_or("");
         ComboBox::from_id_salt("botbc").width(480.0).selected_text(cur).show_ui(ui, |ui| {
             for (k, n) in names {
-                if ui.selectable_value(&mut bk, k, n).changed() {
+                if ui.selectable_value(&mut bk, k, n).tip(n).changed() {
                     set_bot_kind(bc, k);
                     *ch = true;
                 }
@@ -865,7 +857,7 @@ impl App {
             BotKind::Drains => {
                 if let Some(d) = bc.drains.as_mut() {
                     ui.horizontal(|ui| {
-                        ui.label("Drain geometry / configuration");
+                        lbl(ui, "Drain geometry / configuration");
                         ComboBox::from_id_salt("dpos").selected_text(["", "1: on impervious layer", "2: above impervious layer", "3: at layer interface", "4: in bottom layer", "5: in top layer"][d.position.clamp(1, 5) as usize]).show_ui(ui, |ui| {
                             for k in 1..=5 {
                                 if ui.selectable_value(&mut d.position, k, ["", "1: homogeneous, on impervious layer", "2: homogeneous, above impervious layer", "3: heterogeneous, at layer interface", "4: heterogeneous, in bottom layer", "5: heterogeneous, in top layer"][k as usize]).changed() {
@@ -963,25 +955,25 @@ impl App {
         ui.horizontal(|ui| {
             check(ui, ch, &mut self.prj.atmosphere.snow, "Snow accumulation and melt");
             if self.prj.atmosphere.snow {
-                ui.label("Snow melt factor:");
+                lbl(ui, "Snow melt factor:");
                 dv(ui, ch, &mut self.prj.atmosphere.snow_mf);
             }
             check(ui, ch, &mut self.prj.atmosphere.interception, "Canopy interception");
             if self.prj.atmosphere.interception {
-                ui.label("Interception a:");
+                lbl(ui, "Interception a:");
                 dv(ui, ch, &mut self.prj.atmosphere.interception_a);
             }
         });
         ui.horizontal(|ui| {
             check(ui, ch, &mut self.prj.atmosphere.lai_partitioning, "Partition the potential ET by LAI (the transpiration column then holds the LAI)");
             if self.prj.atmosphere.lai_partitioning {
-                ui.label("Extinction coefficient:");
+                lbl(ui, "Extinction coefficient:");
                 dv(ui, ch, &mut self.prj.atmosphere.extinction);
             }
         });
         check(ui, ch, &mut self.prj.atmosphere.bc_cycles, "Repeat the atmospheric records cyclically after the last record");
         ui.horizontal(|ui| {
-            if ui.button("➕ Add record").clicked() {
+            if ui.button("➕ Add record").tip("➕ Add record").clicked() {
                 let mut r = self.prj.atmosphere.records.last().cloned().unwrap_or(AtmRecord { h_crit_a: 10000.0, ..Default::default() });
                 r.t += 1.0;
                 self.prj.atmosphere.records.push(r);
@@ -992,7 +984,7 @@ impl App {
                 self.prj.atmosphere.records.pop();
                 *ch = true;
             }
-            if ui.button("Import from text file…").clicked() {
+            if ui.button("Import from text file…").tip("Import from text file…").clicked() {
                 self.dialog = Some(crate::files::FileDialog::new(crate::files::Purpose::ImportAtmosphere, crate::files::Mode::OpenFile, "Import atmospheric records (whitespace/CSV columns)", self.last_dir.clone(), "", &[]));
             }
             ui.label(format!("{} records", self.prj.atmosphere.records.len()));
@@ -1020,7 +1012,7 @@ impl App {
         tb.header(22.0, |mut h| {
             for t in &heads {
                 h.col(|ui| {
-                    ui.strong(t);
+                    hdr(ui, t);
                 });
             }
         })
@@ -1092,24 +1084,24 @@ impl App {
         ui.columns(2, |cols| {
             cols[0].group(|ui| {
                 ui.strong("Radiation Input");
-                ui.radio_value(&mut mp.i_radiation, 0, "Potential Radiation (Ra computed)");
-                ui.radio_value(&mut mp.i_radiation, 1, "Solar Radiation (measured Rs)");
-                ui.radio_value(&mut mp.i_radiation, 2, "Net Radiation (measured Rn)");
+                ui.radio_value(&mut mp.i_radiation, 0, "Potential Radiation (Ra computed)").tip("Potential Radiation (Ra computed)");
+                ui.radio_value(&mut mp.i_radiation, 1, "Solar Radiation (measured Rs)").tip("Solar Radiation (measured Rs)");
+                ui.radio_value(&mut mp.i_radiation, 2, "Net Radiation (measured Rn)").tip("Net Radiation (measured Rn)");
             });
 
             cols[1].group(|ui| {
                 ui.strong("Cloudiness / Sunshine Input");
-                ui.radio_value(&mut mp.i_sun_sh, 0, "Sunshine Hours");
-                ui.radio_value(&mut mp.i_sun_sh, 1, "Cloudiness Index");
-                ui.radio_value(&mut mp.i_sun_sh, 2, "Transmission Coeff. / Cloud Cover");
-                ui.radio_value(&mut mp.i_sun_sh, 3, "Derived from Solar Radiation");
+                ui.radio_value(&mut mp.i_sun_sh, 0, "Sunshine Hours").tip("Sunshine Hours");
+                ui.radio_value(&mut mp.i_sun_sh, 1, "Cloudiness Index").tip("Cloudiness Index");
+                ui.radio_value(&mut mp.i_sun_sh, 2, "Transmission Coeff. / Cloud Cover").tip("Transmission Coeff. / Cloud Cover");
+                ui.radio_value(&mut mp.i_sun_sh, 3, "Derived from Solar Radiation").tip("Derived from Solar Radiation");
             });
         });
 
         ui.horizontal(|ui| {
-            ui.label("Humidity specification:");
-            ui.radio_value(&mut mp.i_rel_hum, 0, "Relative Humidity (%)");
-            ui.radio_value(&mut mp.i_rel_hum, 1, "Vapor Pressure (kPa)");
+            lbl(ui, "Humidity specification:");
+            ui.radio_value(&mut mp.i_rel_hum, 0, "Relative Humidity (%)").tip("Relative Humidity (%)");
+            ui.radio_value(&mut mp.i_rel_hum, 1, "Vapor Pressure (kPa)").tip("Vapor Pressure (kPa)");
             check(ui, ch, &mut mp.hargreaves, "Use Hargreaves equation instead of Penman-Monteith");
         });
         ui.horizontal(|ui| {
@@ -1119,74 +1111,74 @@ impl App {
 
         section(ui, "Geographical & Radiation Parameters");
         egui::Grid::new("meteo_geo").num_columns(4).striped(true).show(ui, |ui| {
-            ui.label("Latitude (° N+, S-)");
+            lbl(ui, "Latitude (° N+, S-)");
             dv(ui, ch, &mut mp.latitude);
-            ui.label("Altitude (m)");
+            lbl(ui, "Altitude (m)");
             dv(ui, ch, &mut mp.altitude);
             ui.end_row();
 
-            ui.label("Ångström a (shortwave)");
+            lbl(ui, "Ångström a (shortwave)");
             dv(ui, ch, &mut mp.short_wave_a);
-            ui.label("Ångström b (shortwave)");
+            lbl(ui, "Ångström b (shortwave)");
             dv(ui, ch, &mut mp.short_wave_b);
             ui.end_row();
 
-            ui.label("Longwave cloud factor a1");
+            lbl(ui, "Longwave cloud factor a1");
             dv(ui, ch, &mut mp.long_wave_a);
-            ui.label("Longwave cloud factor b1");
+            lbl(ui, "Longwave cloud factor b1");
             dv(ui, ch, &mut mp.long_wave_b);
             ui.end_row();
 
-            ui.label("Longwave emissivity al");
+            lbl(ui, "Longwave emissivity al");
             dv(ui, ch, &mut mp.long_wave_a1);
-            ui.label("Longwave emissivity bl");
+            lbl(ui, "Longwave emissivity bl");
             dv(ui, ch, &mut mp.long_wave_b1);
             ui.end_row();
 
             if mp.i_sun_sh == 3 {
-                ui.label("Cloudiness from Solar ac");
+                lbl(ui, "Cloudiness from Solar ac");
                 dv(ui, ch, &mut mp.cloud_fact_ac);
-                ui.label("Cloudiness from Solar bc");
+                lbl(ui, "Cloudiness from Solar bc");
                 dv(ui, ch, &mut mp.cloud_fact_bc);
                 ui.end_row();
             }
 
-            ui.label("Wind measurement height (cm)");
+            lbl(ui, "Wind measurement height (cm)");
             dv(ui, ch, &mut mp.wind_height);
-            ui.label("Temp. measurement height (cm)");
+            lbl(ui, "Temp. measurement height (cm)");
             dv(ui, ch, &mut mp.temp_height);
             ui.end_row();
         });
 
         section(ui, "Crop & Surface Parameters");
         ui.horizontal(|ui| {
-            ui.label("Crop mode:");
-            ui.radio_value(&mut mp.i_crop, 0, "Bare Soil");
-            ui.radio_value(&mut mp.i_crop, 1, "Constant crop");
-            ui.radio_value(&mut mp.i_crop, 2, "Crop growth table");
-            ui.radio_value(&mut mp.i_crop, 3, "Daily crop data in the records");
+            lbl(ui, "Crop mode:");
+            ui.radio_value(&mut mp.i_crop, 0, "Bare Soil").tip("Bare Soil");
+            ui.radio_value(&mut mp.i_crop, 1, "Constant crop").tip("Constant crop");
+            ui.radio_value(&mut mp.i_crop, 2, "Crop growth table").tip("Crop growth table");
+            ui.radio_value(&mut mp.i_crop, 3, "Daily crop data in the records").tip("Daily crop data in the records");
         });
 
         if mp.i_crop != 0 {
             ui.horizontal(|ui| {
-                ui.label("Leaf Area Index (LAI):");
-                ui.radio_value(&mut mp.i_lai, 1, "From Height (Clipped Grass)");
-                ui.radio_value(&mut mp.i_lai, 2, "From Height (Alfalfa)");
-                ui.radio_value(&mut mp.i_lai, 3, "Direct Input / Surface Fraction");
+                lbl(ui, "Leaf Area Index (LAI):");
+                ui.radio_value(&mut mp.i_lai, 1, "From Height (Clipped Grass)").tip("From Height (Clipped Grass)");
+                ui.radio_value(&mut mp.i_lai, 2, "From Height (Alfalfa)").tip("From Height (Alfalfa)");
+                ui.radio_value(&mut mp.i_lai, 3, "Direct Input / Surface Fraction").tip("Direct Input / Surface Fraction");
             });
 
             egui::Grid::new("meteo_crop").num_columns(4).striped(true).show(ui, |ui| {
-                ui.label("Crop height (cm)");
+                lbl(ui, "Crop height (cm)");
                 dv(ui, ch, &mut mp.crop_height);
-                ui.label("Albedo");
+                lbl(ui, "Albedo");
                 dv(ui, ch, &mut mp.albedo);
                 ui.end_row();
 
                 if mp.i_lai == 3 {
-                    ui.label("Input LAI / Surface Fraction");
+                    lbl(ui, "Input LAI / Surface Fraction");
                     dv(ui, ch, &mut mp.lai);
                 }
-                ui.label("Radiation Extinction Coeff.");
+                lbl(ui, "Radiation Extinction Coeff.");
                 dv(ui, ch, &mut mp.r_extinct);
                 ui.end_row();
             });
@@ -1195,19 +1187,19 @@ impl App {
         if mp.i_crop != 0 {
             ui.horizontal(|ui| {
                 let mut on = mp.i_interc == 1;
-                if ui.checkbox(&mut on, "Canopy interception").changed() {
+                if ui.checkbox(&mut on, "Canopy interception").tip("Canopy interception").changed() {
                     mp.i_interc = if on { 1 } else { 0 };
                     *ch = true;
                 }
                 if mp.i_interc == 1 {
-                    ui.label("Interception constant a (mm):");
+                    lbl(ui, "Interception constant a (mm):");
                     dv(ui, ch, &mut mp.a_interc);
                 }
             });
         }
         if mp.i_crop == 1 {
             ui.horizontal(|ui| {
-                ui.label("Root depth (0 = take it from the root-growth settings):");
+                lbl(ui, "Root depth (0 = take it from the root-growth settings):");
                 dv(ui, ch, &mut mp.x_root);
             });
         }
@@ -1227,7 +1219,7 @@ impl App {
             });
             egui::Grid::new("meteo_growth").striped(true).show(ui, |ui| {
                 for h in [format!("t ({})", tu), "Height (cm)".to_string(), "Albedo".into(), "LAI".into(), "Root depth".into()] {
-                    ui.strong(h);
+                    hdr(ui, &h);
                 }
                 ui.end_row();
                 for r in mp.growth.iter_mut() {
@@ -1294,7 +1286,7 @@ impl App {
         tb.header(22.0, |mut h| {
             for title in &heads {
                 h.col(|ui| {
-                    ui.strong(title);
+                    hdr(ui, title);
                 });
             }
         })
@@ -1338,9 +1330,9 @@ impl App {
         // ------------------------------------------------------------------ the dialog of HYDRUS 4.17
         section(ui, "Root water uptake model");
         ui.horizontal(|ui| {
-            ui.label("Water uptake reduction model");
+            lbl(ui, "Water uptake reduction model");
             let is_feddes = matches!(self.prj.root.stress, RootStress::Feddes { .. });
-            if ui.radio(is_feddes, "Feddes et al. (1978)").clicked() && !is_feddes {
+            if ui.radio(is_feddes, "Feddes et al. (1978)").tip("Feddes et al. (1978)").clicked() && !is_feddes {
                 let mut st = RootUptake::default().stress;
                 if let RootStress::Feddes { p_optm, .. } = &mut st {
                     *p_optm = vec![-25.0; n_mat];
@@ -1348,23 +1340,23 @@ impl App {
                 self.prj.root.stress = st;
                 *ch = true;
             }
-            if ui.radio(!is_feddes, "S-shape (van Genuchten 1987)").clicked() && is_feddes {
+            if ui.radio(!is_feddes, "S-shape (van Genuchten 1987)").tip("S-shape (van Genuchten 1987)").clicked() && is_feddes {
                 self.prj.root.stress = RootStress::SShaped { p50: -800.0, exponent: 3.0 };
                 *ch = true;
             }
         });
         if solute {
             ui.horizontal(|ui| {
-                ui.label("Solute stress model");
+                lbl(ui, "Solute stress model");
                 let kind = match &self.prj.root.solute_stress {
                     None => 0,
                     Some(s) if s.additive => 1,
                     Some(_) => 2,
                 };
                 let mut k2 = kind;
-                ui.radio_value(&mut k2, 0, "No solute stress");
-                ui.radio_value(&mut k2, 1, "Additive");
-                ui.radio_value(&mut k2, 2, "Multiplicative");
+                ui.radio_value(&mut k2, 0, "No solute stress").tip("No solute stress");
+                ui.radio_value(&mut k2, 1, "Additive").tip("Additive");
+                ui.radio_value(&mut k2, 2, "Multiplicative").tip("Multiplicative");
                 if k2 != kind {
                     let a_osm = self.prj.root.solute_stress.as_ref().map(|s| s.a_osm.clone()).unwrap_or_else(|| vec![0.0; ns]);
                     let (c50, p3c, s_shaped) = self.prj.root.solute_stress.as_ref().map(|s| (s.c50, s.p3c, s.s_shaped)).unwrap_or((3000.0, 3.0, false));
@@ -1377,11 +1369,11 @@ impl App {
                 }
                 if let Some(s) = self.prj.root.solute_stress.as_mut().filter(|s| !s.additive) {
                     ui.add_space(12.0);
-                    if ui.radio(!s.s_shaped, "threshold").clicked() {
+                    if ui.radio(!s.s_shaped, "threshold").tip("threshold").clicked() {
                         s.s_shaped = false;
                         *ch = true;
                     }
-                    if ui.radio(s.s_shaped, "S-shape").clicked() {
+                    if ui.radio(s.s_shaped, "S-shape").tip("S-shape").clicked() {
                         s.s_shaped = true;
                         *ch = true;
                     }
@@ -1399,7 +1391,7 @@ impl App {
                 p_optm.resize(n_mat, p_optm.last().copied().unwrap_or(-25.0));
                 egui::Grid::new("root_feddes").striped(true).spacing([14.0, 4.0]).show(ui, |ui| {
                     for h in ["", "P0", "POpt", "P2H", "P2L", "P3", "r2H", "r2L"] {
-                        ui.strong(h);
+                        hdr(ui, h);
                     }
                     ui.end_row();
                     ui.label(RichText::new(format!("[{lu}], r [{lu}/{tu}]")).weak());
@@ -1458,7 +1450,7 @@ impl App {
                         }
                     });
                 }
-                ui.label("Osmotic coefficients (osmotic head per unit concentration):");
+                lbl(ui, "Osmotic coefficients (osmotic head per unit concentration):");
                 egui::Grid::new("root_aosm").striped(true).show(ui, |ui| {
                     for (j, a) in s.a_osm.iter_mut().enumerate() {
                         ui.label(format!("solute {}", j + 1));
@@ -1479,8 +1471,8 @@ impl App {
                     let ui = &mut cols[0];
                     ui.label(RichText::new("Maximum allowed concentration for passive root solute uptake").strong());
                     egui::Grid::new("root_croot").striped(true).show(ui, |ui| {
-                        ui.strong("Sol. No.");
-                        ui.strong(format!("cRoot [{conc_u}]"));
+                        hdr(ui, "Solute");
+                        hdr(ui, &format!("cRoot [{conc_u}]"));
                         ui.end_row();
                         for (j, c) in r.c_root_max.iter_mut().enumerate() {
                             ui.label(format!("{}", j + 1));
@@ -1504,7 +1496,7 @@ impl App {
                     r.active_solute = r.active_solute.min(ns.saturating_sub(1));
                     ui.add_enabled_ui(r.l_act_rsu, |ui| {
                         egui::Grid::new("root_act").num_columns(3).spacing([10.0, 4.0]).show(ui, |ui| {
-                            ui.label("Solute with active uptake");
+                            lbl(ui, "Solute with active uptake");
                             egui::ComboBox::from_id_salt("root_act_sol").selected_text(format!("{}", r.active_solute + 1)).show_ui(ui, |ui| {
                                 for j in 0..ns {
                                     if ui.selectable_value(&mut r.active_solute, j, format!("{}", j + 1)).changed() {
@@ -1514,19 +1506,19 @@ impl App {
                             });
                             ui.label("");
                             ui.end_row();
-                            ui.label("Potential solute uptake rate");
+                            lbl(ui, "Potential solute uptake rate");
                             dv(ui, ch, &mut r.s_pot);
                             ui.label(format!("{mu}/{lu}²/{tu}"));
                             ui.end_row();
-                            ui.label("Michaelis-Menten constant");
+                            lbl(ui, "Michaelis-Menten constant");
                             dv(ui, ch, &mut r.r_km[0]);
                             ui.label(conc_u.clone());
                             ui.end_row();
-                            ui.label("Minimum concentration for uptake");
+                            lbl(ui, "Minimum concentration for uptake");
                             dv(ui, ch, &mut r.c_min[0]);
                             ui.label(conc_u.clone());
                             ui.end_row();
-                            ui.label("Critical stress index for active solute uptake");
+                            lbl(ui, "Critical stress index for active solute uptake");
                             dv(ui, ch, &mut r.omega_act[0]);
                             ui.label("1 = none");
                             ui.end_row();
@@ -1562,9 +1554,9 @@ impl App {
             };
             let mut m2 = mode;
             ui.horizontal(|ui| {
-                ui.radio_value(&mut m2, 0, "Rooting depth from atmospheric data");
-                ui.radio_value(&mut m2, 1, "Table (time, depth)");
-                ui.radio_value(&mut m2, 2, "Logistic (Verhulst–Pearl)");
+                ui.radio_value(&mut m2, 0, "Rooting depth from atmospheric data").tip("Rooting depth from atmospheric data");
+                ui.radio_value(&mut m2, 1, "Table (time, depth)").tip("Table (time, depth)");
+                ui.radio_value(&mut m2, 2, "Logistic (Verhulst–Pearl)").tip("Logistic (Verhulst–Pearl)");
             });
             if m2 != mode {
                 self.prj.root.growth = match m2 {
@@ -1616,9 +1608,7 @@ impl App {
         let s = &mut self.prj.solute;
         egui::Grid::new("sg").num_columns(2).show(ui, |ui| {
             field(ui, ch, "Time weighting ε (0 explicit, 0.5 Crank–Nicolson, 1 implicit)", &mut s.epsi);
-            ui.label("Max. iterations (non-linear)");
-            di(ui, ch, &mut s.max_iter);
-            ui.end_row();
+            field_i(ui, ch, "Max. iterations (non-linear)", &mut s.max_iter);
             field(ui, ch, "Absolute concentration tolerance", &mut s.tol_abs);
             field(ui, ch, "Relative concentration tolerance", &mut s.tol_rel);
             field(ui, ch, "Stability criterion Pe_crit", &mut s.pe_cr);
@@ -1630,16 +1620,16 @@ impl App {
         check(ui, ch, &mut s.tortuosity, "Tortuosity factor");
         if s.tortuosity {
             ui.horizontal(|ui| {
-                ui.radio_value(&mut s.tort_model, 0, "Millington & Quirk");
-                ui.radio_value(&mut s.tort_model, 1, "Moldrup & Olesen");
+                ui.radio_value(&mut s.tort_model, 0, "Millington & Quirk").tip("Millington & Quirk");
+                ui.radio_value(&mut s.tort_model, 1, "Moldrup & Olesen").tip("Moldrup & Olesen");
             });
         }
         check(ui, ch, &mut s.equil_init, "Non-equilibrium phase initially in equilibrium with the liquid phase");
         check(ui, ch, &mut s.mass_init, "Initial conditions given as total solute mass (per volume of soil)");
         ui.horizontal(|ui| {
-            ui.label("Reported concentration:");
-            ui.radio_value(&mut s.i_conc_type, 1, "Volume averaged (resident)");
-            ui.radio_value(&mut s.i_conc_type, 2, "Flux averaged");
+            lbl(ui, "Reported concentration:");
+            ui.radio_value(&mut s.i_conc_type, 1, "Volume averaged (resident)").tip("Volume averaged (resident)");
+            ui.radio_value(&mut s.i_conc_type, 2, "Flux averaged").tip("Flux averaged");
         });
         check(ui, ch, &mut s.l_dual_neq, "Dual non-equilibrium: mobile-immobile model plus kinetic sorption sites in the mobile zone (needs θim > 0)");
         check(ui, ch, &mut s.l_nequil, "Decay products of non-equilibrium sorbed mass go to the non-equilibrium phase (lNEquil)");
@@ -1655,8 +1645,8 @@ impl App {
         if s.l_moist {
             ui.indent("moist_opts", |ui| {
                 ui.horizontal(|ui| {
-                    ui.radio_value(&mut s.i_moist_dep, 1, "Walker: (θ/θref)^B below θref");
-                    ui.radio_value(&mut s.i_moist_dep, 2, "Trapezoidal tables per reaction");
+                    ui.radio_value(&mut s.i_moist_dep, 1, "Walker: (θ/θref)^B below θref").tip("Walker: (θ/θref)^B below θref");
+                    ui.radio_value(&mut s.i_moist_dep, 2, "Trapezoidal tables per reaction").tip("Trapezoidal tables per reaction");
                 });
             });
         }
@@ -1690,10 +1680,10 @@ impl App {
         egui::Grid::new("sm").striped(true).show(ui, |ui| {
             let dual_perm = self.prj.water.model == SoilModel::DualPermeability;
             for h in ["Material", "Bulk density ρ", &format!("Dispersivity Dl ({})", lu), "Fraction f (equilibrium sites)", if dual_perm { "Immobile water θim (fracture)" } else { "Immobile water θim" }] {
-                ui.strong(h);
+                hdr(ui, h);
             }
             if dual_perm {
-                ui.strong("Immobile water θim (matrix)");
+                hdr(ui, "Immobile water θim (matrix)");
             }
             ui.end_row();
             for i in 0..nm {
@@ -1716,9 +1706,9 @@ impl App {
         let ns = self.prj.solute.species.len();
         section(ui, "Molecular diffusion");
         egui::Grid::new("diff").striped(true).show(ui, |ui| {
-            ui.strong("Solute");
-            ui.strong("Dw (liquid)");
-            ui.strong("Dg (gas)");
+            hdr(ui, "Solute");
+            hdr(ui, "Dw (liquid)");
+            hdr(ui, "Dg (gas)");
             ui.end_row();
             for j in 0..ns {
                 let s = &mut self.prj.solute.species[j];
@@ -1747,11 +1737,11 @@ impl App {
             ui.add_space(6.0);
             ui.label(RichText::new(self.prj.solute.species[j].name.clone()).strong());
             egui::Grid::new(format!("re{}", j)).striped(true).show(ui, |ui| {
-                for h in ["Mat", "Ks", "η (Nu)", "β", "Henry kH", "μw", "μs", "μg", "γw", "γs", "γg", "μ0w", "μ0s", "μ0g", "α"] {
-                    ui.strong(h);
+                for h in ["Mat", "Ks", "η (Nu)", "β", "Henry kH", "μw", "μs", "μg", "γw", "γs", "γg", "μ0w", "μ0s", "μ0g", "α (rate)"] {
+                    hdr(ui, h);
                 }
                 if dual_perm {
-                    ui.strong("αs");
+                    hdr(ui, "αs");
                 }
                 ui.end_row();
                 for m in 0..nm {
@@ -1795,7 +1785,8 @@ impl App {
                         ("γw", &mut td.gam_w), ("γs", &mut td.gam_s), ("γg", &mut td.gam_g),
                         ("μ0w", &mut td.mu0_w), ("μ0s", &mut td.mu0_s), ("μ0g", &mut td.mu0_g), ("ω", &mut td.omega),
                     ] {
-                        ui.strong(h);
+                        let what = crate::tips::tip(h).unwrap_or("");
+                        ui.strong(h).tip_text(&format!("Activation energy Ea [J/mol] of {h}; the parameter follows a(T) = a(Tref) exp[Ea (T − Tref)/(R T Tref)] with Tref = 20 °C (Arrhenius). 0 = no temperature dependence.\n\n{h}: {what}"));
                         dv(ui, ch, v);
                         ui.end_row();
                     }
@@ -1813,9 +1804,9 @@ impl App {
                     ui.label(RichText::new(self.prj.solute.species[j].name.clone()).strong());
                     let wd = &mut self.prj.solute.w_dep[j];
                     egui::Grid::new(format!("wdep{}", j)).striped(true).show(ui, |ui| {
-                        ui.strong("Parameter");
-                        ui.strong("B");
-                        ui.strong("href (L)");
+                        hdr(ui, "Reaction");
+                        hdr(ui, "B");
+                        hdr(ui, "href (L)");
                         ui.end_row();
                         for k in 0..9 {
                             ui.label(names[k]);
@@ -1844,7 +1835,7 @@ impl App {
                             let t = &mut self.prj.solute.moist_tables[m * ns + j];
                             egui::Grid::new(format!("mdg{}_{}", m, j)).striped(true).show(ui, |ui| {
                                 for h in ["Reaction", "ReacMin0", "θ0", "θ1", "θ2", "θ3", "ReacMin1"] {
-                                    ui.strong(h);
+                                    hdr(ui, h);
                                 }
                                 ui.end_row();
                                 for (k, row) in t.react.iter_mut().enumerate() {
@@ -1917,30 +1908,30 @@ impl App {
         let tu = self.prj.units.time_str().to_string();
         let s = &mut self.prj.solute;
         ui.horizontal(|ui| {
-            ui.label("Upper boundary");
-            ui.radio_value(&mut s.k_top, 1, "Concentration BC");
-            ui.radio_value(&mut s.k_top, -1, "Concentration flux BC");
-            ui.radio_value(&mut s.k_top, -2, "Volatilization (gas boundary layer)");
+            lbl(ui, "Upper boundary");
+            ui.radio_value(&mut s.k_top, 1, "Concentration BC").tip("Concentration BC");
+            ui.radio_value(&mut s.k_top, -1, "Concentration flux BC").tip("Concentration flux BC");
+            ui.radio_value(&mut s.k_top, -2, "Volatilization (gas boundary layer)").tip("Volatilization (gas boundary layer)");
         });
         if s.k_top == -2 {
             ui.horizontal(|ui| {
-                ui.label("Boundary layer thickness dSurf:");
+                lbl(ui, "Boundary layer thickness dSurf:");
                 dv(ui, ch, &mut s.d_surf);
-                ui.label("Atmospheric gas concentration cAtm:");
+                lbl(ui, "Atmospheric gas concentration cAtm:");
                 dv(ui, ch, &mut s.c_atm);
             });
         }
         ui.horizontal(|ui| {
-            ui.label("Lower boundary");
-            ui.radio_value(&mut s.k_bot, 1, "Concentration BC");
-            ui.radio_value(&mut s.k_bot, -1, "Concentration flux BC");
-            ui.radio_value(&mut s.k_bot, 0, "Zero gradient");
+            lbl(ui, "Lower boundary");
+            ui.radio_value(&mut s.k_bot, 1, "Concentration BC").tip("Concentration BC");
+            ui.radio_value(&mut s.k_bot, -1, "Concentration flux BC").tip("Concentration flux BC");
+            ui.radio_value(&mut s.k_bot, 0, "Zero gradient").tip("Zero gradient");
         });
         egui::Grid::new("sbc").show(ui, |ui| field_u(ui, ch, "Pulse duration (BC concentrations set to 0 afterwards, unless atmospheric)", &mut s.t_pulse, &tu));
         egui::Grid::new("sbc2").striped(true).show(ui, |ui| {
-            ui.strong("Solute");
-            ui.strong("c top");
-            ui.strong("c bottom");
+            hdr(ui, "Solute");
+            hdr(ui, "c top");
+            hdr(ui, "c bottom");
             ui.end_row();
             for sp in s.species.iter_mut() {
                 ui.label(&sp.name);
@@ -1958,7 +1949,7 @@ impl App {
         let h = &mut self.prj.heat;
         egui::Grid::new("ht").striped(true).show(ui, |ui| {
             for t in ["Material", "θn", "θo", "λL", "b1", "b2", "b3", "Cn", "Co", "Cw"] {
-                ui.strong(t);
+                hdr(ui, t);
             }
             ui.end_row();
             for (i, m) in h.materials.iter_mut().enumerate() {
@@ -2002,7 +1993,7 @@ impl App {
             ui.add_space(16.0);
             if ui
                 .button("Default heat capacities")
-                .on_hover_text("Cn = 1.92, Co = 2.51, Cw = 4.18 MJ/m³/K (solid phase, organic matter, water) for all materials")
+                .tip("Default heat capacities")
                 .clicked()
             {
                 for m in h.materials.iter_mut() {
@@ -2013,13 +2004,14 @@ impl App {
         });
         section(ui, "Boundary conditions");
         ui.horizontal(|ui| {
-            ui.label("Upper");
-            ui.radio_value(&mut h.k_top, 1, "Temperature");
-            ui.radio_value(&mut h.k_top, -1, "Heat flux");
-            ui.label("Lower");
-            ui.radio_value(&mut h.k_bot, 1, "Temperature");
-            ui.radio_value(&mut h.k_bot, -1, "Heat flux");
-            ui.radio_value(&mut h.k_bot, 0, "Zero gradient");
+            lbl(ui, "Upper boundary");
+            ui.radio_value(&mut h.k_top, 1, "Temperature").tip("Temperature");
+            ui.radio_value(&mut h.k_top, -1, "Heat flux").tip("Heat flux");
+            ui.add_space(12.0);
+            lbl(ui, "Lower boundary");
+            ui.radio_value(&mut h.k_bot, 1, "Temperature").tip("Temperature");
+            ui.radio_value(&mut h.k_bot, -1, "Heat flux").tip("Heat flux");
+            ui.radio_value(&mut h.k_bot, 0, "Zero gradient").tip("Zero gradient");
         });
         egui::Grid::new("ht2").show(ui, |ui| {
             field(ui, ch, "Upper temperature", &mut h.t_top);

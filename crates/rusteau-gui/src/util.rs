@@ -169,12 +169,6 @@ pub fn dv_unit(ui: &mut Ui, ch: &mut bool, v: &mut f64, unit: &str) {
     }
 }
 
-pub fn di(ui: &mut Ui, ch: &mut bool, v: &mut usize) {
-    if ui.add(DragValue::new(v).speed(0.2)).changed() {
-        *ch = true;
-    }
-}
-
 /// Grid row: label and number field, both with the description of the label as tooltip.
 pub fn field(ui: &mut Ui, ch: &mut bool, label: &str, v: &mut f64) {
     ui.label(label).tip(label);

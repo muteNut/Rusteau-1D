@@ -2,6 +2,7 @@
 
 use crate::hydro::{hyd_plot, HydView, Kind};
 use crate::measured::{Measured, Target};
+use crate::tips::{hdr, lbl, TipExt};
 use crate::util::*;
 use crate::App;
 use egui::{Color32, ComboBox, Ui};
@@ -93,7 +94,7 @@ impl App {
         }
         self.post.obs_var = self.post.obs_var.min(vars.len() - 1);
         ui.horizontal(|ui| {
-            ui.label("Variable");
+            lbl(ui, "Variable");
             ComboBox::from_id_salt("ov").width(260.0).selected_text(&vars[self.post.obs_var]).show_ui(ui, |ui| {
                 for (i, v) in vars.iter().enumerate() {
                     ui.selectable_value(&mut self.post.obs_var, i, v);
@@ -186,15 +187,15 @@ impl App {
         self.post.prof_var = self.post.prof_var.min(vars.len() - 1);
         let times: Vec<f64> = r.profiles.iter().map(|p| p.t).collect();
         ui.horizontal(|ui| {
-            ui.label("Variable");
+            lbl(ui, "Variable");
             ComboBox::from_id_salt("pvv").width(260.0).selected_text(&vars[self.post.prof_var]).show_ui(ui, |ui| {
                 for (i, v) in vars.iter().enumerate() {
                     ui.selectable_value(&mut self.post.prof_var, i, v);
                 }
             });
             ui.separator();
-            ui.selectable_value(&mut self.post.prof_single, false, "Several times");
-            ui.selectable_value(&mut self.post.prof_single, true, "Time slider");
+            ui.selectable_value(&mut self.post.prof_single, false, "Several times").tip("Several times");
+            ui.selectable_value(&mut self.post.prof_single, true, "Time slider").tip("Time slider");
         });
         if self.post.prof_single {
             ui.horizontal(|ui| {
@@ -335,7 +336,12 @@ impl App {
         self.post.flux_var = self.post.flux_var.min(groups.len() - 1);
         ComboBox::from_id_salt("fg").width(420.0).selected_text(&groups[self.post.flux_var].0).show_ui(ui, |ui| {
             for (i, g) in groups.iter().enumerate() {
-                ui.selectable_value(&mut self.post.flux_var, i, &g.0);
+                // "Solute 2: boundary fluxes" has the description of "Solute: boundary fluxes"
+                let key = match g.0.split_once(':') {
+                    Some((a, b)) if a.starts_with("Solute ") => format!("Solute:{b}"),
+                    _ => g.0.clone(),
+                };
+                ui.selectable_value(&mut self.post.flux_var, i, &g.0).tip(&key);
             }
         });
         let g = self.post.flux_var;
@@ -422,17 +428,17 @@ impl App {
         ui.horizontal_wrapped(|ui| {
             ComboBox::from_id_salt("propkind").width(240.0).selected_text(kind.label()).show_ui(ui, |ui| {
                 for (i, k) in Kind::ALL.iter().enumerate() {
-                    ui.selectable_value(&mut self.post.prop_kind, i, k.label());
+                    ui.selectable_value(&mut self.post.prop_kind, i, k.label()).tip(k.label());
                 }
             });
             if kind.x_is_h() {
-                ui.checkbox(&mut self.post.prop_log_x, "log |h|");
+                ui.checkbox(&mut self.post.prop_log_x, "log |h|").tip("log |h|");
             }
             if kind.log_y_possible() {
-                ui.checkbox(&mut self.post.prop_log_y, "log y");
+                ui.checkbox(&mut self.post.prop_log_y, "log y").tip("log y");
             }
             if hyst {
-                ui.checkbox(&mut self.post.prop_wetting, "main wetting curve (dashed)");
+                ui.checkbox(&mut self.post.prop_wetting, "main wetting curve (dashed)").tip("main wetting curve (dashed)");
             }
         });
         ui.horizontal_wrapped(|ui| {
@@ -499,12 +505,12 @@ impl App {
         let tu = self.prj.units.time_str();
         egui::Grid::new("bal").striped(true).show(ui, |ui| {
             for h in [format!("time ({tu})"), format!("water volume ({lu})"), format!("WatBalT ({lu})"), "WatBalR (%)".into()] {
-                ui.strong(h);
+                hdr(ui, &h);
             }
             for j in 0..r.n_solutes {
-                ui.strong(format!("mass {}", j + 1));
-                ui.strong(format!("CncBalT {}", j + 1));
-                ui.strong(format!("CncBalR {} (%)", j + 1));
+                hdr(ui, &format!("mass {}", j + 1));
+                hdr(ui, &format!("CncBalT {}", j + 1));
+                hdr(ui, &format!("CncBalR {} (%)", j + 1));
             }
             ui.end_row();
             for b in &r.balance {
@@ -524,7 +530,7 @@ impl App {
             section(ui, &format!("Sub-regions at t = {} {tu}", fmt_t(b.t)));
             egui::Grid::new("sub").striped(true).show(ui, |ui| {
                 for h in ["region".to_string(), format!("length ({lu})"), format!("water volume ({lu})"), format!("inflow ({lu}/{tu})"), format!("mean h ({lu})")] {
-                    ui.strong(h);
+                    hdr(ui, &h);
                 }
                 for j in 0..r.n_solutes {
                     ui.strong(format!("solute {} mass", j + 1));

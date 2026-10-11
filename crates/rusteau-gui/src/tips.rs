@@ -436,6 +436,105 @@ const TIPS: &[(&str, &str)] = &[
     // ------------------------------------------------------------------ Rosetta
     ("Model", "Rosetta version: Rosetta 3 (Zhang & Schaap, 2017), Rosetta 2 or Rosetta 1 (Schaap et al., 2001)."),
     ("Textural class", "USDA textural class (model H1: class average parameters)."),
+    // ------------------------------------------------------------------ boundary condition types
+    ("Constant pressure head (from the initial condition at the top node)", "First-type condition: the pressure head of the top node keeps its initial value during the whole run."),
+    ("Constant flux", "Second-type condition: a constant water flux across the boundary (value below)."),
+    ("Atmospheric BC with surface layer", "Atmospheric condition: precipitation and potential evaporation from the time-variable data; the surface switches to a head condition when it saturates (water ponds up to hCritS, then runs off) or dries to hCritA (Neuman et al., 1974)."),
+    ("Atmospheric BC with surface runoff", "Atmospheric condition without ponding: water that cannot infiltrate runs off immediately."),
+    ("Variable pressure head", "First-type condition with a time-variable head (column hTop or hBot of the time-variable data)."),
+    ("Variable flux (Evap − Prec)", "Second-type condition with a time-variable flux; at the surface the flux is Evap − Prec of the records."),
+    ("Variable pressure head / flux (code in the evaporation column)", "Each record decides: KodTop in the Evap column, positive = head condition with hTop, negative = flux condition."),
+    ("Constant pressure head (initial condition at the bottom node)", "First-type condition: the pressure head of the bottom node keeps its initial value (e.g. a constant groundwater table)."),
+    ("Variable flux", "Second-type condition with the time-variable flux rBot of the records."),
+    ("Free drainage", "Unit hydraulic gradient at the bottom (∂h/∂z = 0): the water leaves with the conductivity of the bottom node. For deep profiles with the groundwater far below."),
+    ("Deep drainage: q = A·exp(B·|h − GWL0|)", "The bottom flux depends on the position of the groundwater table, q = −Aqh exp(Bqh |h − GWL0L|) (Hopmans & Stricker, 1989)."),
+    ("Seepage face", "The bottom is a no-flux boundary while unsaturated and drains at the head hSeep once it saturates (e.g. lysimeters, laboratory columns)."),
+    ("Horizontal drains", "The bottom flux is the discharge to parallel drains or ditches after Hooghoudt or Ernst, as in SWAP (van Dam et al., 1997)."),
+    ("As HYDRUS 4.17 (the next atmospheric record ends it)", "Reproduces HYDRUS 4.17: the irrigation rate replaces the precipitation, and the next atmospheric record ends the irrigation."),
+    ("Full duration, added to the precipitation", "The irrigation runs for its whole duration on top of the precipitation; no precipitation is lost."),
+    ("Humidity specification:", "Whether the humidity column of the records holds the relative humidity or the vapor pressure."),
+    ("Crop mode:", "How the crop (height, albedo, LAI, root depth) is described."),
+    ("Leaf Area Index (LAI):", "How the leaf area index is obtained (from the crop height or given directly)."),
+    ("Water uptake reduction model", "Stress response function α(h) that reduces the potential root water uptake in wet or dry soil."),
+    ("Solute stress model", "How the osmotic head of the solutes reduces the water uptake."),
+    ("Reported concentration:", "Resident (volume-averaged) or flux-averaged concentrations in the output."),
+    // ------------------------------------------------------------------ soil profile editor
+    ("Quantity:", "Nodal quantity shown in the profile and edited in the selection."),
+    ("Top of the selection", "Value at the uppermost selected node (linear distribution)."),
+    ("Bottom of the selection", "Value at the lowest selected node (linear distribution)."),
+    ("h at the lowest selected node", "Pressure head [L] at the lowest selected node; the others follow hydrostatic equilibrium."),
+    ("Sub-region", "Number of the sub-region of the mass balance; sub-regions do not change the simulation."),
+    ("size above", "Relative size of the finite elements just above the fixed point."),
+    ("size below", "Relative size of the finite elements just below the fixed point."),
+    ("Add at depth", "Adds an observation node at the node nearest to this depth."),
+    ("Add fixed point at", "Adds a fixed point (a depth that is always a node) of the discretization."),
+    ("Only the selected nodes", "Lists only the selected nodes in the table."),
+    // ------------------------------------------------------------------ results tables
+    ("time", "Time [T] of the line."),
+    ("water volume", "Volume of water in the profile (or sub-region) per unit area [L]."),
+    ("WatBalT", "Absolute error of the water balance [L]: change of storage minus the cumulative boundary fluxes and sink terms since the start."),
+    ("WatBalR", "Relative error of the water balance [%]: WatBalT relative to the larger of the change of storage and the cumulative fluxes. Below about 1 % is good."),
+    ("mass", "Solute mass in the profile per unit area [M/L²]."),
+    ("CncBalT", "Absolute error of the solute mass balance [M/L²]."),
+    ("CncBalR", "Relative error of the solute mass balance [%]."),
+    ("region", "Sub-region number (page Soil profile, quantity Sub-regions)."),
+    ("length", "Length [L] of the sub-region."),
+    ("inflow", "Rate of change [L/T] of the water volume of the sub-region (net inflow)."),
+    ("mean h", "Mean pressure head [L] of the sub-region."),
+    ("Parameter", "Estimated parameter (material, name)."),
+    ("Water fluxes: rTop, vTop, vBot, vRoot", "rTop: potential surface flux; vTop: actual surface flux; vBot: actual bottom flux; vRoot: actual transpiration (root water uptake). Negative = into the soil at the top / out of the profile at the bottom (T_Level.out)."),
+    ("Cumulative water fluxes", "Cumulative potential and actual surface flux, bottom flux and root water uptake since the start [L]."),
+    ("Pressure heads: top, root zone, bottom", "Pressure head at the surface node, mean pressure head of the root zone and at the bottom node."),
+    ("Surface: runoff, cumulative infiltration/evaporation", "Surface runoff rate and the cumulative infiltration and evaporation."),
+    ("Soil water storage", "Volume of water in the whole profile per unit area [L]."),
+    ("Temperature at top and bottom", "Temperatures of the surface and the bottom node."),
+    ("Solute: boundary fluxes", "Solute fluxes across the surface and the bottom, and the root solute uptake."),
+    ("Solute: cumulative fluxes", "Cumulative solute fluxes since the start."),
+    ("Solute: concentrations top / bottom", "Liquid concentrations at the surface and at the bottom node."),
+    ("Water content θ(h)", "Retention curve: water content against the absolute pressure head."),
+    ("Hydraulic conductivity K(h)", "Unsaturated hydraulic conductivity against the absolute pressure head."),
+    ("Hydraulic conductivity K(θ)", "Unsaturated hydraulic conductivity against the water content."),
+    ("Water capacity C(h)", "Soil water capacity C = dθ/dh against the absolute pressure head."),
+    ("Initial", "Initial estimate of the parameter (start 0)."),
+    ("Fitted", "Value of the parameter at the end of the estimation."),
+    ("S.E.", "Standard error of the fitted parameter, from the covariance matrix of the last iteration."),
+    ("Lower 95 %", "Lower limit of the 95 % confidence interval (Student t with n − p degrees of freedom)."),
+    ("Upper 95 %", "Upper limit of the 95 % confidence interval."),
+    ("Objective function SSQ", "Weighted sum of squared residuals SSQ = Σ (Wi (observed − fitted))² at the end of the estimation."),
+    ("R² (observed vs fitted)", "Coefficient of determination of the regression of the fitted on the observed values (weighted); 1 = perfect fit."),
+    ("Mean weighted error ME", "ME = Σ Wi ri / n: mean of the weighted residuals (bias)."),
+    ("Mean weighted absolute error MAE", "MAE = Σ |Wi ri| / n."),
+    ("Root mean square weighted error RMSE", "RMSE = √(Σ (Wi ri)² / (n − 1))."),
+    ("Akaike information criterion AIC", "AIC = n ln(SSQ/n) + 2p (Akaike, 1974): compares models with different numbers p of fitted parameters; lower is better."),
+    ("Bayesian information criterion BIC", "BIC = n ln(SSQ/n) + p ln n (Schwarz, 1978): like AIC with a stronger penalty for parameters."),
+    ("Start", "Number of the starting point (0 = the initial estimates)."),
+    ("Final SSQ", "Objective function at the end of the iteration from this starting point."),
+    ("Iterations", "Number of Marquardt–Levenberg iterations of this starting point."),
+    ("End", "Why the iteration stopped."),
+    ("Iteration", "Number of the Marquardt–Levenberg iteration (0 = initial estimates)."),
+    ("SSQ", "Objective function (weighted sum of squared residuals)."),
+    ("constraints:", "Constraints between the drying and wetting branches of the hysteresis model during the estimation."),
+    ("Resident concentrations", "The concentrations of the objective function are resident (volume-averaged) liquid concentrations."),
+    ("Log. resident concentrations", "Logarithms of the resident concentrations (for data over several orders of magnitude)."),
+    ("Flux concentrations", "Flux-averaged concentrations (effluent)."),
+    ("Total concentrations (liquid + solid)", "Total solute mass per volume of soil, liquid and sorbed."),
+    ("Resident concentrations (mobile + immobile)", "Resident concentrations of mobile and immobile water together."),
+    ("θs (drying) > θs (wetting)", "No constraint between the saturated water contents of the branches."),
+    ("θm = θs", "Constraint θm = θs of the drying branch."),
+    ("θm = θs(wetting) = θs", "Constraint: the same saturated water content for both branches."),
+    // ------------------------------------------------------------------ Rosetta inputs
+    ("Sand", "Sand fraction [%] (0.05–2 mm, USDA)."),
+    ("Silt", "Silt fraction [%] (0.002–0.05 mm)."),
+    ("Clay", "Clay fraction [%] (< 0.002 mm). Sand + silt + clay = 100 %."),
+    ("Bulk density", "Dry bulk density [g/cm³] (models with BD)."),
+    ("θ at 33 kPa (field capacity)", "Measured water content [cm³/cm³] at −33 kPa (≈ −330 cm, field capacity)."),
+    ("θ at 1500 kPa (wilting point)", "Measured water content [cm³/cm³] at −1500 kPa (≈ −15000 cm, wilting point)."),
+    ("Textural class (class averages)", "Model H1: average parameters of the USDA textural class."),
+    ("Sand, silt and clay (SSC)", "Model H2: prediction from the sand, silt and clay fractions."),
+    ("SSC + bulk density (BD)", "Model H3: texture and bulk density."),
+    ("SSC + BD + θ at 33 kPa", "Model H4: texture, bulk density and the water content at 33 kPa."),
+    ("SSC + BD + θ at 33 and 1500 kPa", "Model H5: texture, bulk density and the water contents at 33 and 1500 kPa (the most informed prediction)."),
+    ("geometric means of α, n and Ks", "Off: arithmetic means of the neural-network ensemble (as rosetta-soil and the Rosetta web site). On: 10 to the mean of the logarithms."),
 ];
 
 fn map() -> &'static HashMap<&'static str, &'static str> {
@@ -443,28 +542,28 @@ fn map() -> &'static HashMap<&'static str, &'static str> {
     M.get_or_init(|| TIPS.iter().copied().collect())
 }
 
-/// Description of the input labelled `label`: exact match, else the label without a trailing unit in brackets or a
-/// trailing number ("cTop2" → "cTop").
+/// Description of the input labelled `label`: exact match, else the label without trailing units in brackets
+/// ("Dispersivity Dl (cm)", "cRoot [mmol/cm³]") and without a trailing number ("cTop2", "CncBalR 1 (%)").
 pub fn tip(label: &str) -> Option<&'static str> {
     let m = map();
-    let l = label.trim();
-    if let Some(t) = m.get(l) {
-        return Some(t);
-    }
-    if let Some(p) = l.rfind(" (") {
-        if l.ends_with(')') {
-            if let Some(t) = m.get(l[..p].trim()) {
-                return Some(t);
-            }
-        }
-    }
-    let base = l.trim_end_matches(|c: char| c.is_ascii_digit());
-    if base.len() < l.len() {
-        if let Some(t) = m.get(base) {
+    let mut l = label.trim();
+    loop {
+        if let Some(t) = m.get(l) {
             return Some(t);
         }
+        let shorter = if l.ends_with(')') && l.contains(" (") {
+            &l[..l.rfind(" (").unwrap()]
+        } else if l.ends_with(']') && l.contains(" [") {
+            &l[..l.rfind(" [").unwrap()]
+        } else {
+            l.trim_end_matches(|c: char| c.is_ascii_digit())
+        };
+        let shorter = shorter.trim_end();
+        if shorter.len() == l.len() || shorter.is_empty() {
+            return None;
+        }
+        l = shorter;
     }
-    None
 }
 
 fn show(ui: &mut Ui, text: &str) {
@@ -521,6 +620,8 @@ mod tests {
     fn lookup_variants() {
         assert!(tip("Dispersivity Dl (cm)").is_some());
         assert!(tip("cTop2").is_some());
+        assert!(tip("CncBalR 1 (%)").is_some());
+        assert!(tip("cRoot [mmol/cm³]").is_some());
         assert!(tip("no such label").is_none());
     }
 
