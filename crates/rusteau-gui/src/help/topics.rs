@@ -263,7 +263,7 @@ pub fn cited(blocks: &[Block]) -> Vec<String> {
             Block::Table { head, rows } => head.iter().chain(rows.iter().flatten()).for_each(&mut add),
             Block::Formula(lines) => lines.iter().for_each(&mut add),
             Block::Image { caption, .. } => add(caption),
-            Block::Rule | Block::Anchor(_) => {}
+            Block::Rule | Block::Anchor(_) | Block::Code(_) => {}
         }
     }
     keys
@@ -326,7 +326,7 @@ mod tests {
                 Block::Table { head, rows } => head.iter().chain(rows.iter().flatten()).for_each(&mut add),
                 Block::Formula(lines) => lines.iter().for_each(&mut add),
                 Block::Image { caption, .. } => add(caption),
-                Block::Rule | Block::Anchor(_) => {}
+                Block::Rule | Block::Anchor(_) | Block::Code(_) => {}
             }
         }
         out

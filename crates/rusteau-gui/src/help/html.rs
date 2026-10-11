@@ -124,6 +124,9 @@ fn blocks(doc: &Doc) -> String {
             Block::Rule => {
                 let _ = writeln!(o, "<hr>");
             }
+            Block::Code(c) => {
+                let _ = writeln!(o, "<pre><code>{}</code></pre>", esc(c));
+            }
         }
     }
     o
@@ -323,6 +326,8 @@ h1 { font-size: 28px; margin: 4px 0 12px 0; }
 h2 { font-size: 21px; margin: 28px 0 8px 0; padding-bottom: 4px; border-bottom: 1px solid var(--line); }
 h3 { font-size: 17px; margin: 20px 0 6px 0; }
 code { background: var(--code); padding: 1px 5px; border-radius: 4px; font: 14px/1.4 "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace; }
+pre { background: var(--formula); border: 1px solid var(--line); border-radius: 6px; padding: 10px 14px; overflow-x: auto; }
+pre code { background: none; padding: 0; }
 .formula { background: var(--formula); border: 1px solid var(--line); border-radius: 6px; padding: 10px 18px; margin: 10px 0;
   font-family: "Cambria Math", "STIX Two Math", "Latin Modern Math", "Times New Roman", "DejaVu Serif", serif; font-size: 17px; overflow-x: auto; }
 .formula div { white-space: nowrap; }

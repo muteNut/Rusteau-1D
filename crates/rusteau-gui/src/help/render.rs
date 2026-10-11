@@ -217,6 +217,13 @@ impl Renderer<'_> {
             Block::Rule => {
                 ui.separator();
             }
+            Block::Code(c) => {
+                let fill = ui.visuals().extreme_bg_color;
+                egui::Frame::new().fill(fill).inner_margin(egui::Margin::symmetric(12, 8)).corner_radius(4.0).show(ui, |ui| {
+                    ui.set_width(ui.available_width());
+                    ui.label(egui::RichText::new(c).monospace().size(size * 0.9));
+                });
+            }
             Block::Table { head, rows } => self.table(ui, head, rows),
             Block::Image { src, caption } => self.image(ui, src, caption),
         }

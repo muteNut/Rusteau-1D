@@ -11,6 +11,7 @@
 //! * notes: `> text`
 //! * `---`: horizontal rule
 //! * `{#name}` on a line of its own: link target
+//! * code: lines between two lines starting with three back-ticks
 //!
 //! Inline: `**bold**`, `*italic*`, `` `code` ``, `x_{sub}`, `x^{sup}`, `[text](topic)`, `[text](topic#anchor)`,
 //! `[text](https://…)`, citations `[@key]` or `[@key1; @key2]` (see [`super::refs`]), `\` escapes the next character.
@@ -61,6 +62,8 @@ pub enum Block {
     Rule,
     /// Invisible link target (`{#name}` on a line of its own)
     Anchor(String),
+    /// Preformatted text (lines between ``` fences)
+    Code(String),
 }
 
 #[derive(Clone, Debug, Default)]
@@ -346,6 +349,18 @@ pub fn parse(src: &str) -> Doc {
             i += 1;
             continue;
         }
+        if t.starts_with("```") {
+            flush_para(&mut para, &mut doc.blocks);
+            let mut code = vec![];
+            i += 1;
+            while i < lines.len() && !lines[i].trim_start().starts_with("```") {
+                code.push(lines[i]);
+                i += 1;
+            }
+            i += 1;
+            doc.blocks.push(Block::Code(code.join("\n")));
+            continue;
+        }
         if t.starts_with("{#") && t.ends_with('}') {
             flush_para(&mut para, &mut doc.blocks);
             doc.blocks.push(Block::Anchor(t[2..t.len() - 1].to_string()));
@@ -485,6 +500,7 @@ pub fn doc_text(doc: &Doc) -> String {
                 }
             }
             Block::Image { caption, .. } => s.push_str(&plain(caption)),
+            Block::Code(c) => s.push_str(c),
             Block::Rule | Block::Anchor(_) => {}
         }
         s.push('\n');
@@ -532,7 +548,7 @@ mod tests {
 
     #[test]
     fn blocks() {
-        let d = parse("# T\nkeywords: a; b\n\npara\nline\n\n## H {#x}\n- one\n  two\n- three\n\n| a | b |\n|---|---|\n| 1 | 2 |\n\n$$ x^{2} $$\n\n![cap](img/a.png)\n> note\n");
+        let d = parse("# T\nkeywords: a; b\n\npara\nline\n\n## H {#x}\n- one\n  two\n- three\n\n| a | b |\n|---|---|\n| 1 | 2 |\n\n$$ x^{2} $$\n\n![cap](img/a.png)\n> note\n```\nrun *x*\n```\n");
         assert_eq!(d.title, "T");
         assert_eq!(d.keywords, vec!["a", "b"]);
         assert_eq!(d.blocks[0], Block::Para(inline("para line")));
@@ -542,6 +558,7 @@ mod tests {
         assert!(matches!(&d.blocks[4], Block::Formula(l) if l.len() == 1));
         assert!(matches!(&d.blocks[5], Block::Image { src, .. } if src == "img/a.png"));
         assert!(matches!(&d.blocks[6], Block::Note(_)));
+        assert_eq!(d.blocks[7], Block::Code("run *x*".into()));
         assert_eq!(slug("Soil Hydraulic Model – van Genuchten"), "soil-hydraulic-model-van-genuchten");
     }
 }
