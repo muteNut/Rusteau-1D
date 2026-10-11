@@ -1,6 +1,7 @@
 #![cfg_attr(all(not(debug_assertions), windows), windows_subsystem = "windows")]
 
 mod files;
+mod help;
 mod hydro;
 mod inverse_ui;
 mod measured;
@@ -8,6 +9,7 @@ mod post;
 mod pre;
 mod profile;
 mod rosetta_ui;
+mod tips;
 mod util;
 
 use eframe::egui;
@@ -227,6 +229,8 @@ pub struct App {
     pub legacy_on_save: bool,
     /// Rosetta dialog
     pub ros: Option<rosetta_ui::RosettaDlg>,
+    /// Help window
+    pub help: help::HelpState,
 }
 
 #[derive(Clone, Debug)]
@@ -286,6 +290,7 @@ impl App {
             convert_units: true,
             legacy_on_save: false,
             ros: None,
+            help: help::HelpState::default(),
         };
         if let Some(arg) = std::env::args().nth(1) {
             app.open_path(&PathBuf::from(&arg));
@@ -720,6 +725,51 @@ impl App {
                     }
                 });
                 ui.menu_button("Help", |ui| {
+                    if ui.button("Help on this page   (F1)").clicked() {
+                        self.help.show_topic(help::topic_of(self.page), None);
+                        ui.close_menu();
+                    }
+                    if ui.button("Contents").clicked() {
+                        self.help.show_topic("contents", None);
+                        ui.close_menu();
+                    }
+                    if ui.button("Getting started").clicked() {
+                        self.help.show_topic("getting_started", None);
+                        ui.close_menu();
+                    }
+                    if ui.button("Theory and equations").clicked() {
+                        self.help.show_topic("th_richards", None);
+                        ui.close_menu();
+                    }
+                    if ui.button("References (scientific sources)").clicked() {
+                        self.help.show_topic("references", None);
+                        ui.close_menu();
+                    }
+                    ui.separator();
+                    if ui
+                        .button("Open the help in the web browser")
+                        .on_hover_text("Writes the help as HTML pages (offline) and opens them in the web browser")
+                        .clicked()
+                    {
+                        self.open_help_in_browser(ctx, help::topic_of(self.page));
+                        ui.close_menu();
+                    }
+                    if ui.button("Export the HTML help…").on_hover_text("Writes the help as HTML pages into a folder of your choice").clicked() {
+                        self.dialog = Some(FileDialog::new(
+                            Purpose::ExportHelp,
+                            Mode::PickDir,
+                            "Choose a folder for the HTML help",
+                            self.last_dir.clone(),
+                            "",
+                            &[],
+                        ));
+                        ui.close_menu();
+                    }
+                    ui.separator();
+                    if ui.button("Keyboard and mouse").clicked() {
+                        self.help.show_topic("shortcuts", None);
+                        ui.close_menu();
+                    }
                     if ui.button("About Rusteau-1D").clicked() {
                         self.show_about = true;
                         ui.close_menu();
@@ -746,6 +796,33 @@ impl App {
         });
         if ctx.input(|i| i.key_pressed(egui::Key::F5)) && self.run.is_none() && self.inv.run.is_none() {
             self.start_run();
+        }
+        if ctx.input(|i| i.key_pressed(egui::Key::F1)) {
+            let id = if self.ros.is_some() { "rosetta" } else { help::topic_of(self.page) };
+            self.help.show_topic(id, None);
+        }
+    }
+
+    /// Writes the HTML help into the cache folder and opens topic `id` in the web browser.
+    fn open_help_in_browser(&mut self, ctx: &egui::Context, id: &str) {
+        match help::html_url(id) {
+            Ok(url) => {
+                ctx.open_url(egui::OpenUrl::new_tab(&url));
+                self.status = format!("Help opened in the web browser ({url})");
+            }
+            Err(e) => self.status = e,
+        }
+    }
+
+    /// The help window and the help requests of the pages ("?" next to a page title, help buttons of dialogs).
+    fn help_ui(&mut self, ctx: &egui::Context) {
+        match help::take_request(ctx) {
+            Some(None) => self.help.show_topic(help::topic_of(self.page), None),
+            Some(Some(id)) => self.help.show_topic(id, None),
+            None => {}
+        }
+        if let Some(help::HelpEvent::OpenInBrowser(id)) = self.help.window(ctx) {
+            self.open_help_in_browser(ctx, &id);
         }
     }
 
@@ -905,6 +982,12 @@ impl App {
                                     Err(e) => e.to_string(),
                                 };
                             }
+                        }
+                        Purpose::ExportHelp => {
+                            self.status = match help::html::export(&path) {
+                                Ok(start) => format!("HTML help written to {} (start page {})", path.display(), start.display()),
+                                Err(e) => format!("Could not write the HTML help: {e}"),
+                            };
                         }
                         Purpose::ImportAtmosphere => {
                             self.status = match self.import_atmosphere_text(&path) {
@@ -1121,6 +1204,7 @@ impl eframe::App for App {
         });
         self.dialogs(ctx);
         self.rosetta_window(ctx);
+        self.help_ui(ctx);
         self.drop_overlay(ctx);
     }
 }
@@ -1177,6 +1261,21 @@ fn is_project_path(p: &std::path::Path) -> bool {
 }
 
 fn main() -> eframe::Result<()> {
+    // rusteau --export-help DIR: write the HTML help and exit (no window)
+    let args: Vec<String> = std::env::args().collect();
+    if let Some(k) = args.iter().position(|a| a == "--export-help") {
+        let dir = PathBuf::from(args.get(k + 1).map(|s| s.as_str()).unwrap_or("help"));
+        match help::html::export(&dir) {
+            Ok(start) => {
+                println!("HTML help written to {} (start page {})", dir.display(), start.display());
+                std::process::exit(0);
+            }
+            Err(e) => {
+                eprintln!("Could not write the HTML help to {}: {e}", dir.display());
+                std::process::exit(1);
+            }
+        }
+    }
     let opts = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_inner_size([1280.0, 800.0])

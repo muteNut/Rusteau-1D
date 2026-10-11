@@ -16,3 +16,5 @@ eframe = { version = "0.31", default-features = false, features = ["glow", "defa
 egui = "0.31"
 egui_plot = "0.31"
 egui_extras = "0.31"
+# PNG images of the help (already a dependency of eframe)
+image = { version = "0.25", default-features = false, features = ["png"] }

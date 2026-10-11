@@ -1,0 +1,3 @@
+# meteo_page
+
+Stub.

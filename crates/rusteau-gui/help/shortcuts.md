@@ -1,0 +1,3 @@
+# shortcuts
+
+Stub.

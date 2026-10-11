@@ -1,3 +1,4 @@
+use crate::tips::TipExt;
 use egui::{Color32, DragValue, Ui};
 use rusteau_core::{LengthUnit, Project, SoilMaterial, TimeUnit};
 
@@ -132,6 +133,35 @@ pub fn dv(ui: &mut Ui, ch: &mut bool, v: &mut f64) {
     }
 }
 
+/// Number field that returns its response (for tooltips).
+pub fn dv_r(ui: &mut Ui, ch: &mut bool, v: &mut f64) -> egui::Response {
+    let speed = (v.abs() * 0.01).max(1e-6);
+    let r = ui.add(DragValue::new(v).speed(speed).custom_formatter(fmt_num).custom_parser(parse_num));
+    if r.changed() {
+        *ch = true;
+    }
+    r
+}
+
+/// Number field with a unit that returns its response (for tooltips).
+pub fn dv_unit_r(ui: &mut Ui, ch: &mut bool, v: &mut f64, unit: &str) -> egui::Response {
+    let speed = (v.abs() * 0.01).max(1e-6);
+    let r = ui.add(DragValue::new(v).speed(speed).custom_formatter(fmt_num).custom_parser(parse_num).suffix(format!(" {}", unit)));
+    if r.changed() {
+        *ch = true;
+    }
+    r
+}
+
+/// Integer field that returns its response (for tooltips).
+pub fn di_r(ui: &mut Ui, ch: &mut bool, v: &mut usize) -> egui::Response {
+    let r = ui.add(DragValue::new(v).speed(0.2));
+    if r.changed() {
+        *ch = true;
+    }
+    r
+}
+
 pub fn dv_unit(ui: &mut Ui, ch: &mut bool, v: &mut f64, unit: &str) {
     let speed = (v.abs() * 0.01).max(1e-6);
     if ui.add(DragValue::new(v).speed(speed).custom_formatter(fmt_num).custom_parser(parse_num).suffix(format!(" {}", unit))).changed() {
@@ -145,20 +175,30 @@ pub fn di(ui: &mut Ui, ch: &mut bool, v: &mut usize) {
     }
 }
 
+/// Grid row: label and number field, both with the description of the label as tooltip.
 pub fn field(ui: &mut Ui, ch: &mut bool, label: &str, v: &mut f64) {
-    ui.label(label);
-    dv(ui, ch, v);
+    ui.label(label).tip(label);
+    dv_r(ui, ch, v).tip(label);
     ui.end_row();
 }
 
+/// Grid row: label and number field with a unit, both with the description of the label as tooltip.
 pub fn field_u(ui: &mut Ui, ch: &mut bool, label: &str, v: &mut f64, unit: &str) {
-    ui.label(label);
-    dv_unit(ui, ch, v, unit);
+    ui.label(label).tip(label);
+    dv_unit_r(ui, ch, v, unit).tip(label);
     ui.end_row();
 }
 
+/// Grid row: label and integer field with the description of the label as tooltip.
+pub fn field_i(ui: &mut Ui, ch: &mut bool, label: &str, v: &mut usize) {
+    ui.label(label).tip(label);
+    di_r(ui, ch, v).tip(label);
+    ui.end_row();
+}
+
+/// Check box with the description of its label as tooltip.
 pub fn check(ui: &mut Ui, ch: &mut bool, v: &mut bool, label: &str) {
-    if ui.checkbox(v, label).changed() {
+    if ui.checkbox(v, label).tip(label).changed() {
         *ch = true;
     }
 }
@@ -193,9 +233,19 @@ pub fn sig(v: f64) -> String {
     }
 }
 
-/// Page title (heading in the strong text colour).
+/// Page title (heading in the strong text colour) with a "?" button that opens the help of the page (as F1).
 pub fn page_title(ui: &mut Ui, title: &str) {
-    ui.label(egui::RichText::new(title).heading().strong());
+    ui.horizontal(|ui| {
+        ui.label(egui::RichText::new(title).heading().strong());
+        help_button(ui);
+    });
+}
+
+/// Small "?" button: help on the current page.
+pub fn help_button(ui: &mut Ui) {
+    if ui.small_button("?").on_hover_text("Help on this page (F1)").clicked() {
+        crate::help::request_page_help(ui.ctx());
+    }
 }
 
 /// Grid marks at whole decades for an axis that shows log10 values: thin lines at every decade, labelled lines at

@@ -1,0 +1,3 @@
+# time_output
+
+Stub.

@@ -24,6 +24,8 @@ pub enum Purpose {
     ImportFitIn,
     ExportFitIn,
     SaveFitOut,
+    /// Folder for the HTML help
+    ExportHelp,
 }
 
 pub enum DialogResult {

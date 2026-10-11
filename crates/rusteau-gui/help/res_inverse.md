@@ -1,0 +1,3 @@
+# res_inverse
+
+Stub.
