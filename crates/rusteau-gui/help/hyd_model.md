@@ -25,7 +25,7 @@ The equations are given in [soil hydraulic property models](th_hydraulic_models)
 | Option | Description |
 |---|---|
 | No hysteresis | One retention curve (main drying curve). |
-| Hysteresis in the retention curve | Scanning curves between the main drying and the main wetting curve after Kool and Parker [@koolParker1987]; extra parameters θm, θs,w and αw. |
+| Hysteresis in the retention curve | Scanning curves between the main drying and the main wetting curve after [@koolParker1987]; extra parameters θm, θs,w and αw. |
 | Hysteresis in the retention curve and the conductivity | Also K(h) is hysteretic; extra parameter Ks,w. |
 | Hysteresis in the retention curve (no pumping, Lenhard et al.) | Model that keeps track of the reversal points and avoids the drift of scanning loops ("pumping") [@lenhard1991; @lenhardParker1992]. |
 | Initially drying / wetting curve | Branch of the initial condition (iKappa = −1 / +1). |

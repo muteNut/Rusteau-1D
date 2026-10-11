@@ -1,7 +1,7 @@
 # Root solute uptake
 keywords: root solute uptake; passive uptake; active uptake; Michaelis-Menten; nutrient uptake; compensation
 
-Root solute (nutrient) uptake follows Šimůnek and Hopmans [@simunekHopmans2009] as the sum of a passive and an active part.
+Root solute (nutrient) uptake follows [@simunekHopmans2009] as the sum of a passive and an active part.
 
 ## Passive uptake {#passive}
 

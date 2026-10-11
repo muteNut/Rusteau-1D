@@ -44,11 +44,11 @@ The dispersion coefficient in the liquid phase is
 
 $$ θ D^{w} = D_{L} \|q\| + θ D_{w} τ_{w} $$
 
-with the longitudinal dispersivity D_{L} [L], the molecular diffusion coefficient in free water D_{w} and the tortuosity factor τ_{w}. The tortuosity factors of the liquid and gas phases follow Millington and Quirk [@millingtonQuirk1961]:
+with the longitudinal dispersivity D_{L} [L], the molecular diffusion coefficient in free water D_{w} and the tortuosity factor τ_{w}. The tortuosity factors of the liquid and gas phases follow [@millingtonQuirk1961]:
 
 $$ τ_{w} = θ^{7/3} / θ_{s}^{2},   τ_{g} = a_{v}^{7/3} / θ_{s}^{2} $$
 
-or Moldrup et al. [@moldrup1997; @moldrup2000].
+or [@moldrup1997; @moldrup2000].
 
 ## Boundary conditions {#bc}
 

@@ -31,7 +31,7 @@ where h_{im} is the head of the immobile region at its current water content.
 
 ## Durner's model
 
-The model of Durner [@durner1994] also has two pore regions, but in equilibrium: one Richards equation with a bimodal retention function ([Durner](th_hydraulic_models#durner)).
+The model of [@durner1994] also has two pore regions, but in equilibrium: one Richards equation with a bimodal retention function ([Durner](th_hydraulic_models#durner)).
 
 ## Solute transport
 

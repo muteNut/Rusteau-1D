@@ -14,7 +14,7 @@ with the prescribed head h_{0} and flux q_{0} (positive upward).
 
 ## Atmospheric boundary condition {#atmospheric}
 
-The potential fluid flux across the soil surface is determined by the external conditions (precipitation, potential evaporation), but the actual flux depends on the moisture conditions in the soil. The atmospheric boundary condition of Neuman et al. [@neuman1974] limits the absolute flux and the pressure head at the surface:
+The potential fluid flux across the soil surface is determined by the external conditions (precipitation, potential evaporation), but the actual flux depends on the moisture conditions in the soil. The atmospheric boundary condition of [@neuman1974] limits the absolute flux and the pressure head at the surface:
 
 $$
 \|−K (∂h/∂x + 1)\| ≤ E   at x = L
@@ -49,7 +49,7 @@ The bottom of a lysimeter or a column with a free outlet: as long as the bottom 
 
 ## Horizontal drains {#drains}
 
-The bottom flux equals the discharge to parallel drains or ditches, computed from the groundwater level with the formulas of Hooghoudt [@hooghoudt1940] (homogeneous profiles, equivalent depth) and Ernst [@ernst1962] (layered profiles with vertical, horizontal and radial resistances), as implemented in SWAP [@vanDam1997], with the drain spacing, the entrance resistance and the conductivities of the layers.
+The bottom flux equals the discharge to parallel drains or ditches, computed from the groundwater level with the formulas of [@hooghoudt1940] (homogeneous profiles, equivalent depth) and [@ernst1962] (layered profiles with vertical, horizontal and radial resistances), as implemented in SWAP [@vanDam1997], with the drain spacing, the entrance resistance and the conductivities of the layers.
 
 ## Time-variable conditions
 

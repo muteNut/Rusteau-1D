@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coupled water, vapor and heat flow – Rusteau-1D Help</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li><a href="units.html">Units</a></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details><summary>Solute transport</summary>
+<ul>
+<li><a href="solute_general.html">Solute transport: general</a></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+</ul>
+</details></li>
+<li class="book"><details open><summary>Theory and equations</summary>
+<ul>
+<li><a href="th_richards.html">Variably saturated water flow</a></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li class="current"><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<div class="crumbs">Theory and equations</div>
+<h1>Coupled water, vapor and heat flow</h1>
+<p>With <em>Vapor flow</em> switched on, liquid water and water vapor move under gradients of the pressure head and of the temperature <a href="references.html#philipDeVries1957" class="cite" title="Philip, J. R., and D. A. de Vries (1957). Moisture movement in porous materials under temperature gradients. Transactions, American Geophysical Union 38(2): 222–232.">Philip and de Vries (1957)</a>; <a href="references.html#saito2006" class="cite" title="Saito, H., J. Šimůnek, and B. P. Mohanty (2006). Numerical analysis of coupled water, vapor, and heat transport in the vadose zone. Vadose Zone Journal 5(2): 784–800.">Saito et al. (2006)</a>. The water flow equation becomes</p>
+<div class="formula">
+<div>∂θ<sub>T</sub>/∂t = ∂/∂x [ K<sub>Lh</sub> (∂h/∂x + cos α) + K<sub>LT</sub> ∂T/∂x + K<sub>vh</sub> ∂h/∂x + K<sub>vT</sub> ∂T/∂x ] − S</div>
+</div>
+<div class="table"><table>
+<thead><tr><th>Symbol</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td>θ<sub>T</sub></td><td>total water content, θ<sub>T</sub> = θ<sub>L</sub> + θ<sub>v</sub>, the liquid water content plus the water vapor content expressed as an equivalent water content</td></tr>
+<tr><td>K<sub>Lh</sub></td><td>isothermal hydraulic conductivity of the liquid phase [L/T] (the conductivity K(h) of the <a href="th_hydraulic_models.html">hydraulic model</a>)</td></tr>
+<tr><td>K<sub>LT</sub></td><td>thermal hydraulic conductivity of the liquid phase [L²/K/T] (temperature dependence of the surface tension)</td></tr>
+<tr><td>K<sub>vh</sub></td><td>isothermal vapor hydraulic conductivity [L/T]</td></tr>
+<tr><td>K<sub>vT</sub></td><td>thermal vapor hydraulic conductivity [L²/K/T]</td></tr>
+</tbody></table></div>
+<p>The vapor conductivities follow from the vapor diffusivity in the soil air, the saturated vapor density and the relative humidity h<sub>r</sub> = exp(h M g / (R T)) of the soil air (M molecular weight of water, g gravitational acceleration, R gas constant). The thermal vapor flux is multiplied by the enhancement factor η(θ) of <a href="references.html#cass1984" class="cite" title="Cass, A., G. S. Campbell, and T. L. Jones (1984). Enhancement of thermal water vapor diffusion in soil. Soil Science Society of America Journal 48(1): 25–32.">Cass et al. (1984)</a>, which accounts for the higher thermal gradients in the air-filled pores and liquid islands (<em>Further options</em>: switchable).</p>
+<p>The heat transport equation includes the transport of latent heat by the vapor flux and the convection of sensible heat by liquid water and vapor (<a href="th_heat.html">heat transport</a>); water flow and heat transport are solved sequentially in every time step. The surface boundary condition is usually the <a href="th_energy_balance.html">surface energy balance</a>.</p>
+<div class="note">As in HYDRUS, the capacity term of the vapor content contains the unit conversion in a form that is exact for metres; with cm or mm the results differ slightly (e.g. 3.4 % in the cumulative surface flux of the HYDRUS example EnBal2b when changing from cm/d to m/h). Rusteau keeps the HYDRUS expression so that its results match HYDRUS 4.17.</div>
+<h2 id="literature">Literature cited in this topic</h2>
+<ul>
+<li>Cass, A., G. S. Campbell, and T. L. Jones (1984). Enhancement of thermal water vapor diffusion in soil. <em>Soil Science Society of America Journal</em> 48(1): 25–32. doi:<a href="https://doi.org/10.2136/sssaj1984.03615995004800010005x" target="_blank" rel="noopener">10.2136/sssaj1984.03615995004800010005x</a></li>
+<li>Philip, J. R., and D. A. de Vries (1957). Moisture movement in porous materials under temperature gradients. <em>Transactions, American Geophysical Union</em> 38(2): 222–232. doi:<a href="https://doi.org/10.1029/TR038i002p00222" target="_blank" rel="noopener">10.1029/TR038i002p00222</a></li>
+<li>Saito, H., J. Šimůnek, and B. P. Mohanty (2006). Numerical analysis of coupled water, vapor, and heat transport in the vadose zone. <em>Vadose Zone Journal</em> 5(2): 784–800. doi:<a href="https://doi.org/10.2136/vzj2006.0007" target="_blank" rel="noopener">10.2136/vzj2006.0007</a></li>
+</ul>
+<p>All sources: <a href="references.html">References</a>.</p>
+</article>
+<div class="pager"><a class="prev" href="th_energy_balance.html">← Surface energy balance</a><a class="next" href="th_heat.html">Heat transport →</a></div>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 0.1.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>

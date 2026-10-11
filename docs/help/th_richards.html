@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Variably saturated water flow – Rusteau-1D Help</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li><a href="units.html">Units</a></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details><summary>Solute transport</summary>
+<ul>
+<li><a href="solute_general.html">Solute transport: general</a></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+</ul>
+</details></li>
+<li class="book"><details open><summary>Theory and equations</summary>
+<ul>
+<li class="current"><a href="th_richards.html">Variably saturated water flow</a></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<div class="crumbs">Theory and equations</div>
+<h1>Variably saturated water flow</h1>
+<p>One-dimensional uniform (equilibrium) water flow in a partially saturated rigid porous medium is described by a modified form of the Richards equation, assuming that the air phase plays an insignificant role in the liquid flow process and that water flow due to thermal gradients can be neglected <a href="references.html#simunek2009" class="cite" title="Šimůnek, J., M. Šejna, H. Saito, M. Sakai, and M. Th. van Genuchten (2009). The HYDRUS-1D Software Package for Simulating the One-Dimensional Movement of Water, Heat, and Multiple Solutes in Variably-Saturated Media, Version 4.08. HYDRUS Software Series 3, Department of Environmental Sciences, University of California Riverside, Riverside, CA, USA, 330 pp.">Šimůnek et al. (2009)</a>:</p>
+<div class="formula">
+<div>∂θ/∂t = ∂/∂x [ K (∂h/∂x + cos α) ] − S</div>
+</div>
+<div class="table"><table>
+<thead><tr><th>Symbol</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td>h</td><td>pressure head [L] (negative in unsaturated soil)</td></tr>
+<tr><td>θ</td><td>volumetric water content [L³/L³]</td></tr>
+<tr><td>t</td><td>time [T]</td></tr>
+<tr><td>x</td><td>spatial coordinate [L], positive upward (the interface uses the depth below the surface, positive downward)</td></tr>
+<tr><td>S</td><td>sink term [L³/L³/T], the <a href="th_root_uptake.html">root water uptake</a></td></tr>
+<tr><td>α</td><td>angle between the flow direction and the vertical axis (α = 0° for vertical flow, 90° for horizontal flow)</td></tr>
+<tr><td>K</td><td>unsaturated hydraulic conductivity [L/T]</td></tr>
+</tbody></table></div>
+<p>The unsaturated hydraulic conductivity is the product of the saturated conductivity and the relative conductivity, scaled locally (<a href="th_scaling.html">scaling</a>):</p>
+<div class="formula">
+<div>K(h, x) = K<sub>s</sub>(x) K<sub>r</sub>(h, x)</div>
+</div>
+<p>The functions θ(h) and K(h) – the soil hydraulic properties – are given by one of the <a href="th_hydraulic_models.html">soil hydraulic models</a>. The water capacity C(h) = dθ/dh appears when the equation is written in terms of h; the numerical solution uses the mass-conservative mixed form with θ and h <a href="references.html#celia1990" class="cite" title="Celia, M. A., E. T. Bouloutas, and R. L. Zarba (1990). A general mass-conservative numerical solution for the unsaturated flow equation. Water Resources Research 26(7): 1483–1496.">Celia et al. (1990)</a> (<a href="th_numerics.html">numerical solution</a>).</p>
+<h2 id="extensions">Extensions</h2>
+<ul>
+<li><strong>Hysteresis</strong>: θ(h) and K(h) depend on the wetting and drying history (<a href="th_hysteresis.html">hysteresis</a>).</li>
+<li><strong>Non-equilibrium flow</strong>: dual-porosity and dual-permeability formulations with exchange terms between two regions (<a href="th_dual_porosity.html">dual porosity</a>, <a href="th_dual_permeability.html">dual permeability</a>), or a delayed approach of θ to equilibrium (<a href="th_advanced_options.html#nonequilibrium">further options</a>).</li>
+<li><strong>Vapor flow and temperature</strong>: with vapor flow the equation includes the isothermal and thermal vapor fluxes and the thermal liquid flux <a href="references.html#saito2006" class="cite" title="Saito, H., J. Šimůnek, and B. P. Mohanty (2006). Numerical analysis of coupled water, vapor, and heat transport in the vadose zone. Vadose Zone Journal 5(2): 784–800.">Saito et al. (2006)</a> (<a href="th_vapor.html">vapor flow</a>); with temperature-dependent hydraulic properties h and K are scaled with the temperature (<a href="th_hydraulic_models.html#temperature">hydraulic models</a>).</li>
+<li><strong>Centrifuge and density-dependent flow</strong>: the gravity term cos α is replaced (<a href="th_advanced_options.html">further options</a>).</li>
+</ul>
+<h2 id="boundary-and-initial-conditions">Boundary and initial conditions</h2>
+<p>The initial condition is the pressure head (or water content) of every node, set on the page <a href="profile_editor.html">Soil profile</a>. The boundary conditions at the surface and the bottom are described in <a href="th_bc_water.html">boundary conditions</a>.</p>
+<h2 id="literature">Literature cited in this topic</h2>
+<ul>
+<li>Celia, M. A., E. T. Bouloutas, and R. L. Zarba (1990). A general mass-conservative numerical solution for the unsaturated flow equation. <em>Water Resources Research</em> 26(7): 1483–1496. doi:<a href="https://doi.org/10.1029/WR026i007p01483" target="_blank" rel="noopener">10.1029/WR026i007p01483</a></li>
+<li>Saito, H., J. Šimůnek, and B. P. Mohanty (2006). Numerical analysis of coupled water, vapor, and heat transport in the vadose zone. <em>Vadose Zone Journal</em> 5(2): 784–800. doi:<a href="https://doi.org/10.2136/vzj2006.0007" target="_blank" rel="noopener">10.2136/vzj2006.0007</a></li>
+<li>Šimůnek, J., M. Šejna, H. Saito, M. Sakai, and M. Th. van Genuchten (2009). <em>The HYDRUS-1D Software Package for Simulating the One-Dimensional Movement of Water, Heat, and Multiple Solutes in Variably-Saturated Media, Version 4.08.</em> HYDRUS Software Series 3, Department of Environmental Sciences, University of California Riverside, Riverside, CA, USA, 330 pp. <a href="https://www.pc-progress.com/en/Default.aspx?h1d-description" target="_blank" rel="noopener">https://www.pc-progress.com/en/Default.aspx?h1d-description</a></li>
+</ul>
+<p>All sources: <a href="references.html">References</a>.</p>
+</article>
+<div class="pager"><a class="prev" href="measured_data.html">← Measured data</a><a class="next" href="th_hydraulic_models.html">Soil hydraulic property models →</a></div>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 0.1.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>

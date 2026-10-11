@@ -44,7 +44,7 @@ The irrigation events are written to `IRRIG.csv` ([output files](output_files#ir
 | Free drainage | Unit hydraulic gradient: the water leaves with the conductivity of the bottom node; for deep water tables. |
 | Deep drainage | q = −Aqh exp(Bqh \|h − GWL0L\|) with the reference groundwater level GWL0L [@hopmansStricker1989]. |
 | Seepage face | No flux while the bottom is unsaturated; drains at the head hSeep (usually 0) when saturated; lysimeters and columns with an open bottom. |
-| Horizontal drains | Discharge to parallel drains or ditches after Hooghoudt [@hooghoudt1940] and Ernst [@ernst1962], as implemented in SWAP [@vanDam1997]. |
+| Horizontal drains | Discharge to parallel drains or ditches after [@hooghoudt1940] and [@ernst1962], as implemented in SWAP [@vanDam1997]. |
 
 ### Horizontal drains {#drains}
 

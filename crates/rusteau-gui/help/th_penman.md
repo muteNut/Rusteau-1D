@@ -40,7 +40,7 @@ R_{s} = (a_{s} + b_{s} n/N) R_{a}
 R_{nl} = σ [(T_{max,K}^{4} + T_{min,K}^{4})/2] (a_{l} + b_{l} √e_{a}) f
 $$
 
-a is the albedo, R_{s} the solar radiation (measured, or from the relative sunshine duration n/N after Ångström [@angstrom1924]; a_{s} = 0.25, b_{s} = 0.5), R_{a} the extraterrestrial radiation from the latitude and the day of the year, N the day length, σ the Stefan–Boltzmann constant, a_{l} + b_{l} √e_{a} the net emissivity (0.34, −0.14 [@allen1998]) and f the cloudiness factor: f = a_{1} n/N + b_{1} from the sunshine duration (0.9, 0.1 [@doorenbosPruitt1977]), or f = a_{c} R_{s}/R_{so} + b_{c} from the ratio of the measured to the clear-sky radiation (1.35, −0.35 [@allen1998]).
+a is the albedo, R_{s} the solar radiation (measured, or from the relative sunshine duration n/N after [@angstrom1924]; a_{s} = 0.25, b_{s} = 0.5), R_{a} the extraterrestrial radiation from the latitude and the day of the year, N the day length, σ the Stefan–Boltzmann constant, a_{l} + b_{l} √e_{a} the net emissivity (0.34, −0.14 [@allen1998]) and f the cloudiness factor: f = a_{1} n/N + b_{1} from the sunshine duration (0.9, 0.1 [@doorenbosPruitt1977]), or f = a_{c} R_{s}/R_{so} + b_{c} from the ratio of the measured to the clear-sky radiation (1.35, −0.35 [@allen1998]).
 
 ## Partitioning
 

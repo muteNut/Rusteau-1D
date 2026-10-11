@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Output files – Rusteau-1D Help</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li><a href="units.html">Units</a></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details open><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li class="current"><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details><summary>Solute transport</summary>
+<ul>
+<li><a href="solute_general.html">Solute transport: general</a></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Theory and equations</summary>
+<ul>
+<li><a href="th_richards.html">Variably saturated water flow</a></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<div class="crumbs">Projects and files</div>
+<h1>Output files</h1>
+<p><em>File → Export results (CSV)…</em> (and the <a href="cli.html">command line program</a>) write the results as comma-separated files with a header line. The files correspond to the output files of HYDRUS-1D <a href="references.html#simunek2009" class="cite" title="Šimůnek, J., M. Šejna, H. Saito, M. Sakai, and M. Th. van Genuchten (2009). The HYDRUS-1D Software Package for Simulating the One-Dimensional Movement of Water, Heat, and Multiple Solutes in Variably-Saturated Media, Version 4.08. HYDRUS Software Series 3, Department of Environmental Sciences, University of California Riverside, Riverside, CA, USA, 330 pp.">Šimůnek et al. (2009)</a>. All values are in the project's units; signs follow HYDRUS (fluxes positive upward, i.e. negative values enter the soil at the surface and leave the profile at the bottom).</p>
+<h2 id="tlevel">T_LEVEL.csv – time-level information</h2>
+<p>One line per time step (or every n-th step, <a href="time_output.html">Time &amp; output</a>).</p>
+<div class="table"><table>
+<thead><tr><th>Column</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>time</code>, <code>dt</code>, <code>tlevel</code></td><td>time, time step, number of the time level</td></tr>
+<tr><td><code>iter_w</code>, <code>it_cum</code></td><td>iterations of the water flow in this step, cumulative iterations</td></tr>
+<tr><td><code>kod_top</code>, <code>kod_bot</code></td><td>boundary condition code at the top and bottom in this step (positive: head, negative: flux)</td></tr>
+<tr><td><code>rTop</code>, <code>rRoot</code></td><td>potential surface flux and potential transpiration [L/T]</td></tr>
+<tr><td><code>vTop</code>, <code>vRoot</code>, <code>vBot</code></td><td>actual surface flux, actual transpiration, actual bottom flux [L/T]</td></tr>
+<tr><td><code>sum_rTop</code> … <code>sum_vBot</code></td><td>cumulative values of the fluxes [L]</td></tr>
+<tr><td><code>hTop</code>, <code>hRoot</code>, <code>hBot</code></td><td>pressure head at the surface, mean head of the root zone, head at the bottom [L]</td></tr>
+<tr><td><code>runoff</code>, <code>sum_runoff</code></td><td>surface runoff [L/T] and its cumulative value [L]</td></tr>
+<tr><td><code>volume</code></td><td>water volume in the profile per unit area [L]</td></tr>
+<tr><td><code>sum_infil</code>, <code>sum_evap</code></td><td>cumulative infiltration and evaporation [L]</td></tr>
+<tr><td><code>precip</code>, <code>snow_layer</code></td><td>precipitation rate, thickness of the snow layer (water equivalent)</td></tr>
+<tr><td>per solute</td><td><code>cvTop</code>, <code>cvBot</code> (solute fluxes), <code>sum_cvTop</code>, <code>sum_cvBot</code>, <code>sum_cvCh0</code>, <code>sum_cvCh1</code> (cumulative zero- and first-order reactions), <code>cTop</code>, <code>cRoot</code>, <code>cBot</code>, <code>cvRoot</code>, <code>sum_cvRoot</code>, <code>sum_cvNEql</code>, <code>cGWL</code>, <code>cRunOff</code>, <code>sum_cRunOff</code></td></tr>
+<tr><td><code>temp_top</code>, <code>temp_bot</code></td><td>temperatures at the top and the bottom [°C]</td></tr>
+<tr><td><code>peclet</code>, <code>courant</code></td><td>maximum Peclet and Courant numbers of the solute transport</td></tr>
+<tr><td><code>cum_w_transf</code></td><td>cumulative water transfer between the domains (dual porosity / permeability)</td></tr>
+</tbody></table></div>
+<h2 id="nodinf">NOD_INF.csv – profiles at the print times</h2>
+<div class="table"><table>
+<thead><tr><th>Column</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>time</code>, <code>node</code>, <code>depth</code></td><td>print time, node number (from the top), depth [L]</td></tr>
+<tr><td><code>head</code>, <code>theta</code></td><td>pressure head [L], water content [–]</td></tr>
+<tr><td><code>K</code>, <code>C</code></td><td>hydraulic conductivity [L/T], water capacity [1/L]</td></tr>
+<tr><td><code>flux</code>, <code>sink</code></td><td>water flux [L/T], root water uptake [1/T]</td></tr>
+<tr><td><code>kappa</code></td><td>branch of the hysteresis model (−1 drying, +1 wetting)</td></tr>
+<tr><td><code>v_over_Ks</code></td><td>flux relative to Ks of the top node</td></tr>
+<tr><td><code>temp</code></td><td>temperature [°C]</td></tr>
+<tr><td><code>h_matrix</code>, <code>th_matrix</code></td><td>head and water content of the matrix or the immobile region (dual porosity / permeability)</td></tr>
+<tr><td>per solute</td><td><code>conc</code> (liquid), <code>sorb</code> (sorbed or immobile), <code>conc_matrix</code>, <code>flux_conc</code></td></tr>
+</tbody></table></div>
+<h2 id="obsnode">OBS_NODE.csv – observation nodes</h2>
+<p><code>time</code>, <code>node</code>, <code>head</code>, <code>theta</code>, <code>temp</code>, <code>flux</code>, <code>h_matrix</code>, <code>th_matrix</code> and per solute <code>conc</code>, <code>conc_matrix</code>, <code>flux_conc</code>, one line per time step and observation node.</p>
+<h2 id="balance">BALANCE.csv – mass balance</h2>
+<p><code>time</code>, <code>area</code> (length of the region), <code>volume</code>, <code>inflow</code>, <code>h_mean</code>, <code>top_flux</code>, <code>bot_flux</code>, <code>WatBalT</code> (absolute error [L]) and <code>WatBalR_percent</code> (relative error [%]) at the print times (<a href="res_balance.html">mass balance</a>).</p>
+<h2 id="alevel">A_LEVEL.csv – atmospheric records</h2>
+<p>Cumulative fluxes and boundary heads at the end of every atmospheric record: <code>time</code>, <code>sum_rTop</code>, <code>sum_rRoot</code>, <code>sum_vTop</code>, <code>sum_vRoot</code>, <code>sum_vBot</code>, <code>hTop</code>, <code>hRoot</code>, <code>hBot</code>.</p>
+<h2 id="tlevel1">T_LEVEL1.csv – extended fluxes</h2>
+<p>Written with the option <em>Write extended flux table T_Level1</em>: potential and actual precipitation, evaporation, surface flux, infiltration, transpiration, bottom flux, runoff, their cumulative values, the storage, the snow layer and the liquid and vapor parts of the surface flux.</p>
+<h2 id="meteo">METEO.csv and Meteo.out</h2>
+<p>With meteorological data: the potential evapotranspiration and its components, the radiation terms and, with the energy balance, the surface energy fluxes. <code>Meteo.out</code> has the fixed-width layout of HYDRUS-1D.</p>
+<h2 id="irrig">IRRIG.csv</h2>
+<p>With triggered irrigation: one line per irrigation event (<code>event</code>, <code>t_trigger</code>, <code>t_start</code>, <code>t_end</code>, <code>amount</code>).</p>
+<h2 id="fit-out">Fit.out</h2>
+<p>The results of a parameter estimation are written with <em>Save Fit.out…</em> on the page <a href="res_inverse.html">Parameter estimation results</a>, in the layout of HYDRUS-1D 4.17.</p>
+<h2 id="literature">Literature cited in this topic</h2>
+<ul>
+<li>Šimůnek, J., M. Šejna, H. Saito, M. Sakai, and M. Th. van Genuchten (2009). <em>The HYDRUS-1D Software Package for Simulating the One-Dimensional Movement of Water, Heat, and Multiple Solutes in Variably-Saturated Media, Version 4.08.</em> HYDRUS Software Series 3, Department of Environmental Sciences, University of California Riverside, Riverside, CA, USA, 330 pp. <a href="https://www.pc-progress.com/en/Default.aspx?h1d-description" target="_blank" rel="noopener">https://www.pc-progress.com/en/Default.aspx?h1d-description</a></li>
+</ul>
+<p>All sources: <a href="references.html">References</a>.</p>
+</article>
+<div class="pager"><a class="prev" href="examples.html">← Examples</a><a class="next" href="cli.html">Command line program →</a></div>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 0.1.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>

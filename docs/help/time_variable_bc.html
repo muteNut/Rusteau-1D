@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Time-variable boundary data – Rusteau-1D Help</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li><a href="units.html">Units</a></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details open><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li class="current"><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details><summary>Solute transport</summary>
+<ul>
+<li><a href="solute_general.html">Solute transport: general</a></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Theory and equations</summary>
+<ul>
+<li><a href="th_richards.html">Variably saturated water flow</a></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<div class="crumbs">Input (pre-processing)</div>
+<h1>Time-variable boundary data</h1>
+<p>With an atmospheric or another time-variable boundary condition, the boundary values come from a table of records, the file <code>ATMOSPH.IN</code> of HYDRUS-1D (<em>Time-Variable Boundary Conditions</em> dialog). Each record holds from the end of the previous record (or the initial time) to its time t.</p>
+<figure><a href="img/time_variable_bc.png"><img src="img/time_variable_bc.png" alt="The page Time-variable boundary data with the record table and a plot of the rates." loading="lazy"></a><figcaption>The page Time-variable boundary data with the record table and a plot of the rates.</figcaption></figure>
+<h2 id="columns">Columns</h2>
+<div class="table"><table>
+<thead><tr><th>Column</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>t</td><td>end time of the record [T]</td></tr>
+<tr><td>Prec</td><td>precipitation (and irrigation) [L/T]</td></tr>
+<tr><td>Evap</td><td>potential evaporation [L/T] (with LAI partitioning: potential evapotranspiration; with a variable head/flux top: the code KodTop)</td></tr>
+<tr><td>Transp</td><td>potential transpiration [L/T] (with LAI partitioning: the leaf area index)</td></tr>
+<tr><td>hCritA</td><td>absolute value of the minimum pressure head at the surface [L]: below it the surface turns into a head condition and the evaporation is reduced (e.g. 10⁴–10⁵ cm)</td></tr>
+<tr><td>rBot, hBot, hTop</td><td>bottom flux, bottom head, top head [L/T, L] for variable flux or head conditions</td></tr>
+<tr><td>Ttop, Tbot, Ampl</td><td>temperatures at the top and the bottom and the amplitude of the daily surface temperature (heat transport) [°C]</td></tr>
+<tr><td>cTop k, cBot k</td><td>concentrations of solute k at the top and the bottom [M/L³] (with active uptake: cBot of the actively taken-up solute is the potential uptake rate)</td></tr>
+<tr><td>xRoot</td><td>rooting depth (root growth from the atmospheric data) [L]</td></tr>
+</tbody></table></div>
+<p><em>➕ Add record</em> adds a copy of the last record one time unit later; <em>Import from text file…</em> reads records from a text or CSV file with at least 8 columns in the order of the table. The plot below the table shows precipitation, potential evaporation and transpiration as step functions.</p>
+<h2 id="options">Options</h2>
+<div class="table"><table>
+<thead><tr><th>Option</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>Daily sinusoidal variation of evaporation/transpiration</td><td>Distributes daily rates over the day: 24 % of the mean rate at night and a sine wave during the day <a href="references.html#fayer2000" class="cite" title="Fayer, M. J. (2000). UNSAT-H Version 3.0: Unsaturated Soil Water and Heat Flow Model. Theory, User Manual, and Examples. Report PNNL-13249, Pacific Northwest National Laboratory, Richland, WA.">Fayer (2000)</a> (<a href="th_atmosphere.html#daily">theory</a>).</td></tr>
+<tr><td>Sinusoidal precipitation within each interval</td><td>The precipitation of each record follows a sine wave over its interval.</td></tr>
+<tr><td>Snow accumulation and melt</td><td>Snow below −2 °C, rain above +2 °C, mixed in between; melt with the degree-day factor [L/T/°C] (Ttop is the air temperature) (<a href="th_atmosphere.html#snow">snow</a>).</td></tr>
+<tr><td>Canopy interception</td><td>Interception capacity a · LAI with the interception constant a [L] <a href="references.html#vonHoyningenHune1983" class="cite" title="von Hoyningen-Hüne, J. (1983). Die Interception des Niederschlags in landwirtschaftlichen Beständen. Schriftenreihe des DVWK 57: 1–53.">von Hoyningen-Hüne (1983)</a>; <a href="references.html#braden1985" class="cite" title="Braden, H. (1985). Ein Energiehaushalts- und Verdunstungsmodell für Wasser- und Stoffhaushaltsuntersuchungen landwirtschaftlich genutzter Einzugsgebiete. Mitteilungen der Deutschen Bodenkundlichen Gesellschaft 42: 294–299.">Braden (1985)</a>.</td></tr>
+<tr><td>Partition the potential ET by LAI</td><td>The Evap column holds ETp and the Transp column the LAI; Tp = ETp (1 − e<sup>−k·LAI</sup>) <a href="references.html#ritchie1972" class="cite" title="Ritchie, J. T. (1972). Model for predicting evaporation from a row crop with incomplete cover. Water Resources Research 8(5): 1204–1213.">Ritchie (1972)</a> with the extinction coefficient k (0.463).</td></tr>
+<tr><td>Repeat the atmospheric records cyclically</td><td>After the last record the table starts again (lBCCycles).</td></tr>
+</tbody></table></div>
+<p>See also: <a href="th_bc_water.html#atmospheric">atmospheric boundary condition</a> · <a href="th_atmosphere.html">atmospheric inputs</a> · <a href="meteo_page.html">meteorological data</a></p>
+<h2 id="literature">Literature cited in this topic</h2>
+<ul>
+<li>Braden, H. (1985). Ein Energiehaushalts- und Verdunstungsmodell für Wasser- und Stoffhaushaltsuntersuchungen landwirtschaftlich genutzter Einzugsgebiete. <em>Mitteilungen der Deutschen Bodenkundlichen Gesellschaft</em> 42: 294–299.</li>
+<li>Fayer, M. J. (2000). <em>UNSAT-H Version 3.0: Unsaturated Soil Water and Heat Flow Model. Theory, User Manual, and Examples.</em> Report PNNL-13249, Pacific Northwest National Laboratory, Richland, WA.</li>
+<li>Ritchie, J. T. (1972). Model for predicting evaporation from a row crop with incomplete cover. <em>Water Resources Research</em> 8(5): 1204–1213. doi:<a href="https://doi.org/10.1029/WR008i005p01204" target="_blank" rel="noopener">10.1029/WR008i005p01204</a></li>
+<li>von Hoyningen-Hüne, J. (1983). Die Interception des Niederschlags in landwirtschaftlichen Beständen. <em>Schriftenreihe des DVWK</em> 57: 1–53.</li>
+</ul>
+<p>All sources: <a href="references.html">References</a>.</p>
+</article>
+<div class="pager"><a class="prev" href="water_bc.html">← Water flow boundary conditions</a><a class="next" href="meteo_page.html">Meteorological data →</a></div>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 0.1.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>

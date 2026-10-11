@@ -9,6 +9,7 @@ mod post;
 mod pre;
 mod profile;
 mod rosetta_ui;
+mod shots;
 mod tips;
 mod util;
 
@@ -231,6 +232,8 @@ pub struct App {
     pub ros: Option<rosetta_ui::RosettaDlg>,
     /// Help window
     pub help: help::HelpState,
+    /// Screenshot tour for the help (`RUSTEAU_SCREENSHOTS`)
+    tour: Option<shots::Tour>,
 }
 
 #[derive(Clone, Debug)]
@@ -291,6 +294,7 @@ impl App {
             legacy_on_save: false,
             ros: None,
             help: help::HelpState::default(),
+            tour: shots::Tour::from_env(),
         };
         if let Some(arg) = std::env::args().nth(1) {
             app.open_path(&PathBuf::from(&arg));
@@ -754,11 +758,11 @@ impl App {
                         self.open_help_in_browser(ctx, help::topic_of(self.page));
                         ui.close_menu();
                     }
-                    if ui.button("Export the HTML help…").on_hover_text("Writes the help as HTML pages into a folder of your choice").clicked() {
+                    if ui.button("Export the HTML help…").on_hover_text("Writes the help as HTML pages into the folder \"Rusteau-1D help\" of a folder of your choice").clicked() {
                         self.dialog = Some(FileDialog::new(
                             Purpose::ExportHelp,
                             Mode::PickDir,
-                            "Choose a folder for the HTML help",
+                            "Choose a folder for the HTML help (a folder \"Rusteau-1D help\" is created in it)",
                             self.last_dir.clone(),
                             "",
                             &[],
@@ -984,6 +988,7 @@ impl App {
                             }
                         }
                         Purpose::ExportHelp => {
+                            let path = path.join("Rusteau-1D help");
                             self.status = match help::html::export(&path) {
                                 Ok(start) => format!("HTML help written to {} (start page {})", path.display(), start.display()),
                                 Err(e) => format!("Could not write the HTML help: {e}"),
@@ -1163,11 +1168,16 @@ impl App {
 
 impl eframe::App for App {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        if let Some(mut tour) = self.tour.take() {
+            if tour.frame(self, ctx) {
+                self.tour = Some(tour);
+            }
+        }
         if self.first_frame {
             self.first_frame = false;
             // 80 % of the monitor (the viewport itself is not the monitor); without monitor information the default
-            // size of the native options stays
-            if let Some(m) = ctx.input(|i| i.viewport().monitor_size) {
+            // size of the native options stays; the screenshots of the tour keep the default size
+            if let Some(m) = ctx.input(|i| i.viewport().monitor_size).filter(|_| self.tour.is_none()) {
                 if m.x > 0.0 && m.y > 0.0 {
                     let target_w = (m.x * 0.80).clamp(960.0_f32.min(m.x), 1920.0);
                     let target_h = (m.y * 0.82).clamp(620.0_f32.min(m.y), 1200.0);

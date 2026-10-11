@@ -22,7 +22,7 @@ See [numerical solution](th_numerics#solute) and [discretization](th_discretizat
 
 | Input | Description |
 |---|---|
-| Tortuosity factor | molecular diffusion reduced by the tortuosity of the liquid and gas phases, after Millington and Quirk [@millingtonQuirk1961] or Moldrup and Olesen [@moldrup1997; @moldrup2000] |
+| Tortuosity factor | molecular diffusion reduced by the tortuosity of the liquid and gas phases, after [@millingtonQuirk1961] or Moldrup and Olesen [@moldrup1997; @moldrup2000] |
 | Non-equilibrium phase initially in equilibrium | the initial kinetically sorbed or immobile concentrations are in equilibrium with the liquid |
 | Initial conditions as total solute mass | the initial concentrations of the profile are total masses per volume of soil |
 | Reported concentration | resident (volume-averaged) or flux-averaged concentrations |
@@ -30,7 +30,7 @@ See [numerical solution](th_numerics#solute) and [discretization](th_discretizat
 | Decay products … to the non-equilibrium phase | the daughter products of the kinetically sorbed mass enter the kinetic sites of the next solute (lNEquil) |
 | Colloid / virus / bacteria transport | two kinetic attachment–detachment sites with blocking and straining [@schijvenSimunek2002; @bradford2003] ([colloids](th_colloids)); optionally with attachment from filtration theory |
 | Temperature dependence | Arrhenius dependence of the transport and reaction parameters [@stummMorgan1981] |
-| Water content dependent reaction rates | after Walker [@walker1974] or trapezoidal functions per reaction ([theory](th_reaction_dependence)) |
+| Water content dependent reaction rates | after [@walker1974] or trapezoidal functions per reaction ([theory](th_reaction_dependence)) |
 
 ## Solutes
 

@@ -24,10 +24,10 @@ The USDA texture class of the entered fractions is shown below the inputs.
 | Version | Description |
 |---|---|
 | Rosetta 3 (default) | One network for the retention parameters and Ks, recalibrated with weights from the uncertainty of the fitted retention curves and 1000 bootstrap members [@zhangSchaap2017]. |
-| Rosetta 2 | Rosetta 1 with the retention parameters corrected after Schaap et al. [@schaap2004]. |
+| Rosetta 2 | Rosetta 1 with the retention parameters corrected after [@schaap2004]. |
 | Rosetta 1 | The models of Rosetta Lite in HYDRUS-1D [@schaap2001]. |
 
-All are ensembles of neural networks trained on bootstrap samples; the prediction is the ensemble mean, shown with its standard deviation. *Geometric means* uses 10 to the mean of the logarithms of α, n and Ks instead of the arithmetic means. The network weights are those of the Python package rosetta-soil [@rosettaSoil]; the unit tests reproduce its predictions.
+All are ensembles of neural networks trained on bootstrap samples; the prediction is the ensemble mean, shown with its standard deviation. *Geometric means* uses 10 to the mean of the logarithms of α, n and Ks instead of the arithmetic means. The network weights are those of the Python package [@rosettaSoil]; the unit tests reproduce its predictions.
 
 ## Result
 

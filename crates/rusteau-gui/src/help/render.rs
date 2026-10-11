@@ -62,12 +62,17 @@ impl Renderer<'_> {
                 color,
                 italics: s.italic,
                 background: if s.code { v.faint_bg_color } else { Color32::TRANSPARENT },
+                // all text of a row shares the row height 1.42 size, aligned at the top of its line box (baseline about
+                // 0.93 size below the top). A superscript keeps the top alignment, which raises its baseline; a subscript
+                // gets a shorter line box aligned at the bottom, which lowers its baseline by about 0.2 size.
                 valign: match s.script {
                     Script::Sup => Align::TOP,
-                    Script::Sub => Align::BOTTOM,
-                    Script::Normal => Align::BOTTOM,
+                    Script::Sub | Script::Normal => Align::BOTTOM,
                 },
-                line_height: Some(size * 1.42),
+                line_height: Some(match s.script {
+                    Script::Sub => size * 0.98,
+                    _ => size * 1.42,
+                }),
                 ..Default::default()
             };
             job.append(&s.text, 0.0, format);

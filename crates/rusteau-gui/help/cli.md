@@ -29,4 +29,4 @@ The interface program writes the help as HTML pages and exits:
 rusteau --export-help DIR
 ```
 
-Open `DIR/index.html` in a web browser. *Help → Export the HTML help…* in the interface does the same.
+Open `DIR/index.html` in a web browser. *Help → Export the HTML help…* in the interface writes the same pages into the folder *Rusteau-1D help* of the chosen folder.

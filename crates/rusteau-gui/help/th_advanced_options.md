@@ -5,7 +5,7 @@ These options of the HYDRUS code are not offered by the HYDRUS-1D interface ([fu
 
 ## Non-equilibrium water flow {#nonequilibrium}
 
-Following Ross and Smettem [@rossSmettem2000], the water content does not follow the equilibrium retention curve θ_{eq}(h) instantly but approaches it with the time constant τ_{w}:
+Following [@rossSmettem2000], the water content does not follow the equilibrium retention curve θ_{eq}(h) instantly but approaches it with the time constant τ_{w}:
 
 $$ ∂θ/∂t = (θ_{eq}(h) − θ) / τ_{w} $$
 

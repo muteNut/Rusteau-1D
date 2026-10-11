@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Penman–Monteith combination equation – Rusteau-1D Help</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li><a href="units.html">Units</a></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details><summary>Solute transport</summary>
+<ul>
+<li><a href="solute_general.html">Solute transport: general</a></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+</ul>
+</details></li>
+<li class="book"><details open><summary>Theory and equations</summary>
+<ul>
+<li><a href="th_richards.html">Variably saturated water flow</a></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li class="current"><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<div class="crumbs">Theory and equations</div>
+<h1>Penman–Monteith combination equation</h1>
+<p>With meteorological data, the potential evapotranspiration is calculated with the Penman–Monteith combination equation <a href="references.html#monteith1981" class="cite" title="Monteith, J. L. (1981). Evaporation and surface temperature. Quarterly Journal of the Royal Meteorological Society 107(451): 1–27.">Monteith (1981)</a>; <a href="references.html#monteithUnsworth1990" class="cite" title="Monteith, J. L., and M. H. Unsworth (1990). Principles of Environmental Physics. 2nd ed., Edward Arnold, London, 291 pp.">Monteith and Unsworth (1990)</a> in the form of FAO Irrigation and Drainage Paper 56 <a href="references.html#allen1998" class="cite" title="Allen, R. G., L. S. Pereira, D. Raes, and M. Smith (1998). Crop Evapotranspiration – Guidelines for Computing Crop Water Requirements. FAO Irrigation and Drainage Paper 56, Food and Agriculture Organization of the United Nations, Rome, 300 pp.">Allen et al. (1998)</a>:</p>
+<div class="formula">
+<div>ET<sub>p</sub> = (1/λ) [ Δ (R<sub>n</sub> − G) + ρ<sub>a</sub> c<sub>p</sub> (e<sub>s</sub> − e<sub>a</sub>) / r<sub>a</sub> ] / [ Δ + γ (1 + r<sub>c</sub>/r<sub>a</sub>) ]</div>
+</div>
+<div class="table"><table>
+<thead><tr><th>Symbol</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td>ET<sub>p</sub></td><td>potential evapotranspiration [mm/d], converted to the project's units</td></tr>
+<tr><td>λ</td><td>latent heat of vaporization, λ = 2.501 − 0.002361 T [MJ/kg]</td></tr>
+<tr><td>Δ</td><td>slope of the saturation vapor pressure curve [kPa/°C]</td></tr>
+<tr><td>R<sub>n</sub></td><td>net radiation at the surface [MJ/m²/d]</td></tr>
+<tr><td>G</td><td>soil heat flux [MJ/m²/d], neglected for daily values</td></tr>
+<tr><td>ρ<sub>a</sub> c<sub>p</sub></td><td>volumetric heat capacity of the air</td></tr>
+<tr><td>e<sub>s</sub> − e<sub>a</sub></td><td>vapor pressure deficit [kPa]</td></tr>
+<tr><td>r<sub>a</sub>, r<sub>c</sub></td><td>aerodynamic and canopy resistance [s/m]</td></tr>
+<tr><td>γ</td><td>psychrometric constant [kPa/°C], γ = 0.0016286 P/λ, with the atmospheric pressure P = 101.3 [(293 − 0.0065 z)/293]<sup>5.253</sup> at the altitude z [m]</td></tr>
+</tbody></table></div>
+<h2 id="vapor-pressure">Vapor pressure</h2>
+<p>The saturation vapor pressure is the mean of e°(T<sub>max</sub>) and e°(T<sub>min</sub>), with e°(T) = 0.6108 exp[17.27 T/(T + 237.3)], and Δ the mean of the slopes 4098 e°(T)/(T + 237.3)² at T<sub>max</sub> and T<sub>min</sub>. The actual vapor pressure e<sub>a</sub> follows from the relative humidity or is given directly <a href="references.html#allen1998" class="cite" title="Allen, R. G., L. S. Pereira, D. Raes, and M. Smith (1998). Crop Evapotranspiration – Guidelines for Computing Crop Water Requirements. FAO Irrigation and Drainage Paper 56, Food and Agriculture Organization of the United Nations, Rome, 300 pp.">Allen et al. (1998)</a>.</p>
+<h2 id="aerodynamic-and-canopy-resistance">Aerodynamic and canopy resistance</h2>
+<div class="formula">
+<div>r<sub>a</sub> = ln[(z<sub>m</sub> − d)/z<sub>om</sub>] ln[(z<sub>h</sub> − d)/z<sub>oh</sub>] / (k² u<sub>z</sub>)</div>
+<div>r<sub>c</sub> = r<sub>l</sub> / LAI<sub>active</sub> = 200 / LAI</div>
+</div>
+<p>with the measurement heights of wind z<sub>m</sub> and humidity z<sub>h</sub>, the zero-plane displacement d = 0.667 h<sub>c</sub>, the roughness lengths z<sub>om</sub> = 0.123 h<sub>c</sub> and z<sub>oh</sub> = 0.1 z<sub>om</sub> of a crop of height h<sub>c</sub>, the von Kármán constant k = 0.41 and the wind speed u<sub>z</sub>; r<sub>l</sub> = 100 s/m and LAI<sub>active</sub> = 0.5 LAI <a href="references.html#allen1998" class="cite" title="Allen, R. G., L. S. Pereira, D. Raes, and M. Smith (1998). Crop Evapotranspiration – Guidelines for Computing Crop Water Requirements. FAO Irrigation and Drainage Paper 56, Food and Agriculture Organization of the United Nations, Rome, 300 pp.">Allen et al. (1998)</a>. The LAI comes from the crop data or from the crop height (clipped grass: 0.24 h<sub>c</sub> with h<sub>c</sub> in cm; alfalfa: 5.5 + 1.5 ln h<sub>c</sub>).</p>
+<h2 id="radiation">Radiation</h2>
+<p>The net radiation is the difference of the net short-wave and the net long-wave radiation:</p>
+<div class="formula">
+<div>R<sub>n</sub> = (1 − a) R<sub>s</sub> − R<sub>nl</sub></div>
+<div>R<sub>s</sub> = (a<sub>s</sub> + b<sub>s</sub> n/N) R<sub>a</sub></div>
+<div>R<sub>nl</sub> = σ [(T<sub>max,K</sub><sup>4</sup> + T<sub>min,K</sub><sup>4</sup>)/2] (a<sub>l</sub> + b<sub>l</sub> √e<sub>a</sub>) f</div>
+</div>
+<p>a is the albedo, R<sub>s</sub> the solar radiation (measured, or from the relative sunshine duration n/N after <a href="references.html#angstrom1924" class="cite" title="Ångström, A. (1924). Solar and terrestrial radiation. Quarterly Journal of the Royal Meteorological Society 50(210): 121–126.">Ångström (1924)</a>; a<sub>s</sub> = 0.25, b<sub>s</sub> = 0.5), R<sub>a</sub> the extraterrestrial radiation from the latitude and the day of the year, N the day length, σ the Stefan–Boltzmann constant, a<sub>l</sub> + b<sub>l</sub> √e<sub>a</sub> the net emissivity (0.34, −0.14 <a href="references.html#allen1998" class="cite" title="Allen, R. G., L. S. Pereira, D. Raes, and M. Smith (1998). Crop Evapotranspiration – Guidelines for Computing Crop Water Requirements. FAO Irrigation and Drainage Paper 56, Food and Agriculture Organization of the United Nations, Rome, 300 pp.">Allen et al. (1998)</a>) and f the cloudiness factor: f = a<sub>1</sub> n/N + b<sub>1</sub> from the sunshine duration (0.9, 0.1 <a href="references.html#doorenbosPruitt1977" class="cite" title="Doorenbos, J., and W. O. Pruitt (1977). Guidelines for Predicting Crop Water Requirements. FAO Irrigation and Drainage Paper 24, Food and Agriculture Organization of the United Nations, Rome, 144 pp.">Doorenbos and Pruitt (1977)</a>), or f = a<sub>c</sub> R<sub>s</sub>/R<sub>so</sub> + b<sub>c</sub> from the ratio of the measured to the clear-sky radiation (1.35, −0.35 <a href="references.html#allen1998" class="cite" title="Allen, R. G., L. S. Pereira, D. Raes, and M. Smith (1998). Crop Evapotranspiration – Guidelines for Computing Crop Water Requirements. FAO Irrigation and Drainage Paper 56, Food and Agriculture Organization of the United Nations, Rome, 300 pp.">Allen et al. (1998)</a>).</p>
+<h2 id="partitioning">Partitioning</h2>
+<p>ET<sub>p</sub> is divided into potential transpiration and evaporation with the soil cover fraction SCF = 1 − exp(−k LAI) (<a href="th_atmosphere.html#lai">partitioning</a>) <a href="references.html#ritchie1972" class="cite" title="Ritchie, J. T. (1972). Model for predicting evaporation from a row crop with incomplete cover. Water Resources Research 8(5): 1204–1213.">Ritchie (1972)</a>; the canopy interception is subtracted from the transpiration (<a href="th_atmosphere.html#interception">interception</a>).</p>
+<p>See also: <a href="th_hargreaves.html">Hargreaves equation</a> · <a href="th_energy_balance.html">surface energy balance</a> · <a href="meteo_page.html">page Meteorological data</a></p>
+<h2 id="literature">Literature cited in this topic</h2>
+<ul>
+<li>Allen, R. G., L. S. Pereira, D. Raes, and M. Smith (1998). <em>Crop Evapotranspiration – Guidelines for Computing Crop Water Requirements.</em> FAO Irrigation and Drainage Paper 56, Food and Agriculture Organization of the United Nations, Rome, 300 pp. <a href="https://www.fao.org/4/x0490e/x0490e00.htm" target="_blank" rel="noopener">https://www.fao.org/4/x0490e/x0490e00.htm</a></li>
+<li>Doorenbos, J., and W. O. Pruitt (1977). <em>Guidelines for Predicting Crop Water Requirements.</em> FAO Irrigation and Drainage Paper 24, Food and Agriculture Organization of the United Nations, Rome, 144 pp.</li>
+<li>Monteith, J. L. (1981). Evaporation and surface temperature. <em>Quarterly Journal of the Royal Meteorological Society</em> 107(451): 1–27. doi:<a href="https://doi.org/10.1002/qj.49710745102" target="_blank" rel="noopener">10.1002/qj.49710745102</a></li>
+<li>Monteith, J. L., and M. H. Unsworth (1990). <em>Principles of Environmental Physics.</em> 2nd ed., Edward Arnold, London, 291 pp.</li>
+<li>Ritchie, J. T. (1972). Model for predicting evaporation from a row crop with incomplete cover. <em>Water Resources Research</em> 8(5): 1204–1213. doi:<a href="https://doi.org/10.1029/WR008i005p01204" target="_blank" rel="noopener">10.1029/WR008i005p01204</a></li>
+<li>Ångström, A. (1924). Solar and terrestrial radiation. <em>Quarterly Journal of the Royal Meteorological Society</em> 50(210): 121–126. doi:<a href="https://doi.org/10.1002/qj.49705021008" target="_blank" rel="noopener">10.1002/qj.49705021008</a></li>
+</ul>
+<p>All sources: <a href="references.html">References</a>.</p>
+</article>
+<div class="pager"><a class="prev" href="th_atmosphere.html">← Atmospheric inputs: partitioning, daily variation, interception, snow</a><a class="next" href="th_hargreaves.html">Hargreaves equation →</a></div>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 0.1.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>

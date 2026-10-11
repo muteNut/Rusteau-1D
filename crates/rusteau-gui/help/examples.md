@@ -5,7 +5,7 @@ keywords: examples; example projects; demonstration; tutorial projects
 
 ## Infiltration & evaporation with roots
 
-A 100 cm profile (101 nodes) of loam (0–50 cm) over sand, with the van Genuchten parameters of Carsel and Parrish [@carselParrish1988]. Atmospheric boundary condition with runoff at the surface, free drainage at the bottom, six records of rain (3 cm/d in the first 2 days, 8 cm/d between days 8 and 12), potential evaporation and transpiration over 30 days. Roots in the upper 30 cm with the Feddes stress function [@feddes1978]. Observation nodes at 20, 50 and 100 cm. This project is loaded at start ([getting started](getting_started)).
+A 100 cm profile (101 nodes) of loam (0–50 cm) over sand, with the van Genuchten parameters of [@carselParrish1988]. Atmospheric boundary condition with runoff at the surface, free drainage at the bottom, six records of rain (3 cm/d in the first 2 days, 8 cm/d between days 8 and 12), potential evaporation and transpiration over 30 days. Roots in the upper 30 cm with the Feddes stress function [@feddes1978]. Observation nodes at 20, 50 and 100 cm. This project is loaded at start ([getting started](getting_started)).
 
 ## Solute pulse with sorption and decay
 

@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neural network prediction (Rosetta) – Rusteau-1D Help</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li><a href="units.html">Units</a></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details open><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li class="current"><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details><summary>Solute transport</summary>
+<ul>
+<li><a href="solute_general.html">Solute transport: general</a></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Theory and equations</summary>
+<ul>
+<li><a href="th_richards.html">Variably saturated water flow</a></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<div class="crumbs">Input (pre-processing)</div>
+<h1>Neural network prediction (Rosetta)</h1>
+<p>The dialog predicts the van Genuchten parameters θr, θs, α, n and Ks from soil data with the Rosetta pedotransfer functions <a href="references.html#schaap2001" class="cite" title="Schaap, M. G., F. J. Leij, and M. Th. van Genuchten (2001). Rosetta: a computer program for estimating soil hydraulic parameters with hierarchical pedotransfer functions. Journal of Hydrology 251(3–4): 163–176.">Schaap et al. (2001)</a>; <a href="references.html#zhangSchaap2017" class="cite" title="Zhang, Y., and M. G. Schaap (2017). Weighted recalibration of the Rosetta pedotransfer model with improved estimates of hydraulic parameter distributions and summary statistics (Rosetta3). Journal of Hydrology 547: 39–53.">Zhang and Schaap (2017)</a>, as the Rosetta Lite dialog of HYDRUS-1D. It opens from <em>Neural network prediction (Rosetta)…</em> on the page <a href="soil_params.html">Materials &amp; parameters</a> and from <em>Rosetta…</em> next to the soil catalog of the <a href="inverse_page.html">parameter estimation</a> (initial estimates).</p>
+<figure><a href="img/rosetta.png"><img src="img/rosetta.png" alt="The Rosetta dialog with the input data on the left and the prediction with the standard deviations on the right." loading="lazy"></a><figcaption>The Rosetta dialog with the input data on the left and the prediction with the standard deviations on the right.</figcaption></figure>
+<h2 id="input-data">Input data</h2>
+<p>Rosetta is hierarchical: the more data, the better the prediction.</p>
+<div class="table"><table>
+<thead><tr><th>Model</th><th>Input</th></tr></thead>
+<tbody>
+<tr><td>H1 Textural class</td><td>the USDA textural class; gives the average parameters of the class in the Rosetta database</td></tr>
+<tr><td>H2 SSC</td><td>sand, silt and clay [%] (sum 99–101 %)</td></tr>
+<tr><td>H3 SSC + BD</td><td>and the bulk density [g/cm³] (0.5–2)</td></tr>
+<tr><td>H4 SSC + BD + θ33</td><td>and the water content at 33 kPa (field capacity)</td></tr>
+<tr><td>H5 SSC + BD + θ33 + θ1500</td><td>and the water content at 1500 kPa (wilting point)</td></tr>
+</tbody></table></div>
+<p>The USDA texture class of the entered fractions is shown below the inputs.</p>
+<h2 id="models">Models</h2>
+<div class="table"><table>
+<thead><tr><th>Version</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>Rosetta 3 (default)</td><td>One network for the retention parameters and Ks, recalibrated with weights from the uncertainty of the fitted retention curves and 1000 bootstrap members <a href="references.html#zhangSchaap2017" class="cite" title="Zhang, Y., and M. G. Schaap (2017). Weighted recalibration of the Rosetta pedotransfer model with improved estimates of hydraulic parameter distributions and summary statistics (Rosetta3). Journal of Hydrology 547: 39–53.">Zhang and Schaap (2017)</a>.</td></tr>
+<tr><td>Rosetta 2</td><td>Rosetta 1 with the retention parameters corrected after <a href="references.html#schaap2004" class="cite" title="Schaap, M. G., A. Nemes, and M. Th. van Genuchten (2004). Comparison of models for indirect estimation of water retention and available water in surface soils. Vadose Zone Journal 3(4): 1455–1463.">Schaap et al. (2004)</a>.</td></tr>
+<tr><td>Rosetta 1</td><td>The models of Rosetta Lite in HYDRUS-1D <a href="references.html#schaap2001" class="cite" title="Schaap, M. G., F. J. Leij, and M. Th. van Genuchten (2001). Rosetta: a computer program for estimating soil hydraulic parameters with hierarchical pedotransfer functions. Journal of Hydrology 251(3–4): 163–176.">Schaap et al. (2001)</a>.</td></tr>
+</tbody></table></div>
+<p>All are ensembles of neural networks trained on bootstrap samples; the prediction is the ensemble mean, shown with its standard deviation. <em>Geometric means</em> uses 10 to the mean of the logarithms of α, n and Ks instead of the arithmetic means. The network weights are those of the Python package <a href="references.html#rosettaSoil" class="cite" title="USDA-ARS U.S. Salinity Laboratory. rosetta-soil, version 0.3.2: Python implementation of the Rosetta pedotransfer functions (CC0 1.0).">rosetta-soil</a>; the unit tests reproduce its predictions.</p>
+<h2 id="result">Result</h2>
+<p>The prediction is given in cm and days, with K0 and L of the conductivity function with a matching point <a href="references.html#schaapLeij2000" class="cite" title="Schaap, M. G., and F. J. Leij (2000). Improved prediction of unsaturated hydraulic conductivity with the Mualem–van Genuchten model. Soil Science Society of America Journal 64(3): 843–851.">Schaap and Leij (2000)</a> for information. <em>Accept</em> writes θr, θs, α, n and Ks, converted to the project's units, into the material (or the initial estimates); l stays.</p>
+<div class="note">Pedotransfer functions give approximate parameters for a soil like the soils of their database (mostly temperate agricultural soils). Measured retention data or a <a href="th_inverse.html">parameter estimation</a> are better when available.</div>
+<p>See also: <a href="th_rosetta.html">pedotransfer functions</a>.</p>
+<h2 id="literature">Literature cited in this topic</h2>
+<ul>
+<li>Schaap, M. G., A. Nemes, and M. Th. van Genuchten (2004). Comparison of models for indirect estimation of water retention and available water in surface soils. <em>Vadose Zone Journal</em> 3(4): 1455–1463. doi:<a href="https://doi.org/10.2136/vzj2004.1455" target="_blank" rel="noopener">10.2136/vzj2004.1455</a></li>
+<li>Schaap, M. G., and F. J. Leij (2000). Improved prediction of unsaturated hydraulic conductivity with the Mualem–van Genuchten model. <em>Soil Science Society of America Journal</em> 64(3): 843–851. doi:<a href="https://doi.org/10.2136/sssaj2000.643843x" target="_blank" rel="noopener">10.2136/sssaj2000.643843x</a></li>
+<li>Schaap, M. G., F. J. Leij, and M. Th. van Genuchten (2001). Rosetta: a computer program for estimating soil hydraulic parameters with hierarchical pedotransfer functions. <em>Journal of Hydrology</em> 251(3–4): 163–176. doi:<a href="https://doi.org/10.1016/S0022-1694(01)00466-8" target="_blank" rel="noopener">10.1016/S0022-1694(01)00466-8</a></li>
+<li>USDA-ARS U.S. Salinity Laboratory. <em>rosetta-soil</em>, version 0.3.2: Python implementation of the Rosetta pedotransfer functions (CC0 1.0). <a href="https://github.com/usda-ars-ussl/rosetta-soil" target="_blank" rel="noopener">https://github.com/usda-ars-ussl/rosetta-soil</a></li>
+<li>Zhang, Y., and M. G. Schaap (2017). Weighted recalibration of the Rosetta pedotransfer model with improved estimates of hydraulic parameter distributions and summary statistics (Rosetta3). <em>Journal of Hydrology</em> 547: 39–53. doi:<a href="https://doi.org/10.1016/j.jhydrol.2017.01.004" target="_blank" rel="noopener">10.1016/j.jhydrol.2017.01.004</a></li>
+</ul>
+<p>All sources: <a href="references.html">References</a>.</p>
+</article>
+<div class="pager"><a class="prev" href="soil_params.html">← Materials &amp; parameters</a><a class="next" href="profile_editor.html">Soil profile →</a></div>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 0.1.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>

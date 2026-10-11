@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solute transport: general – Rusteau-1D Help</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li><a href="units.html">Units</a></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details open><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details open><summary>Solute transport</summary>
+<ul>
+<li class="current"><a href="solute_general.html">Solute transport: general</a></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Theory and equations</summary>
+<ul>
+<li><a href="th_richards.html">Variably saturated water flow</a></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<div class="crumbs">Input (pre-processing) › Solute transport</div>
+<h1>Solute transport: general</h1>
+<p>The page corresponds to the <em>General Solute Transport Information</em> dialog of HYDRUS-1D: the numerical scheme, the transport model and the names of the solutes. The equations are in <a href="th_solute.html">solute transport</a>.</p>
+<figure><a href="img/solute_general.png"><img src="img/solute_general.png" alt="The page Solute transport: general." loading="lazy"></a><figcaption>The page Solute transport: general.</figcaption></figure>
+<h2 id="numerical-scheme">Numerical scheme</h2>
+<div class="table"><table>
+<thead><tr><th>Input</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>Time weighting ε</td><td>0 explicit, 0.5 Crank–Nicolson (default, second order), 1 fully implicit</td></tr>
+<tr><td>Max. iterations (non-linear)</td><td>iterations per time step with non-linear sorption</td></tr>
+<tr><td>Absolute / relative concentration tolerance</td><td>convergence of the iteration with non-linear sorption</td></tr>
+<tr><td>Stability criterion Pe_crit</td><td>Pe·Cr ≤ Pe_crit (default 2) <a href="references.html#perrochetBerod1993" class="cite" title="Perrochet, P., and D. Berod (1993). Stability of the standard Crank-Nicolson-Galerkin scheme applied to the diffusion-convection equation: some new insights. Water Resources Research 29(9): 3291–3297.">Perrochet and Berod (1993)</a></td></tr>
+<tr><td>Upstream weighting</td><td>upstream-weighted finite elements <a href="references.html#christie1976" class="cite" title="Christie, I., D. F. Griffiths, A. R. Mitchell, and O. C. Zienkiewicz (1976). Finite element methods for second order differential equations with significant first derivatives. International Journal for Numerical Methods in Engineering 10(6): 1389–1396.">Christie et al. (1976)</a> instead of Galerkin; damps oscillations at sharp fronts</td></tr>
+<tr><td>Add artificial dispersion</td><td>with Galerkin elements, artificial dispersion is added where the stability criterion is not met</td></tr>
+</tbody></table></div>
+<p>See <a href="th_numerics.html#solute">numerical solution</a> and <a href="th_discretization.html">discretization</a>.</p>
+<h2 id="transport-model">Transport model</h2>
+<div class="table"><table>
+<thead><tr><th>Input</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>Tortuosity factor</td><td>molecular diffusion reduced by the tortuosity of the liquid and gas phases, after <a href="references.html#millingtonQuirk1961" class="cite" title="Millington, R. J., and J. P. Quirk (1961). Permeability of porous solids. Transactions of the Faraday Society 57: 1200–1207.">Millington and Quirk (1961)</a> or Moldrup and Olesen <a href="references.html#moldrup1997" class="cite" title="Moldrup, P., T. Olesen, D. E. Rolston, and T. Yamaguchi (1997). Modeling diffusion and reaction in soils: VII. Predicting gas and ion diffusivity in undisturbed and sieved soils. Soil Science 162(9): 632–640.">Moldrup et al. (1997)</a>; <a href="references.html#moldrup2000" class="cite" title="Moldrup, P., T. Olesen, J. Gamst, P. Schjønning, T. Yamaguchi, and D. E. Rolston (2000). Predicting the gas diffusion coefficient in repacked soil: water-induced linear reduction model. Soil Science Society of America Journal 64(5): 1588–1594.">Moldrup et al. (2000)</a></td></tr>
+<tr><td>Non-equilibrium phase initially in equilibrium</td><td>the initial kinetically sorbed or immobile concentrations are in equilibrium with the liquid</td></tr>
+<tr><td>Initial conditions as total solute mass</td><td>the initial concentrations of the profile are total masses per volume of soil</td></tr>
+<tr><td>Reported concentration</td><td>resident (volume-averaged) or flux-averaged concentrations</td></tr>
+<tr><td>Dual non-equilibrium</td><td>mobile–immobile water plus kinetic sorption sites in the mobile zone (needs θim &gt; 0) <a href="references.html#simunekVG2008" class="cite" title="Šimůnek, J., and M. Th. van Genuchten (2008). Modeling nonequilibrium flow and transport processes using HYDRUS. Vadose Zone Journal 7(2): 782–797.">Šimůnek and van Genuchten (2008)</a></td></tr>
+<tr><td>Decay products … to the non-equilibrium phase</td><td>the daughter products of the kinetically sorbed mass enter the kinetic sites of the next solute (lNEquil)</td></tr>
+<tr><td>Colloid / virus / bacteria transport</td><td>two kinetic attachment–detachment sites with blocking and straining <a href="references.html#schijvenSimunek2002" class="cite" title="Schijven, J. F., and J. Šimůnek (2002). Kinetic modeling of virus transport at the field scale. Journal of Contaminant Hydrology 55(1–2): 113–135.">Schijven and Šimůnek (2002)</a>; <a href="references.html#bradford2003" class="cite" title="Bradford, S. A., J. Šimůnek, M. Bettahar, M. Th. van Genuchten, and S. R. Yates (2003). Modeling colloid attachment, straining, and exclusion in saturated porous media. Environmental Science &amp; Technology 37(10): 2242–2250.">Bradford et al. (2003)</a> (<a href="th_colloids.html">colloids</a>); optionally with attachment from filtration theory</td></tr>
+<tr><td>Temperature dependence</td><td>Arrhenius dependence of the transport and reaction parameters <a href="references.html#stummMorgan1981" class="cite" title="Stumm, W., and J. J. Morgan (1981). Aquatic Chemistry. 2nd ed., John Wiley &amp; Sons, New York, 780 pp.">Stumm and Morgan (1981)</a></td></tr>
+<tr><td>Water content dependent reaction rates</td><td>after <a href="references.html#walker1974" class="cite" title="Walker, A. (1974). A simulation model for prediction of herbicide persistence. Journal of Environmental Quality 3(4): 396–401.">Walker (1974)</a> or trapezoidal functions per reaction (<a href="th_reaction_dependence.html">theory</a>)</td></tr>
+</tbody></table></div>
+<h2 id="solutes">Solutes</h2>
+<p>The names of the solutes (as many as set on <a href="processes.html">Processes &amp; units</a>). Solutes form a decay chain: solute k is produced from solute k−1 by the first-order coefficients γ on the <a href="solute_reactions.html">reaction page</a>.</p>
+<h2 id="literature">Literature cited in this topic</h2>
+<ul>
+<li>Bradford, S. A., J. Šimůnek, M. Bettahar, M. Th. van Genuchten, and S. R. Yates (2003). Modeling colloid attachment, straining, and exclusion in saturated porous media. <em>Environmental Science &amp; Technology</em> 37(10): 2242–2250. doi:<a href="https://doi.org/10.1021/es025899u" target="_blank" rel="noopener">10.1021/es025899u</a></li>
+<li>Christie, I., D. F. Griffiths, A. R. Mitchell, and O. C. Zienkiewicz (1976). Finite element methods for second order differential equations with significant first derivatives. <em>International Journal for Numerical Methods in Engineering</em> 10(6): 1389–1396. doi:<a href="https://doi.org/10.1002/nme.1620100617" target="_blank" rel="noopener">10.1002/nme.1620100617</a></li>
+<li>Millington, R. J., and J. P. Quirk (1961). Permeability of porous solids. <em>Transactions of the Faraday Society</em> 57: 1200–1207. doi:<a href="https://doi.org/10.1039/TF9615701200" target="_blank" rel="noopener">10.1039/TF9615701200</a></li>
+<li>Moldrup, P., T. Olesen, D. E. Rolston, and T. Yamaguchi (1997). Modeling diffusion and reaction in soils: VII. Predicting gas and ion diffusivity in undisturbed and sieved soils. <em>Soil Science</em> 162(9): 632–640.</li>
+<li>Moldrup, P., T. Olesen, J. Gamst, P. Schjønning, T. Yamaguchi, and D. E. Rolston (2000). Predicting the gas diffusion coefficient in repacked soil: water-induced linear reduction model. <em>Soil Science Society of America Journal</em> 64(5): 1588–1594. doi:<a href="https://doi.org/10.2136/sssaj2000.6451588x" target="_blank" rel="noopener">10.2136/sssaj2000.6451588x</a></li>
+<li>Perrochet, P., and D. Berod (1993). Stability of the standard Crank-Nicolson-Galerkin scheme applied to the diffusion-convection equation: some new insights. <em>Water Resources Research</em> 29(9): 3291–3297. doi:<a href="https://doi.org/10.1029/93WR00927" target="_blank" rel="noopener">10.1029/93WR00927</a></li>
+<li>Schijven, J. F., and J. Šimůnek (2002). Kinetic modeling of virus transport at the field scale. <em>Journal of Contaminant Hydrology</em> 55(1–2): 113–135. doi:<a href="https://doi.org/10.1016/S0169-7722(01)00188-7" target="_blank" rel="noopener">10.1016/S0169-7722(01)00188-7</a></li>
+<li>Stumm, W., and J. J. Morgan (1981). <em>Aquatic Chemistry.</em> 2nd ed., John Wiley &amp; Sons, New York, 780 pp.</li>
+<li>Walker, A. (1974). A simulation model for prediction of herbicide persistence. <em>Journal of Environmental Quality</em> 3(4): 396–401. doi:<a href="https://doi.org/10.2134/jeq1974.00472425000300040021x" target="_blank" rel="noopener">10.2134/jeq1974.00472425000300040021x</a></li>
+<li>Šimůnek, J., and M. Th. van Genuchten (2008). Modeling nonequilibrium flow and transport processes using HYDRUS. <em>Vadose Zone Journal</em> 7(2): 782–797. doi:<a href="https://doi.org/10.2136/vzj2007.0074" target="_blank" rel="noopener">10.2136/vzj2007.0074</a></li>
+</ul>
+<p>All sources: <a href="references.html">References</a>.</p>
+</article>
+<div class="pager"><a class="prev" href="heat_page.html">← Heat transport</a><a class="next" href="solute_params.html">Solute transport: transport parameters →</a></div>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 0.1.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>

@@ -21,6 +21,7 @@ pedotransfer functions (Rosetta 3 and the Rosetta 1 models of HYDRUS' Rosetta Li
 - [Building](#building)
 - [Running](#running)
 - [Interface](#interface)
+- [Help and documentation](#help-and-documentation)
 - [Unit conversion](#unit-conversion)
 - [Parameter estimation](#parameter-estimation)
 - [HYDRUS-1D project files](#hydrus-1d-project-files)
@@ -186,6 +187,35 @@ folder), edits all inputs, runs the simulation and plots the results. *File → 
   tabs, commas or semicolons (with semicolons a decimal comma is accepted); lines without two numbers are skipped. The
   observations of a `Fit.in` in an imported project folder are loaded automatically.
 - **Plots** are for inspection only; for figures use the CSV output (e.g. with ggplot2 or matplotlib).
+
+## Help and documentation
+
+The interface has a help modelled on the compiled HTML help of HYDRUS-1D:
+
+- **Tooltips:** the inputs, check boxes, options and table headings describe themselves when the mouse rests on them:
+  meaning, unit (L, T, M as in HYDRUS), typical or default values and the HYDRUS variable (about 500 descriptions).
+- **Help window** (*Help* menu, **F1**, or the **?** next to every page title, which opens the topic of the page): a
+  table of contents, a keyword index and a full-text search; back and forward. 68 topics in six books: introduction
+  (getting started, the main window, workflow, units, relation to HYDRUS-1D), projects and files (HYDRUS-1D import and
+  export, examples, output files, command line), one topic per input page and results page with a screenshot and a
+  table of its inputs, the theory with the equations of every calculation (Richards equation, hydraulic models,
+  hysteresis, dual porosity and permeability, root water and solute uptake, boundary conditions, Penman–Monteith,
+  Hargreaves, energy balance, vapor flow, heat and solute transport, non-equilibrium transport, colloids, numerics,
+  discretization, parameter estimation, Rosetta) and a reference part (symbols, keyboard and mouse, questions and
+  problems, credits).
+- **Scientific sources:** citations in the text link to the topic *References* – 101 publications, with the DOI where
+  one exists and with what Rusteau bases on each – and every topic that cites sources ends with its literature.
+- **Offline HTML help:** *Open in web browser* (help window or *Help* menu) writes the help as HTML pages and opens
+  them; *Help → Export the HTML help…* or `rusteau --export-help DIR` writes them into a folder. The pages are part of
+  the repository in [`docs/help`](docs/help/index.html) (open `docs/help/index.html`) and of the release archives.
+
+The topics are the files `crates/rusteau-gui/help/*.md` (a small Markdown dialect with sub- and superscripts, formulas
+and citations, see `crates/rusteau-gui/src/help/markup.rs`), the references are in
+`crates/rusteau-gui/src/help/refs.rs` and the tooltips in `crates/rusteau-gui/src/tips.rs`. The tests check that every
+link, anchor, citation and image of the help resolves, that every reference is cited, that every label of the input
+helpers and every tooltip key used in the interface has a description, and that `docs/help` is up to date.
+`tools/help_screenshots.sh` takes the screenshots again (with `RUSTEAU_SCREENSHOTS=<dir>` the interface shows its pages
+one after the other and saves them; without a display it runs under Xvfb) and regenerates `docs/help`.
 
 ## Unit conversion
 

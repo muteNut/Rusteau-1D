@@ -373,11 +373,11 @@ pub fn parse(src: &str) -> Doc {
             i += 1;
             continue;
         }
-        if t.starts_with("$$") {
+        if let Some(rest) = t.strip_prefix("$$") {
             flush_para(&mut para, &mut doc.blocks);
-            let rest = t[2..].trim();
-            if rest.ends_with("$$") && !rest.is_empty() {
-                doc.blocks.push(Block::Formula(vec![inline(rest[..rest.len() - 2].trim())]));
+            let rest = rest.trim();
+            if let Some(one_line) = rest.strip_suffix("$$") {
+                doc.blocks.push(Block::Formula(vec![inline(one_line.trim())]));
                 i += 1;
             } else {
                 let mut f = vec![];

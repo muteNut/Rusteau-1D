@@ -5,7 +5,7 @@ Rusteau-1D is a program for simulating the one-dimensional movement of water, he
 
 ## What the program computes
 
-- **Variably saturated water flow** with the Richards equation, including a sink term for root water uptake ([theory](th_richards)). The soil hydraulic properties can be described by the models of van Genuchten–Mualem [@vanGenuchten1980; @mualem1976], modified van Genuchten [@vogelCislerova1988], Brooks and Corey [@brooksCorey1964], Kosugi [@kosugi1996] and Durner [@durner1994], or by look-up tables ([hydraulic models](th_hydraulic_models)).
+- **Variably saturated water flow** with the Richards equation, including a sink term for root water uptake ([theory](th_richards)). The soil hydraulic properties can be described by the models of van Genuchten–Mualem [@vanGenuchten1980; @mualem1976], modified van Genuchten [@vogelCislerova1988], [@brooksCorey1964], [@kosugi1996] and [@durner1994], or by look-up tables ([hydraulic models](th_hydraulic_models)).
 - **Hysteresis** in the retention curve and the hydraulic conductivity [@koolParker1987], or without pumping [@lenhard1991] ([hysteresis](th_hysteresis)).
 - **Non-equilibrium (preferential) flow** with dual-porosity and dual-permeability models [@simunek2003; @gerkeVG1993a] ([dual porosity](th_dual_porosity), [dual permeability](th_dual_permeability)).
 - **Root water and solute uptake** with water and osmotic stress, compensation and active uptake [@feddes1978; @vanGenuchten1987; @simunekHopmans2009] ([root uptake](th_root_uptake)).

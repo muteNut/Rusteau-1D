@@ -7,7 +7,7 @@ The numerical engine of Rusteau-1D is a port of the HYDRUS-1D code by J. Šimůn
 
 ## Pedotransfer functions
 
-The Rosetta network weights come from rosetta-soil of the USDA-ARS U.S. Salinity Laboratory (CC0 1.0) [@rosettaSoil]; the models are those of Schaap et al. [@schaap2001; @schaap2004] and Zhang and Schaap [@zhangSchaap2017].
+The Rosetta network weights come from rosetta-soil of the USDA-ARS U.S. Salinity Laboratory (CC0 1.0) [@rosettaSoil]; the models are those of [@schaap2001; @schaap2004] and [@zhangSchaap2017].
 
 ## Interface
 

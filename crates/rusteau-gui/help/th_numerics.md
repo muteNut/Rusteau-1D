@@ -5,7 +5,7 @@ Rusteau uses the numerical methods of HYDRUS-1D [@simunek2009]: Galerkin-type li
 
 ## Water flow {#water}
 
-The Richards equation is discretized with linear finite elements on the nodes of the profile, with a lumped (diagonal) mass matrix, and with a fully implicit finite difference scheme in time [@vogel1987]. The non-linearity is resolved by the mass-conservative modified Picard iteration of Celia et al. [@celia1990]: the time derivative is written in terms of the water content,
+The Richards equation is discretized with linear finite elements on the nodes of the profile, with a lumped (diagonal) mass matrix, and with a fully implicit finite difference scheme in time [@vogel1987]. The non-linearity is resolved by the mass-conservative modified Picard iteration of [@celia1990]: the time derivative is written in terms of the water content,
 
 $$ (θ_{i}^{j+1,k+1} − θ_{i}^{j}) / Δt = C_{i}^{j+1,k} (h_{i}^{j+1,k+1} − h_{i}^{j+1,k}) / Δt + (θ_{i}^{j+1,k} − θ_{i}^{j}) / Δt $$
 

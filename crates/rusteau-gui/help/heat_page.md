@@ -19,10 +19,10 @@ The thermal parameters are in the project's units with the mass in kg ([units](u
 
 | Button | Values |
 |---|---|
-| b1, b2, b3 for sand / loam / clay | Chung and Horton [@chungHorton1987]: sand 0.228, −2.406, 4.909; loam 0.243, 0.393, 1.534; clay −0.197, −0.962, 2.521 W/m/K |
+| b1, b2, b3 for sand / loam / clay | [@chungHorton1987]: sand 0.228, −2.406, 4.909; loam 0.243, 0.393, 1.534; clay −0.197, −0.962, 2.521 W/m/K |
 | Default heat capacities | Cn = 1.92, Co = 2.51, Cw = 4.18 MJ/m³/K |
 
-*Campbell (1985) thermal conductivity* uses the function of Campbell [@campbell1985] instead; b1, b2 and b3 then hold the volume fractions of quartz, other minerals and clay.
+*Campbell (1985) thermal conductivity* uses the function of [@campbell1985] instead; b1, b2 and b3 then hold the volume fractions of quartz, other minerals and clay.
 
 ## Boundary conditions
 

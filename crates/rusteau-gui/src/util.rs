@@ -171,14 +171,16 @@ pub fn dv_unit(ui: &mut Ui, ch: &mut bool, v: &mut f64, unit: &str) {
 
 /// Grid row: label and number field, both with the description of the label as tooltip.
 pub fn field(ui: &mut Ui, ch: &mut bool, label: &str, v: &mut f64) {
-    ui.label(label).tip(label);
+    let r = ui.label(label).tip(label);
+    crate::shots::note(ui.ctx(), label, r.rect);
     dv_r(ui, ch, v).tip(label);
     ui.end_row();
 }
 
 /// Grid row: label and number field with a unit, both with the description of the label as tooltip.
 pub fn field_u(ui: &mut Ui, ch: &mut bool, label: &str, v: &mut f64, unit: &str) {
-    ui.label(label).tip(label);
+    let r = ui.label(label).tip(label);
+    crate::shots::note(ui.ctx(), label, r.rect);
     dv_unit_r(ui, ch, v, unit).tip(label);
     ui.end_row();
 }

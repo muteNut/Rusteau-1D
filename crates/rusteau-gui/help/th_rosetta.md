@@ -15,7 +15,7 @@ Each model is an ensemble of artificial neural networks trained on bootstrap sam
 
 α, n and K_{s} are predicted as logarithms; their ensemble means are either the mean of the back-transformed values (arithmetic) or 10 to the mean of the logarithms (geometric). Rosetta also predicts the parameters K_{0} and L of a conductivity function with a matching point [@schaapLeij2000]; Rusteau shows them for information.
 
-The network weights are those of the Python package rosetta-soil [@rosettaSoil]; the unit tests of Rusteau reproduce its predictions within 2 × 10^{−5}.
+The network weights are those of the Python package [@rosettaSoil]; the unit tests of Rusteau reproduce its predictions within 2 × 10^{−5}.
 
 ## Limitations
 

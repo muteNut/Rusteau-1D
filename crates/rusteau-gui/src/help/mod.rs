@@ -128,7 +128,7 @@ pub fn search(query: &str) -> Vec<(&'static str, usize, String)> {
             hits.push((t.id, score, format!("{}{snip}…", if a > 0 { "…" } else { "" })));
         }
     }
-    hits.sort_by(|a, b| b.1.cmp(&a.1));
+    hits.sort_by_key(|h| std::cmp::Reverse(h.1));
     hits
 }
 
@@ -319,7 +319,8 @@ impl HelpState {
                 ui.label(RichText::new(path.join(" › ")).weak().small());
             }
             egui::ScrollArea::vertical().id_salt(("help_page", self.current.clone())).auto_shrink([false, false]).show(ui, |ui| {
-                ui.set_max_width(980.0);
+                // a readable line length, never wider than the panel
+                ui.set_max_width(ui.available_width().min(980.0));
                 if let Some(t) = topics::get(&self.current) {
                     let mut r = Renderer { images: &mut self.images, action: None, scroll_to: self.scroll_to.take(), size: self.size };
                     r.doc(ui, &t.doc);

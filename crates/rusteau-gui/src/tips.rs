@@ -134,8 +134,8 @@ const TIPS: &[(&str, &str)] = &[
     ("Load from catalog (Carsel & Parrish 1988):", "Average van Genuchten parameters of the USDA textural classes (Carsel & Parrish, 1988), converted to the project's units. Only rough averages of each class."),
     ("Neural network prediction (Rosetta)…", "Predicts θr, θs, α, n and Ks from the texture, the bulk density and the water contents at 33 and 1500 kPa with the Rosetta pedotransfer functions."),
     // ------------------------------------------------------------------ Water flow boundary conditions
-    ("Upper boundary", "Boundary condition of the water flow at the soil surface."),
-    ("Lower boundary", "Boundary condition of the water flow at the bottom of the profile."),
+    ("Upper boundary", "Boundary condition at the soil surface."),
+    ("Lower boundary", "Boundary condition at the bottom of the profile."),
     ("Top flux (negative = infiltration)", "rTop [L/T]: constant flux across the surface; negative values enter the soil (infiltration), positive leave it (evaporation)."),
     ("Bottom flux (positive = upward)", "rBot [L/T]: constant flux across the bottom; positive values enter the profile from below, negative values drain it."),
     ("Constant potential transpiration", "rRoot [L/T]: potential transpiration with constant boundary conditions (without atmospheric data)."),

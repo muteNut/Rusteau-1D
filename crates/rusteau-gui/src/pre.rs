@@ -1785,8 +1785,20 @@ impl App {
                         ("γw", &mut td.gam_w), ("γs", &mut td.gam_s), ("γg", &mut td.gam_g),
                         ("μ0w", &mut td.mu0_w), ("μ0s", &mut td.mu0_s), ("μ0g", &mut td.mu0_g), ("ω", &mut td.omega),
                     ] {
-                        let what = crate::tips::tip(h).unwrap_or("");
-                        ui.strong(h).tip_text(&format!("Activation energy Ea [J/mol] of {h}; the parameter follows a(T) = a(Tref) exp[Ea (T − Tref)/(R T Tref)] with Tref = 20 °C (Arrhenius). 0 = no temperature dependence.\n\n{h}: {what}"));
+                        // the description of the parameter itself (the reaction table names some of them differently)
+                        let key = match h {
+                            "Dw" => "Dw (liquid)",
+                            "Dg" => "Dg (gas)",
+                            "η" => "η (Nu)",
+                            "Henry" => "Henry kH",
+                            "ω" => "α (rate)",
+                            k => k,
+                        };
+                        let what = crate::tips::tip(key).map(|t| format!("\n\n{t}")).unwrap_or_default();
+                        ui.strong(h).tip_text(&format!(
+                            "Activation energy Ea [J/mol] of {h}: the parameter follows a(T) = a(Tref) exp[Ea (T − Tref)/(R T Tref)] with Tref = 20 °C \
+                             (Arrhenius). 0 = no temperature dependence.{what}"
+                        ));
                         dv(ui, ch, v);
                         ui.end_row();
                     }

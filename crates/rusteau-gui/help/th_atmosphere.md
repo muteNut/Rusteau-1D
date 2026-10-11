@@ -14,7 +14,7 @@ SCF is the soil cover fraction and k the extinction coefficient of the radiation
 
 ## Daily variation of evaporation and transpiration {#daily}
 
-Daily values of evaporation and transpiration can be distributed over the day with the functions of Fayer [@fayer2000], as in HYDRUS: during the night (t < 0.264 d and t > 0.736 d) the rate is 24 % of the daily mean, during the day it follows a sine wave:
+Daily values of evaporation and transpiration can be distributed over the day with the functions of [@fayer2000], as in HYDRUS: during the night (t < 0.264 d and t > 0.736 d) the rate is 24 % of the daily mean, during the day it follows a sine wave:
 
 $$ T_{p}(t) = 2.75 T_{p} sin(2π t − π/2)   for 0.264 d ≤ t ≤ 0.736 d;   T_{p}(t) = 0.24 T_{p}   otherwise $$
 
@@ -22,7 +22,7 @@ with t the time of the day in days; the integral over the day equals the daily r
 
 ## Canopy interception {#interception}
 
-Part of the precipitation is intercepted by the leaves and evaporates. The interception follows von Hoyningen-Hüne [@vonHoyningenHune1983] and Braden [@braden1985]:
+Part of the precipitation is intercepted by the leaves and evaporates. The interception follows [@vonHoyningenHune1983] and [@braden1985]:
 
 $$ I = a · LAI [ 1 − 1 / (1 + SCF · P / (a · LAI)) ] $$
 
@@ -34,7 +34,7 @@ With snow accumulation, precipitation falls as snow at air temperatures below �
 
 $$ M = m_{f} · T_{a}   for T_{a} > 0 °C $$
 
-(a temperature-index approach, see Hock [@hock2003]); the HYDRUS default is 0.43 cm/d/°C. Evaporation is taken from the snow layer first. Solutes in the precipitation are stored in the snow and released with the melt water.
+(a temperature-index approach, see [@hock2003]); the HYDRUS default is 0.43 cm/d/°C. Evaporation is taken from the snow layer first. Solutes in the precipitation are stored in the snow and released with the melt water.
 
 ## Sinusoidal precipitation
 

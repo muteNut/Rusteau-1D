@@ -3,7 +3,7 @@ keywords: root water uptake; sink term; Feddes; S-shape; water stress; osmotic s
 
 ## Sink term
 
-The sink term S of the [Richards equation](th_richards) is the volume of water removed per unit time from a unit volume of soil by plant roots. Feddes et al. [@feddes1978] defined it as
+The sink term S of the [Richards equation](th_richards) is the volume of water removed per unit time from a unit volume of soil by plant roots. [@feddes1978] defined it as
 
 $$ S(h) = α(h) S_{p} $$
 
@@ -28,10 +28,10 @@ with the pressure head h_{50} at which the uptake is halved and the exponent p (
 
 ## Osmotic (salinity) stress {#osmotic}
 
-The osmotic head of the soil solution is h_{φ} = Σ a_{j} c_{j} with the osmotic coefficients a_{j} of the solutes. Following van Genuchten [@vanGenuchten1987]:
+The osmotic head of the soil solution is h_{φ} = Σ a_{j} c_{j} with the osmotic coefficients a_{j} of the solutes. Following [@vanGenuchten1987]:
 
 - **additive**: the osmotic head adds to the pressure head, α = α(h + h_{φ});
-- **multiplicative**: α = α(h) α_{φ}(h_{φ}), with an S-shaped α_{φ} = 1/[1 + (h_{φ}/h_{φ50})^{p}] or the threshold–slope function of Maas and Hoffman [@maasHoffman1977; @maas1990]: no reduction up to a threshold, then a linear decrease with the slope.
+- **multiplicative**: α = α(h) α_{φ}(h_{φ}), with an S-shaped α_{φ} = 1/[1 + (h_{φ}/h_{φ50})^{p}] or the threshold–slope function of [@maasHoffman1977; @maas1990]: no reduction up to a threshold, then a linear decrease with the slope.
 
 ## Compensated root water uptake {#compensation}
 
@@ -46,7 +46,7 @@ For ω ≥ ω_{c} the uptake is fully compensated (T_{a} = T_{p}); below, T_{a} 
 
 ## Root distribution {#distribution}
 
-The root distribution b'(x) is set on the page [Soil profile](profile_editor), constant, linear, or with the functions of Hoffman and van Genuchten [@hoffmanVG1983] (constant in the upper 20 % of the rooting depth L_{r}, then linear to zero at L_{r}) and Vrugt et al. [@vrugt2001]:
+The root distribution b'(x) is set on the page [Soil profile](profile_editor), constant, linear, or with the functions of [@hoffmanVG1983] (constant in the upper 20 % of the rooting depth L_{r}, then linear to zero at L_{r}) and [@vrugt2001]:
 
 $$ b(z) = (1 − z/z_{m}) exp[ −(p_{z}/z_{m}) \|z^{*} − z\| ] $$
 

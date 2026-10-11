@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Root water uptake – Rusteau-1D Help</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li><a href="units.html">Units</a></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details><summary>Solute transport</summary>
+<ul>
+<li><a href="solute_general.html">Solute transport: general</a></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+</ul>
+</details></li>
+<li class="book"><details open><summary>Theory and equations</summary>
+<ul>
+<li><a href="th_richards.html">Variably saturated water flow</a></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li class="current"><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<div class="crumbs">Theory and equations</div>
+<h1>Root water uptake</h1>
+<h2 id="sink-term">Sink term</h2>
+<p>The sink term S of the <a href="th_richards.html">Richards equation</a> is the volume of water removed per unit time from a unit volume of soil by plant roots. <a href="references.html#feddes1978" class="cite" title="Feddes, R. A., P. J. Kowalik, and H. Zaradny (1978). Simulation of Field Water Use and Crop Yield. Simulation Monographs, Pudoc, Wageningen, 189 pp.">Feddes et al. (1978)</a> defined it as</p>
+<div class="formula">
+<div>S(h) = α(h) S<sub>p</sub></div>
+</div>
+<p>where the water stress response function α(h) (0 ≤ α ≤ 1) reduces the potential uptake S<sub>p</sub>. The potential uptake is the potential transpiration T<sub>p</sub> distributed over the root zone with the normalized root distribution b(x):</p>
+<div class="formula">
+<div>S<sub>p</sub> = b(x) T<sub>p</sub>,   b(x) = b'(x) / ∫<sub>LR</sub> b'(x) dx</div>
+<div>S(h, h<sub>φ</sub>, x) = α(h, h<sub>φ</sub>, x) b(x) T<sub>p</sub></div>
+</div>
+<p>b'(x) is the root distribution of the <a href="profile_editor.html">soil profile</a> (only relative values matter) and L<sub>R</sub> the root zone. The actual transpiration is the integral of S over the root zone, T<sub>a</sub> = ∫ S dx.</p>
+<h2 id="stress">Water stress response functions</h2>
+<p><strong>Feddes et al. (1978)</strong> <a href="references.html#feddes1978" class="cite" title="Feddes, R. A., P. J. Kowalik, and H. Zaradny (1978). Simulation of Field Water Use and Crop Yield. Simulation Monographs, Pudoc, Wageningen, 189 pp.">Feddes et al. (1978)</a>: piecewise linear. Water uptake is zero close to saturation (h &gt; h<sub>1</sub> = P0, oxygen deficiency) and below the wilting point (h &lt; h<sub>4</sub> = P3); it is optimal between h<sub>2</sub> = POpt and h<sub>3</sub>, and varies linearly in between. h<sub>3</sub> depends on the potential transpiration: h<sub>3</sub> = P2H for T<sub>p</sub> ≥ r2H, P2L for T<sub>p</sub> ≤ r2L, and is interpolated linearly in between.</p>
+<p><strong>S-shape (van Genuchten 1987)</strong> <a href="references.html#vanGenuchten1987" class="cite" title="van Genuchten, M. Th. (1987). A Numerical Model for Water and Solute Movement in and below the Root Zone. Research Report No. 121, U.S. Salinity Laboratory, USDA-ARS, Riverside, CA.">van Genuchten (1987)</a>:</p>
+<div class="formula">
+<div>α(h) = 1 / [1 + (h/h<sub>50</sub>)<sup>p</sup>]</div>
+</div>
+<p>with the pressure head h<sub>50</sub> at which the uptake is halved and the exponent p (≈ 3). It does not account for oxygen stress.</p>
+<h2 id="osmotic">Osmotic (salinity) stress</h2>
+<p>The osmotic head of the soil solution is h<sub>φ</sub> = Σ a<sub>j</sub> c<sub>j</sub> with the osmotic coefficients a<sub>j</sub> of the solutes. Following <a href="references.html#vanGenuchten1987" class="cite" title="van Genuchten, M. Th. (1987). A Numerical Model for Water and Solute Movement in and below the Root Zone. Research Report No. 121, U.S. Salinity Laboratory, USDA-ARS, Riverside, CA.">van Genuchten (1987)</a>:</p>
+<ul>
+<li><strong>additive</strong>: the osmotic head adds to the pressure head, α = α(h + h<sub>φ</sub>);</li>
+<li><strong>multiplicative</strong>: α = α(h) α<sub>φ</sub>(h<sub>φ</sub>), with an S-shaped α<sub>φ</sub> = 1/[1 + (h<sub>φ</sub>/h<sub>φ50</sub>)<sup>p</sup>] or the threshold–slope function of <a href="references.html#maasHoffman1977" class="cite" title="Maas, E. V., and G. J. Hoffman (1977). Crop salt tolerance – current assessment. Journal of the Irrigation and Drainage Division, ASCE 103(IR2): 115–134.">Maas and Hoffman (1977)</a>; <a href="references.html#maas1990" class="cite" title="Maas, E. V. (1990). Crop salt tolerance. In: K. K. Tanji (ed.), Agricultural Salinity Assessment and Management, ASCE Manuals and Reports on Engineering Practice No. 71, American Society of Civil Engineers, New York, pp. 262–304.">Maas (1990)</a>: no reduction up to a threshold, then a linear decrease with the slope.</li>
+</ul>
+<h2 id="compensation">Compensated root water uptake</h2>
+<p>Roots may take up more water from less stressed parts of the root zone to compensate for stressed parts. With the water stress index ω (the ratio of actual to potential transpiration without compensation) and the critical stress index ω<sub>c</sub> <a href="references.html#jarvis1989" class="cite" title="Jarvis, N. J. (1989). A simple empirical model of root water uptake. Journal of Hydrology 107(1–4): 57–72.">Jarvis (1989)</a>; <a href="references.html#simunekHopmans2009" class="cite" title="Šimůnek, J., and J. W. Hopmans (2009). Modeling compensated root water and nutrient uptake. Ecological Modelling 220(4): 505–521.">Šimůnek and Hopmans (2009)</a>:</p>
+<div class="formula">
+<div>ω = ∫<sub>LR</sub> α(h, h<sub>φ</sub>, x) b(x) dx</div>
+<div>S = α(h, h<sub>φ</sub>, x) b(x) T<sub>p</sub> / max(ω, ω<sub>c</sub>)</div>
+</div>
+<p>For ω ≥ ω<sub>c</sub> the uptake is fully compensated (T<sub>a</sub> = T<sub>p</sub>); below, T<sub>a</sub> = T<sub>p</sub> ω/ω<sub>c</sub>. ω<sub>c</sub> = 1 means no compensation.</p>
+<h2 id="distribution">Root distribution</h2>
+<p>The root distribution b'(x) is set on the page <a href="profile_editor.html">Soil profile</a>, constant, linear, or with the functions of <a href="references.html#hoffmanVG1983" class="cite" title="Hoffman, G. J., and M. Th. van Genuchten (1983). Soil properties for efficient use of water and salinity control. In: H. M. Taylor, W. R. Jordan, and T. R. Sinclair (eds.), Limitations to Efficient Water Use in Crop Production, ASA, CSSA, SSSA, Madison, WI, pp. 73–85.">Hoffman and van Genuchten (1983)</a> (constant in the upper 20 % of the rooting depth L<sub>r</sub>, then linear to zero at L<sub>r</sub>) and <a href="references.html#vrugt2001" class="cite" title="Vrugt, J. A., M. T. van Wijk, J. W. Hopmans, and J. Šimůnek (2001). One-, two-, and three-dimensional root water uptake functions for transient modeling. Water Resources Research 37(10): 2457–2470.">Vrugt et al. (2001)</a>:</p>
+<div class="formula">
+<div>b(z) = (1 − z/z<sub>m</sub>) exp[ −(p<sub>z</sub>/z<sub>m</sub>) |z − z| ]</div>
+</div>
+<p>with the maximum rooting depth z<sub>m</sub>, the depth of maximum root density z and the shape parameter p<sub>z</sub> (above z; p = 1 below).</p>
+<h2 id="growth">Root growth</h2>
+<p>With root growth the root distribution follows the Hoffman–van Genuchten function of the current rooting depth L<sub>R</sub>(t), which is read from the time-variable data, interpolated from a table, or given by the Verhulst–Pearl logistic growth function <a href="references.html#simunekSuarez1993" class="cite" title="Šimůnek, J., and D. L. Suarez (1993). Modeling of carbon dioxide transport and production in soil: 1. Model development. Water Resources Research 29(2): 487–497.">Šimůnek and Suarez (1993)</a>:</p>
+<div class="formula">
+<div>L<sub>R</sub>(t) = L<sub>m</sub> L<sub>0</sub> / [L<sub>0</sub> + (L<sub>m</sub> − L<sub>0</sub>) e<sup>−r t</sup>]</div>
+<div>r = −1/(t<sub>m</sub> − t<sub>0</sub>) · ln[ L<sub>0</sub>(L<sub>m</sub> − L<sub>med</sub>) / (L<sub>med</sub>(L<sub>m</sub> − L<sub>0</sub>)) ]</div>
+</div>
+<p>with the initial rooting depth L<sub>0</sub> at the sowing time t<sub>0</sub>, the maximum rooting depth L<sub>m</sub> and the known rooting depth L<sub>med</sub> at the time t<sub>m</sub>; t is the time since sowing. Before sowing and after harvest there are no roots; a period repeats the cycle.</p>
+<p>See also: <a href="th_root_solute.html">root solute uptake</a> · <a href="root_uptake_page.html">page Root water and solute uptake</a></p>
+<h2 id="literature">Literature cited in this topic</h2>
+<ul>
+<li>Feddes, R. A., P. J. Kowalik, and H. Zaradny (1978). <em>Simulation of Field Water Use and Crop Yield.</em> Simulation Monographs, Pudoc, Wageningen, 189 pp.</li>
+<li>Hoffman, G. J., and M. Th. van Genuchten (1983). Soil properties for efficient use of water and salinity control. In: H. M. Taylor, W. R. Jordan, and T. R. Sinclair (eds.), <em>Limitations to Efficient Water Use in Crop Production</em>, ASA, CSSA, SSSA, Madison, WI, pp. 73–85.</li>
+<li>Jarvis, N. J. (1989). A simple empirical model of root water uptake. <em>Journal of Hydrology</em> 107(1–4): 57–72.</li>
+<li>Maas, E. V. (1990). Crop salt tolerance. In: K. K. Tanji (ed.), <em>Agricultural Salinity Assessment and Management</em>, ASCE Manuals and Reports on Engineering Practice No. 71, American Society of Civil Engineers, New York, pp. 262–304.</li>
+<li>Maas, E. V., and G. J. Hoffman (1977). Crop salt tolerance – current assessment. <em>Journal of the Irrigation and Drainage Division, ASCE</em> 103(IR2): 115–134.</li>
+<li>van Genuchten, M. Th. (1987). <em>A Numerical Model for Water and Solute Movement in and below the Root Zone.</em> Research Report No. 121, U.S. Salinity Laboratory, USDA-ARS, Riverside, CA.</li>
+<li>Vrugt, J. A., M. T. van Wijk, J. W. Hopmans, and J. Šimůnek (2001). One-, two-, and three-dimensional root water uptake functions for transient modeling. <em>Water Resources Research</em> 37(10): 2457–2470. doi:<a href="https://doi.org/10.1029/2000WR000027" target="_blank" rel="noopener">10.1029/2000WR000027</a></li>
+<li>Šimůnek, J., and D. L. Suarez (1993). Modeling of carbon dioxide transport and production in soil: 1. Model development. <em>Water Resources Research</em> 29(2): 487–497. doi:<a href="https://doi.org/10.1029/92WR02225" target="_blank" rel="noopener">10.1029/92WR02225</a></li>
+<li>Šimůnek, J., and J. W. Hopmans (2009). Modeling compensated root water and nutrient uptake. <em>Ecological Modelling</em> 220(4): 505–521. doi:<a href="https://doi.org/10.1016/j.ecolmodel.2008.11.004" target="_blank" rel="noopener">10.1016/j.ecolmodel.2008.11.004</a></li>
+</ul>
+<p>All sources: <a href="references.html">References</a>.</p>
+</article>
+<div class="pager"><a class="prev" href="th_dual_permeability.html">← Dual-permeability model</a><a class="next" href="th_root_solute.html">Root solute uptake →</a></div>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 0.1.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>

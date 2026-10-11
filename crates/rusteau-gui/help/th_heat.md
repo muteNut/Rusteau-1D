@@ -17,7 +17,7 @@ The first term on the right is conduction, the second convection by flowing wate
 
 ## Heat capacity {#capacity}
 
-Following de Vries [@deVries1963]:
+Following [@deVries1963]:
 
 $$ C_{p}(θ) = C_{n} θ_{n} + C_{o} θ_{o} + C_{w} θ + C_{v} a_{v} $$
 
@@ -29,11 +29,11 @@ The apparent thermal conductivity combines the thermal conductivity of the soil 
 
 $$ λ(θ) = λ_{0}(θ) + β_{t} C_{w} \|q\| $$
 
-with the longitudinal thermal dispersivity β_{t} (λL). λ_{0} follows Chung and Horton [@chungHorton1987]:
+with the longitudinal thermal dispersivity β_{t} (λL). λ_{0} follows [@chungHorton1987]:
 
 $$ λ_{0}(θ) = b_{1} + b_{2} θ + b_{3} θ^{0.5} $$
 
-with the empirical coefficients b_{1}, b_{2}, b_{3}; for sand 0.228, −2.406, 4.909, for loam 0.243, 0.393, 1.534 and for clay −0.197, −0.962, 2.521 W/m/K. Alternatively the function of Campbell [@campbell1985] computes λ_{0} from the volume fractions of quartz, other minerals and clay.
+with the empirical coefficients b_{1}, b_{2}, b_{3}; for sand 0.228, −2.406, 4.909, for loam 0.243, 0.393, 1.534 and for clay −0.197, −0.962, 2.521 W/m/K. Alternatively the function of [@campbell1985] computes λ_{0} from the volume fractions of quartz, other minerals and clay.
 
 ## Boundary conditions
 

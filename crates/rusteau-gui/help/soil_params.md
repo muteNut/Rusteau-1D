@@ -35,11 +35,11 @@ Further parameters of the models:
 
 ## The parameter l {#l}
 
-The parameter l represents the tortuosity and connectivity of the pores. Mualem [@mualem1976] estimated it as 0.5 for many soils, but there is no general agreement; from the UNSODA database, Schaap and Leij [@schaapLeij2000] found a mean of about −1 together with a matching conductivity K0 below Ks. Since the shape parameters α and n of the conductivity function come from the retention curve, l is the only parameter that shapes K(h) independently – useful in the [parameter estimation](th_inverse) from outflow or evaporation experiments.
+The parameter l represents the tortuosity and connectivity of the pores. [@mualem1976] estimated it as 0.5 for many soils, but there is no general agreement; from the UNSODA database, [@schaapLeij2000] found a mean of about −1 together with a matching conductivity K0 below Ks. Since the shape parameters α and n of the conductivity function come from the retention curve, l is the only parameter that shapes K(h) independently – useful in the [parameter estimation](th_inverse) from outflow or evaporation experiments.
 
 ## Soil catalog {#catalog}
 
-*Load from catalog* enters the average van Genuchten parameters of the 12 USDA textural classes of Carsel and Parrish [@carselParrish1988], converted to the project's units (l = 0.5). The values were derived statistically from the data of Rawls et al. [@rawls1982]; they are only rough averages of each class.
+*Load from catalog* enters the average van Genuchten parameters of the 12 USDA textural classes of [@carselParrish1988], converted to the project's units (l = 0.5). The values were derived statistically from the data of [@rawls1982]; they are only rough averages of each class.
 
 | Texture | θr | θs | α [1/cm] | n | Ks [cm/d] |
 |---|---|---|---|---|---|

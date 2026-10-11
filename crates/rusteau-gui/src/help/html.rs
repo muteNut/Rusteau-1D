@@ -313,7 +313,7 @@ header nav.top a { margin-right: 16px; }
 header form.search { margin-left: auto; }
 header input { width: 240px; max-width: 60vw; padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); font: inherit; }
 .layout { display: grid; grid-template-columns: minmax(220px, 300px) 1fr; min-height: calc(100vh - 110px); }
-nav.toc { border-right: 1px solid var(--line); padding: 12px 8px 24px 8px; background: var(--panel); position: sticky; top: 55px; align-self: start; max-height: calc(100vh - 55px); overflow: auto; font-size: 14.5px; }
+nav.toc { border-right: 1px solid var(--line); padding: 12px 8px 24px 8px; background: var(--panel); position: sticky; top: 55px; align-self: start; height: calc(100vh - 55px); overflow: auto; font-size: 14.5px; }
 nav.toc ul { list-style: none; margin: 0; padding-left: 14px; }
 nav.toc > ul { padding-left: 4px; }
 nav.toc li { margin: 1px 0; }
@@ -330,7 +330,7 @@ pre { background: var(--formula); border: 1px solid var(--line); border-radius: 
 pre code { background: none; padding: 0; }
 .formula { background: var(--formula); border: 1px solid var(--line); border-radius: 6px; padding: 10px 18px; margin: 10px 0;
   font-family: "Cambria Math", "STIX Two Math", "Latin Modern Math", "Times New Roman", "DejaVu Serif", serif; font-size: 17px; overflow-x: auto; }
-.formula div { white-space: nowrap; }
+.formula div { white-space: pre; }
 .note { background: var(--note); border-left: 4px solid var(--accent); padding: 8px 14px; border-radius: 4px; margin: 10px 0; }
 .table { overflow-x: auto; margin: 10px 0; }
 table { border-collapse: collapse; font-size: 15px; }
@@ -383,6 +383,37 @@ mod tests {
             assert!(dir.join(name).exists());
         }
         let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// The HTML help in `docs/help` of the repository is generated from the topics: it must be up to date.
+    #[test]
+    fn committed_html_help_is_current() {
+        let committed = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../docs/help");
+        if !committed.exists() {
+            return;
+        }
+        let dir = std::env::temp_dir().join(format!("rusteau-help-current-{}", std::process::id()));
+        export(&dir).unwrap();
+        let mut stale = vec![];
+        let mut names: Vec<String> = std::fs::read_dir(&dir).unwrap().flatten().map(|e| e.file_name().to_string_lossy().to_string()).collect();
+        names.extend(topics::IMAGES.iter().map(|(n, _)| n.to_string()));
+        for name in names.iter().filter(|n| *n != "img") {
+            let new = std::fs::read(dir.join(name)).unwrap();
+            // a checkout on Windows may have converted the line ends of the text files
+            let mut old = std::fs::read(committed.join(name)).unwrap_or_default();
+            if !name.ends_with(".png") {
+                old.retain(|b| *b != b'\r');
+            }
+            if old != new {
+                stale.push(name.clone());
+            }
+        }
+        let _ = std::fs::remove_dir_all(&dir);
+        assert!(
+            stale.is_empty(),
+            "docs/help is out of date ({}); regenerate it with: cargo run --release -p rusteau-gui -- --export-help docs/help",
+            stale.join(", ")
+        );
     }
 
     #[test]

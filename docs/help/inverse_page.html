@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parameter estimation (inverse problem) – Rusteau-1D Help</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li><a href="units.html">Units</a></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details open><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details><summary>Solute transport</summary>
+<ul>
+<li><a href="solute_general.html">Solute transport: general</a></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li class="current"><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Theory and equations</summary>
+<ul>
+<li><a href="th_richards.html">Variably saturated water flow</a></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<div class="crumbs">Input (pre-processing)</div>
+<h1>Parameter estimation (inverse problem)</h1>
+<p>On this page the parameter estimation is set up: which parameters to estimate, their initial estimates and constraints, the measured data (observations) and the iteration. It corresponds to the <em>Inverse Solution</em>, <em>Soil Hydraulic Parameters – Inverse</em> and <em>Data for Inverse Solution</em> dialogs of HYDRUS-1D and the file <code>Fit.in</code>. The method is described in <a href="th_inverse.html">parameter estimation</a>.</p>
+<figure><a href="img/inverse_page.png"><img src="img/inverse_page.png" alt="The page Inverse problem with the parameter table and the observations." loading="lazy"></a><figcaption>The page Inverse problem with the parameter table and the observations.</figcaption></figure>
+<p>Switch on <em>Inverse problem</em> and create the settings from the current project, or import a <code>Fit.in</code>. <em>Export Fit.in…</em> writes the settings for HYDRUS-1D.</p>
+<h2 id="estimate">Estimate</h2>
+<div class="table"><table>
+<thead><tr><th>Group</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>Soil hydraulic parameters</td><td>θr, θs, α, n, Ks, l and the extra parameters of the model; with hysteresis also θm, θs,w, αw, Ks,w with the optional constraints (θm = θs, αw = 2α, Ksw = Ks)</td></tr>
+<tr><td>Solute transport parameters</td><td>of solute 1: bulk density, dispersivity, f, θim, diffusion, sorption, decay, rate coefficients; with the type of concentration of the objective function (resident, logarithm, flux, total, mobile + immobile)</td></tr>
+<tr><td>Heat transport parameters</td><td>θn, θo, λL, b1–b3, Cn, Co, Cw (HYDRUS 4.17; temperatures are observations of type 4)</td></tr>
+</tbody></table></div>
+<p>Solute and heat parameters exclude each other, as in HYDRUS 4.17.</p>
+<h2 id="weighting-of-the-measurement-sets">Weighting of the measurement sets</h2>
+<p>The measurement sets are the observation types. <em>No internal weighting</em>: all sets weight 1. <em>By mean ratio</em>: each set is weighted by the ratio of the smallest mean of all sets to its own mean. <em>By standard deviation</em>: 1/(√n σ) of the set (<a href="th_inverse.html#objective">objective function</a>).</p>
+<h2 id="iteration">Iteration</h2>
+<div class="table"><table>
+<thead><tr><th>Input</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>Maximum number of iterations (MIT)</td><td>0 = a direct run with the initial estimates</td></tr>
+<tr><td>Rusteau iteration (default)</td><td>stages on frozen time levels and further starting points; the number of additional starting points (8) runs in parallel threads (<a href="th_inverse.html#rusteau">theory</a>)</td></tr>
+<tr><td>HYDRUS 4.17 iteration</td><td>adaptive time steps in every run, one starting point – for comparisons with HYDRUS</td></tr>
+</tbody></table></div>
+<h2 id="parameters">Parameters</h2>
+<p>For every material and group: the initial estimate, the minimum and maximum (0 = no constraint) and <em>Fitted?</em>. <em>Take the initial estimates from the project</em> copies the material parameters; the soil catalog <a href="references.html#carselParrish1988" class="cite" title="Carsel, R. F., and R. S. Parrish (1988). Developing joint probability distributions of soil water retention characteristics. Water Resources Research 24(5): 755–769.">Carsel and Parrish (1988)</a> and <em>Rosetta…</em> <a href="references.html#schaap2001" class="cite" title="Schaap, M. G., F. J. Leij, and M. Th. van Genuchten (2001). Rosetta: a computer program for estimating soil hydraulic parameters with hierarchical pedotransfer functions. Journal of Hydrology 251(3–4): 163–176.">Schaap et al. (2001)</a> give initial estimates of the hydraulic parameters. Constraints that bound the physically sensible range help the estimation, especially with several starting points.</p>
+<h2 id="observations">Observations</h2>
+<div class="table"><table>
+<thead><tr><th>Column</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>Type</td><td>0 cumulative boundary flux, 1 pressure head at an observation node, 2 water content at an observation node (position 0: mean of the profile, −k: of sub-region k), 3 boundary flux, 4 concentration (or temperature with heat parameters) at an observation node (position 0: solute mass in the profile), 5 retention point θ(h), 6 conductivity K(h), 7–11 prior information on α, n, θr, θs, Ks, 12–15 h, θ, c or sorbed c against depth at a print time</td></tr>
+<tr><td>Position</td><td>the observation node, the boundary (1 top, 2 bottom), the material or the print time, depending on the type</td></tr>
+<tr><td>Time / h / x</td><td>time (types 0–4), pressure head (5, 6) or depth (12–15)</td></tr>
+<tr><td>Value, Weight</td><td>the observed value and its weight</td></tr>
+</tbody></table></div>
+<p><em>+ Add observation</em> adds a row, <em>Paste observations</em> appends lines <code>x value type position weight</code> from the clipboard (as in <code>Fit.in</code>), <em>Remove all</em> clears the table. A summary shows the number of observations per type.</p>
+<p><em>▶ Run parameter estimation</em> starts the estimation; the <a href="res_inverse.html">results page</a> shows the iterations live.</p>
+<h2 id="literature">Literature cited in this topic</h2>
+<ul>
+<li>Carsel, R. F., and R. S. Parrish (1988). Developing joint probability distributions of soil water retention characteristics. <em>Water Resources Research</em> 24(5): 755–769. doi:<a href="https://doi.org/10.1029/WR024i005p00755" target="_blank" rel="noopener">10.1029/WR024i005p00755</a></li>
+<li>Schaap, M. G., F. J. Leij, and M. Th. van Genuchten (2001). Rosetta: a computer program for estimating soil hydraulic parameters with hierarchical pedotransfer functions. <em>Journal of Hydrology</em> 251(3–4): 163–176. doi:<a href="https://doi.org/10.1016/S0022-1694(01)00466-8" target="_blank" rel="noopener">10.1016/S0022-1694(01)00466-8</a></li>
+</ul>
+<p>All sources: <a href="references.html">References</a>.</p>
+</article>
+<div class="pager"><a class="prev" href="check_run.html">← Check &amp; run</a><a class="next" href="res_obs.html">Observation points →</a></div>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 0.1.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>

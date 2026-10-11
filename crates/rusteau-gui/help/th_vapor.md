@@ -13,7 +13,7 @@ $$ ∂θ_{T}/∂t = ∂/∂x [ K_{Lh} (∂h/∂x + cos α) + K_{LT} ∂T/∂x + 
 | K_{vh} | isothermal vapor hydraulic conductivity [L/T] |
 | K_{vT} | thermal vapor hydraulic conductivity [L²/K/T] |
 
-The vapor conductivities follow from the vapor diffusivity in the soil air, the saturated vapor density and the relative humidity h_{r} = exp(h M g / (R T)) of the soil air (M molecular weight of water, g gravitational acceleration, R gas constant). The thermal vapor flux is multiplied by the enhancement factor η(θ) of Cass et al. [@cass1984], which accounts for the higher thermal gradients in the air-filled pores and liquid islands (*Further options*: switchable).
+The vapor conductivities follow from the vapor diffusivity in the soil air, the saturated vapor density and the relative humidity h_{r} = exp(h M g / (R T)) of the soil air (M molecular weight of water, g gravitational acceleration, R gas constant). The thermal vapor flux is multiplied by the enhancement factor η(θ) of [@cass1984], which accounts for the higher thermal gradients in the air-filled pores and liquid islands (*Further options*: switchable).
 
 The heat transport equation includes the transport of latent heat by the vapor flux and the convection of sensible heat by liquid water and vapor ([heat transport](th_heat)); water flow and heat transport are solved sequentially in every time step. The surface boundary condition is usually the [surface energy balance](th_energy_balance).
 

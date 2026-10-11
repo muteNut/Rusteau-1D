@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dual-porosity models – Rusteau-1D Help</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li><a href="units.html">Units</a></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details><summary>Solute transport</summary>
+<ul>
+<li><a href="solute_general.html">Solute transport: general</a></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+</ul>
+</details></li>
+<li class="book"><details open><summary>Theory and equations</summary>
+<ul>
+<li><a href="th_richards.html">Variably saturated water flow</a></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li class="current"><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<div class="crumbs">Theory and equations</div>
+<h1>Dual-porosity models</h1>
+<p>Dual-porosity models assume that water flows only in one part of the pore space (inter-aggregate pores, fractures, the <strong>mobile</strong> region), while water in the other part (intra-aggregate pores, the rock matrix, the <strong>immobile</strong> region) does not move but exchanges water and solutes with the mobile region <a href="references.html#simunek2003" class="cite" title="Šimůnek, J., N. J. Jarvis, M. Th. van Genuchten, and A. Gärdenäs (2003). Review and comparison of models for describing non-equilibrium and preferential flow and transport in the vadose zone. Journal of Hydrology 272(1–4): 14–35.">Šimůnek et al. (2003)</a>; <a href="references.html#simunekVG2008" class="cite" title="Šimůnek, J., and M. Th. van Genuchten (2008). Modeling nonequilibrium flow and transport processes using HYDRUS. Vadose Zone Journal 7(2): 782–797.">Šimůnek and van Genuchten (2008)</a>. They describe non-equilibrium (preferential) flow in structured soils.</p>
+<h2 id="governing-equations">Governing equations</h2>
+<div class="formula">
+<div>∂θ<sub>mo</sub>/∂t = ∂/∂x [ K(h) (∂h/∂x + cos α) ] − S<sub>mo</sub> − Γ<sub>w</sub></div>
+<div>∂θ<sub>im</sub>/∂t = −S<sub>im</sub> + Γ<sub>w</sub></div>
+<div>θ = θ<sub>mo</sub> + θ<sub>im</sub></div>
+</div>
+<p>θ<sub>mo</sub> and θ<sub>im</sub> are the water contents of the mobile and immobile regions, S<sub>mo</sub> and S<sub>im</sub> their sink terms and Γ<sub>w</sub> the transfer rate of water from the mobile to the immobile region [1/T]. The hydraulic functions of the mobile region are van Genuchten–Mualem functions; the immobile region has its own retention parameters θ<sub>r,im</sub>, θ<sub>s,im</sub> (and α<sub>im</sub>, n<sub>im</sub>).</p>
+<h2 id="water">Mass transfer driven by the water content</h2>
+<p>The transfer rate is proportional to the difference of the effective saturations of the two regions <a href="references.html#simunek2001" class="cite" title="Šimůnek, J., O. Wendroth, N. Wypler, and M. Th. van Genuchten (2001). Non-equilibrium water flow characterized by means of upward infiltration experiments. European Journal of Soil Science 52(1): 13–24.">Šimůnek et al. (2001)</a>; <a href="references.html#simunek2003" class="cite" title="Šimůnek, J., N. J. Jarvis, M. Th. van Genuchten, and A. Gärdenäs (2003). Review and comparison of models for describing non-equilibrium and preferential flow and transport in the vadose zone. Journal of Hydrology 272(1–4): 14–35.">Šimůnek et al. (2003)</a>:</p>
+<div class="formula">
+<div>Γ<sub>w</sub> = ω [S<sub>e</sub><sup>mo</sup> − S<sub>e</sub><sup>im</sup>]</div>
+</div>
+<p>with the first-order rate coefficient ω [1/T]. The transfer within a time step is limited so that the immobile region does not exceed saturation or fall below its residual water content.</p>
+<h2 id="head">Mass transfer driven by the pressure head</h2>
+<p>The transfer is driven by the difference of the pressure heads of the two regions, with a conductivity of the interface evaluated with the van Genuchten parameters of the immobile region (α<sub>im</sub>, n<sub>im</sub>; ω takes the role of the saturated conductivity of the interface):</p>
+<div class="formula">
+<div>Γ<sub>w</sub> = ½ [K<sub>a</sub>(h<sub>mo</sub>) + K<sub>a</sub>(h<sub>im</sub>)] (h<sub>mo</sub> − h<sub>im</sub>)</div>
+</div>
+<p>where h<sub>im</sub> is the head of the immobile region at its current water content.</p>
+<h2 id="durner-s-model">Durner's model</h2>
+<p>The model of <a href="references.html#durner1994" class="cite" title="Durner, W. (1994). Hydraulic conductivity estimation for soils with heterogeneous pore structure. Water Resources Research 30(2): 211–223.">Durner (1994)</a> also has two pore regions, but in equilibrium: one Richards equation with a bimodal retention function (<a href="th_hydraulic_models.html#durner">Durner</a>).</p>
+<h2 id="solute-transport">Solute transport</h2>
+<p>With a dual-porosity flow model, solute transport uses the mobile–immobile formulation with an exchange proportional to the concentration difference plus the solute carried by the water transfer (<a href="th_nonequilibrium.html#mim">non-equilibrium transport</a>).</p>
+<p>See also: <a href="th_dual_permeability.html">dual-permeability model</a></p>
+<h2 id="literature">Literature cited in this topic</h2>
+<ul>
+<li>Durner, W. (1994). Hydraulic conductivity estimation for soils with heterogeneous pore structure. <em>Water Resources Research</em> 30(2): 211–223. doi:<a href="https://doi.org/10.1029/93WR02676" target="_blank" rel="noopener">10.1029/93WR02676</a></li>
+<li>Šimůnek, J., and M. Th. van Genuchten (2008). Modeling nonequilibrium flow and transport processes using HYDRUS. <em>Vadose Zone Journal</em> 7(2): 782–797. doi:<a href="https://doi.org/10.2136/vzj2007.0074" target="_blank" rel="noopener">10.2136/vzj2007.0074</a></li>
+<li>Šimůnek, J., N. J. Jarvis, M. Th. van Genuchten, and A. Gärdenäs (2003). Review and comparison of models for describing non-equilibrium and preferential flow and transport in the vadose zone. <em>Journal of Hydrology</em> 272(1–4): 14–35. doi:<a href="https://doi.org/10.1016/S0022-1694(02)00252-4" target="_blank" rel="noopener">10.1016/S0022-1694(02)00252-4</a></li>
+<li>Šimůnek, J., O. Wendroth, N. Wypler, and M. Th. van Genuchten (2001). Non-equilibrium water flow characterized by means of upward infiltration experiments. <em>European Journal of Soil Science</em> 52(1): 13–24. doi:<a href="https://doi.org/10.1046/j.1365-2389.2001.00361.x" target="_blank" rel="noopener">10.1046/j.1365-2389.2001.00361.x</a></li>
+</ul>
+<p>All sources: <a href="references.html">References</a>.</p>
+</article>
+<div class="pager"><a class="prev" href="th_scaling.html">← Scaling of the hydraulic properties</a><a class="next" href="th_dual_permeability.html">Dual-permeability model →</a></div>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 0.1.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>

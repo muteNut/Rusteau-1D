@@ -11,8 +11,8 @@ Rusteau-1D simulates the one-dimensional movement of water, heat and multiple so
 - **Index**: keywords and section headings in alphabetical order; type a few letters to filter.
 - **Search**: full-text search; all words must occur in a topic.
 - **F1** or the **?** button next to a page title opens the topic of the page you are working on. Resting the mouse on any input shows a short description (tooltip).
-- Underlined blue text links to other topics; author–year citations such as [@vanGenuchten1980] link to the [References](references) (resting the mouse on a citation shows the full reference).
-- **Open in web browser** writes the whole help as HTML pages (offline) and opens them in your web browser; *Help → Export the HTML help…* writes them into a folder of your choice.
+- Blue text links to other topics; author–year citations such as [@vanGenuchten1980] link to the [References](references) (resting the mouse on a citation shows the full reference).
+- **Open in web browser** writes the whole help as HTML pages (offline) and opens them in your web browser; *Help → Export the HTML help…* writes them into the folder *Rusteau-1D help* of a folder of your choice.
 
 ## Chapters
 

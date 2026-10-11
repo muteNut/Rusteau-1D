@@ -1,7 +1,7 @@
 # Dual-permeability model
 keywords: dual permeability; fractures; macropores; matrix; preferential flow; Gerke van Genuchten; water transfer; solute transfer
 
-The dual-permeability model of Gerke and van Genuchten [@gerkeVG1993a] assumes that the porous medium consists of two overlapping domains, both of which conduct water: the **fracture** (macropore, inter-aggregate) domain and the **matrix** (micropore, intra-aggregate) domain. Each domain has its own Richards equation, coupled by a water transfer term.
+The dual-permeability model of [@gerkeVG1993a] assumes that the porous medium consists of two overlapping domains, both of which conduct water: the **fracture** (macropore, inter-aggregate) domain and the **matrix** (micropore, intra-aggregate) domain. Each domain has its own Richards equation, coupled by a water transfer term.
 
 ## Governing equations
 

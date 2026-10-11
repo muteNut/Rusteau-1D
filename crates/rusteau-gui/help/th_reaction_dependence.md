@@ -11,7 +11,7 @@ with the parameter value a_{r} at the reference absolute temperature T_{r}^{A} =
 
 ## Water-content dependence {#water}
 
-Degradation is often slower in dry soil. Following Walker [@walker1974], the reaction rates can be reduced below a reference water content:
+Degradation is often slower in dry soil. Following [@walker1974], the reaction rates can be reduced below a reference water content:
 
 $$ a(θ) = a_{r} (θ/θ_{ref})^{B}   for θ < θ_{ref};   a(θ) = a_{r}   otherwise $$
 

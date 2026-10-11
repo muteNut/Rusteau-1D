@@ -24,6 +24,6 @@ The density and the viscosity of the solution are cubic polynomials of the liqui
 
 | Option | Description |
 |---|---|
-| Enhancement factor of the thermal vapor flux (iEnhanc, default on) | the thermal vapor flux is multiplied by the enhancement factor of Cass et al. [@cass1984]; off: factor 1 ([vapor flow](th_vapor)) |
+| Enhancement factor of the thermal vapor flux (iEnhanc, default on) | the thermal vapor flux is multiplied by the enhancement factor of [@cass1984]; off: factor 1 ([vapor flow](th_vapor)) |
 
 > Non-equilibrium water flow, the centrifuge and density-dependent flow are not available with the dual-permeability model.

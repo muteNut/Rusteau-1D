@@ -12,7 +12,7 @@ Start Rusteau-1D. The example is loaded already; otherwise choose *File → Exam
 - **Processes & units**: water flow and root water uptake are switched on; lengths in cm, times in days ([Processes & units](processes)).
 - **Time & output**: 0 to 30 days, print times every 5 days ([Time & output](time_output)).
 - **Soil → Hydraulic model**: van Genuchten–Mualem without hysteresis ([Soil hydraulic model](hyd_model)).
-- **Soil → Materials & parameters**: material 1 *Loam* and material 2 *Sand* with the catalog values of Carsel and Parrish [@carselParrish1988]; the retention curve θ(h) and the conductivity K(h) are drawn below the table ([Materials & parameters](soil_params)).
+- **Soil → Materials & parameters**: material 1 *Loam* and material 2 *Sand* with the catalog values of [@carselParrish1988]; the retention curve θ(h) and the conductivity K(h) are drawn below the table ([Materials & parameters](soil_params)).
 - **Soil → Soil profile**: 101 nodes over 100 cm; loam down to 50 cm, sand below; an initial pressure head of −200 cm in the loam and −80 cm in the sand; roots in the upper 30 cm; observation nodes at 20, 50 and 100 cm ([soil profile editor](profile_editor)).
 - **Boundary conditions → Water flow**: atmospheric boundary condition with surface runoff at the top, free drainage at the bottom ([Water flow boundary conditions](water_bc)).
 - **Boundary conditions → Time-variable data**: six records of precipitation, potential evaporation and potential transpiration ([Time-variable boundary data](time_variable_bc)).
