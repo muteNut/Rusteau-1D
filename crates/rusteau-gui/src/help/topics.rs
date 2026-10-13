@@ -157,6 +157,7 @@ pub const IMAGES: &[(&str, &[u8])] = images![
     "figures.png",
     "figures_layer.png",
     "figures_comparison.png",
+    "figures_colors.png",
     "figure_example.png",
 ];
 

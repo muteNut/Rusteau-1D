@@ -4,10 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The main window – Rusteau-1D Help</title>
+<link rel="icon" type="image/png" href="favicon.png">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header><a class="brand" href="contents.html">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<header><a class="brand" href="contents.html"><img src="favicon.png" alt="" width="22" height="22">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
 <div class="layout">
 <nav class="toc" aria-label="Contents">
 <ul>
@@ -139,7 +140,7 @@
 <h2 id="pages">Pages</h2>
 <p>Every page has a title with a <strong>?</strong> button that opens its help topic (as F1). Inputs show a <strong>tooltip</strong> with their meaning, unit and typical values when the mouse rests on the label or the value:</p>
 <figure><a href="img/tooltip.png"><img src="img/tooltip.png" alt="Tooltip of an input: the description appears when the mouse rests on the label or the field." loading="lazy"></a><figcaption>Tooltip of an input: the description appears when the mouse rests on the label or the field.</figcaption></figure>
-<p>Number fields accept typing (click, type, Enter) and dragging with the mouse; a comma is accepted as decimal separator and <code>d</code> / <code>D</code> as exponent (<code>1d-3</code>, as in Fortran files). Changes mark the project as modified.</p>
+<p>Number fields accept typing (click, type, Enter) and dragging with the mouse; a comma is accepted as decimal separator and <code>d</code> / <code>D</code> as exponent (<code>1d-3</code>, as in Fortran files). While a number is typed, other characters (letters, blanks, units) are ignored; whole-number fields (numbers of nodes, solutes, iterations …) accept only digits and the minus sign. A value that is still not a number when the field is left (e.g. <code>1e</code>) is discarded and the field keeps its previous value. Changes mark the project as modified.</p>
 <h2 id="bars">Workflow bar and status bar</h2>
 <p>On the input pages a bar at the bottom leads to the previous and the next page of the workflow (<em>step k of n</em>); on the last page it runs the calculation. The status bar shows messages (files written, problems, the end of a run) and, during a run, a progress bar with the current time.</p>
 <h2 id="help-window">Help window</h2>

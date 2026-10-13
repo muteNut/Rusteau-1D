@@ -4,10 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Questions and problems – Rusteau-1D Help</title>
+<link rel="icon" type="image/png" href="favicon.png">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header><a class="brand" href="contents.html">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<header><a class="brand" href="contents.html"><img src="favicon.png" alt="" width="22" height="22">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
 <div class="layout">
 <nav class="toc" aria-label="Contents">
 <ul>
@@ -134,6 +135,9 @@
 <p>Water or osmotic stress reduces the uptake (<a href="th_root_uptake.html">root water uptake</a>); compensated uptake (ωc &lt; 1) reduces the effect. Also check that the root distribution is not zero and that the roots reach the moist soil.</p>
 <h2 id="the-run-is-slow">The run is slow</h2>
 <p>Long simulations with small time steps (frequent rain, dry soil, fine mesh) take longer. Reduce the number of print times and use <em>Short output</em>; thin the time-level output (<em>Store time-level info every n-th step</em>). Parameter estimation runs the model many times; fewer starting points speed it up.</p>
+<h2 id="crash">The program stopped unexpectedly</h2>
+<p>An internal error while drawing a page or a figure shows a message in place of the page (<em>Try again</em> draws it again); an internal error of a calculation ends the run with a message in the status bar. Every such error is written with its details to the crash log <code>crash.log</code> in the folder <code>Rusteau-1D</code> of the user data (Windows: <code>%LOCALAPPDATA%\Rusteau-1D</code>, Linux: <code>~/.local/share/Rusteau-1D</code>, macOS: <code>~/Library/Application Support/Rusteau-1D</code>); please add it to a report.</p>
+<p>A project with unsaved changes is copied to <code>recovery.h1dr</code> in the same folder, at most once a minute and only when it changed since the last copy; the file always holds the latest state only. Saving the project (or closing the program normally) removes the copy. If the program did not close normally, the next start offers to open this copy (<em>Open the copy</em>) or to discard it. Save the recovered project under a name of your choice.</p>
 <h2 id="where-are-the-results-stored">Where are the results stored?</h2>
 <p>In memory with the project. Use <em>File → Export results (CSV)…</em> to write them (<a href="output_files.html">output files</a>).</p>
 <h2 id="how-do-i-make-a-figure-for-a-paper-or-a-presentation">How do I make a figure for a paper or a presentation?</h2>

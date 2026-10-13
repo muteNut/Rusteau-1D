@@ -4,10 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Soil hydraulic model – Rusteau-1D Help</title>
+<link rel="icon" type="image/png" href="favicon.png">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header><a class="brand" href="contents.html">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<header><a class="brand" href="contents.html"><img src="favicon.png" alt="" width="22" height="22">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
 <div class="layout">
 <nav class="toc" aria-label="Contents">
 <ul>
@@ -131,6 +132,7 @@
 <tr><td>Look-up tables</td><td>θ(h), K(h) and C(h) from tables (<code>Mater.in</code> of a HYDRUS-1D project).</td></tr>
 </tbody></table></div>
 <p>The equations are given in <a href="th_hydraulic_models.html">soil hydraulic property models</a>; the parameters are entered on the page <a href="soil_params.html">Materials &amp; parameters</a>.</p>
+<p>The parameters of the second region (θm, θa, θk, Kk of the modified van Genuchten model; w2, α2, n2 of Durner; θr,im, θs,im, ω … of the dual-porosity models; the matrix of the dual-permeability model) share the same columns. When the model is changed and the present values are not valid for the new model (e.g. θs,im smaller than θr,im), they are set to defaults of the model and the status bar says so; valid values are kept. <em>Check &amp; run</em> lists invalid parameters before a run.</p>
 <h2 id="hysteresis">Hysteresis</h2>
 <div class="table"><table>
 <thead><tr><th>Option</th><th>Description</th></tr></thead>

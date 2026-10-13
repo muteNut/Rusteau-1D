@@ -34,13 +34,21 @@ Every change shows at once in the preview. A click on a panel of the preview sel
 | Resolution (dpi) | dots per inch of the PNG (300 for print, 150–200 for screens) |
 | Panels (rows × columns) | number of diagrams in a grid (up to 4 × 4) |
 | Theme | Grid (frame and light grid), Classic (axis lines left and bottom), Minimal (no frame), Dark (presentations) |
-| Palette | colours of the series in order: Okabe–Ito, Tableau 10, Viridis, Grey |
+| Palette | colours of the series in order: Okabe–Ito, Tableau 10, Viridis, Grey, or Custom (your own list, see [custom colours](figures#custom-colours)) |
 | Transparent background | the exported files have no background |
 | SVG: text as outlines | see [Export](figures#export) |
 
 The size is the size in the document: the fonts are given in points (1 pt = 1/72 inch ≈ 0.35 mm) and keep their size whatever the resolution. Journals usually ask for text of at least 6–8 pt at the printed size; the defaults (8.5 pt for the numbers, 10 pt for the axis titles) fit a figure of 85–170 mm.
 
 The palettes follow the advice to use colours that remain distinguishable for readers with a colour vision deficiency and in print [@crameri2020]: Okabe–Ito, the default, is the palette of [@okabeIto2008], recommended for scientific figures by [@wong2011]. Viridis [@smith2015viridis] is a perceptually uniform sequence for series in an order such as print times or depths. Grey suits black-and-white print.
+
+### Custom colours {#custom-colours}
+
+With the palette **Custom (own colours)** the series take the colours of a list of your own, in order (after the last colour the list starts again). When Custom is chosen first, the list starts with the colours of the palette chosen before. Each colour has a name (for you; it is not drawn), a swatch and its code; ⬆ ⬇ change the order, 🗑 removes a colour, **+ Add colour** adds one.
+
+A click on a swatch opens the colour picker, as in the developer tools of web browsers: the field sets the saturation (left to right) and the brightness (top to bottom), the sliders below the hue and the opacity (alpha); the code can be typed as `#rrggbb` or `#rrggbbaa`, and R, G, B, A as numbers 0–255. The same picker sets the fixed colour of a layer and the colour of an annotation.
+
+![The custom palette with the colour picker of the first colour.](img/figures_colors.png)
 
 ## Font and text sizes
 

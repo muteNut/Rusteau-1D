@@ -4,10 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Keyboard and mouse – Rusteau-1D Help</title>
+<link rel="icon" type="image/png" href="favicon.png">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header><a class="brand" href="contents.html">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<header><a class="brand" href="contents.html"><img src="favicon.png" alt="" width="22" height="22">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
 <div class="layout">
 <nav class="toc" aria-label="Contents">
 <ul>
@@ -131,7 +132,7 @@
 </tbody></table></div>
 <p>On macOS, Cmd works in place of Ctrl.</p>
 <h2 id="number-fields">Number fields</h2>
-<p>Click a field to type a value; drag it with the mouse to change the value continuously. A comma is accepted as decimal separator and <code>d</code> / <code>D</code> as exponent (<code>1d-3</code>).</p>
+<p>Click a field to type a value; drag it with the mouse to change the value continuously. A comma is accepted as decimal separator and <code>d</code> / <code>D</code> as exponent (<code>1d-3</code>). Characters that cannot be part of a number are ignored while typing (whole-number fields: digits and the minus sign only).</p>
 <h2 id="plots">Plots</h2>
 <div class="table"><table>
 <thead><tr><th>Mouse</th><th>Action</th></tr></thead>
@@ -159,7 +160,9 @@
 <tr><td>drag (tool <em>Select nodes</em>)</td><td>selects a depth range</td></tr>
 <tr><td>click</td><td>selects one node; for material and sub-region the whole layer</td></tr>
 <tr><td>Shift+click</td><td>extends the selection</td></tr>
-<tr><td>click (tool <em>Observation nodes</em>)</td><td>adds or removes an observation node</td></tr>
+<tr><td>click (tool <em>Observation nodes</em>)</td><td>adds an observation node, or selects the one under the pointer</td></tr>
+<tr><td>drag (tool <em>Observation nodes</em>)</td><td>moves the observation node to another node</td></tr>
+<tr><td>double-click / Delete (tool <em>Observation nodes</em>)</td><td>removes the observation node</td></tr>
 <tr><td>click (tool <em>Fixed points</em>)</td><td>adds or removes a fixed point</td></tr>
 <tr><td>wheel / Ctrl+wheel / double-click</td><td>scroll / zoom / whole profile</td></tr>
 </tbody></table></div>

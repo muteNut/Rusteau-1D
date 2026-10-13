@@ -4,10 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Soil profile – Rusteau-1D Help</title>
+<link rel="icon" type="image/png" href="favicon.png">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header><a class="brand" href="contents.html">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<header><a class="brand" href="contents.html"><img src="favicon.png" alt="" width="22" height="22">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
 <div class="layout">
 <nav class="toc" aria-label="Contents">
 <ul>
@@ -150,7 +151,7 @@
 </tbody></table></div>
 <p><em>Apply to selection</em> sets the values. With results of a previous run, <em>Or take the results at t = …</em> sets the initial pressure head (or water content), temperature or concentrations from any print time (interpolated in depth). With Kool–Parker hysteresis, <em>Restart from these results</em> also takes the hysteresis state of all nodes (<a href="hyd_model.html#restart">restart</a>).</p>
 <h2 id="observation">Observation nodes</h2>
-<p>Observation nodes record h, θ, temperature, flux and concentrations at every time step (<a href="res_obs.html">Observation points</a>). Add them with the mouse tool <em>Observation nodes</em> (click toggles a node) or <em>Add at depth</em>; <em>✖</em> removes one, <em>Delete all</em> removes all (at most 100).</p>
+<p>Observation nodes record h, θ, temperature, flux and concentrations at every time step (<a href="res_obs.html">Observation points</a>). With the mouse tool <em>Observation nodes</em> a click in the profile adds an observation node at the nearest node, or selects the observation node under the pointer (it is drawn larger); dragging moves it to another node, a double-click or the Delete key removes it. The list on the right shows every observation node with its node number and depth: select one, drag or type its node number or depth (a depth moves it to the nearest node; nodes that are already observation nodes are skipped), <em>✖</em> removes one. <em>Add at depth</em> adds one at a typed depth, <em>Delete all</em> removes all (at most 100).</p>
 <h2 id="discretization">Profile depth and discretization</h2>
 <div class="table"><table>
 <thead><tr><th>Input</th><th>Description</th></tr></thead>
