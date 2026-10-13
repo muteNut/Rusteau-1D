@@ -1,6 +1,8 @@
 #![cfg_attr(all(not(debug_assertions), windows), windows_subsystem = "windows")]
 
+mod figure;
 mod files;
+mod fonts;
 mod help;
 mod hydro;
 mod inverse_ui;
@@ -130,6 +132,7 @@ fn load_system_font(ctx: &egui::Context) {
         "/Library/Fonts/Arial.ttf",
     ];
 
+    let mut found = false;
     for path in candidate_paths {
         if let Ok(data) = std::fs::read(path) {
             fonts.font_data.insert(
@@ -140,9 +143,12 @@ fn load_system_font(ctx: &egui::Context) {
             if let Some(family) = fonts.families.get_mut(&egui::FontFamily::Proportional) {
                 family.insert(0, "os_default".to_owned());
             }
+            found = true;
             break;
         }
     }
+    // symbols the system font lacks come from the bundled Noto fonts
+    fonts::add_fallbacks(&mut fonts, found);
 
     ctx.set_fonts(fonts);
 }

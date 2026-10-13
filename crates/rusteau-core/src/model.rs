@@ -1074,6 +1074,9 @@ pub struct Project {
     /// Options the HYDRUS-1D interface does not offer (`Options.in`)
     #[serde(default, skip_serializing_if = "AdvancedOptions::is_default")]
     pub options: AdvancedOptions,
+    /// Figures of the figure editor (not used by the simulation; not stored in HYDRUS-1D projects)
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub figures: Vec<crate::figure::Figure>,
 }
 
 impl Default for Project {
@@ -1092,6 +1095,7 @@ impl Default for Project {
             profile: Profile::default(),
             inverse: None,
             options: AdvancedOptions::default(),
+            figures: vec![],
         }
     }
 }
