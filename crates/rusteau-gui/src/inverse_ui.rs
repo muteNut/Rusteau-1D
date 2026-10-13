@@ -143,7 +143,8 @@ impl App {
         let mut done = None;
         if let Some(h) = self.inv.run.as_mut() {
             ctx.request_repaint_after(std::time::Duration::from_millis(100));
-            loop {
+            // until the result arrives; a closed channel without a result means the thread ended abnormally
+            while done.is_none() {
                 let m = match h.rx.try_recv() {
                     Ok(m) => m,
                     Err(std::sync::mpsc::TryRecvError::Empty) => break,
@@ -887,5 +888,61 @@ fn sync_records(s: &mut InverseSettings, prj: &rusteau_core::Project) {
     s.params.sort_by_key(|p| (rank(p.group), p.mat, p.index));
     if s.n_water_par < 10 && s.params.iter().any(|p| p.group == ParamGroup::Water && p.index > s.n_water_par) {
         s.params.retain(|p| p.group != ParamGroup::Water || p.index <= s.n_water_par);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::App;
+
+    /// A parameter estimation started like the Run button and polled like the interface delivers its result (the
+    /// thread has ended, so the result and the closed channel are seen in the same poll).
+    #[test]
+    fn a_finished_estimation_delivers_its_result() {
+        let mut app = App::with_project(rusteau_core::examples::inverse_outflow());
+        app.start_inverse();
+        assert!(app.inv.run.is_some(), "{}", app.status);
+        let ctx = egui::Context::default();
+        let start = std::time::Instant::now();
+        // wait for the end of the thread before polling: the worst case of the polling
+        while app.inv.run.as_ref().is_some_and(|h| !h.cancel.load(std::sync::atomic::Ordering::Relaxed)) && start.elapsed().as_secs() < 300 {
+            std::thread::sleep(std::time::Duration::from_millis(200));
+            app.poll_inverse(&ctx);
+        }
+        assert!(app.inv.run.is_none(), "still running after 300 s");
+        assert!(app.inv.result.is_some(), "no result: {}", app.status);
+        assert!(app.status.starts_with("Parameter estimation finished"), "{}", app.status);
+    }
+
+    /// A HYDRUS-1D project with Fit.in (folder in `RUSTEAU_INVERSE_PROJECT`) opened and estimated as in the interface:
+    /// `RUSTEAU_INVERSE_PROJECT=<folder> cargo test -p rusteau-gui --release -- --ignored imported`.
+    #[test]
+    #[ignore]
+    fn imported_project_estimation() {
+        let dir = std::path::PathBuf::from(std::env::var_os("RUSTEAU_INVERSE_PROJECT").expect("RUSTEAU_INVERSE_PROJECT"));
+        let mut app = App::with_project(rusteau_core::examples::infiltration_evaporation());
+        app.open_path(&dir);
+        assert!(app.prj.processes.inverse, "{}", app.status);
+        app.start_inverse();
+        assert!(app.inv.run.is_some(), "{} {:?}", app.status, app.problems);
+        let ctx = egui::Context::default();
+        let start = std::time::Instant::now();
+        while app.inv.run.is_some() && start.elapsed().as_secs() < 900 {
+            std::thread::sleep(std::time::Duration::from_millis(200));
+            app.poll_inverse(&ctx);
+        }
+        assert!(app.inv.result.is_some(), "{}", app.status);
+        println!("{}", app.status);
+    }
+
+    #[test]
+    fn a_thread_that_ends_without_a_result_is_reported() {
+        let mut app = App::with_project(rusteau_core::examples::inverse_outflow());
+        let (tx, rx) = std::sync::mpsc::channel::<super::InvMsg>();
+        drop(tx);
+        app.inv.run = Some(super::InvHandle { rx, cancel: Default::default(), started: std::time::Instant::now(), rows: vec![], finished: vec![], n_starts: 1 });
+        app.poll_inverse(&egui::Context::default());
+        assert!(app.inv.run.is_none());
+        assert!(app.status.contains("ended without results"), "{}", app.status);
     }
 }
