@@ -26,6 +26,12 @@ pub enum Purpose {
     SaveFitOut,
     /// Folder for the HTML help
     ExportHelp,
+    /// figure editor: export, data tables, kept runs
+    FigurePng,
+    FigureSvg,
+    FigureData,
+    FigureLoadRun,
+    FigureSaveRun,
 }
 
 pub enum DialogResult {

@@ -401,8 +401,9 @@ fn axis_ticks(axis: &Axis, data: Option<(f64, f64)>, len: f32, spacing: f32) -> 
         step = nice_step(hi - lo, target);
     }
     if axis.auto {
-        lo = (lo / step + 1e-9).floor() * step;
-        hi = (hi / step - 1e-9).ceil() * step;
+        // data a millionth of a step beyond a tick (noise of single-precision times) do not add a step
+        lo = (lo / step + 1e-6).floor() * step;
+        hi = (hi / step - 1e-6).ceil() * step;
     }
     let (k0, k1) = ((lo / step - 1e-9).ceil() as i64, (hi / step + 1e-9).floor() as i64);
     let vals: Vec<f64> = (k0..=k1).map(|k| k as f64 * step).collect();
@@ -1122,6 +1123,9 @@ mod tests {
         assert!(t.minor.contains(&0.2));
         let (_, t) = axis_ticks(&l, Some((1.0, 100.0)), 300.0, 30.0);
         assert_eq!(t.major.iter().map(|m| m.1.as_str()).collect::<Vec<_>>(), vec!["1", "10", "100"]);
+        // noise above a tick does not extend the axis
+        let ((_, hi), _) = axis_ticks(&a, Some((0.0, 30.000001)), 300.0, 60.0);
+        assert_eq!(hi, 30.0);
         // one value
         let ((lo, hi), _) = axis_ticks(&a, Some((5.0, 5.0)), 300.0, 40.0);
         assert!(lo < 5.0 && hi > 5.0);

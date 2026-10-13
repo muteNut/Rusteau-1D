@@ -42,6 +42,7 @@ impl FontSet {
     }
 
     /// Whether font `k` is Noto Sans Math (the last fallback).
+    #[cfg(test)]
     pub fn is_math(&self, k: u8) -> bool {
         k == 8
     }

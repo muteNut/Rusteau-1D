@@ -7,7 +7,9 @@
 //! ```
 //!
 //! With `RUSTEAU_SCREENSHOTS_TOPICS=1` the tour also shows every help topic (`topic_<id>.png`, for proof-reading the
-//! formulas and tables; not used by the help).
+//! formulas and tables; not used by the help). `RUSTEAU_SCREENSHOTS_ONLY=<prefix>` limits the tour to the steps whose
+//! names start with the prefix. Steps whose names start with `_` prepare the next step and save no screenshot. The
+//! figure window is embedded in the main window during the tour (screenshots of other windows are not available).
 
 use crate::{App, Page};
 use eframe::egui;
@@ -67,7 +69,46 @@ fn has_fit(a: &App) -> bool {
 fn page(a: &mut App, p: Page) {
     a.ros = None;
     a.help.open = false;
+    a.figs.open = false;
     a.page = p;
+}
+
+/// The figure window with the figures of the help: profiles of the infiltration example and an overview (written as
+/// an example image, `figure_example.png`, by the next step).
+fn figures_setup(a: &mut App, _: &egui::Context) {
+    page(a, Page::ProfileInfo);
+    let tc = crate::figure::templates::TemplateCtx { prj: &a.prj, runs: vec![], has_fit: false, has_measured: false };
+    let all = crate::figure::templates::all();
+    let make = |name: &str| all.iter().find(|t| t.name == name).map(|t| (t.make)(&tc)).unwrap_or_default();
+    let mut prof = make("Water content and pressure head profiles");
+    prof.title = "Infiltration and evaporation".into();
+    prof.panels[0].annotations.push(rusteau_core::figure::Annotation {
+        kind: rusteau_core::figure::AnnotationKind::HLine,
+        text: "layer boundary".into(),
+        relative: false,
+        y: 50.0,
+        anchor: rusteau_core::figure::Anchor::Right,
+        ..Default::default()
+    });
+    prof.subtitle = "Layered profile of loam and sand".into();
+    let mut over = make("Overview (four panels)");
+    over.title = "Infiltration and evaporation: overview".into();
+    a.prj.figures = vec![prof, over];
+    a.figs.fig = 0;
+    a.figs.panel = 1;
+    a.figs.layer = 0;
+    a.figs.open = true;
+}
+
+/// Writes figure `k` as `<name>.png` at 120 dpi into the folder of the screenshots.
+fn export_figure(a: &mut App, k: usize, name: &str) {
+    let Some(dir) = std::env::var_os("RUSTEAU_SCREENSHOTS") else { return };
+    let sel = a.figs.fig;
+    a.figs.fig = k;
+    if let Some(pm) = a.figure_pixmap_at(120.0) {
+        let _ = crate::figure::canvas::write_png(&pm, 120.0, &PathBuf::from(dir).join(format!("{name}.png")));
+    }
+    a.figs.fig = sel;
 }
 
 /// Meteorological data for the screenshot of the meteo page: ten summer days.
@@ -177,6 +218,54 @@ impl Tour {
                 page(a, Page::Inverse);
             }),
             Step {
+                name: "figures".into(),
+                setup: |a, ctx| {
+                    a.set_project(examples::infiltration_evaporation(), None);
+                    a.start_run();
+                    figures_setup(a, ctx);
+                },
+                ready: has_results,
+                hover: None,
+                topic: None,
+            },
+            s("figures_layer", |a, _| {
+                a.figs.fig = 0;
+                a.figs.panel = 0;
+                a.figs.layer = 0;
+                a.figs.fold = Some(false);
+            }),
+            Step {
+                name: "_figures_keep".into(),
+                setup: |a, _| {
+                    export_figure(a, 1, "figure_example");
+                    // keep the results, lower Ks of the loam and run again
+                    if let Some(r) = a.results.clone() {
+                        a.figs.runs = vec![crate::figure::data::SavedRun { name: "Ks of loam 25 cm/d".into(), project: a.prj.clone(), results: r }];
+                    }
+                    let figs = std::mem::take(&mut a.prj.figures);
+                    if let Some(m) = a.prj.water.materials.get_mut(0) {
+                        m.ks *= 0.2;
+                    }
+                    a.start_run();
+                    a.prj.figures = figs;
+                },
+                ready: has_results,
+                hover: None,
+                topic: None,
+            },
+            s("figures_comparison", |a, _| {
+                let tc = crate::figure::templates::TemplateCtx { prj: &a.prj, runs: a.figs.runs.iter().map(|r| r.name.clone()).collect(), has_fit: false, has_measured: false };
+                if let Some(t) = crate::figure::templates::all().iter().find(|t| t.name == "Comparison of runs") {
+                    let mut f = (t.make)(&tc);
+                    f.subtitle = "Current results (Ks of loam 5 cm/d) and the kept run".into();
+                    a.prj.figures.push(f);
+                }
+                a.figs.fig = a.prj.figures.len() - 1;
+                a.figs.panel = 0;
+                a.figs.layer = 0;
+                a.figs.open = true;
+            }),
+            Step {
                 name: "res_inverse".into(),
                 setup: |a, _| {
                     a.start_run();
@@ -187,6 +276,10 @@ impl Tour {
                 topic: None,
             },
         ];
+        if let Some(only) = std::env::var_os("RUSTEAU_SCREENSHOTS_ONLY") {
+            let only = only.to_string_lossy().to_string();
+            steps.retain(|s| s.name.trim_start_matches('_').starts_with(&only));
+        }
         if std::env::var_os("RUSTEAU_SCREENSHOTS_TOPICS").is_some() {
             for id in crate::help::topics::order() {
                 steps.push(Step { name: format!("topic_{id}"), setup: |a, _| page(a, Page::Main), ready: always, hover: None, topic: Some(id) });
@@ -198,6 +291,7 @@ impl Tour {
     /// One frame of the tour; returns false when it has ended.
     pub fn frame(&mut self, app: &mut App, ctx: &egui::Context) -> bool {
         ctx.request_repaint();
+        ctx.set_embed_viewports(true);
         let Some(step) = self.steps.get(self.k) else {
             app.dirty = false;
             ctx.send_viewport_cmd(egui::ViewportCommand::Close);
@@ -218,6 +312,10 @@ impl Tour {
                 // a few frames for the layout (plots, scroll areas, windows) to settle
                 if n >= 12 && (step.ready)(app) {
                     match step.hover {
+                        _ if step.name.starts_with('_') => {
+                            self.k += 1;
+                            Phase::Setup
+                        }
                         Some(_) => Phase::Hover(0),
                         None => {
                             ctx.send_viewport_cmd(egui::ViewportCommand::Screenshot(egui::UserData::default()));

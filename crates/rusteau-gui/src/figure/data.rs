@@ -125,6 +125,33 @@ pub fn all_sources(fig: &Figure) -> Vec<Source> {
     v
 }
 
+/// Group of a column in the menus of the x and y variables.
+pub fn column_group(src: &Source, c: &ColInfo) -> &'static str {
+    match src {
+        Source::Meteo => return if c.key == "t" { "Time" } else { "Meteorology" },
+        Source::Hydraulic => return "Hydraulic properties",
+        Source::Measured | Source::Fit | Source::DataFile(_) => return "Columns",
+        _ => {}
+    }
+    let k = c.key.as_str();
+    let n = c.name.as_str();
+    if matches!(k, "t" | "depth" | "node") {
+        "Time and position"
+    } else if matches!(k, "dt" | "iter" | "peclet" | "courant") {
+        "Numerics"
+    } else if n.starts_with("Solute") || n.contains("oncentration") || n.starts_with("Sorbed") {
+        "Solutes"
+    } else if n.contains("emperature") {
+        "Heat"
+    } else if k.starts_with("sum_") {
+        "Cumulative water fluxes"
+    } else if matches!(src, Source::ProfileInput) {
+        "Soil profile"
+    } else {
+        "Water"
+    }
+}
+
 /// Whether the source has items to choose (nodes, print times, materials, sets).
 pub fn has_items(s: &Source) -> bool {
     matches!(s, Source::ObsNodes | Source::Profiles | Source::Hydraulic | Source::Measured | Source::Fit)
@@ -532,7 +559,7 @@ impl DataCtx<'_> {
                 let Some(t) = self.table(&layer.source, k, run, fig) else { continue };
                 let (Some((xi, xv)), Some((yi, yv))) = (t.get(&layer.x), t.get(&layer.y)) else { continue };
                 let item = if has_items(&layer.source) { item_labels.get(k).cloned().unwrap_or_default() } else { String::new() };
-                let run_name = if run.is_empty() { "current run".to_string() } else { run.clone() };
+                let run_name = if run.is_empty() { "current results".to_string() } else { run.clone() };
                 let label = if layer.label.trim().is_empty() {
                     let mut parts = vec![];
                     if !item.is_empty() {

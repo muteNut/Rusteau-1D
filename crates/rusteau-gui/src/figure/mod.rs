@@ -4,4 +4,6 @@
 pub mod data;
 pub mod render;
 pub mod canvas;
+pub mod templates;
 pub mod text;
+pub mod ui;

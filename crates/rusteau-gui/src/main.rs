@@ -17,6 +17,7 @@ mod util;
 
 use eframe::egui;
 use files::{DialogResult, FileDialog, Mode, Purpose};
+use tips::TipExt;
 use rusteau_core::{Project, Results, Simulation};
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
@@ -240,6 +241,8 @@ pub struct App {
     pub help: help::HelpState,
     /// Screenshot tour for the help (`RUSTEAU_SCREENSHOTS`)
     tour: Option<shots::Tour>,
+    /// figure editor (its own window)
+    pub figs: figure::ui::FigState,
 }
 
 #[derive(Clone, Debug)]
@@ -301,6 +304,7 @@ impl App {
             ros: None,
             help: help::HelpState::default(),
             tour: shots::Tour::from_env(),
+            figs: Default::default(),
         };
         if let Some(arg) = std::env::args().nth(1) {
             app.open_path(&PathBuf::from(&arg));
@@ -382,6 +386,7 @@ impl App {
         self.inv.result = None;
         self.inv.settings = None;
         self.page = Page::Main;
+        self.figs.project_changed();
         self.sync();
     }
 
@@ -725,6 +730,11 @@ impl App {
                     }
                 });
                 ui.menu_button("View", |ui| {
+                    if ui.button("Figures (new window)…").on_hover_text("Diagrams of the results, the input and measured data for publications: titles, annotations, several panels, comparison of runs; PNG and SVG").clicked() {
+                        self.figs.open = true;
+                        ui.close_menu();
+                    }
+                    ui.separator();
                     if ui.button("Dark theme").clicked() {
                         apply_custom_dark_theme(ctx);
                         ui.close_menu();
@@ -830,6 +840,10 @@ impl App {
             Some(None) => self.help.show_topic(help::topic_of(self.page), None),
             Some(Some(id)) => self.help.show_topic(id, None),
             None => {}
+        }
+        // the figure window shows the help itself when it was asked for there
+        if self.figs.open && self.figs.help_here {
+            return;
         }
         if let Some(help::HelpEvent::OpenInBrowser(id)) = self.help.window(ctx) {
             self.open_help_in_browser(ctx, &id);
@@ -1006,6 +1020,8 @@ impl App {
                                 Err(e) => e,
                             };
                         }
+                        // dialogs of the figure window
+                        Purpose::FigurePng | Purpose::FigureSvg | Purpose::FigureData | Purpose::FigureLoadRun | Purpose::FigureSaveRun => {}
                     }
                 }
             }
@@ -1124,6 +1140,15 @@ impl App {
                             }
                         });
                     }
+                    ui.add_space(6.0);
+                    ui.horizontal(|ui| {
+                        ui.add_space(8.0);
+                        let n = self.prj.figures.len();
+                        let label = if n == 0 { "📈 Figures ↗".to_string() } else { format!("📈 Figures ({n}) ↗") };
+                        if ui.selectable_label(self.figs.open, label).tip("Figures").clicked() {
+                            self.figs.open = true;
+                        }
+                    });
                 });
             });
     }
@@ -1221,6 +1246,7 @@ impl eframe::App for App {
         self.dialogs(ctx);
         self.rosetta_window(ctx);
         self.help_ui(ctx);
+        self.figure_window(ctx);
         self.drop_overlay(ctx);
     }
 }
