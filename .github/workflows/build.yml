@@ -6,16 +6,22 @@ on:
     tags: ["v*"]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   build:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          # macOS: one program for Apple Silicon and Intel
+          targets: ${{ matrix.os == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
       - uses: Swatinem/rust-cache@v2
       - name: Linux system libraries
         if: runner.os == 'Linux'
@@ -25,7 +31,13 @@ jobs:
       - name: Test interface (help, tooltips)
         run: cargo test -p rusteau-gui --release
       - name: Build release binaries
+        if: runner.os != 'macOS'
         run: cargo build --release -p rusteau-gui -p rusteau-cli
+      - name: Build release binaries (macOS, Apple Silicon and Intel)
+        if: runner.os == 'macOS'
+        run: |
+          cargo build --release --target aarch64-apple-darwin -p rusteau-gui -p rusteau-cli
+          cargo build --release --target x86_64-apple-darwin -p rusteau-gui -p rusteau-cli
       - name: Package (Linux)
         if: runner.os == 'Linux'
         run: |
@@ -44,19 +56,37 @@ jobs:
           New-Item -ItemType Directory dist\fonts
           Copy-Item crates\rusteau-gui\fonts\OFL-*.txt, crates\rusteau-gui\fonts\README.md dist\fonts\
           Compress-Archive -Path dist\* -DestinationPath rusteau-windows-x86_64.zip
+      - name: Package (macOS)
+        if: runner.os == 'macOS'
+        run: sh tools/package-macos.sh
       - uses: actions/upload-artifact@v4
         with:
           name: rusteau-${{ runner.os }}
           path: |
             rusteau-linux-x86_64.tar.gz
             rusteau-windows-x86_64.zip
-          if-no-files-found: ignore
-      - name: Release
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
+            rusteau-macos-universal.zip
+          if-no-files-found: error
+
+  # a tag v…: publish the release with the archives of all systems (only when every build succeeded)
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
         with:
           name: Rusteau-1D ${{ github.ref_name }}
           body_path: RELEASE_NOTES.md
+          fail_on_unmatched_files: true
           files: |
-            rusteau-linux-x86_64.tar.gz
-            rusteau-windows-x86_64.zip
+            dist/rusteau-linux-x86_64.tar.gz
+            dist/rusteau-windows-x86_64.zip
+            dist/rusteau-macos-universal.zip

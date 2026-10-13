@@ -1,5 +1,5 @@
 Rusteau-1D is a Rust port of the numerical engine of **HYDRUS-1D**: one-dimensional variably saturated water flow, heat
-transport and solute transport in porous media. It comes with a desktop interface for Windows and Linux, a figure
+transport and solute transport in porous media. It comes with a desktop interface for Windows, macOS and Linux, a figure
 editor for publication figures and a complete help. Version 1.0.0 is the first release.
 
 > Rusteau-1D is an independent project. It is not affiliated with or endorsed by PC-Progress or the HYDRUS authors.
@@ -9,11 +9,12 @@ editor for publication figures and a complete help. Version 1.0.0 is the first r
 | File | System |
 |---|---|
 | `rusteau-windows-x86_64.zip` | Windows 10 or 11, 64-bit |
+| `rusteau-macos-universal.zip` | macOS 11 or newer, Apple Silicon or Intel |
 | `rusteau-linux-x86_64.tar.gz` | Linux x86-64 with glibc 2.39 or newer (Ubuntu 24.04, Debian 13, Fedora 40 or later) and an X11 desktop (Wayland through XWayland) |
 
-Both archives contain:
+Each archive contains:
 
-- `rusteau` (`rusteau.exe`): the interface
+- `rusteau` (`rusteau.exe`; on macOS the app `Rusteau-1D.app`): the interface
 - `rusteau-cli` (`rusteau-cli.exe`): the command line program
 - `help`: the help as HTML pages (open `help/index.html`)
 - `fonts`: the licenses of the bundled fonts
@@ -22,6 +23,10 @@ Nothing needs to be installed:
 
 - **Windows:** unpack the archive and start `rusteau.exe`. The programs are not code-signed, so Windows SmartScreen
   may warn when they are started the first time: *More info → Run anyway*.
+- **macOS:** unpack the archive and start `Rusteau-1D.app` (it can be moved to *Applications*). The app is not
+  notarized by Apple, so macOS refuses to open it the first time: open *System Settings → Privacy & Security* and
+  click *Open Anyway*. Or remove the quarantine flag in the Terminal: `xattr -dr com.apple.quarantine Rusteau-1D.app`
+  (and the same for `rusteau-cli`).
 - **Linux:** `mkdir rusteau && tar xzf rusteau-linux-x86_64.tar.gz -C rusteau && ./rusteau/rusteau`
 
 To start, open an example with *File → Examples*, or a HYDRUS-1D project (`.h1d`) with *File → Open project*. **F1**
@@ -105,7 +110,6 @@ rusteau-cli project.h1dr --save-h1d C:\Hydrus\Copy.h1d # write a Rusteau project
 ## Not included
 
 - HP1 (coupling with PHREEQC) and UnsatChem are not supported.
-- There is no macOS build.
 
 ## License
 

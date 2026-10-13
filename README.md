@@ -3,16 +3,17 @@
 <img src="crates/rusteau-gui/assets/icon-512.png" alt="Rusteau-1D icon" width="96" align="right">
 
 Rusteau-1D is a Rust port of the numerical engine of **HYDRUS-1D**, the program for one-dimensional water flow, heat
-transport and solute transport in variably saturated soils. It comes with a desktop interface for Windows and Linux
-and a command line program.
+transport and solute transport in variably saturated soils. It comes with a desktop interface for Windows, macOS and
+Linux and a command line program.
 
 > Rusteau-1D is an independent project. It is not affiliated with or endorsed by PC-Progress or the HYDRUS authors.
 > "HYDRUS" is used here only to name the program this port follows.
 
 ## TL;DR
 
-- **Download** the programs for Windows or Linux from [Releases](https://github.com/muteNut/rustyHydrus/releases),
-  unpack the archive and start `rusteau`. Nothing needs to be installed.
+- **Download** the programs for Windows, macOS or Linux from
+  [Releases](https://github.com/muteNut/rustyHydrus/releases), unpack the archive and start `rusteau` (on macOS
+  `Rusteau-1D.app`). Nothing needs to be installed.
 - **Compatible with HYDRUS-1D:** opens and saves HYDRUS-1D 4.x projects (`.h1d`); the input pages follow the dialogs
   of HYDRUS-1D 4.17.
 - **Close to HYDRUS 4.17:** the 23 direct and 12 inverse examples of the HYDRUS-1D distribution are part of the test
@@ -20,7 +21,7 @@ and a command line program.
   listed [below](#results-that-differ-from-hydrus-417). Water and solute totals agree within 0.07 % in all of them.
 - **Parameter estimation iterates differently by default.** It reaches the same or a lower objective function than
   HYDRUS 4.17, but can end at other parameter values. The iteration of HYDRUS 4.17 is available as an option.
-- **Not supported:** HP1, UnsatChem and CO₂ transport. There is no macOS build.
+- **Not supported:** HP1, UnsatChem and CO₂ transport.
 - **Beyond HYDRUS-1D:** a figure editor for publication figures, comparison of runs, Rosetta 3, options of the HYDRUS
   code that HYDRUS-1D does not offer, and a help with the theory and 109 references.
 - **License:** GPL-3.0 or later.
@@ -42,13 +43,17 @@ and a command line program.
 | Archive | System |
 |---|---|
 | `rusteau-windows-x86_64.zip` | Windows 10 or 11, 64-bit |
+| `rusteau-macos-universal.zip` | macOS 11 or newer, Apple Silicon or Intel |
 | `rusteau-linux-x86_64.tar.gz` | Linux x86-64 with glibc 2.39 or newer (Ubuntu 24.04, Debian 13, Fedora 40 or later) and an X11 desktop (Wayland through XWayland) |
 
-Each archive contains the interface `rusteau`, the command line program `rusteau-cli`, the help as HTML pages
-(`help/index.html`) and the licenses of the bundled fonts (`fonts`).
+Each archive contains the interface `rusteau` (on macOS the app `Rusteau-1D.app`), the command line program
+`rusteau-cli`, the help as HTML pages (`help/index.html`) and the licenses of the bundled fonts (`fonts`).
 
 - **Windows:** unpack and start `rusteau.exe`. The programs are not code-signed, so SmartScreen may warn the first
   time: *More info → Run anyway*.
+- **macOS:** unpack and start `Rusteau-1D.app`. The app is not notarized by Apple, so macOS refuses to open it the
+  first time: *System Settings → Privacy & Security → Open Anyway*, or in the Terminal
+  `xattr -dr com.apple.quarantine Rusteau-1D.app`.
 - **Linux:** `mkdir rusteau && tar xzf rusteau-linux-x86_64.tar.gz -C rusteau && ./rusteau/rusteau`
 
 To start, open an example with *File → Examples*, or a HYDRUS-1D project with *File → Open project*. **F1** opens the
@@ -64,7 +69,8 @@ cargo build --release
 ```
 
 The programs are `target/release/rusteau` (interface) and `target/release/rusteau-cli` (command line), with `.exe` on
-Windows.
+Windows. On macOS (with the Xcode command line tools), `tools/package-macos.sh` builds the app bundle the releases
+contain.
 
 | Crate | Content |
 |---|---|
@@ -187,7 +193,6 @@ list, with the code involved, is in the [technical notes](docs/technical-notes.m
 
 - HP1 (coupling with PHREEQC), UnsatChem (major-ion chemistry) and CO₂ transport. They are separate modules beside
   the HYDRUS-1D core and not part of the source this port follows.
-- There is no macOS build.
 
 ## Testing
 
