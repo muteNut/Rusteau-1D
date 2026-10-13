@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rusteau-1D</title>
+<meta name="description" content="Rusteau-1D simulates one-dimensional water flow, heat and solute transport in variably saturated soils: a Rust port of the HYDRUS-1D engine for Windows, macOS and Linux.">
+<link rel="icon" type="image/png" href="help/favicon.png">
+<link rel="stylesheet" href="help/style.css">
+<style>
+  .home { max-width: 920px; margin: 0 auto; padding: 32px 16px 40px; }
+  .hero { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+  .hero img { width: 112px; height: 112px; }
+  .hero h1 { font-size: 34px; margin: 0; }
+  .hero p { margin: 4px 0 0; color: var(--weak); font-size: 18px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 24px 0 8px; }
+  .button { display: inline-block; padding: 9px 18px; border-radius: 6px; border: 1px solid var(--line);
+    background: var(--panel); color: var(--text); font-weight: 600; }
+  .button.primary { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+  .button:hover { text-decoration: none; filter: brightness(1.08); }
+  .home h2 { margin-top: 32px; }
+  .home figure img { display: block; }
+</style>
+</head>
+<body>
+<header><a class="brand" href="./"><img src="help/favicon.png" alt="" width="22" height="22">Rusteau-1D</a><nav class="top"><a href="https://github.com/muteNut/Rusteau-1D/releases/latest">Download</a><a href="help/contents.html">Help</a><a href="https://github.com/muteNut/Rusteau-1D">Source code</a></nav></header>
+<main class="home">
+  <div class="hero">
+    <img src="icon.png" alt="Rusteau-1D icon">
+    <div>
+      <h1>Rusteau-1D</h1>
+      <p>Water flow, heat and solute transport in variably saturated soils</p>
+    </div>
+  </div>
+  <div class="actions">
+    <a class="button primary" href="https://github.com/muteNut/Rusteau-1D/releases/latest">Download for Windows, macOS and Linux</a>
+    <a class="button" href="help/contents.html">Read the help</a>
+    <a class="button" href="https://github.com/muteNut/Rusteau-1D">Source code on GitHub</a>
+  </div>
+
+  <h2>About</h2>
+  <p>Rusteau-1D simulates one-dimensional water flow, heat transport and solute transport in variably saturated soils.
+  It is a port of the numerical engine of HYDRUS-1D to Rust, with a desktop interface for Windows, macOS and Linux and a
+  command line program. Rusteau-1D opens and saves HYDRUS-1D projects, and its results are checked against HYDRUS 4.17
+  on all examples of the HYDRUS-1D distribution. Beyond HYDRUS-1D it offers a figure editor for publication figures,
+  the comparison of runs and a help that explains every input and the theory behind it, with its references. It is
+  free software under the GNU General Public License; nothing needs to be installed.</p>
+
+  <figure>
+    <img src="help/img/main_window.png" alt="The main window of Rusteau-1D" width="1280" height="800">
+    <figcaption>The main window: the steps of a project on the left, here the water content profiles of an example after a run.</figcaption>
+  </figure>
+
+  <h2>Where to go next</h2>
+  <ul>
+    <li><a href="help/getting_started.html">Getting started</a>: open an example, run it and look at the results.</li>
+    <li><a href="help/hydrus_relation.html">Relation to HYDRUS-1D</a>: compatibility, verification and what differs.</li>
+    <li><a href="help/figures.html">Figure editor</a>: figures for papers, reports and presentations.</li>
+    <li><a href="https://github.com/muteNut/Rusteau-1D/releases/latest">Release notes</a> of the current version.</li>
+  </ul>
+</main>
+<div class="foot">Rusteau-1D is an independent project. It is not affiliated with or endorsed by PC-Progress or the
+HYDRUS authors. Free software under the GNU GPL, version 3 or later.</div>
+</body>
+</html>
