@@ -930,9 +930,9 @@ impl App {
         ui.horizontal(|ui| {
             let (mut fa, mut fb) = (da, db);
             ui.label("From");
-            let ra = ui.add(egui::DragValue::new(&mut fa).speed(0.2).suffix(format!(" {lu}"))).tip_text("Depth of the top of the selection (the nearest node is taken)");
+            let ra = ui.add(egui::DragValue::new(&mut fa).custom_parser(crate::util::parse_num).speed(0.2).suffix(format!(" {lu}"))).tip_text("Depth of the top of the selection (the nearest node is taken)");
             ui.label("to");
-            let rb = ui.add(egui::DragValue::new(&mut fb).speed(0.2).suffix(format!(" {lu}"))).tip_text("Depth of the bottom of the selection (the nearest node is taken)");
+            let rb = ui.add(egui::DragValue::new(&mut fb).custom_parser(crate::util::parse_num).speed(0.2).suffix(format!(" {lu}"))).tip_text("Depth of the bottom of the selection (the nearest node is taken)");
             if ra.changed() || rb.changed() {
                 let ka = self.prj.profile.nearest_node(fa);
                 let kb = self.prj.profile.nearest_node(fb);
@@ -971,7 +971,7 @@ impl App {
             Qty::SubRegion => {
                 ui.horizontal(|ui| {
                     lbl(ui, "Sub-region");
-                    ui.add(egui::DragValue::new(&mut self.pe.sub).range(1..=100)).tip("Sub-region");
+                    crate::util::int(ui.add(egui::DragValue::new(&mut self.pe.sub).range(1..=100))).tip("Sub-region");
                     if ui.button("Apply").tip_text("Assigns the sub-region to the selected nodes").clicked() {
                         self.apply_values(ch);
                     }
@@ -1007,12 +1007,12 @@ impl App {
                         self.pe.obs_sel = Some(o);
                     }
                     let mut node = o;
-                    if ui.add(egui::DragValue::new(&mut node).range(1..=n_nodes.max(1)).speed(0.2)).tip("Node").changed() {
+                    if crate::util::int(ui.add(egui::DragValue::new(&mut node).range(1..=n_nodes.max(1)).speed(0.2))).tip("Node").changed() {
                         moves.push((o, node));
                     }
                     let depth = self.prj.profile.nodes.get(o.wrapping_sub(1)).map(|x| x.depth).unwrap_or(0.0);
                     let mut z = depth;
-                    if ui.add(egui::DragValue::new(&mut z).speed(spacing.max(1e-9)).suffix(format!(" {lu}"))).tip("Depth").changed() {
+                    if ui.add(egui::DragValue::new(&mut z).custom_parser(crate::util::parse_num).speed(spacing.max(1e-9)).suffix(format!(" {lu}"))).tip("Depth").changed() {
                         // the nearest node; a move of less than half a node spacing moves to the neighbour
                         let mut to = self.prj.profile.nearest_node(z) + 1;
                         if to == o && (z - depth).abs() > 1e-12 {
@@ -1041,7 +1041,7 @@ impl App {
         }
         ui.horizontal(|ui| {
             lbl(ui, "Add at depth");
-            ui.add(egui::DragValue::new(&mut self.pe.obs_depth).speed(0.2).suffix(format!(" {lu}"))).tip("Add at depth");
+            ui.add(egui::DragValue::new(&mut self.pe.obs_depth).custom_parser(crate::util::parse_num).speed(0.2).suffix(format!(" {lu}"))).tip("Add at depth");
             if ui.button("Add").clicked() {
                 let k = self.prj.profile.nearest_node(self.pe.obs_depth) + 1;
                 let obs = &mut self.prj.profile.observation_nodes;
@@ -1062,12 +1062,12 @@ impl App {
         section(ui, "Profile depth & discretization");
         egui::Grid::new("pe_geo").num_columns(2).show(ui, |ui| {
             lbl(ui, "Profile depth");
-            if ui.add(egui::DragValue::new(&mut self.pe.g_depth).speed(0.5).range(1e-6..=1e9).suffix(format!(" {lu}"))).tip("Profile depth").changed() {
+            if ui.add(egui::DragValue::new(&mut self.pe.g_depth).custom_parser(crate::util::parse_num).speed(0.5).range(1e-6..=1e9).suffix(format!(" {lu}"))).tip("Profile depth").changed() {
                 self.pe.g_dirty = true;
             }
             ui.end_row();
             lbl(ui, "Number of nodes");
-            if ui.add(egui::DragValue::new(&mut self.pe.g_nodes).range(2..=1001)).tip("Number of nodes").changed() {
+            if crate::util::int(ui.add(egui::DragValue::new(&mut self.pe.g_nodes).range(2..=1001))).tip("Number of nodes").changed() {
                 self.pe.g_dirty = true;
             }
             ui.end_row();
@@ -1087,16 +1087,16 @@ impl App {
                 let end = f.depth <= 1e-9 * total || f.depth >= total * (1.0 - 1e-9);
                 if end {
                     ui.label(sig(f.depth));
-                } else if ui.add(egui::DragValue::new(&mut f.depth).speed(0.2).range(0.0..=total)).changed() {
+                } else if ui.add(egui::DragValue::new(&mut f.depth).custom_parser(crate::util::parse_num).speed(0.2).range(0.0..=total)).changed() {
                     dirty = true;
                 }
                 if i > 0 {
-                    dirty |= ui.add(egui::DragValue::new(&mut f.size_above).speed(0.05).range(1e-3..=1e3)).changed();
+                    dirty |= ui.add(egui::DragValue::new(&mut f.size_above).custom_parser(crate::util::parse_num).speed(0.05).range(1e-3..=1e3)).changed();
                 } else {
                     ui.label("–");
                 }
                 if i + 1 < m {
-                    dirty |= ui.add(egui::DragValue::new(&mut f.size_below).speed(0.05).range(1e-3..=1e3)).changed();
+                    dirty |= ui.add(egui::DragValue::new(&mut f.size_below).custom_parser(crate::util::parse_num).speed(0.05).range(1e-3..=1e3)).changed();
                 } else {
                     ui.label("–");
                 }
@@ -1118,7 +1118,7 @@ impl App {
         }
         ui.horizontal(|ui| {
             lbl(ui, "Add fixed point at");
-            ui.add(egui::DragValue::new(&mut self.pe.fixed_depth).speed(0.2).range(0.0..=total).suffix(format!(" {lu}")));
+            ui.add(egui::DragValue::new(&mut self.pe.fixed_depth).custom_parser(crate::util::parse_num).speed(0.2).range(0.0..=total).suffix(format!(" {lu}")));
             if ui.button("Add").clicked() {
                 self.add_fixed_point(self.pe.fixed_depth);
             }
@@ -1183,7 +1183,7 @@ impl App {
         let dv_u = |ui: &mut Ui, v: &mut f64, u: &str| {
             let speed = (v.abs() * 0.01).max(1e-3);
             let suffix = if u == "–" { String::new() } else { format!(" {u}") };
-            ui.add(egui::DragValue::new(v).speed(speed).max_decimals(6).suffix(suffix));
+            ui.add(egui::DragValue::new(v).custom_parser(crate::util::parse_num).speed(speed).max_decimals(6).suffix(suffix));
         };
         egui::Grid::new("pe_val").num_columns(2).show(ui, |ui| match self.pe.dist {
             Dist::Constant => {
@@ -1403,12 +1403,12 @@ impl App {
                 });
                 row.col(|ui| dv(ui, ch, &mut nd.h));
                 row.col(|ui| {
-                    if ui.add(egui::DragValue::new(&mut nd.mat).range(1..=nm)).changed() {
+                    if crate::util::int(ui.add(egui::DragValue::new(&mut nd.mat).range(1..=nm))).changed() {
                         *ch = true;
                     }
                 });
                 row.col(|ui| {
-                    if ui.add(egui::DragValue::new(&mut nd.layer).range(1..=100)).changed() {
+                    if crate::util::int(ui.add(egui::DragValue::new(&mut nd.layer).range(1..=100))).changed() {
                         *ch = true;
                     }
                 });

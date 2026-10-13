@@ -236,7 +236,7 @@ impl App {
             ui.horizontal(|ui| {
                 lbl(ui, "Number of solutes:");
                 let mut n = self.prj.solute.species.len();
-                if ui.add(egui::DragValue::new(&mut n).range(1..=11)).changed() {
+                if crate::util::int(ui.add(egui::DragValue::new(&mut n).range(1..=11))).changed() {
                     while self.prj.solute.species.len() < n {
                         let k = self.prj.solute.species.len() + 1;
                         let mut sp = Species::default();
@@ -1893,10 +1893,10 @@ impl App {
                             dv(ui, ch, &mut p.d_c);
                             dv(ui, ch, &mut p.d_p);
                         } else {
-                            if ui.add(egui::DragValue::new(&mut p.i_psi1).range(0..=5)).changed() {
+                            if crate::util::int(ui.add(egui::DragValue::new(&mut p.i_psi1).range(0..=5))).changed() {
                                 *ch = true;
                             }
-                            if ui.add(egui::DragValue::new(&mut p.i_psi2).range(0..=5)).changed() {
+                            if crate::util::int(ui.add(egui::DragValue::new(&mut p.i_psi2).range(0..=5))).changed() {
                                 *ch = true;
                             }
                             dv(ui, ch, &mut p.d_c);

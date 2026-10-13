@@ -122,8 +122,43 @@ fn fmt_num(v: f64, _r: std::ops::RangeInclusive<usize>) -> String {
     }
 }
 
-fn parse_num(s: &str) -> Option<f64> {
+/// Reads a typed number: a comma is a decimal separator, `d` / `D` an exponent (as in Fortran files).
+pub fn parse_num(s: &str) -> Option<f64> {
     s.trim().replace(',', ".").replace(['d', 'D'], "e").parse::<f64>().ok()
+}
+
+fn int_fields_id() -> egui::Id {
+    egui::Id::new("rusteau_int_fields")
+}
+
+/// Marks a number field as an integer field: typing accepts only digits and the minus sign.
+pub fn int(r: egui::Response) -> egui::Response {
+    r.ctx.data_mut(|d| d.get_temp_mut_or_default::<std::collections::HashSet<egui::Id>>(int_fields_id()).insert(r.id));
+    r
+}
+
+/// Characters a number field accepts while it is typed: digits, the decimal separators `.` and `,`, signs and the
+/// exponent letters `e`, `E`, `d`, `D`; integer fields ([`int`]) only digits and the minus sign.
+pub fn number_char(c: char, integer: bool) -> bool {
+    c.is_ascii_digit() || c == '-' || (!integer && matches!(c, '.' | ',' | '+' | 'e' | 'E' | 'd' | 'D'))
+}
+
+/// Removes the characters that cannot be part of a number from the keyboard input (typed and pasted text) while a
+/// number field is edited. Called at the start of every frame of a window, before its widgets.
+pub fn filter_number_input(ctx: &egui::Context) {
+    let Some(id) = ctx.memory(|m| m.focused()) else { return };
+    // a number field (DragValue) being edited keeps its text in the temporary data under its id
+    if ctx.data(|d| d.get_temp::<String>(id)).is_none() {
+        return;
+    }
+    let integer = ctx.data_mut(|d| d.get_temp_mut_or_default::<std::collections::HashSet<egui::Id>>(int_fields_id()).contains(&id));
+    ctx.input_mut(|i| {
+        for e in i.events.iter_mut() {
+            if let egui::Event::Text(t) | egui::Event::Paste(t) = e {
+                t.retain(|c| number_char(c, integer));
+            }
+        }
+    });
 }
 
 pub fn dv(ui: &mut Ui, ch: &mut bool, v: &mut f64) {
@@ -155,7 +190,7 @@ pub fn dv_unit_r(ui: &mut Ui, ch: &mut bool, v: &mut f64, unit: &str) -> egui::R
 
 /// Integer field that returns its response (for tooltips).
 pub fn di_r(ui: &mut Ui, ch: &mut bool, v: &mut usize) -> egui::Response {
-    let r = ui.add(DragValue::new(v).speed(0.2));
+    let r = int(ui.add(DragValue::new(v).speed(0.2)));
     if r.changed() {
         *ch = true;
     }
@@ -308,4 +343,41 @@ pub fn conc_unit(p: &Project) -> String {
     let m = p.units.mass.trim();
     let m = if m.is_empty() || m == "-" { "M" } else { m };
     format!("{}/{}³", m, p.units.length_str())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn number_fields_accept_only_number_characters() {
+        assert!(number_char('5', true) && number_char('-', true) && !number_char('.', true) && !number_char('e', true));
+        assert!(number_char(',', false) && number_char('.', false) && number_char('e', false) && number_char('D', false));
+        assert!(!number_char('x', false) && !number_char(' ', false) && !number_char('%', false));
+        assert_eq!(parse_num(" 0,25 "), Some(0.25));
+        assert_eq!(parse_num("1d-3"), Some(1e-3));
+        assert_eq!(parse_num("abc"), None);
+        // typing into a number field of a running interface: letters are dropped, the comma stays
+        let ctx = egui::Context::default();
+        let mut v = 1.0f64;
+        let mut id = egui::Id::NULL;
+        let frame = |events: Vec<egui::Event>, focus: bool, v: &mut f64, id: &mut egui::Id| {
+            let input = egui::RawInput { events, ..Default::default() };
+            let _ = ctx.run(input, |ctx| {
+                filter_number_input(ctx);
+                egui::CentralPanel::default().show(ctx, |ui| {
+                    let r = ui.add(DragValue::new(v).custom_parser(parse_num));
+                    if focus {
+                        r.request_focus();
+                    }
+                    *id = r.id;
+                });
+            });
+        };
+        frame(vec![], true, &mut v, &mut id);
+        frame(vec![], false, &mut v, &mut id);
+        frame(vec![egui::Event::Text("ab2,5x".into())], false, &mut v, &mut id);
+        let text = ctx.data(|d| d.get_temp::<String>(id)).unwrap_or_default();
+        assert!(text.contains("2,5") && !text.contains('a') && !text.contains('x'), "{text:?}");
+    }
 }

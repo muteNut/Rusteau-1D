@@ -137,7 +137,7 @@ impl App {
                 egui::Grid::new("ros_in").num_columns(3).spacing([8.0, 4.0]).show(ui, |ui| {
                     let row = |ui: &mut egui::Ui, label: &str, v: &mut f64, unit: &str, on: bool, speed: f64| {
                         crate::tips::lbl(ui, label);
-                        ui.add_enabled(on, egui::DragValue::new(v).speed(speed).max_decimals(4)).tip(label);
+                        ui.add_enabled(on, egui::DragValue::new(v).custom_parser(crate::util::parse_num).speed(speed).max_decimals(4)).tip(label);
                         ui.label(unit);
                         ui.end_row();
                     };

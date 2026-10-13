@@ -19,7 +19,7 @@ On macOS, Cmd works in place of Ctrl.
 
 ## Number fields
 
-Click a field to type a value; drag it with the mouse to change the value continuously. A comma is accepted as decimal separator and `d` / `D` as exponent (`1d-3`).
+Click a field to type a value; drag it with the mouse to change the value continuously. A comma is accepted as decimal separator and `d` / `D` as exponent (`1d-3`). Characters that cannot be part of a number are ignored while typing (whole-number fields: digits and the minus sign only).
 
 ## Plots
 

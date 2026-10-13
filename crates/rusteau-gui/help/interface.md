@@ -32,7 +32,7 @@ Every page has a title with a **?** button that opens its help topic (as F1). In
 
 ![Tooltip of an input: the description appears when the mouse rests on the label or the field.](img/tooltip.png)
 
-Number fields accept typing (click, type, Enter) and dragging with the mouse; a comma is accepted as decimal separator and `d` / `D` as exponent (`1d-3`, as in Fortran files). Changes mark the project as modified.
+Number fields accept typing (click, type, Enter) and dragging with the mouse; a comma is accepted as decimal separator and `d` / `D` as exponent (`1d-3`, as in Fortran files). While a number is typed, other characters (letters, blanks, units) are ignored; whole-number fields (numbers of nodes, solutes, iterations …) accept only digits and the minus sign. A value that is still not a number when the field is left (e.g. `1e`) is discarded and the field keeps its previous value. Changes mark the project as modified.
 
 ## Workflow bar and status bar {#bars}
 

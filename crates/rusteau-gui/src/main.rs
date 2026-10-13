@@ -1191,6 +1191,7 @@ impl App {
 
 impl eframe::App for App {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        util::filter_number_input(ctx);
         if let Some(mut tour) = self.tour.take() {
             if tour.frame(self, ctx) {
                 self.tour = Some(tour);

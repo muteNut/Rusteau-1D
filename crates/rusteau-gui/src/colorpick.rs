@@ -157,7 +157,7 @@ pub fn picker(ui: &mut Ui, id: Id, c: &mut [u8; 4]) -> bool {
     ui.horizontal(|ui| {
         for (k, name) in ["R", "G", "B", "A"].iter().enumerate() {
             ui.label(*name);
-            dragged |= ui.add(egui::DragValue::new(&mut rgba[k]).range(0..=255).speed(1.0)).changed();
+            dragged |= crate::util::int(ui.add(egui::DragValue::new(&mut rgba[k]).range(0..=255).speed(1.0))).changed();
         }
     });
     if typed || dragged {

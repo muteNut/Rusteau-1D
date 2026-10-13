@@ -140,13 +140,13 @@ fn speed(v: f64) -> f64 {
 
 fn num(ui: &mut Ui, v: &mut f64, lo: f64, hi: f64, suffix: &str) -> egui::Response {
     let s = speed(*v);
-    ui.add(DragValue::new(v).range(lo..=hi).speed(s).max_decimals(6).suffix(suffix))
+    ui.add(DragValue::new(v).custom_parser(crate::util::parse_num).range(lo..=hi).speed(s).max_decimals(6).suffix(suffix))
 }
 
 /// A coordinate: steps of 0.005 for relative coordinates, 1 % of the value otherwise.
 fn coord(ui: &mut Ui, v: &mut f64, relative: bool) -> egui::Response {
     let s = if relative { 0.005 } else { speed(*v) };
-    ui.add(DragValue::new(v).speed(s).max_decimals(6))
+    ui.add(DragValue::new(v).custom_parser(crate::util::parse_num).speed(s).max_decimals(6))
 }
 
 fn hash_of(v: &impl Hash) -> u64 {
@@ -238,6 +238,7 @@ impl App {
                 }
                 return;
             }
+            crate::util::filter_number_input(ctx);
             if ctx.input(|i| i.viewport().close_requested()) {
                 self.figs.open = false;
                 self.figs.help_here = false;
@@ -686,9 +687,9 @@ fn figure_section(ui: &mut Ui, fig: &mut Figure, fold: Option<bool>) {
             ui.end_row();
             row(ui, "Panels (rows × columns)");
             ui.horizontal(|ui| {
-                ui.add(DragValue::new(&mut fig.rows).range(1..=4)).tip("Panels (rows × columns)");
+                crate::util::int(ui.add(DragValue::new(&mut fig.rows).range(1..=4))).tip("Panels (rows × columns)");
                 ui.label("×");
-                ui.add(DragValue::new(&mut fig.cols).range(1..=4)).tip("Panels (rows × columns)");
+                crate::util::int(ui.add(DragValue::new(&mut fig.cols).range(1..=4))).tip("Panels (rows × columns)");
             });
             ui.end_row();
             row(ui, "Theme");
@@ -787,7 +788,7 @@ fn text_section(ui: &mut Ui, fig: &mut Figure) {
                 ("Legend size (pt)", &mut s.legend),
             ] {
                 row(ui, label);
-                ui.add(DragValue::new(v).range(4.0..=48.0).speed(0.1).max_decimals(1)).tip(label);
+                ui.add(DragValue::new(v).custom_parser(crate::util::parse_num).range(4.0..=48.0).speed(0.1).max_decimals(1)).tip(label);
                 ui.end_row();
             }
         });
@@ -905,8 +906,8 @@ fn layer_editor(ui: &mut Ui, st: &mut FigState, l: &mut Layer, fig: &Figure, dc:
         ui.end_row();
         row(ui, "Scale factors x, y");
         ui.horizontal(|ui| {
-            ui.add(DragValue::new(&mut l.x_scale).speed(0.01).max_decimals(6)).tip("Scale factors x, y");
-            ui.add(DragValue::new(&mut l.y_scale).speed(0.01).max_decimals(6)).tip("Scale factors x, y");
+            ui.add(DragValue::new(&mut l.x_scale).custom_parser(crate::util::parse_num).speed(0.01).max_decimals(6)).tip("Scale factors x, y");
+            ui.add(DragValue::new(&mut l.y_scale).custom_parser(crate::util::parse_num).speed(0.01).max_decimals(6)).tip("Scale factors x, y");
         });
         ui.end_row();
     });
@@ -988,7 +989,7 @@ fn layer_editor(ui: &mut Ui, st: &mut FigState, l: &mut Layer, fig: &Figure, dc:
         ui.end_row();
         if l.geom != Geom::Points {
             row(ui, "Line width (pt)");
-            ui.add(DragValue::new(&mut l.width).range(0.1..=10.0).speed(0.05).max_decimals(2)).tip("Line width (pt)");
+            ui.add(DragValue::new(&mut l.width).custom_parser(crate::util::parse_num).range(0.1..=10.0).speed(0.05).max_decimals(2)).tip("Line width (pt)");
             ui.end_row();
             row(ui, "Line style");
             combo(ui, "fig_dash", &mut l.dash, &DASHES, 160.0).tip("Line style");
@@ -998,7 +999,7 @@ fn layer_editor(ui: &mut Ui, st: &mut FigState, l: &mut Layer, fig: &Figure, dc:
             row(ui, "Marker");
             ui.horizontal(|ui| {
                 combo(ui, "fig_marker", &mut l.marker, &MARKERS, 130.0).tip("Marker");
-                ui.add(DragValue::new(&mut l.marker_size).range(1.0..=20.0).speed(0.1).max_decimals(1).suffix(" pt")).tip("Marker");
+                ui.add(DragValue::new(&mut l.marker_size).custom_parser(crate::util::parse_num).range(1.0..=20.0).speed(0.1).max_decimals(1).suffix(" pt")).tip("Marker");
             });
             ui.end_row();
         }
@@ -1125,7 +1126,7 @@ fn annotations_section(ui: &mut Ui, st: &mut FigState, p: &mut Panel) {
                 ui.end_row();
             }
             row(ui, "Font size (pt)");
-            ui.add(DragValue::new(&mut a.size).range(0.0..=48.0).speed(0.1).max_decimals(1)).on_hover_text("0: size of the tick labels").tip("Font size (pt)");
+            ui.add(DragValue::new(&mut a.size).custom_parser(crate::util::parse_num).range(0.0..=48.0).speed(0.1).max_decimals(1)).on_hover_text("0: size of the tick labels").tip("Font size (pt)");
             ui.end_row();
             row(ui, "Colour");
             ui.horizontal(|ui| {
@@ -1142,7 +1143,7 @@ fn annotations_section(ui: &mut Ui, st: &mut FigState, p: &mut Panel) {
                 row(ui, "Line");
                 ui.horizontal(|ui| {
                     combo(ui, "fig_ann_dash", &mut a.dash, &DASHES, 100.0).tip("Line");
-                    ui.add(DragValue::new(&mut a.width).range(0.1..=8.0).speed(0.05).max_decimals(2).suffix(" pt")).tip("Line");
+                    ui.add(DragValue::new(&mut a.width).custom_parser(crate::util::parse_num).range(0.1..=8.0).speed(0.05).max_decimals(2).suffix(" pt")).tip("Line");
                 });
                 ui.end_row();
             }

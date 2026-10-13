@@ -287,7 +287,7 @@ impl App {
         section(ui, "Iteration");
         ui.horizontal(|ui| {
             lbl(ui, "Maximum number of iterations (MIT)");
-            if ui.add(egui::DragValue::new(&mut s.max_iter).range(0..=1000)).tip("Maximum number of iterations (MIT)").changed() {
+            if crate::util::int(ui.add(egui::DragValue::new(&mut s.max_iter).range(0..=1000))).tip("Maximum number of iterations (MIT)").changed() {
                 *ch = true;
             }
         });
@@ -304,8 +304,7 @@ impl App {
             ui.add_space(28.0);
             ui.add_enabled_ui(!hydrus, |ui| {
                 ui.label("Additional starting points");
-                if ui
-                    .add(egui::DragValue::new(&mut s.extra_starts).range(0..=64))
+                if crate::util::int(ui.add(egui::DragValue::new(&mut s.extra_starts).range(0..=64)))
                     .on_hover_text("Number of starting points besides the initial estimates (0: only the initial estimates). They run in parallel threads.")
                     .changed()
                 {
@@ -453,7 +452,7 @@ impl App {
                             });
                         });
                         row.col(|ui| {
-                            if ui.add(egui::DragValue::new(&mut o.pos).range(-99..=999)).on_hover_text(pos_help(o.kind)).changed() {
+                            if crate::util::int(ui.add(egui::DragValue::new(&mut o.pos).range(-99..=999))).on_hover_text(pos_help(o.kind)).changed() {
                                 *ch = true;
                             }
                         });
