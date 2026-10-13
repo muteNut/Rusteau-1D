@@ -152,6 +152,37 @@ pub fn column_group(src: &Source, c: &ColInfo) -> &'static str {
     }
 }
 
+/// Whether a column belongs to a process that run `p` simulated (columns of other processes are left out).
+fn simulated(src: &Source, key: &str, p: &Project) -> bool {
+    let pr = &p.processes;
+    let (root, heat) = (pr.root_water_uptake, pr.heat);
+    match src {
+        Source::TimeLevel => match key {
+            "rRoot" | "vRoot" | "sum_rRoot" | "sum_vRoot" | "hRoot" => root,
+            k if k.starts_with("cvRoot") || k.starts_with("sum_cvRoot") => root,
+            "tTop" | "tBot" => heat,
+            "snow" => p.atmosphere.snow,
+            "precip" => p.water.bc.atmospheric,
+            "peclet" | "courant" => pr.solute || heat,
+            _ => true,
+        },
+        Source::ObsNodes => key != "temp" || heat,
+        Source::Profiles => match key {
+            "sink" => root,
+            "temp" => heat,
+            _ => true,
+        },
+        Source::ALevel => !matches!(key, "sum_rRoot" | "sum_vRoot" | "hRoot") || root,
+        Source::TLevel1 => !matches!(key, "transpP" | "transpA" | "sum_transpP" | "sum_transpA") || root,
+        Source::ProfileInput => match key {
+            "beta" => root,
+            "temp" => heat,
+            _ => true,
+        },
+        _ => true,
+    }
+}
+
 /// Whether the source has items to choose (nodes, print times, materials, sets).
 pub fn has_items(s: &Source) -> bool {
     matches!(s, Source::ObsNodes | Source::Profiles | Source::Hydraulic | Source::Measured | Source::Fit)
@@ -224,6 +255,27 @@ impl DataCtx<'_> {
                 None => vec![],
             },
             _ => vec![],
+        }
+    }
+
+    /// Whether the source has data: results of the current run or of a kept run, input that is used, measured data.
+    pub fn available(&self, src: &Source, fig: &Figure) -> bool {
+        let any = |f: &dyn Fn(&Results) -> bool| self.results.is_some_and(f) || self.runs.iter().any(|r| f(&r.results));
+        let bc = &self.prj.water.bc;
+        match src {
+            Source::TimeLevel => any(&|r| !r.tlevel.is_empty()),
+            Source::ObsNodes => any(&|r| r.obs.first().is_some_and(|o| !o.points.is_empty())),
+            Source::Profiles => any(&|r| !r.profiles.is_empty()),
+            Source::Balance => any(&|r| !r.balance.is_empty()),
+            Source::ALevel => any(&|r| !r.alevel.is_empty()),
+            Source::TLevel1 => any(&|r| !r.tlevel1.is_empty()),
+            Source::Meteo => any(&|r| !r.meteo.is_empty()),
+            Source::Hydraulic => !self.prj.water.materials.is_empty(),
+            Source::AtmInput => !self.prj.atmosphere.records.is_empty() && (bc.atmospheric || bc.top_time_variable || bc.bot_time_variable),
+            Source::ProfileInput => !self.prj.profile.nodes.is_empty(),
+            Source::Measured => !self.measured.is_empty(),
+            Source::Fit => self.fit.is_some(),
+            Source::DataFile(i) => *i < fig.data.len(),
         }
     }
 
@@ -549,6 +601,11 @@ impl DataCtx<'_> {
                 }
             }
         }
+        // columns of processes the run did not simulate, and columns without any value, are left out
+        t.cols.retain(|(c, _)| simulated(src, &c.key, p));
+        if t.cols.iter().any(|(_, v)| !v.is_empty()) {
+            t.cols.retain(|(_, v)| v.iter().any(|x| x.is_finite()));
+        }
         Some(t)
     }
 
@@ -726,6 +783,18 @@ mod tests {
                 assert!(!c.name.is_empty());
             }
         }
+        // only simulated processes: no temperatures or root uptake without heat transport and roots
+        let tl = ctx.columns(&Source::TimeLevel, &fig);
+        assert!(tl.iter().any(|c| c.key == "vTop"));
+        assert_eq!(tl.iter().any(|c| c.key == "tTop"), p.processes.heat);
+        assert_eq!(tl.iter().any(|c| c.key == "vRoot"), p.processes.root_water_uptake);
+        // sources without data are not offered
+        assert!(ctx.available(&Source::TimeLevel, &fig));
+        assert!(!ctx.available(&Source::Meteo, &fig));
+        assert!(!ctx.available(&Source::Fit, &fig));
+        assert!(!ctx.available(&Source::DataFile(0), &fig));
+        let none = DataCtx { prj: &p, results: None, runs: &[], measured: &[], fit: None };
+        assert!(!none.available(&Source::Profiles, &fig) && none.available(&Source::Hydraulic, &fig));
         // profiles: one series per print time, depth against water content
         let layer = Layer { source: Source::Profiles, x: "theta".into(), y: "depth".into(), ..Default::default() };
         let s = ctx.series(&layer, &fig);

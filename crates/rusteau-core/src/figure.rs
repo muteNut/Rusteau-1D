@@ -4,8 +4,76 @@
 
 use serde::{Deserialize, Serialize};
 
-/// RGB colour.
-pub type Rgb = [u8; 3];
+/// A colour with opacity (sRGB and alpha, 0–255). Stored as `"#rrggbb"` or `"#rrggbbaa"`; `[r, g, b]` and
+/// `[r, g, b, a]` are read, too.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct Color(pub [u8; 4]);
+
+impl Color {
+    pub const BLACK: Color = Color([0, 0, 0, 255]);
+
+    pub const fn rgb(r: u8, g: u8, b: u8) -> Color {
+        Color([r, g, b, 255])
+    }
+
+    /// `#rrggbb`, or `#rrggbbaa` when the colour is not opaque.
+    pub fn hex(&self) -> String {
+        let [r, g, b, a] = self.0;
+        if a == 255 {
+            format!("#{r:02x}{g:02x}{b:02x}")
+        } else {
+            format!("#{r:02x}{g:02x}{b:02x}{a:02x}")
+        }
+    }
+
+    /// Reads `#rgb`, `#rrggbb` or `#rrggbbaa` (the `#` is optional).
+    pub fn parse(s: &str) -> Option<Color> {
+        let h = s.trim().trim_start_matches('#');
+        if !h.chars().all(|c| c.is_ascii_hexdigit()) {
+            return None;
+        }
+        let byte = |i: usize| u8::from_str_radix(&h[i..i + 2], 16).ok();
+        match h.len() {
+            3 => {
+                let d = |i: usize| u8::from_str_radix(&h[i..i + 1], 16).ok().map(|v| v * 17);
+                Some(Color([d(0)?, d(1)?, d(2)?, 255]))
+            }
+            6 => Some(Color([byte(0)?, byte(2)?, byte(4)?, 255])),
+            8 => Some(Color([byte(0)?, byte(2)?, byte(4)?, byte(6)?])),
+            _ => None,
+        }
+    }
+}
+
+impl Serialize for Color {
+    fn serialize<S: serde::Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        s.serialize_str(&self.hex())
+    }
+}
+
+impl<'de> Deserialize<'de> for Color {
+    fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Color, D::Error> {
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        enum Repr {
+            Hex(String),
+            Values(Vec<u8>),
+        }
+        match Repr::deserialize(d)? {
+            Repr::Hex(s) => Color::parse(&s).ok_or_else(|| serde::de::Error::custom(format!("not a colour: {s}"))),
+            Repr::Values(v) if v.len() == 3 => Ok(Color([v[0], v[1], v[2], 255])),
+            Repr::Values(v) if v.len() == 4 => Ok(Color([v[0], v[1], v[2], v[3]])),
+            Repr::Values(v) => Err(serde::de::Error::custom(format!("a colour has 3 or 4 values, not {}", v.len()))),
+        }
+    }
+}
+
+/// A colour of the custom palette with its name.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct NamedColor {
+    pub name: String,
+    pub color: Color,
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub enum Theme {
@@ -31,6 +99,8 @@ pub enum Palette {
     Viridis,
     /// shades of grey
     Grey,
+    /// the colours of `Figure::colors`
+    Custom,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, Default)]
@@ -133,7 +203,7 @@ pub struct Layer {
     pub y_scale: f64,
     pub geom: Geom,
     /// fixed colour; `None`: the next colours of the palette
-    pub color: Option<Rgb>,
+    pub color: Option<Color>,
     /// line width [pt]
     pub width: f64,
     pub dash: Dash,
@@ -236,7 +306,8 @@ pub struct Annotation {
     pub relative: bool,
     /// font size [pt]; 0: the size of the tick labels
     pub size: f64,
-    pub color: Rgb,
+    /// black follows the text colour of the theme
+    pub color: Color,
     pub anchor: Anchor,
     pub dash: Dash,
     /// line width [pt]
@@ -256,7 +327,7 @@ impl Default for Annotation {
             y2: 0.7,
             relative: true,
             size: 0.0,
-            color: [0, 0, 0],
+            color: Color::BLACK,
             anchor: Anchor::Left,
             dash: Dash::Dashed,
             width: 0.8,
@@ -332,6 +403,8 @@ pub struct Figure {
     pub title_bold: bool,
     pub theme: Theme,
     pub palette: Palette,
+    /// colours of the palette "Custom", in order
+    pub colors: Vec<NamedColor>,
     /// transparent background in the exported files
     pub transparent: bool,
     /// panels in a grid of `rows` × `cols`, row by row
@@ -358,6 +431,7 @@ impl Default for Figure {
             title_bold: true,
             theme: Theme::Grid,
             palette: Palette::OkabeIto,
+            colors: vec![],
             transparent: false,
             rows: 1,
             cols: 1,
@@ -411,5 +485,23 @@ mod tests {
         assert_eq!(g.panels[0].layers[0].y, "theta");
         assert_eq!(g.panels[0].layers[0].x, "t");
         assert_eq!(g.width_mm, 160.0);
+    }
+
+    #[test]
+    fn colours_read_hex_and_arrays() {
+        assert_eq!(Color::parse("#34517d"), Some(Color([0x34, 0x51, 0x7d, 255])));
+        assert_eq!(Color::parse("34517d80"), Some(Color([0x34, 0x51, 0x7d, 0x80])));
+        assert_eq!(Color::parse("#fff"), Some(Color([255, 255, 255, 255])));
+        assert_eq!(Color::parse("#12345"), None);
+        assert_eq!(Color::parse("#gg0000"), None);
+        assert_eq!(Color([1, 2, 3, 255]).hex(), "#010203");
+        let l: Layer = serde_json::from_str(r#"{"color":[10,20,30]}"#).unwrap();
+        assert_eq!(l.color, Some(Color([10, 20, 30, 255])));
+        let l: Layer = serde_json::from_str(r##"{"color":"#0a141e80"}"##).unwrap();
+        assert_eq!(l.color, Some(Color([10, 20, 30, 128])));
+        assert!(serde_json::from_str::<Layer>(r#"{"color":[1,2]}"#).is_err());
+        let f = Figure { palette: Palette::Custom, colors: vec![NamedColor { name: "loam".into(), color: Color([1, 2, 3, 4]) }], ..Default::default() };
+        let back: Figure = serde_json::from_str(&serde_json::to_string(&f).unwrap()).unwrap();
+        assert_eq!(back, f);
     }
 }

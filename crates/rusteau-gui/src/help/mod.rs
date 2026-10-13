@@ -396,14 +396,14 @@ impl HelpState {
             return;
         }
         let hits = search(&self.query);
-        ui.label(RichText::new(format!("{} topic(s)", hits.len())).weak());
+        ui.label(RichText::new(format!("{} topic(s)", hits.len())).weak().size(13.5));
         let mut go = None;
         for (id, _, snip) in hits {
-            if ui.selectable_label(self.current == id, RichText::new(topics::title(id)).strong()).clicked() {
+            if ui.selectable_label(self.current == id, RichText::new(topics::title(id)).strong().size(15.0)).clicked() {
                 go = Some(id);
             }
-            ui.label(RichText::new(snip).weak().small());
-            ui.add_space(4.0);
+            ui.label(RichText::new(snip).weak().size(13.0));
+            ui.add_space(6.0);
         }
         if let Some(id) = go {
             self.show_topic(id, None);

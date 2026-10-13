@@ -199,6 +199,24 @@ pub fn check(ui: &mut Ui, ch: &mut bool, v: &mut bool, label: &str) {
     }
 }
 
+/// Text in the bold font of the interface (registered by [`crate::fonts::install`]; the normal font without it).
+pub fn bold(ui: &Ui, text: impl Into<String>, size: f32) -> egui::RichText {
+    let family = egui::FontFamily::Name(crate::fonts::BOLD.into());
+    let has = ui.fonts(|f| f.families().contains(&family));
+    let t = egui::RichText::new(text).size(size);
+    if has {
+        t.family(family)
+    } else {
+        t.strong()
+    }
+}
+
+/// Heading of a group of entries in a side panel (steps of the input, sections of the figure editor): bold, slightly
+/// larger than the entries, in the normal text colour (readable in the light and the dark theme).
+pub fn section_head(ui: &Ui, text: &str) -> egui::RichText {
+    bold(ui, text, 13.0).color(ui.visuals().text_color())
+}
+
 pub fn section(ui: &mut Ui, title: &str) {
     ui.add_space(6.0);
     ui.label(egui::RichText::new(title).strong().size(15.0));

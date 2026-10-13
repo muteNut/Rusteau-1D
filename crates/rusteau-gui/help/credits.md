@@ -15,7 +15,7 @@ The interface is built with egui and eframe (Rust). The figures are drawn with t
 
 ## Fonts {#fonts}
 
-The program bundles the fonts **Noto Sans** (version 2.015, regular, bold, italic and bold italic) and **Noto Sans Math** (version 3.000), unmodified. They are the default font of the [figures](figures) and supply the symbols that the system font of the interface lacks.
+The program bundles the fonts **Noto Sans** (version 2.015, regular, bold, italic and bold italic) and **Noto Sans Math** (version 3.000), unmodified. They are the font of the interface on every system (Noto Sans Bold for headings) and the default font of the [figures](figures); Noto Sans Math supplies the mathematical signs and arrows.
 
 Copyright 2022 The Noto Project Authors (https://github.com/notofonts/latin-greek-cyrillic) and Copyright 2022 The Noto Project Authors (https://github.com/notofonts/math).
 

@@ -1,8 +1,9 @@
 # Fonts
 
 The interface of Rusteau-1D bundles these fonts unmodified: they are compiled into the program (`rusteau`,
-`rusteau.exe`). They are the default font of the figures and a fallback of the interface for symbols that the system
-font lacks (Greek letters, sub- and superscripts such as θₛ or cm⁻¹, ≤, ≥, √, ∂, arrows). This file and the license
+`rusteau.exe`). They are the font of the interface on every system (Noto Sans, Noto Sans Bold for headings) and the
+default font of the figures; together they have every symbol of the labels (Greek letters, sub- and superscripts such
+as θₛ or cm⁻¹, ≤, ≥, √, ∂, arrows). This file and the license
 texts are in the folder `fonts` of the release archives.
 
 | File | Font | Version | Source | License |

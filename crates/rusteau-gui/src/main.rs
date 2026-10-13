@@ -1,5 +1,6 @@
 #![cfg_attr(all(not(debug_assertions), windows), windows_subsystem = "windows")]
 
+mod colorpick;
 mod figure;
 mod files;
 mod fonts;
@@ -114,43 +115,10 @@ impl Default for PostState {
     }
 }
 
-fn load_system_font(ctx: &egui::Context) {
+/// The fonts of the interface: the bundled Noto Sans on every system (see [`fonts::install`]).
+fn load_fonts(ctx: &egui::Context) {
     let mut fonts = egui::FontDefinitions::default();
-
-    let candidate_paths: &[&str] = &[
-        // Linux / Ubuntu / GNOME
-        "/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf",
-        "/usr/share/fonts/opentype/cantarell/Cantarell-Regular.otf",
-        "/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf",
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-        "/usr/share/fonts/TTF/DejaVuSans.ttf",
-        // Windows
-        "C:\\Windows\\Fonts\\segoeui.ttf",
-        "C:\\Windows\\Fonts\\arial.ttf",
-        // macOS
-        "/System/Library/Fonts/SFProText-Regular.otf",
-        "/System/Library/Fonts/HelveticaNeue.ttc",
-        "/Library/Fonts/Arial.ttf",
-    ];
-
-    let mut found = false;
-    for path in candidate_paths {
-        if let Ok(data) = std::fs::read(path) {
-            fonts.font_data.insert(
-                "os_default".to_owned(),
-                std::sync::Arc::new(egui::FontData::from_owned(data)),
-            );
-
-            if let Some(family) = fonts.families.get_mut(&egui::FontFamily::Proportional) {
-                family.insert(0, "os_default".to_owned());
-            }
-            found = true;
-            break;
-        }
-    }
-    // symbols the system font lacks come from the bundled Noto fonts
-    fonts::add_fallbacks(&mut fonts, found);
-
+    fonts::install(&mut fonts);
     ctx.set_fonts(fonts);
 }
 
@@ -256,7 +224,7 @@ pub enum PendingAction {
 
 impl App {
     fn new(cc: &eframe::CreationContext<'_>) -> Self {
-        load_system_font(&cc.egui_ctx);
+        load_fonts(&cc.egui_ctx);
 
         #[cfg(target_os = "linux")]
         {
@@ -1131,8 +1099,8 @@ impl App {
                     ui.separator();
                     for (k, (step, pages)) in self.pre_steps().into_iter().enumerate() {
                         ui.add_space(if k == 0 { 0.0 } else { 6.0 });
-                        let head = if step == "Parameter estimation" { step.to_uppercase() } else { format!("{} · {}", k + 1, step.to_uppercase()) };
-                        ui.label(egui::RichText::new(head).small().weak());
+                        let head = if step == "Parameter estimation" { step.to_string() } else { format!("{} · {}", k + 1, step) };
+                        ui.label(util::section_head(ui, &head));
                         for (p, label) in pages {
                             ui.horizontal(|ui| {
                                 ui.add_space(8.0);

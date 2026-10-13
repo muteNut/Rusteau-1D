@@ -234,6 +234,21 @@ impl Tour {
                 a.figs.layer = 0;
                 a.figs.fold = Some(false);
             }),
+            s("figures_colors", |a, ctx| {
+                a.figs.fig = 0;
+                a.figs.panel = 0;
+                a.figs.fold = Some(true);
+                if let Some(f) = a.prj.figures.get_mut(0) {
+                    f.palette = rusteau_core::figure::Palette::Custom;
+                    f.colors = (0..7)
+                        .map(|k| {
+                            let [r, g, b] = crate::figure::render::builtin_color(rusteau_core::figure::Palette::Viridis, k, 7, false);
+                            rusteau_core::figure::NamedColor { name: format!("t{}", k * 5), color: rusteau_core::figure::Color::rgb(r, g, b) }
+                        })
+                        .collect();
+                }
+                ctx.data_mut(|d| d.insert_temp(egui::Id::new("tour_open_picker"), true));
+            }),
             Step {
                 name: "_figures_keep".into(),
                 setup: |a, _| {

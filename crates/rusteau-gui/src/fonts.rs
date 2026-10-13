@@ -1,5 +1,6 @@
-//! The bundled fonts (Noto Sans in four styles and Noto Sans Math, SIL Open Font License 1.1, see `fonts/README.md`)
-//! and the fonts installed on the system (for the figures).
+//! The bundled fonts (Noto Sans in four styles and Noto Sans Math, SIL Open Font License 1.1, see `fonts/README.md`):
+//! the fonts of the interface and the default font of the figures; and the fonts installed on the system (offered
+//! for the figures).
 
 use std::path::PathBuf;
 use std::sync::OnceLock;
@@ -17,16 +18,27 @@ pub const OFL_NOTO_SANS_MATH: &str = include_str!("../fonts/OFL-NotoSansMath.txt
 /// Name of the bundled font family (the default of the figures).
 pub const DEFAULT_FAMILY: &str = "Noto Sans";
 
-/// Adds the bundled fonts to the egui font families after the system font: symbols the system font lacks
-/// (sub- and superscripts, mathematical operators) are taken from Noto Sans and Noto Sans Math.
-pub fn add_fallbacks(fonts: &mut egui::FontDefinitions, after_system_font: bool) {
-    fonts.font_data.insert("noto_sans".into(), std::sync::Arc::new(egui::FontData::from_static(NOTO_SANS)));
-    fonts.font_data.insert("noto_sans_math".into(), std::sync::Arc::new(egui::FontData::from_static(NOTO_SANS_MATH)));
-    if let Some(family) = fonts.families.get_mut(&egui::FontFamily::Proportional) {
-        let at = if after_system_font { 1.min(family.len()) } else { 0 };
-        family.insert(at, "noto_sans_math".into());
-        family.insert(at, "noto_sans".into());
-    }
+/// Name of the bold family of the interface (headings).
+pub const BOLD: &str = "bold";
+
+/// Makes the bundled fonts the fonts of the interface, the same on every system: Noto Sans for the text, Noto Sans
+/// Bold for headings (family [`BOLD`]), Noto Sans Math for the mathematical signs and arrows. The default fonts of
+/// egui stay behind them for emoji and icons; the monospace font of egui stays first in its family.
+pub fn install(fonts: &mut egui::FontDefinitions) {
+    let add = |fonts: &mut egui::FontDefinitions, name: &str, data: &'static [u8]| {
+        fonts.font_data.insert(name.into(), std::sync::Arc::new(egui::FontData::from_static(data)));
+    };
+    add(fonts, "noto_sans", NOTO_SANS);
+    add(fonts, "noto_sans_bold", NOTO_SANS_BOLD);
+    add(fonts, "noto_sans_math", NOTO_SANS_MATH);
+    let defaults = fonts.families.get(&egui::FontFamily::Proportional).cloned().unwrap_or_default();
+    let with = |first: &str| -> Vec<String> {
+        let mut v = vec![first.to_string(), "noto_sans_math".to_string()];
+        v.extend(defaults.iter().cloned());
+        v
+    };
+    fonts.families.insert(egui::FontFamily::Proportional, with("noto_sans"));
+    fonts.families.insert(egui::FontFamily::Name(BOLD.into()), with("noto_sans_bold"));
     if let Some(family) = fonts.families.get_mut(&egui::FontFamily::Monospace) {
         family.push("noto_sans".into());
         family.push("noto_sans_math".into());
@@ -156,5 +168,15 @@ mod tests {
         }
         assert!(OFL_NOTO_SANS.contains("SIL OPEN FONT LICENSE Version 1.1"));
         assert!(OFL_NOTO_SANS_MATH.contains("SIL OPEN FONT LICENSE Version 1.1"));
+    }
+
+    #[test]
+    fn the_interface_uses_noto_sans() {
+        let mut f = egui::FontDefinitions::default();
+        install(&mut f);
+        assert_eq!(f.families[&egui::FontFamily::Proportional][0], "noto_sans");
+        assert_eq!(f.families[&egui::FontFamily::Name(BOLD.into())][0], "noto_sans_bold");
+        // emoji and icons of egui stay available
+        assert!(f.families[&egui::FontFamily::Proportional].len() > 2);
     }
 }

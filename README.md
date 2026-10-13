@@ -215,8 +215,9 @@ publications and presentations. The figures are saved with the project (`.h1dr`)
 - **Text:** titles, axis titles, legends and annotations take the markup of the help (`θ_{s}`, `cm^{3}`, `*italic*`,
   `**bold**`); a symbol palette copies Greek letters, sub- and superscripts and mathematical signs.
 - **Fonts:** Noto Sans and Noto Sans Math are bundled (SIL Open Font License 1.1, see
-  [`crates/rusteau-gui/fonts`](crates/rusteau-gui/fonts/README.md)): every symbol of soil physics can be drawn, and
-  characters missing in a chosen system font are taken from them glyph by glyph.
+  [`crates/rusteau-gui/fonts`](crates/rusteau-gui/fonts/README.md)): they are the font of the whole interface on every
+  system, every symbol of soil physics can be drawn, and characters missing in a font installed on the system and
+  chosen for a figure are taken from them glyph by glyph.
 - **Export:** PNG with the resolution stored in the file, SVG (text as text elements or as outlines), or the image on
   the clipboard. Preview, PNG and SVG are drawn by the same renderer (`crates/rusteau-gui/src/figure`: text layout with
   ab_glyph, rasterizing with tiny-skia), so the files look like the preview.

@@ -1,6 +1,6 @@
 //! Ready-made figures: the usual diagrams of a simulation, a start for one's own figures.
 
-use rusteau_core::figure::{Axis, Dash, Figure, Geom, Layer, LegendPos, Marker, Palette, Panel, Source};
+use rusteau_core::figure::{Axis, Color, Dash, Figure, Geom, Layer, LegendPos, Marker, Palette, Panel, Source};
 use rusteau_core::Project;
 
 /// What the templates may use.
@@ -113,7 +113,7 @@ pub fn all() -> Vec<Template> {
             make: |c| {
                 let mut ls = vec![layer(Source::TimeLevel, "t", "vTop"), layer(Source::TimeLevel, "t", "vBot")];
                 if !c.prj.atmosphere.records.is_empty() && c.prj.water.bc.atmospheric {
-                    ls.push(Layer { geom: Geom::Steps, y2: true, color: Some([150, 150, 150]), ..layer(Source::AtmInput, "t", "prec") });
+                    ls.push(Layer { geom: Geom::Steps, y2: true, color: Some(Color::rgb(150, 150, 150)), ..layer(Source::AtmInput, "t", "prec") });
                 }
                 let mut p = panel("", ls);
                 p.y.label_auto = false;
@@ -141,12 +141,15 @@ pub fn all() -> Vec<Template> {
         Template {
             name: "Atmospheric forcing",
             desc: "Precipitation as bars, potential evaporation and transpiration as steps (input data).",
-            fits: |c| !c.prj.atmosphere.records.is_empty(),
+            fits: |c| {
+                let bc = &c.prj.water.bc;
+                !c.prj.atmosphere.records.is_empty() && (bc.atmospheric || bc.top_time_variable || bc.bot_time_variable)
+            },
             make: |c| {
-                let mut ls = vec![Layer { geom: Geom::Bars, color: Some([0, 114, 178]), alpha: 0.6, ..layer(Source::AtmInput, "t", "prec") }];
-                ls.push(Layer { geom: Geom::Steps, color: Some([213, 94, 0]), ..layer(Source::AtmInput, "t", "evap") });
+                let mut ls = vec![Layer { geom: Geom::Bars, color: Some(Color::rgb(0, 114, 178)), alpha: 0.6, ..layer(Source::AtmInput, "t", "prec") }];
+                ls.push(Layer { geom: Geom::Steps, color: Some(Color::rgb(213, 94, 0)), ..layer(Source::AtmInput, "t", "evap") });
                 if !c.prj.atmosphere.lai_partitioning {
-                    ls.push(Layer { geom: Geom::Steps, color: Some([0, 158, 115]), dash: Dash::Dashed, ..layer(Source::AtmInput, "t", "transp") });
+                    ls.push(Layer { geom: Geom::Steps, color: Some(Color::rgb(0, 158, 115)), dash: Dash::Dashed, ..layer(Source::AtmInput, "t", "transp") });
                 }
                 let mut p = panel("", ls);
                 p.y.label_auto = false;

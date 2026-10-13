@@ -5,7 +5,7 @@
 use super::canvas::{Cap, Drawing, Path, Prim, Rgba, Stroke};
 use super::data::Series;
 use super::text::{self, TextLayout, ASCENT, DESCENT};
-use rusteau_core::figure::{Anchor, AnnotationKind, Axis, Dash, Figure, Geom, Layer, LegendPos, Marker, Palette, Panel, Theme};
+use rusteau_core::figure::{Anchor, AnnotationKind, Axis, Color, Dash, Figure, Geom, Layer, LegendPos, Marker, Palette, Panel, Theme};
 use std::sync::Arc;
 
 /// Points per millimetre.
@@ -153,8 +153,20 @@ fn look(t: Theme) -> Look {
 const OKABE_ITO: [[u8; 3]; 8] = [[0, 114, 178], [213, 94, 0], [0, 158, 115], [230, 159, 0], [86, 180, 233], [204, 121, 167], [240, 228, 66], [0, 0, 0]];
 const VIRIDIS: [[u8; 3]; 9] = [[68, 1, 84], [71, 45, 123], [59, 82, 139], [44, 114, 142], [33, 145, 140], [40, 174, 128], [94, 201, 98], [173, 220, 48], [253, 231, 37]];
 
-/// Colour `k` of `n` series of a palette.
-pub fn palette_color(p: Palette, k: usize, n: usize, dark: bool) -> [u8; 3] {
+/// Colour `k` of `n` series of the palette of a figure (the custom colours repeat; without any, Okabe–Ito).
+pub fn palette_color(fig: &Figure, k: usize, n: usize, dark: bool) -> Rgba {
+    match fig.palette {
+        Palette::Custom if !fig.colors.is_empty() => {
+            let c = fig.colors[k % fig.colors.len()].color.0;
+            Rgba(c[0], c[1], c[2], c[3])
+        }
+        Palette::Custom => Rgba::rgb(builtin_color(Palette::OkabeIto, k, n, dark)),
+        p => Rgba::rgb(builtin_color(p, k, n, dark)),
+    }
+}
+
+/// Colour `k` of `n` series of a built-in palette.
+pub fn builtin_color(p: Palette, k: usize, n: usize, dark: bool) -> [u8; 3] {
     let along = |a: f64| if n <= 1 { 0.0 } else { a * k as f64 / (n - 1) as f64 };
     match p {
         Palette::OkabeIto => {
@@ -182,6 +194,7 @@ pub fn palette_color(p: Palette, k: usize, n: usize, dark: bool) -> [u8; 3] {
             let v = v.round() as u8;
             [v, v, v]
         }
+        Palette::Custom => OKABE_ITO[k % OKABE_ITO.len()],
     }
 }
 
@@ -249,9 +262,12 @@ fn styles(fig: &Figure, panel: &Panel, series: &[Vec<Series>], dark: bool) -> Ve
             .enumerate()
             .map(|(k, s)| {
                 let slot = next + if by_item { s.item } else { k };
-                let c = l.color.unwrap_or_else(|| palette_color(fig.palette, slot, total, dark));
+                let color = match l.color {
+                    Some(c) => Rgba(c.0[0], c.0[1], c.0[2], c.0[3]),
+                    None => palette_color(fig, slot, total, dark),
+                };
                 let (dash, marker) = if by_item { (cycle(&DASHES, l.dash, s.run), cycle(&MARKERS, l.marker, s.run)) } else { (l.dash, l.marker) };
-                Style { color: Rgba::rgb(c), geom: l.geom, width: l.width as f32, dash, marker, marker_size: l.marker_size as f32, alpha: l.alpha }
+                Style { color, geom: l.geom, width: l.width as f32, dash, marker, marker_size: l.marker_size as f32, alpha: l.alpha }
             })
             .collect();
         next += slots;
@@ -990,7 +1006,7 @@ fn render_panel(d: &mut Drawing, fig: &Figure, panel: &Panel, series: &[Vec<Seri
         let ys = if a.on_y2 && has_y2 { &sy2 } else { &sy };
         let px = |x: f64| if a.relative { Some(x0 + x as f32 * (x1 - x0)) } else { sx.pos(x) };
         let py = |y: f64| if a.relative { Some(y1 - y as f32 * (y1 - y0)) } else { ys.pos(y) };
-        let color = if a.color == [0, 0, 0] { lk.fg } else { Rgba::rgb(a.color) };
+        let color = if a.color == Color::BLACK { lk.fg } else { Rgba(a.color.0[0], a.color.0[1], a.color.0[2], a.color.0[3]) };
         let size = if a.size > 0.0 { a.size } else { sz.ticks };
         let t = ty.t(&a.text, size, false, None);
         let (dash, cap) = dash_pattern(a.dash, a.width as f32);
@@ -1164,7 +1180,7 @@ mod tests {
         assert!(texts > 30, "{texts}");
         // all themes and palettes render; an empty panel shows a hint
         for theme in [Theme::Grid, Theme::Classic, Theme::Minimal, Theme::Dark] {
-            for palette in [Palette::OkabeIto, Palette::Tableau, Palette::Viridis, Palette::Grey] {
+            for palette in [Palette::OkabeIto, Palette::Tableau, Palette::Viridis, Palette::Grey, Palette::Custom] {
                 let f = Figure { theme, palette, ..fig.clone() };
                 let r = render(&f, &[]);
                 assert!(r.drawing.prims.iter().any(|p| matches!(p, Prim::Text { t, .. } if t.spans.iter().any(|s| s.text.contains("No data")))));
@@ -1241,7 +1257,7 @@ mod visual {
             title: "(b) Surface flux, comparison".into(),
             layers: vec![
                 Layer { source: Source::TimeLevel, runs: vec![String::new(), "Ks × 0.3".into()], x: "t".into(), y: "vTop".into(), ..Default::default() },
-                Layer { source: Source::AtmInput, x: "t".into(), y: "prec".into(), geom: Geom::Steps, y2: true, color: Some([120, 120, 120]), ..Default::default() },
+                Layer { source: Source::AtmInput, x: "t".into(), y: "prec".into(), geom: Geom::Steps, y2: true, color: Some(Color::rgb(120, 120, 120)), ..Default::default() },
             ],
             annotations: vec![Annotation { kind: AnnotationKind::Arrow, text: "rain".into(), x: 0.55, y: 0.8, x2: 0.4, y2: 0.6, ..Default::default() }],
             legend: LegendPos::Bottom,

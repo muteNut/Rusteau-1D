@@ -11,7 +11,7 @@ use crate::tips::TipExt;
 use crate::util::sig;
 use crate::App;
 use egui::{CollapsingHeader, ComboBox, DragValue, RichText, Ui};
-use rusteau_core::figure::{Anchor, Annotation, AnnotationKind, Axis, Dash, Figure, Geom, Layer, LegendPos, Marker, Palette, Panel, Source, Theme};
+use rusteau_core::figure::{Anchor, Annotation, AnnotationKind, Axis, Color, Dash, Figure, Geom, Layer, LegendPos, Marker, NamedColor, Palette, Panel, Source, Theme};
 use std::hash::{Hash, Hasher};
 
 /// State of the figure window.
@@ -77,7 +77,13 @@ enum Act {
 }
 
 const THEMES: [(Theme, &str); 4] = [(Theme::Grid, "Grid"), (Theme::Classic, "Classic (axis lines)"), (Theme::Minimal, "Minimal"), (Theme::Dark, "Dark")];
-const PALETTES: [(Palette, &str); 4] = [(Palette::OkabeIto, "Okabe–Ito (colour-blind safe)"), (Palette::Tableau, "Tableau 10"), (Palette::Viridis, "Viridis (ordered series)"), (Palette::Grey, "Grey")];
+const PALETTES: [(Palette, &str); 5] = [
+    (Palette::OkabeIto, "Okabe–Ito (colour-blind safe)"),
+    (Palette::Tableau, "Tableau 10"),
+    (Palette::Viridis, "Viridis (ordered series)"),
+    (Palette::Grey, "Grey"),
+    (Palette::Custom, "Custom (own colours)"),
+];
 const LEGENDS: [(LegendPos, &str); 7] = [
     (LegendPos::TopRight, "Top right"),
     (LegendPos::TopLeft, "Top left"),
@@ -605,7 +611,7 @@ fn controls(ui: &mut Ui, st: &mut FigState, fig: &mut Figure, dc: &DataCtx, runs
     fig.sync_panels();
     st.panel = st.panel.min(fig.panels.len().saturating_sub(1));
     // panel
-    CollapsingHeader::new(RichText::new("Panel").strong()).default_open(true).show(ui, |ui| {
+    CollapsingHeader::new(crate::util::section_head(ui, "Panel")).default_open(true).show(ui, |ui| {
         if fig.panels.len() > 1 {
             ui.horizontal_wrapped(|ui| {
                 ui.label("Panel:").tip("Panel");
@@ -643,7 +649,7 @@ fn controls(ui: &mut Ui, st: &mut FigState, fig: &mut Figure, dc: &DataCtx, runs
 }
 
 fn figure_section(ui: &mut Ui, fig: &mut Figure, fold: Option<bool>) {
-    CollapsingHeader::new(RichText::new("Figure").strong()).default_open(true).open(fold).show(ui, |ui| {
+    CollapsingHeader::new(crate::util::section_head(ui, "Figure")).default_open(true).open(fold).show(ui, |ui| {
         egui::Grid::new("fig_main").num_columns(2).show(ui, |ui| {
             row(ui, "Figure name");
             ui.add(egui::TextEdit::singleline(&mut fig.name).desired_width(230.0)).tip("Figure name");
@@ -689,16 +695,73 @@ fn figure_section(ui: &mut Ui, fig: &mut Figure, fold: Option<bool>) {
             combo(ui, "fig_theme", &mut fig.theme, &THEMES, 200.0).tip("Theme");
             ui.end_row();
             row(ui, "Palette");
+            let before = fig.palette;
             combo(ui, "fig_palette", &mut fig.palette, &PALETTES, 200.0).tip("Palette");
+            if fig.palette == Palette::Custom && before != Palette::Custom && fig.colors.is_empty() {
+                // start from the colours of the palette chosen before
+                let dark = fig.theme == Theme::Dark;
+                fig.colors = (0..8)
+                    .map(|k| {
+                        let [r, g, b] = render::builtin_color(before, k, 8, dark);
+                        NamedColor { name: format!("colour {}", k + 1), color: Color::rgb(r, g, b) }
+                    })
+                    .collect();
+            }
             ui.end_row();
         });
+        if fig.palette == Palette::Custom {
+            custom_colors(ui, fig);
+        }
         ui.checkbox(&mut fig.transparent, "Transparent background (PNG, SVG)").tip("Transparent background (PNG, SVG)");
         ui.checkbox(&mut fig.svg_text_as_paths, "SVG: text as outlines").tip("SVG: text as outlines");
     });
 }
 
+/// The colours of the palette "Custom": name, swatch (opens the picker) and code, in the order of the series.
+fn custom_colors(ui: &mut Ui, fig: &mut Figure) {
+    ui.label(RichText::new("Custom colours, in the order of the series (click a swatch to change it):").weak());
+    let mut action: Option<(usize, i32)> = None;
+    let n = fig.colors.len();
+    egui::Grid::new("fig_custom_colors").num_columns(4).spacing([6.0, 4.0]).show(ui, |ui| {
+        for (k, nc) in fig.colors.iter_mut().enumerate() {
+            ui.add(egui::TextEdit::singleline(&mut nc.name).desired_width(110.0).hint_text("name")).tip("Colour name");
+            let r = crate::colorpick::color_button(ui, &mut nc.color.0).tip("Custom colour");
+            if k == 0 && ui.ctx().data_mut(|d| d.remove_temp::<bool>(egui::Id::new("tour_open_picker"))).is_some() {
+                // the screenshot tour shows the picker
+                ui.memory_mut(|m| m.open_popup(r.id.with("picker")));
+            }
+            ui.monospace(nc.color.hex());
+            ui.horizontal(|ui| {
+                if ui.add_enabled(k > 0, egui::Button::new("⬆").small()).on_hover_text("Earlier in the order").clicked() {
+                    action = Some((k, -1));
+                }
+                if ui.add_enabled(k + 1 < n, egui::Button::new("⬇").small()).on_hover_text("Later in the order").clicked() {
+                    action = Some((k, 1));
+                }
+                if ui.small_button("🗑").on_hover_text("Remove the colour").clicked() {
+                    action = Some((k, 0));
+                }
+            });
+            ui.end_row();
+        }
+    });
+    match action {
+        Some((k, 0)) => {
+            fig.colors.remove(k);
+        }
+        Some((k, d)) => fig.colors.swap(k, (k as i32 + d) as usize),
+        None => {}
+    }
+    if ui.button("+ Add colour").tip("Add colour").clicked() {
+        let dark = fig.theme == Theme::Dark;
+        let k = fig.colors.len();
+        let [r, g, b] = render::builtin_color(Palette::OkabeIto, k, 8, dark);
+        fig.colors.push(NamedColor { name: format!("colour {}", k + 1), color: Color::rgb(r, g, b) });
+    }
+}
+
 fn text_section(ui: &mut Ui, fig: &mut Figure) {
-    CollapsingHeader::new(RichText::new("Font and text sizes").strong()).show(ui, |ui| {
+    CollapsingHeader::new(crate::util::section_head(ui, "Font and text sizes")).show(ui, |ui| {
         egui::Grid::new("fig_text").num_columns(2).show(ui, |ui| {
             row(ui, "Font");
             let mut font = fig.font.clone();
@@ -732,19 +795,22 @@ fn text_section(ui: &mut Ui, fig: &mut Figure) {
     });
 }
 
-fn layer_name(l: &Layer, cols: &[ColInfo]) -> String {
-    let n = |k: &str| cols.iter().find(|c| c.key == k).map(|c| c.name.clone()).unwrap_or_else(|| k.to_string());
-    format!("{} against {}", n(&l.y), n(&l.x))
+fn layer_name(l: &Layer, cols: &[ColInfo], fig: &Figure) -> String {
+    let n = |k: &str| cols.iter().find(|c| c.key == k).map(|c| c.name.clone());
+    match (n(&l.y), n(&l.x)) {
+        (Some(y), Some(x)) => format!("{y} against {x}"),
+        _ => format!("{} (no data)", data::source_name(&l.source, fig)),
+    }
 }
 
 fn layers_section(ui: &mut Ui, st: &mut FigState, p: &mut Panel, fig: &Figure, dc: &DataCtx, runs: &[SavedRun]) {
-    CollapsingHeader::new(RichText::new("Layers (data)").strong()).default_open(true).show(ui, |ui| {
+    CollapsingHeader::new(crate::util::section_head(ui, "Layers (data)")).default_open(true).show(ui, |ui| {
         let mut action: Option<(usize, i32)> = None;
         for k in 0..p.layers.len() {
             let cols = columns(st, dc, &p.layers[k].source, fig);
             ui.horizontal(|ui| {
                 ui.checkbox(&mut p.layers[k].visible, "").tip("Visible");
-                let name = format!("{} {}", k + 1, layer_name(&p.layers[k], &cols));
+                let name = format!("{} {}", k + 1, layer_name(&p.layers[k], &cols, fig));
                 if ui.selectable_label(st.layer == k, name).clicked() {
                     st.layer = k;
                 }
@@ -799,9 +865,14 @@ fn layer_editor(ui: &mut Ui, st: &mut FigState, l: &mut Layer, fig: &Figure, dc:
     egui::Grid::new("fig_layer").num_columns(2).show(ui, |ui| {
         row(ui, "Data source");
         let before = l.source.clone();
-        ComboBox::from_id_salt("fig_source").width(250.0).selected_text(data::source_name(&l.source, fig)).height(420.0).show_ui(ui, |ui| {
+        let mut shown = data::source_name(&l.source, fig);
+        if !dc.available(&l.source, fig) {
+            shown.push_str(" (no data)");
+        }
+        ComboBox::from_id_salt("fig_source").width(250.0).selected_text(shown).height(420.0).show_ui(ui, |ui| {
             let mut group = "";
-            for s in data::all_sources(fig) {
+            // only sources with data: results that were calculated, input that is used, loaded data
+            for s in data::all_sources(fig).into_iter().filter(|s| dc.available(s, fig)) {
                 let g = data::source_group(&s);
                 if g != group {
                     ui.label(RichText::new(g).small().weak());
@@ -907,10 +978,11 @@ fn layer_editor(ui: &mut Ui, st: &mut FigState, l: &mut Layer, fig: &Figure, dc:
         ui.horizontal(|ui| {
             let mut auto = l.color.is_none();
             if ui.checkbox(&mut auto, "palette").tip("Colour").changed() {
-                l.color = if auto { None } else { Some([0, 114, 178]) };
+                l.color = if auto { None } else { Some(Color::rgb(0, 114, 178)) };
             }
             if let Some(c) = &mut l.color {
-                egui::color_picker::color_edit_button_srgb(ui, c).tip("Colour");
+                crate::colorpick::color_button(ui, &mut c.0).tip("Colour");
+                ui.monospace(c.hex());
             }
         });
         ui.end_row();
@@ -978,7 +1050,7 @@ fn axis_editor(ui: &mut Ui, a: &mut Axis, id: &str) {
 }
 
 fn axes_section(ui: &mut Ui, st: &mut FigState, p: &mut Panel) {
-    CollapsingHeader::new(RichText::new("Axes").strong()).default_open(true).show(ui, |ui| {
+    CollapsingHeader::new(crate::util::section_head(ui, "Axes")).default_open(true).show(ui, |ui| {
         ui.horizontal(|ui| {
             for (k, n) in ["x axis", "y axis", "Right y axis"].iter().enumerate() {
                 ui.selectable_value(&mut st.axis, k, *n);
@@ -998,7 +1070,7 @@ fn axes_section(ui: &mut Ui, st: &mut FigState, p: &mut Panel) {
 }
 
 fn annotations_section(ui: &mut Ui, st: &mut FigState, p: &mut Panel) {
-    CollapsingHeader::new(RichText::new("Annotations").strong()).show(ui, |ui| {
+    CollapsingHeader::new(crate::util::section_head(ui, "Annotations")).show(ui, |ui| {
         ui.horizontal_wrapped(|ui| {
             for (kind, n) in KINDS {
                 if ui.button(format!("+ {n}")).tip("Add annotation").clicked() {
@@ -1056,7 +1128,10 @@ fn annotations_section(ui: &mut Ui, st: &mut FigState, p: &mut Panel) {
             ui.add(DragValue::new(&mut a.size).range(0.0..=48.0).speed(0.1).max_decimals(1)).on_hover_text("0: size of the tick labels").tip("Font size (pt)");
             ui.end_row();
             row(ui, "Colour");
-            egui::color_picker::color_edit_button_srgb(ui, &mut a.color).tip("Annotation colour");
+            ui.horizontal(|ui| {
+                crate::colorpick::color_button(ui, &mut a.color.0).tip("Annotation colour");
+                ui.monospace(a.color.hex());
+            });
             ui.end_row();
             if a.kind != AnnotationKind::Arrow {
                 row(ui, "Text alignment");
@@ -1086,7 +1161,7 @@ fn annotations_section(ui: &mut Ui, st: &mut FigState, p: &mut Panel) {
 }
 
 fn data_section(ui: &mut Ui, fig: &mut Figure, acts: &mut Vec<Act>) {
-    CollapsingHeader::new(RichText::new("Data files").strong()).show(ui, |ui| {
+    CollapsingHeader::new(crate::util::section_head(ui, "Data files")).show(ui, |ui| {
         ui.label(RichText::new("Tables from text or CSV files (a header line with the column names, units in brackets), e.g. measurements or results of other programs. They are stored in the project.").weak());
         if ui.button("Import table…").tip("Import table").clicked() {
             acts.push(Act::ImportData);
@@ -1119,7 +1194,7 @@ fn data_section(ui: &mut Ui, fig: &mut Figure, acts: &mut Vec<Act>) {
 }
 
 fn runs_section(ui: &mut Ui, st: &mut FigState, dc: &DataCtx, runs: &[SavedRun], acts: &mut Vec<Act>) {
-    CollapsingHeader::new(RichText::new("Runs for comparison").strong()).show(ui, |ui| {
+    CollapsingHeader::new(crate::util::section_head(ui, "Runs for comparison")).show(ui, |ui| {
         ui.label(RichText::new("Keep the current results under a name, change the input, run again and show both: choose the runs in the layer settings. Kept runs are not saved with the project; save them as files.").weak());
         ui.horizontal(|ui| {
             ui.add(egui::TextEdit::singleline(&mut st.run_name).desired_width(150.0).hint_text(format!("Run {}", runs.len() + 1))).tip("Run name");
@@ -1145,7 +1220,7 @@ fn runs_section(ui: &mut Ui, st: &mut FigState, dc: &DataCtx, runs: &[SavedRun],
 }
 
 fn symbols_section(ui: &mut Ui, st: &mut FigState) {
-    CollapsingHeader::new(RichText::new("Symbols and markup").strong()).show(ui, |ui| {
+    CollapsingHeader::new(crate::util::section_head(ui, "Symbols and markup")).show(ui, |ui| {
         ui.label(RichText::new("Click a symbol to copy it, then paste it into a text with Ctrl+V.").weak());
         ui.horizontal_wrapped(|ui| {
             ui.spacing_mut().item_spacing = egui::vec2(3.0, 3.0);
