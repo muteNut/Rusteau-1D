@@ -40,6 +40,9 @@ pub struct FigState {
     save_run: usize,
     tex: Option<egui::TextureHandle>,
     key: u64,
+    /// columns of the sources (the menus of the variables) for the data of `cols_env`
+    cols: std::collections::HashMap<String, Vec<ColInfo>>,
+    cols_env: u64,
     rendered: Option<Rendered>,
     last_hash: Option<u64>,
     hover: String,
@@ -276,6 +279,10 @@ impl App {
                     self.measured.iter().map(|m| (m.name.clone(), m.pts.len())).collect::<Vec<_>>(),
                     fit.map(|(s, r)| (s.observations.len(), r.fitted.len())),
                 ));
+                if env != st.cols_env {
+                    st.cols.clear();
+                    st.cols_env = env;
+                }
                 egui::SidePanel::left("fig_side").resizable(true).default_width(400.0).min_width(330.0).show_inside(ui, |ui| {
                     egui::ScrollArea::vertical().auto_shrink([false, false]).show(ui, |ui| {
                         let fig = &mut figures[st.fig];
@@ -734,7 +741,7 @@ fn layers_section(ui: &mut Ui, st: &mut FigState, p: &mut Panel, fig: &Figure, d
     CollapsingHeader::new(RichText::new("Layers (data)").strong()).default_open(true).show(ui, |ui| {
         let mut action: Option<(usize, i32)> = None;
         for k in 0..p.layers.len() {
-            let cols = dc.columns(&p.layers[k].source, fig);
+            let cols = columns(st, dc, &p.layers[k].source, fig);
             ui.horizontal(|ui| {
                 ui.checkbox(&mut p.layers[k].visible, "").tip("Visible");
                 let name = format!("{} {}", k + 1, layer_name(&p.layers[k], &cols));
@@ -776,11 +783,19 @@ fn layers_section(ui: &mut Ui, st: &mut FigState, p: &mut Panel, fig: &Figure, d
         let Some(l) = p.layers.get_mut(st.layer) else { return };
         ui.add_space(4.0);
         ui.label(RichText::new(format!("Layer {}", st.layer + 1)).strong());
-        layer_editor(ui, l, fig, dc, runs);
+        layer_editor(ui, st, l, fig, dc, runs);
     });
 }
 
-fn layer_editor(ui: &mut Ui, l: &mut Layer, fig: &Figure, dc: &DataCtx, runs: &[SavedRun]) {
+/// The columns of a source; built once per state of the data (a table of the results can be long).
+fn columns(st: &mut FigState, dc: &DataCtx, src: &Source, fig: &Figure) -> Vec<ColInfo> {
+    if matches!(src, Source::DataFile(_)) {
+        return dc.columns(src, fig);
+    }
+    st.cols.entry(format!("{src:?}")).or_insert_with(|| dc.columns(src, fig)).clone()
+}
+
+fn layer_editor(ui: &mut Ui, st: &mut FigState, l: &mut Layer, fig: &Figure, dc: &DataCtx, runs: &[SavedRun]) {
     egui::Grid::new("fig_layer").num_columns(2).show(ui, |ui| {
         row(ui, "Data source");
         let before = l.source.clone();
@@ -799,7 +814,7 @@ fn layer_editor(ui: &mut Ui, l: &mut Layer, fig: &Figure, dc: &DataCtx, runs: &[
         .response
         .tip("Data source");
         ui.end_row();
-        let cols = dc.columns(&l.source, fig);
+        let cols = columns(st, dc, &l.source, fig);
         if l.source != before {
             // keep the variables when the new source has them, otherwise its first columns
             l.items.clear();
@@ -1201,8 +1216,8 @@ fn preview(ui: &mut Ui, st: &mut FigState, fig: &mut Figure, dc: &DataCtx, env: 
                 Some(k) => {
                     let g = &r.panels[k];
                     let rel = ((x - g.rect[0]) / (g.rect[2] - g.rect[0]), (g.rect[3] - y) / (g.rect[3] - g.rect[1]));
-                    let y2 = g.y2.map(|s| format!(", right y = {}", sig(s.from_pt(y)))).unwrap_or_default();
-                    format!("panel {}: x = {}, y = {}{y2}  (relative {:.2}, {:.2})", k + 1, sig(g.x.from_pt(x)), sig(g.y.from_pt(y)), rel.0, rel.1)
+                    let y2 = g.y2.map(|s| format!(", right y = {}", sig(s.value(y)))).unwrap_or_default();
+                    format!("panel {}: x = {}, y = {}{y2}  (relative {:.2}, {:.2})", k + 1, sig(g.x.value(x)), sig(g.y.value(y)), rel.0, rel.1)
                 }
                 None => format!("{:.1} × {:.1} mm", x as f64 / PT_PER_MM, y as f64 / PT_PER_MM),
             }
@@ -1228,7 +1243,7 @@ fn preview(ui: &mut Ui, st: &mut FigState, fig: &mut Figure, dc: &DataCtx, env: 
                     let (vx, vy) = if a.relative {
                         (((x - g.rect[0]) / (g.rect[2] - g.rect[0])) as f64, ((g.rect[3] - y) / (g.rect[3] - g.rect[1])) as f64)
                     } else {
-                        (g.x.from_pt(x), ys.from_pt(y))
+                        (g.x.value(x), ys.value(y))
                     };
                     let round = |v: f64| if a.relative { (v * 1000.0).round() / 1000.0 } else { sig(v).parse().unwrap_or(v) };
                     if second {

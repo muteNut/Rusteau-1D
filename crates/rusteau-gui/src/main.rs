@@ -598,6 +598,15 @@ impl App {
     }
 
     fn menu(&mut self, ctx: &egui::Context) {
+        let help_before = (self.help.open, self.help.current().to_string());
+        self.menu_bar(ctx);
+        // help asked for in the main window is shown there, also while the figure window shows it
+        if (self.help.open, self.help.current().to_string()) != help_before {
+            self.figs.help_here = false;
+        }
+    }
+
+    fn menu_bar(&mut self, ctx: &egui::Context) {
         egui::TopBottomPanel::top("menu").show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
                 ui.menu_button("File", |ui| {
@@ -837,8 +846,14 @@ impl App {
     /// The help window and the help requests of the pages ("?" next to a page title, help buttons of dialogs).
     fn help_ui(&mut self, ctx: &egui::Context) {
         match help::take_request(ctx) {
-            Some(None) => self.help.show_topic(help::topic_of(self.page), None),
-            Some(Some(id)) => self.help.show_topic(id, None),
+            Some(None) => {
+                self.figs.help_here = false;
+                self.help.show_topic(help::topic_of(self.page), None);
+            }
+            Some(Some(id)) => {
+                self.figs.help_here = false;
+                self.help.show_topic(id, None);
+            }
             None => {}
         }
         // the figure window shows the help itself when it was asked for there

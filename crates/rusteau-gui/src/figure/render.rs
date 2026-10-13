@@ -40,12 +40,12 @@ impl Scale {
     }
 
     /// Page position of value `v` (`None` for missing values and values ≤ 0 on a log axis).
-    pub fn to_pt(&self, v: f64) -> Option<f32> {
+    pub fn pos(&self, v: f64) -> Option<f32> {
         self.frac(v).map(|t| (self.p0 as f64 + t.clamp(-1e3, 1e3) * (self.p1 - self.p0) as f64) as f32)
     }
 
     /// Value at page position `p`.
-    pub fn from_pt(&self, p: f32) -> f64 {
+    pub fn value(&self, p: f32) -> f64 {
         let mut t = ((p - self.p0) / (self.p1 - self.p0)) as f64;
         if self.reverse {
             t = 1.0 - t;
@@ -522,7 +522,7 @@ fn draw_marker(d: &mut Drawing, m: Marker, x: f32, y: f32, size: f32, c: Rgba, b
 
 /// Draws a series in the plot area.
 fn draw_series(d: &mut Drawing, s: &Series, st: &Style, sx: &Scale, sy: &Scale, bg: Rgba) {
-    let pts: Vec<Option<(f32, f32)>> = s.x.iter().zip(&s.y).map(|(&x, &y)| Some((sx.to_pt(x)?, sy.to_pt(y)?))).collect();
+    let pts: Vec<Option<(f32, f32)>> = s.x.iter().zip(&s.y).map(|(&x, &y)| Some((sx.pos(x)?, sy.pos(y)?))).collect();
     // runs of consecutive valid points
     let mut runs: Vec<Vec<(f32, f32)>> = vec![];
     let mut cur = vec![];
@@ -542,7 +542,7 @@ fn draw_series(d: &mut Drawing, s: &Series, st: &Style, sx: &Scale, sy: &Scale, 
     let (dash, cap) = dash_pattern(st.dash, st.width);
     let stroke = Stroke { width: st.width, dash, cap };
     // the base of areas and bars: y = 0, or the edge of the axis when 0 is not on it
-    let base = sy.to_pt(0.0).filter(|_| !sy.log).unwrap_or(if sy.reverse { sy.p1 } else { sy.p0 });
+    let base = sy.pos(0.0).filter(|_| !sy.log).unwrap_or(if sy.reverse { sy.p1 } else { sy.p0 });
     let base = base.clamp(sy.p0.min(sy.p1), sy.p0.max(sy.p1));
     match st.geom {
         Geom::Line | Geom::LinePoints => {
@@ -887,7 +887,7 @@ fn render_panel(d: &mut Drawing, fig: &Figure, panel: &Panel, series: &[Vec<Seri
         if a.minor {
             let mut p = Path::default();
             for v in &t.minor {
-                if let Some(q) = s.to_pt(*v) {
+                if let Some(q) = s.pos(*v) {
                     p.extend(if vertical { Path::line(q, y0, q, y1) } else { Path::line(x0, q, x1, q) });
                 }
             }
@@ -895,7 +895,7 @@ fn render_panel(d: &mut Drawing, fig: &Figure, panel: &Panel, series: &[Vec<Seri
         }
         let mut p = Path::default();
         for (v, _) in &t.major {
-            if let Some(q) = s.to_pt(*v) {
+            if let Some(q) = s.pos(*v) {
                 p.extend(if vertical { Path::line(q, y0, q, y1) } else { Path::line(x0, q, x1, q) });
             }
         }
@@ -934,20 +934,20 @@ fn render_panel(d: &mut Drawing, fig: &Figure, panel: &Panel, series: &[Vec<Seri
     let mut tick_path = Path::default();
     let minor_len = tick_len * 0.6;
     for ((v, _), t) in xticks.major.iter().zip(&xl) {
-        if let Some(q) = sx.to_pt(*v) {
+        if let Some(q) = sx.pos(*v) {
             tick_path.extend(Path::line(q, y1, q, y1 + tick_len));
             d.text(t, q - t.width / 2.0, y1 + tick_len + 2.0, 0.0, lk.fg);
         }
     }
     for ((v, _), t) in yticks.major.iter().zip(&yl) {
-        if let Some(q) = sy.to_pt(*v) {
+        if let Some(q) = sy.pos(*v) {
             tick_path.extend(Path::line(x0 - tick_len, q, x0, q));
             d.text(t, x0 - tick_len - 2.0 - t.width, q - t.height / 2.0, 0.0, lk.fg);
         }
     }
     if has_y2 {
         for ((v, _), t) in y2ticks.major.iter().zip(&y2l) {
-            if let Some(q) = sy2.to_pt(*v) {
+            if let Some(q) = sy2.pos(*v) {
                 tick_path.extend(Path::line(x1, q, x1 + tick_len, q));
                 d.text(t, x1 + tick_len + 2.0, q - t.height / 2.0, 0.0, lk.fg);
             }
@@ -957,7 +957,7 @@ fn render_panel(d: &mut Drawing, fig: &Figure, panel: &Panel, series: &[Vec<Seri
         let mut minor = |a: &Axis, t: &Ticks, s: &Scale, f: &dyn Fn(f32) -> Path| {
             if a.minor {
                 for v in &t.minor {
-                    if let Some(q) = s.to_pt(*v) {
+                    if let Some(q) = s.pos(*v) {
                         tick_path.extend(f(q));
                     }
                 }
@@ -988,8 +988,8 @@ fn render_panel(d: &mut Drawing, fig: &Figure, panel: &Panel, series: &[Vec<Seri
     // annotations
     for a in &panel.annotations {
         let ys = if a.on_y2 && has_y2 { &sy2 } else { &sy };
-        let px = |x: f64| if a.relative { Some(x0 + x as f32 * (x1 - x0)) } else { sx.to_pt(x) };
-        let py = |y: f64| if a.relative { Some(y1 - y as f32 * (y1 - y0)) } else { ys.to_pt(y) };
+        let px = |x: f64| if a.relative { Some(x0 + x as f32 * (x1 - x0)) } else { sx.pos(x) };
+        let py = |y: f64| if a.relative { Some(y1 - y as f32 * (y1 - y0)) } else { ys.pos(y) };
         let color = if a.color == [0, 0, 0] { lk.fg } else { Rgba::rgb(a.color) };
         let size = if a.size > 0.0 { a.size } else { sz.ticks };
         let t = ty.t(&a.text, size, false, None);
@@ -1131,11 +1131,11 @@ mod tests {
         assert!(lo < 5.0 && hi > 5.0);
         // scale
         let s = Scale { lo: 0.0, hi: 10.0, log: false, reverse: true, p0: 100.0, p1: 0.0 };
-        assert_eq!(s.to_pt(0.0), Some(0.0));
-        assert!((s.from_pt(25.0) - 2.5).abs() < 1e-9);
+        assert_eq!(s.pos(0.0), Some(0.0));
+        assert!((s.value(25.0) - 2.5).abs() < 1e-9);
         let s = Scale { lo: 1.0, hi: 100.0, log: true, reverse: false, p0: 0.0, p1: 100.0 };
-        assert_eq!(s.to_pt(10.0), Some(50.0));
-        assert_eq!(s.to_pt(-1.0), None);
+        assert_eq!(s.pos(10.0), Some(50.0));
+        assert_eq!(s.pos(-1.0), None);
     }
 
     #[test]
@@ -1158,7 +1158,7 @@ mod tests {
         let g = &r.panels[0];
         assert!(g.rect[0] > 20.0 && g.rect[2] < r.drawing.width / 2.0);
         // the hline annotation lies at y = 0.2
-        let q = g.y.to_pt(0.2).unwrap();
+        let q = g.y.pos(0.2).unwrap();
         assert!(q > g.rect[1] && q < g.rect[3]);
         let texts = r.drawing.prims.iter().filter(|p| matches!(p, Prim::Text { .. })).count();
         assert!(texts > 30, "{texts}");

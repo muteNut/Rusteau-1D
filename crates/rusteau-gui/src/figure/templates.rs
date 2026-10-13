@@ -248,4 +248,27 @@ mod tests {
             assert!(!t.desc.is_empty());
         }
     }
+
+    /// Every template that fits a project shows data in every panel once the project has been run.
+    #[test]
+    fn templates_show_the_results() {
+        use super::super::data::{DataCtx, SavedRun};
+        for p in [rusteau_core::examples::infiltration_evaporation(), rusteau_core::examples::solute_pulse()] {
+            let mut sim = rusteau_core::Simulation::new(p.clone()).unwrap();
+            sim.run(|_| true);
+            let r = std::mem::take(&mut sim.res);
+            let runs = vec![SavedRun { name: "A".into(), project: p.clone(), results: r.clone() }];
+            let c = TemplateCtx { prj: &p, runs: vec!["A".into()], has_fit: false, has_measured: false };
+            let dc = DataCtx { prj: &p, results: Some(&r), runs: &runs, measured: &[], fit: None };
+            for t in all().iter().filter(|t| (t.fits)(&c) && t.name != "Empty figure") {
+                let f = (t.make)(&c);
+                for (k, panel) in f.panels.iter().enumerate() {
+                    let n: usize = panel.layers.iter().map(|l| dc.series(l, &f).iter().filter(|s| s.x.iter().any(|v| v.is_finite())).count()).sum();
+                    assert!(n > 0, "{} ({}): panel {} has no data", t.name, p.title, k + 1);
+                }
+                let r = super::super::render::render(&f, &f.panels.iter().map(|p| p.layers.iter().map(|l| dc.series(l, &f)).collect()).collect::<Vec<_>>());
+                assert_eq!(r.panels.len(), f.panels.len());
+            }
+        }
+    }
 }

@@ -229,6 +229,18 @@ impl DataCtx<'_> {
 
     /// Columns of a source (for the menus of the x and y variables).
     pub fn columns(&self, src: &Source, fig: &Figure) -> Vec<ColInfo> {
+        if let Source::DataFile(i) = src {
+            // the names alone, without copying the values
+            let names = fig.data.get(*i).map(|d| d.columns.as_slice()).unwrap_or_default();
+            return names
+                .iter()
+                .enumerate()
+                .map(|(k, n)| {
+                    let (name, unit) = split_unit(n);
+                    ColInfo { key: format!("col{k}"), name, unit }
+                })
+                .collect();
+        }
         // the table of the first item of the current run, or of an empty run when there are no results
         if let Some(t) = self.table(src, 0, "", fig) {
             return t.infos();

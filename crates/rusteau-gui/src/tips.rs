@@ -571,7 +571,7 @@ const TIPS: &[(&str, &str)] = &[
     ("In the legend", "Lists the series of the layer in the legend."),
     ("Right y axis", "Plots the layer against a second y axis on the right side (e.g. precipitation next to fluxes)."),
     ("Axis title", "auto: the variable of the layers with its unit. Otherwise your own text with markup, e.g. θ (cm^{3} cm^{−3}) or K (cm d^{−1})."),
-    ("Range", "auto: from the data, rounded to the ticks. Otherwise the range from the first to the second value (the first may be larger to reverse the axis)."),
+    ("Range", "auto: from the data, extended to the next ticks. Otherwise the range from the first to the second value (to let the values increase downward or to the left, use Reversed)."),
     ("Tick step", "Distance of the labelled ticks; 0: automatic. Logarithmic axes: the step in decades."),
     ("Logarithmic", "Logarithmic scale (values ≤ 0 are left out), e.g. for pressure heads or conductivities."),
     ("Reversed", "The values increase downward (depth) or to the left."),
