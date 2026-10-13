@@ -1,5 +1,7 @@
 # Rusteau-1D
 
+<img src="crates/rusteau-gui/assets/icon-512.png" alt="Rusteau-1D icon" width="96" align="right">
+
 Rusteau-1D is a Rust port of the numerical engine of **HYDRUS-1D** (one-dimensional variably saturated water flow, heat
 transport and solute transport in porous media) with a cross-platform desktop interface for Windows and Linux.
 

@@ -18,6 +18,15 @@ pub const OFL_NOTO_SANS_MATH: &str = include_str!("../fonts/OFL-NotoSansMath.txt
 /// Name of the bundled font family (the default of the figures).
 pub const DEFAULT_FAMILY: &str = "Noto Sans";
 
+/// The program icon (`assets/icon.png`, 256 × 256) and the favicon of the HTML help (`assets/favicon.png`).
+pub const ICON_PNG: &[u8] = include_bytes!("../assets/icon.png");
+pub const FAVICON_PNG: &[u8] = include_bytes!("../assets/favicon.png");
+
+/// The program icon for the windows.
+pub fn icon() -> std::sync::Arc<egui::IconData> {
+    std::sync::Arc::new(eframe::icon_data::from_png_bytes(ICON_PNG).unwrap_or_default())
+}
+
 /// Name of the bold family of the interface (headings).
 pub const BOLD: &str = "bold";
 

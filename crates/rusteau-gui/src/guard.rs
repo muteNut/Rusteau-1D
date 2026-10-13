@@ -21,10 +21,6 @@ pub fn crash_log() -> PathBuf {
     data_dir().join("crash.log")
 }
 
-pub fn recovery_file() -> PathBuf {
-    data_dir().join("recovery.h1dr")
-}
-
 /// The text of a panic payload.
 fn payload_text(e: &(dyn std::any::Any + Send)) -> String {
     e.downcast_ref::<&str>().map(|s| s.to_string()).or_else(|| e.downcast_ref::<String>().cloned()).unwrap_or_else(|| "unknown error".into())
@@ -64,26 +60,34 @@ pub fn install_panic_hook() {
     }));
 }
 
-/// Periodic copy of an unsaved project.
+/// Periodic copy of an unsaved project: one file with the latest state, written only when the project changed
+/// since the last copy, removed when the project is saved (or has no unsaved changes) and when the program closes.
 pub struct Recovery {
     last: Instant,
-    /// a recovery file of this session exists
-    written: bool,
+    /// hash of the project in the recovery file of this session (`None`: no file of this session)
+    written: Option<u64>,
+    /// folder of the recovery file (the user data; another folder in tests)
+    dir: PathBuf,
 }
 
 impl Default for Recovery {
     fn default() -> Self {
-        Recovery { last: Instant::now(), written: false }
+        Recovery { last: Instant::now(), written: None, dir: data_dir() }
     }
 }
 
 impl Recovery {
     const EVERY: Duration = Duration::from_secs(60);
 
-    /// Writes the project when it has unsaved changes (at most once a minute); removes the copy when there are none.
+    pub fn file(&self) -> PathBuf {
+        self.dir.join("recovery.h1dr")
+    }
+
+    /// Called every frame: writes the project when it has unsaved changes that are not in the copy yet (at most once
+    /// a minute); removes the copy when there are no unsaved changes.
     pub fn tick(&mut self, prj: &rusteau_core::Project, dirty: bool) {
         if !dirty {
-            if self.written {
+            if self.written.is_some() {
                 self.discard();
             }
             return;
@@ -92,24 +96,39 @@ impl Recovery {
             return;
         }
         self.last = Instant::now();
-        let _ = std::fs::create_dir_all(data_dir());
-        // written next to it first, so a crash while writing keeps the previous copy
-        let tmp = recovery_file().with_extension("tmp");
-        if rusteau_io::save_project(prj, &tmp).is_ok() && std::fs::rename(&tmp, recovery_file()).is_ok() {
-            self.written = true;
+        self.write(prj);
+    }
+
+    /// Writes the project unless the copy already holds this state.
+    pub fn write(&mut self, prj: &rusteau_core::Project) {
+        let Ok(text) = serde_json::to_string_pretty(prj) else { return };
+        let hash = {
+            use std::hash::{Hash, Hasher};
+            let mut h = std::collections::hash_map::DefaultHasher::new();
+            text.hash(&mut h);
+            h.finish()
+        };
+        if self.written == Some(hash) && self.file().exists() {
+            return;
+        }
+        let _ = std::fs::create_dir_all(&self.dir);
+        // written next to it first and renamed: the file always holds one complete, latest copy
+        let tmp = self.file().with_extension("tmp");
+        if std::fs::write(&tmp, text).is_ok() && std::fs::rename(&tmp, self.file()).is_ok() {
+            self.written = Some(hash);
         }
     }
 
-    /// Removes the recovery copy (the project was saved or the program closes normally).
+    /// Removes the recovery copy (the project was saved, or the program closes normally).
     pub fn discard(&mut self) {
-        let _ = std::fs::remove_file(recovery_file());
-        self.written = false;
+        let _ = std::fs::remove_file(self.file());
+        self.written = None;
     }
 }
 
 /// A recovery copy left by a session that did not end normally: its path and age.
 pub fn pending_recovery() -> Option<(PathBuf, Duration)> {
-    let p = recovery_file();
+    let p = Recovery::default().file();
     let age = std::fs::metadata(&p).ok()?.modified().ok()?.elapsed().unwrap_or_default();
     Some((p, age))
 }
@@ -117,6 +136,31 @@ pub fn pending_recovery() -> Option<(PathBuf, Duration)> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn recovery_keeps_the_latest_changed_state_and_is_cleared_by_saving() {
+        let dir = std::env::temp_dir().join(format!("rusteau-recovery-{}", std::process::id()));
+        let mut r = Recovery { last: Instant::now(), written: None, dir: dir.clone() };
+        let mut p = rusteau_core::examples::infiltration_evaporation();
+        // within a minute of the last copy nothing is written
+        r.tick(&p, true);
+        assert!(!r.file().exists());
+        r.write(&p);
+        let t0 = std::fs::metadata(r.file()).unwrap().modified().unwrap();
+        // the same state again: the file is not rewritten
+        std::thread::sleep(Duration::from_millis(20));
+        r.write(&p);
+        assert_eq!(std::fs::metadata(r.file()).unwrap().modified().unwrap(), t0);
+        // a change replaces the copy (one file with the latest state)
+        p.title = "changed".into();
+        r.write(&p);
+        assert_eq!(rusteau_io::load_project(&r.file()).unwrap().title, "changed");
+        assert_eq!(std::fs::read_dir(&dir).unwrap().count(), 1);
+        // saved (no unsaved changes): the copy is removed
+        r.tick(&p, false);
+        assert!(!r.file().exists());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
 
     #[test]
     fn panics_become_errors() {

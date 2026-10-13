@@ -220,6 +220,8 @@ pub struct App {
     recover_offer: Option<(PathBuf, std::time::Duration)>,
     /// a page whose drawing failed with an internal error, and the message
     broken_page: Option<(Page, String)>,
+    /// the program icon in the About dialog
+    icon_tex: Option<egui::TextureHandle>,
 }
 
 #[derive(Clone, Debug)]
@@ -296,6 +298,7 @@ impl App {
             recovery: Default::default(),
             recover_offer: None,
             broken_page: None,
+            icon_tex: None,
         }
     }
 
@@ -861,6 +864,10 @@ impl App {
             match rusteau_io::save_project(&self.prj, &p) {
                 Ok(_) => {
                     self.dirty = false;
+                    // the saved project needs no recovery copy (a copy of an earlier crash waits for its answer)
+                    if self.recover_offer.is_none() {
+                        self.recovery.discard();
+                    }
                     self.status = format!("Saved {}", p.display());
                     if self.legacy_on_save {
                         let msg = self.save_legacy(&p.with_extension("h1d"));
@@ -1064,11 +1071,24 @@ impl App {
                 });
         }
         if self.show_about {
+            if self.icon_tex.is_none() {
+                if let Ok(img) = image::load_from_memory(fonts::ICON_PNG) {
+                    let img = img.to_rgba8();
+                    let ci = egui::ColorImage::from_rgba_unmultiplied([img.width() as usize, img.height() as usize], img.as_raw());
+                    self.icon_tex = Some(ctx.load_texture("program_icon", ci, egui::TextureOptions::LINEAR));
+                }
+            }
+            let icon = self.icon_tex.clone();
             egui::Window::new("About Rusteau-1D")
                 .open(&mut self.show_about)
                 .collapsible(false)
                 .show(ctx, |ui| {
-                    ui.heading("Rusteau-1D");
+                    ui.horizontal(|ui| {
+                        if let Some(t) = &icon {
+                            ui.add(egui::Image::new((t.id(), egui::vec2(48.0, 48.0))));
+                        }
+                        ui.heading("Rusteau-1D");
+                    });
                     ui.label("Modern, performant porous media & vadose zone simulator.\nNumerical engine ported and verified against HYDRUS-1D Fortran routines:\nvariably saturated flow (Richards), solute transport, and heat flow.");
                     ui.add_space(4.0);
                     ui.hyperlink_to(
@@ -1408,7 +1428,8 @@ fn main() -> eframe::Result<()> {
             .with_min_inner_size([920.0, 600.0])
             .with_resizable(true)
             .with_drag_and_drop(true)
-            .with_title("Rusteau-1D"),
+            .with_title("Rusteau-1D")
+            .with_icon(fonts::icon()),
         ..Default::default()
     };
     eframe::run_native("Rusteau-1D", opts, Box::new(|cc| Ok(Box::new(App::new(cc)))))

@@ -160,8 +160,8 @@ fn toc_html(current: &str) -> String {
 fn page(title: &str, current: &str, body: &str, pager: &str) -> String {
     format!(
         "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n\
-         <title>{t} – Rusteau-1D Help</title>\n<link rel=\"stylesheet\" href=\"style.css\">\n</head>\n<body>\n\
-         <header><a class=\"brand\" href=\"contents.html\">Rusteau-1D Help</a>\
+         <title>{t} – Rusteau-1D Help</title>\n<link rel=\"icon\" type=\"image/png\" href=\"favicon.png\">\n<link rel=\"stylesheet\" href=\"style.css\">\n</head>\n<body>\n\
+         <header><a class=\"brand\" href=\"contents.html\"><img src=\"favicon.png\" alt=\"\" width=\"22\" height=\"22\">Rusteau-1D Help</a>\
          <nav class=\"top\"><a href=\"contents.html\">Contents</a><a href=\"keywords.html\">Index</a><a href=\"references.html\">References</a></nav>\
          <form class=\"search\" action=\"search.html\"><input type=\"search\" name=\"q\" placeholder=\"Search the help\" aria-label=\"Search the help\"></form></header>\n\
          <div class=\"layout\">\n<nav class=\"toc\" aria-label=\"Contents\">\n{toc}</nav>\n<main>\n<article>\n{body}</article>\n{pager}</main>\n</div>\n\
@@ -205,7 +205,7 @@ pub fn export(dir: &Path) -> std::io::Result<PathBuf> {
     std::fs::write(
         dir.join("index.html"),
         "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta http-equiv=\"refresh\" content=\"0; url=contents.html\">\
-         <title>Rusteau-1D Help</title></head><body><a href=\"contents.html\">Rusteau-1D Help</a></body></html>\n",
+         <title>Rusteau-1D Help</title><link rel=\"icon\" type=\"image/png\" href=\"favicon.png\"></head><body><a href=\"contents.html\">Rusteau-1D Help</a></body></html>\n",
     )?;
     // keyword index
     let mut body = String::from("<h1>Index</h1>\n<p>Keywords and section headings of all topics.</p>\n<ul class=\"index\">\n");
@@ -231,6 +231,7 @@ pub fn export(dir: &Path) -> std::io::Result<PathBuf> {
     std::fs::write(dir.join("search_index.js"), idx)?;
     std::fs::write(dir.join("search.js"), SEARCH_JS)?;
     std::fs::write(dir.join("style.css"), STYLE_CSS)?;
+    std::fs::write(dir.join("favicon.png"), crate::fonts::FAVICON_PNG)?;
     for (name, bytes) in topics::IMAGES {
         std::fs::write(dir.join(name), bytes)?;
     }
@@ -308,7 +309,7 @@ a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 header { position: sticky; top: 0; z-index: 2; display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: center;
   padding: 10px 16px; background: var(--panel); border-bottom: 1px solid var(--line); }
-header .brand { font-weight: 700; font-size: 18px; color: var(--text); }
+header .brand { font-weight: 700; font-size: 18px; color: var(--text); display: inline-flex; align-items: center; gap: 8px; }
 header nav.top a { margin-right: 16px; }
 header form.search { margin-left: auto; }
 header input { width: 240px; max-width: 60vw; padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); font: inherit; }

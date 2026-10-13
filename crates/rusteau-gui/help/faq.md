@@ -36,7 +36,7 @@ Long simulations with small time steps (frequent rain, dry soil, fine mesh) take
 
 An internal error while drawing a page or a figure shows a message in place of the page (*Try again* draws it again); an internal error of a calculation ends the run with a message in the status bar. Every such error is written with its details to the crash log `crash.log` in the folder `Rusteau-1D` of the user data (Windows: `%LOCALAPPDATA%\Rusteau-1D`, Linux: `~/.local/share/Rusteau-1D`, macOS: `~/Library/Application Support/Rusteau-1D`); please add it to a report.
 
-A project with unsaved changes is copied to `recovery.h1dr` in the same folder once a minute. If the program did not close normally, the next start offers to open this copy (*Open the copy*) or to discard it. Save the recovered project under a name of your choice.
+A project with unsaved changes is copied to `recovery.h1dr` in the same folder, at most once a minute and only when it changed since the last copy; the file always holds the latest state only. Saving the project (or closing the program normally) removes the copy. If the program did not close normally, the next start offers to open this copy (*Open the copy*) or to discard it. Save the recovered project under a name of your choice.
 
 ## Where are the results stored?
 

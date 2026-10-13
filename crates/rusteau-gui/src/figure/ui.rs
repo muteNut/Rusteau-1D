@@ -220,7 +220,7 @@ impl App {
             None => "Rusteau-1D – Figures".into(),
         };
         let vid = viewport_id();
-        let builder = egui::ViewportBuilder::default().with_title(title).with_inner_size([1320.0, 860.0]).with_min_inner_size([900.0, 560.0]);
+        let builder = egui::ViewportBuilder::default().with_title(title).with_icon(crate::fonts::icon()).with_inner_size([1320.0, 860.0]).with_min_inner_size([900.0, 560.0]);
         ctx.show_viewport_immediate(vid, builder, |ctx, class| {
             if class == egui::ViewportClass::Embedded && crate::shots::ACTIVE.load(std::sync::atomic::Ordering::Relaxed) {
                 // the screenshot tour: the window covers the main window
