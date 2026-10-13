@@ -12,7 +12,7 @@ Linux and a command line program.
 ## TL;DR
 
 - **Download** the programs for Windows, macOS or Linux from
-  [Releases](https://github.com/muteNut/rustyHydrus/releases), unpack the archive and start `rusteau` (on macOS
+  [Releases](https://github.com/muteNut/Rusteau-1D/releases),, unpack the archive and start `rusteau` (on macOS
   `Rusteau-1D.app`). Nothing needs to be installed.
 - **Compatible with HYDRUS-1D:** opens and saves HYDRUS-1D 4.x projects (`.h1d`); the input pages follow the dialogs
   of HYDRUS-1D 4.17.
