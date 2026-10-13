@@ -355,8 +355,8 @@ pub struct Panel {
     pub layers: Vec<Layer>,
     pub annotations: Vec<Annotation>,
     pub legend: LegendPos,
-    /// maximum width of the legend (below the plot: of an entry) in percent of the width of the panel; longer labels
-    /// are wrapped at blanks
+    /// width of the legend in percent of the width of the plot area, with the entries in as many columns as fit
+    /// (labels too long for one column are wrapped at blanks); 0: automatic, as wide as the entries
     pub legend_width: f64,
     /// legend labels given to single series, in place of their automatic labels (the keys)
     pub legend_names: BTreeMap<String, String>,
@@ -395,7 +395,7 @@ impl Default for Panel {
             layers: vec![Layer::default()],
             annotations: vec![],
             legend: LegendPos::TopRight,
-            legend_width: 40.0,
+            legend_width: 0.0,
             legend_names: BTreeMap::new(),
             palette: Palette::OkabeIto,
             colors: vec![],
@@ -566,7 +566,7 @@ mod tests {
         panel.rename_series("Runoff", "Runoff");
         assert!(panel.legend_names.is_empty());
         let old: Panel = serde_json::from_str(r#"{"title":"(a)"}"#).unwrap();
-        assert_eq!((old.legend_width, old.legend_names.len()), (40.0, 0));
+        assert_eq!((old.legend_width, old.legend_names.len()), (0.0, 0));
         // a figure with missing fields takes the defaults
         let g: Figure = serde_json::from_str(r#"{"name":"F","panels":[{"layers":[{"y":"theta"}]}]}"#).unwrap();
         assert_eq!(g.panels[0].layers[0].y, "theta");

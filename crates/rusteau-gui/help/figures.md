@@ -80,7 +80,7 @@ A line break in the title, the caption or an axis title starts a new line. The s
 
 ## Panels and layers {#layers}
 
-A panel is one diagram with its axes, legend and annotations. Its title (e.g. "(a) Loam"), the position of its legend (a corner inside the plot area, outside on the right, below, or none) and the **Legend width** are set in the section **Panel**; with several panels the row of numbers selects the panel. The legend width is the largest width of the legend in percent of the width of the panel (below the plot: of each entry); longer labels are wrapped at blanks, so a legend outside on the right takes at most this share of the panel from the plot.
+A panel is one diagram with its axes, legend and annotations. Its title (e.g. "(a) Loam"), the position of its legend (a corner inside the plot area, outside on the right, below, or none) and the **Legend width** are set in the section **Panel**; with several panels the row of numbers selects the panel. The legend width is the width of the legend in percent of the width of the plot area (for a legend outside on the right: of the plot area without it): at 90 % the legend spans almost the whole plot area. The entries are arranged in rows of as many columns as fit, and labels too long for one column are wrapped at blanks (a word longer than the column stays whole). **auto** (0, at first) makes the legend as wide as its entries, in one column (below the plot: in rows across the panel); labels are wrapped only where the legend would be wider than the plot area (on the right: than half of it).
 
 A panel shows one or more **layers**. A layer takes its x and y values from two columns of a data source; it draws one series for each selected item (observation node, print time, material, data set) and run. The check box shows or hides a layer, ⬆ ⬇ change the drawing order (later layers are drawn on top), 🗑 removes it, **+ Add layer** adds a copy of the selected one.
 
@@ -124,9 +124,9 @@ The section **Axes** has the x axis, the y axis and the right y axis of the sele
 
 | Setting | Meaning |
 |---|---|
-| Axis title | auto: the variables of the layers with their unit (e.g. "Water content θ (–)"); otherwise your own text with markup, e.g. `K (cm d^{−1})`; Enter starts a new line. A title longer than its axis is wrapped at blanks into centred lines |
+| Axis title | shown in grey: the automatic title, the variables of the layers with their unit (e.g. "Water content θ (–)"); editing it makes it your own text with markup, e.g. `K (cm d^{−1})` (empty: no title), and ↺ brings back the automatic one. Enter starts a new line; a title longer than its axis is wrapped at blanks into centred lines |
 | Range | auto: from the data, extended to the next ticks; otherwise from – to |
-| Tick step | distance of the labelled ticks; 0: automatic (1, 2, 2.5 or 5 times a power of ten, as many as fit) [@heckbert1990; @talbot2010] |
+| Tick step | distance of the labelled ticks; **auto** (0): automatic (1, 2, 2.5 or 5 times a power of ten, as many as fit) [@heckbert1990; @talbot2010] |
 | Logarithmic | decades labelled 10⁻¹, 10⁰ … (plain numbers between 0.01 and 1000); values ≤ 0 are left out, which the status bar notes |
 | Reversed | values increase downward or to the left |
 | Grid lines, Minor ticks | lines at the ticks; small ticks between them (2 … 9 times the powers of ten on logarithmic axes) |

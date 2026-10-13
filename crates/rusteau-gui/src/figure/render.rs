@@ -68,6 +68,8 @@ pub struct PanelGeom {
     pub y2: Option<Scale>,
     /// the first series at each position of the palette (none: an empty automatic label)
     pub slot_labels: Vec<SlotLabel>,
+    /// automatic titles (markup) of the x, y and right y axis
+    pub auto_titles: [String; 3],
 }
 
 /// The legend label of a series.
@@ -686,77 +688,56 @@ fn draw_sample(d: &mut Drawing, st: &Style, x: f32, yc: f32, bg: Rgba) {
     }
 }
 
-/// Size of a legend: entries in a column, or in rows of at most `max_w` pt (legend below the plot).
-fn legend_size(entries: &[Entry], rows_of: Option<f32>) -> (f32, f32) {
-    const PAD: f32 = 4.0;
-    match rows_of {
-        None => {
-            let w = entries.iter().map(|e| entry_size(e).0).fold(0.0, f32::max);
-            let h: f32 = entries.iter().map(|e| entry_size(e).1 + 2.0).sum();
-            (w + 2.0 * PAD, h - 2.0 + 2.0 * PAD)
-        }
-        Some(max_w) => {
-            let rows = flow(entries, max_w - 2.0 * PAD);
-            let w = rows.iter().map(|r| r.1).fold(0.0, f32::max);
-            let h: f32 = rows.iter().map(|r| r.2 + 2.0).sum();
-            (w + 2.0 * PAD, h - 2.0 + 2.0 * PAD)
-        }
-    }
+const LEGEND_PAD: f32 = 4.0;
+/// space between the columns of a legend
+const LEGEND_GAP: f32 = 12.0;
+
+/// The entries of a legend in a grid, row by row: `cols` columns of `col_w` pt; the size of the legend `w` × `h`.
+#[derive(Debug)]
+struct LegendGrid {
+    cols: usize,
+    col_w: f32,
+    row_h: Vec<f32>,
+    w: f32,
+    h: f32,
 }
 
-/// Entries in rows: (indices, width, height).
-fn flow(entries: &[Entry], max_w: f32) -> Vec<(Vec<usize>, f32, f32)> {
-    let mut rows: Vec<(Vec<usize>, f32, f32)> = vec![];
-    for (k, e) in entries.iter().enumerate() {
-        let (w, h) = entry_size(e);
-        match rows.last_mut() {
-            Some(r) if r.1 + 12.0 + w <= max_w => {
-                r.0.push(k);
-                r.1 += 12.0 + w;
-                r.2 = r.2.max(h);
-            }
-            _ => rows.push((vec![k], w, h)),
-        }
-    }
-    rows
+/// Arranges the entries in as many columns as fit into `avail` pt (one column without it); with `fill` the columns
+/// are widened so that the legend is `avail` wide (as far as its widest entry allows).
+fn legend_grid(entries: &[Entry], avail: Option<f32>, fill: bool) -> LegendGrid {
+    let n = entries.len().max(1);
+    let natural = entries.iter().map(|e| entry_size(e).0).fold(0.0, f32::max);
+    let cols = match avail {
+        Some(a) => (((a - 2.0 * LEGEND_PAD + LEGEND_GAP) / (natural + LEGEND_GAP)).floor() as usize).clamp(1, n),
+        None => 1,
+    };
+    let gaps = LEGEND_GAP * (cols - 1) as f32;
+    let col_w = match avail {
+        Some(a) if fill => ((a - 2.0 * LEGEND_PAD - gaps) / cols as f32).max(natural),
+        _ => natural,
+    };
+    let row_h: Vec<f32> = entries.chunks(cols).map(|r| r.iter().map(|e| entry_size(e).1).fold(0.0, f32::max)).collect();
+    let h = row_h.iter().sum::<f32>() + 2.0 * row_h.len().saturating_sub(1) as f32 + 2.0 * LEGEND_PAD;
+    LegendGrid { cols, col_w, w: cols as f32 * col_w + gaps + 2.0 * LEGEND_PAD, h, row_h }
 }
 
-fn draw_legend(d: &mut Drawing, entries: &[Entry], x: f32, y: f32, rows_of: Option<f32>, lk: &Look, boxed: bool) {
-    const PAD: f32 = 4.0;
-    let (w, h) = legend_size(entries, rows_of);
+fn draw_legend(d: &mut Drawing, entries: &[Entry], g: &LegendGrid, x: f32, y: f32, lk: &Look, boxed: bool) {
     if boxed {
-        let r = Path::rect(x, y, x + w, y + h);
+        let r = Path::rect(x, y, x + g.w, y + g.h);
         d.fill(r.clone(), lk.legend_bg);
         if let Some(b) = lk.legend_border {
             d.stroke(r, b, Stroke::solid(0.5));
         }
     }
-    let item = |d: &mut Drawing, e: &Entry, ex: f32, ey: f32, eh: f32| {
-        let sw = sample_w(&e.style);
-        let yc = ey + eh / 2.0;
-        draw_sample(d, &e.style, ex, yc, lk.bg);
-        d.text(&e.label, ex + sw + 4.0, yc - e.label.height / 2.0, 0.0, lk.fg);
-    };
-    match rows_of {
-        None => {
-            let mut ey = y + PAD;
-            for e in entries {
-                let (_, eh) = entry_size(e);
-                item(d, e, x + PAD, ey, eh);
-                ey += eh + 2.0;
-            }
+    let mut ey = y + LEGEND_PAD;
+    for (row, rh) in entries.chunks(g.cols).zip(&g.row_h) {
+        for (c, e) in row.iter().enumerate() {
+            let ex = x + LEGEND_PAD + c as f32 * (g.col_w + LEGEND_GAP);
+            let yc = ey + rh / 2.0;
+            draw_sample(d, &e.style, ex, yc, lk.bg);
+            d.text(&e.label, ex + sample_w(&e.style) + 4.0, yc - e.label.height / 2.0, 0.0, lk.fg);
         }
-        Some(max_w) => {
-            let mut ey = y + PAD;
-            for (idx, rw, rh) in flow(entries, max_w - 2.0 * PAD) {
-                let mut ex = x + PAD + (w - 2.0 * PAD - rw) / 2.0;
-                for k in idx {
-                    item(d, &entries[k], ex, ey, rh);
-                    ex += entry_size(&entries[k]).0 + 12.0;
-                }
-                ey += rh + 2.0;
-            }
-        }
+        ey += rh + 2.0;
     }
 }
 
@@ -864,28 +845,50 @@ fn render_panel(d: &mut Drawing, fig: &Figure, pi: usize, panel: &Panel, series:
         }
         v
     };
-    let title_of = |a: &Axis, x: bool, right: bool| if a.label_auto { escape_markup(&auto_title(&infos(x, right))) } else { a.label.clone() };
-    let titles = [title_of(&panel.x, true, false), title_of(&panel.y, false, false), title_of(&panel.y2, false, true)];
+    // the automatic titles (markup) of the x, y and right y axis
+    let auto_titles = [(true, false), (false, false), (false, true)].map(|(x, right)| escape_markup(&auto_title(&infos(x, right))));
+    let titles = [&panel.x, &panel.y, &panel.y2].iter().zip(&auto_titles).map(|(a, t)| if a.label_auto { t.clone() } else { a.label.clone() }).collect::<Vec<_>>();
     // a title longer than its axis is wrapped to the length of the axis (in lines centred on it)
     let axis_titles = |rect: &[f32; 4]| {
         let (w, h) = ((rect[2] - rect[0]).max(40.0), (rect[3] - rect[1]).max(40.0));
         (ty.centred(&titles[0], sz.axis_title, w), ty.centred(&titles[1], sz.axis_title, h), ty.centred(&titles[2], sz.axis_title, h))
     };
-    // legend: at most `legend_width` % of the panel wide (below the plot: each entry), longer labels wrapped at blanks
-    let legend_w = panel.legend_width.clamp(5.0, 100.0) as f32 / 100.0 * (cx1 - cx0);
-    let mut entries = vec![];
-    for (k, l) in &visible {
-        if !l.in_legend {
-            continue;
-        }
-        for (s, st) in layer_series(*k).iter().zip(&styles[*k]) {
-            if entries.len() < 40 {
-                let wrap = (legend_w - 8.0 - sample_w(st) - 4.0).max(20.0);
-                entries.push(Entry { style: st.clone(), label: ty.t(panel.legend_label(&s.label), sz.legend, false, Some(wrap)) });
+    // legend: `legend_width` % of the width of the plot area (beside a legend on the right: of the plot area without
+    // it) with the entries in as many columns as fit. Automatic (0): as wide as its entries, in one column (below the
+    // plot: in rows), labels wrapped at blanks only where the legend would be wider than the plot area (on the right:
+    // than half of it; below: than the panel)
+    let auto_width = panel.legend_width.is_nan() || panel.legend_width <= 0.0;
+    let share = if !auto_width {
+        (panel.legend_width / 100.0).clamp(0.05, 1.0) as f32
+    } else if panel.legend == LegendPos::Right {
+        0.5
+    } else {
+        1.0
+    };
+    let make_entries = |plot_w: f32| {
+        let legend_w = if auto_width && panel.legend == LegendPos::Bottom { cx1 - cx0 } else { share * plot_w };
+        let mut entries = vec![];
+        for (k, l) in &visible {
+            if !l.in_legend {
+                continue;
+            }
+            for (s, st) in layer_series(*k).iter().zip(&styles[*k]) {
+                if entries.len() < 40 {
+                    let wrap = (legend_w - 8.0 - sample_w(st) - 4.0).max(20.0);
+                    entries.push(Entry { style: st.clone(), label: ty.t(panel.legend_label(&s.label), sz.legend, false, Some(wrap)) });
+                }
             }
         }
-    }
+        entries
+    };
+    let mut entries = make_entries(cx1 - cx0 - 50.0);
     let legend = if entries.is_empty() { LegendPos::None } else { panel.legend };
+    let grid_of = |entries: &[Entry], plot_w: f32| match (auto_width, legend) {
+        (false, _) => legend_grid(entries, Some(share * plot_w), true),
+        (true, LegendPos::Bottom) => legend_grid(entries, Some(cx1 - cx0), false),
+        (true, _) => legend_grid(entries, None, false),
+    };
+    let mut lg = grid_of(&entries, cx1 - cx0 - 50.0);
     let tick_len = if lk.ticks { 3.0 } else { 0.0 };
     let tick_h = (ASCENT + DESCENT) * sz.ticks as f32;
     // margins depend on the tick labels, which depend on the length of the axes: two passes
@@ -917,12 +920,16 @@ fn render_panel(d: &mut Drawing, fig: &Figure, pi: usize, panel: &Panel, series:
         if !xt.is_empty() {
             bot -= xt.height + 4.0;
         }
+        if legend != LegendPos::None {
+            entries = make_entries(right - left);
+            lg = grid_of(&entries, right - left);
+        }
         match legend {
             LegendPos::Right => {
-                right -= legend_size(&entries, None).0 + 8.0;
+                right -= lg.w + 8.0;
             }
             LegendPos::Bottom => {
-                bot -= legend_size(&entries, Some(cx1 - cx0)).1 + 6.0;
+                bot -= lg.h + 6.0;
             }
             _ => {}
         }
@@ -1118,24 +1125,23 @@ fn render_panel(d: &mut Drawing, fig: &Figure, pi: usize, panel: &Panel, series:
     match legend {
         LegendPos::None => {}
         LegendPos::Right => {
-            let lw = legend_size(&entries, None).0;
             let mut x = x1 + 8.0;
             if has_y2 {
                 let w2 = y2l.iter().map(|t| t.width).fold(0.0, f32::max);
                 x += tick_len + 3.0 + w2 + if y2t.is_empty() { 0.0 } else { y2t.height + 4.0 };
             }
-            draw_legend(d, &entries, x.min(cx1 - lw), y0, None, lk, false);
+            draw_legend(d, &entries, &lg, x.min(cx1 - lg.w), y0, lk, false);
         }
         LegendPos::Bottom => {
-            let (lw, lh) = legend_size(&entries, Some(cx1 - cx0));
-            draw_legend(d, &entries, (x0 + x1 - lw) / 2.0, cy1 - lh, Some(cx1 - cx0), lk, false);
+            let x = ((x0 + x1 - lg.w) / 2.0).clamp(cx0, (cx1 - lg.w).max(cx0));
+            draw_legend(d, &entries, &lg, x, cy1 - lg.h, lk, false);
         }
         inside => {
-            let (lw, lh) = legend_size(&entries, None);
-            let inset = 5.0;
-            let x = if matches!(inside, LegendPos::TopLeft | LegendPos::BottomLeft) { x0 + inset } else { x1 - inset - lw };
-            let y = if matches!(inside, LegendPos::TopLeft | LegendPos::TopRight) { y0 + inset } else { y1 - inset - lh };
-            draw_legend(d, &entries, x, y, None, lk, true);
+            // inside the plot area, a little off its frame (a legend as wide as the plot area: at its edges)
+            let inset = (x1 - x0 - lg.w).clamp(0.0, 10.0) / 2.0;
+            let x = if matches!(inside, LegendPos::TopLeft | LegendPos::BottomLeft) { x0 + inset } else { x1 - inset - lg.w };
+            let y = if matches!(inside, LegendPos::TopLeft | LegendPos::TopRight) { y0 + 5.0 } else { y1 - 5.0 - lg.h };
+            draw_legend(d, &entries, &lg, x, y, lk, true);
         }
     }
     // which series take which colour of the palette (shown with the custom colours of the editor)
@@ -1152,7 +1158,7 @@ fn render_panel(d: &mut Drawing, fig: &Figure, pi: usize, panel: &Panel, series:
             }
         }
     }
-    PanelGeom { rect, x: sx, y: sy, y2: if has_y2 { Some(sy2) } else { None }, slot_labels }
+    PanelGeom { rect, x: sx, y: sy, y2: if has_y2 { Some(sy2) } else { None }, slot_labels, auto_titles }
 }
 
 #[cfg(test)]
@@ -1293,8 +1299,33 @@ mod tests {
         let title = text_with(&r, "evaporation").expect("y title");
         assert!(lines(&title) > 1 && title.width <= g.rect[3] - g.rect[1] + 1.0, "{title:?} {:?}", g.rect);
         let label = text_with(&r, "soil").expect("legend label");
-        assert!(lines(&label) > 1 && label.width <= 0.3 * r.drawing.width, "{label:?}");
+        assert!(lines(&label) > 1, "{label:?}");
         assert_eq!(g.slot_labels[0], SlotLabel { auto: long.into(), shown: long.into() });
+        assert!(g.auto_titles[1].contains("evaporation") && g.auto_titles[0] == "Time (d)", "{:?}", g.auto_titles);
+        // inside the plot of a wider figure: the legend (with its line and padding) at most half the plot area wide
+        // (words longer than the limit are not broken)
+        fig.width_mm = 120.0;
+        fig.panels[0].legend = LegendPos::TopRight;
+        fig.panels[0].legend_width = 50.0;
+        let r = render(&fig, &[vec![vec![s.clone()]]]);
+        let (g, label) = (&r.panels[0], text_with(&r, "soil").unwrap());
+        assert!(lines(&label) > 1 && label.width + 8.0 + SAMPLE_W + 4.0 <= 0.5 * (g.rect[2] - g.rect[0]) + 0.5, "{label:?} {:?}", g.rect);
+        // wide enough: one line
+        fig.panels[0].legend_width = 100.0;
+        let r = render(&fig, &[vec![vec![s.clone()]]]);
+        assert_eq!(lines(&text_with(&r, "soil").unwrap()), 1);
+        fig.panels[0].legend_width = 30.0;
+        // the width of the legend: short entries side by side in a legend 300 pt wide, in one column without a width
+        let ty = Typo { family: crate::fonts::DEFAULT_FAMILY };
+        let st = styles(&fig, 0, &fig.panels[0], &[vec![s.clone()]], false)[0][0].clone();
+        let entries: Vec<Entry> = (0..7).map(|k| Entry { style: st.clone(), label: ty.t(&format!("t = {k} d"), 8.5, false, None) }).collect();
+        let g = legend_grid(&entries, Some(300.0), true);
+        assert!(g.cols > 1 && (g.w - 300.0).abs() < 0.01 && g.row_h.len() == 7usize.div_ceil(g.cols), "{g:?}");
+        let g = legend_grid(&entries, None, false);
+        assert!(g.cols == 1 && g.row_h.len() == 7 && g.w < 100.0, "{g:?}");
+        // below the plot without a width: as many in a row as fit, not widened
+        let g = legend_grid(&entries[..2], Some(300.0), false);
+        assert!(g.cols == 2 && g.w < 150.0, "{g:?}");
         // renamed: the legend and the labels of the palette show the new name
         fig.panels[0].rename_series(long, "**Infiltration**");
         let r = render(&fig, &[vec![vec![s]]]);
@@ -1385,6 +1416,16 @@ mod visual {
             let pm = super::super::canvas::rasterize(&rd.drawing, 150.0 / 72.0, false).unwrap();
             super::super::canvas::write_png(&pm, 150.0, &out.join(format!("fig_{theme:?}.png"))).unwrap();
             std::fs::write(out.join(format!("fig_{theme:?}.svg")), super::super::canvas::to_svg(&rd.drawing, false, false)).unwrap();
+        }
+        // widths of the legend: automatic, 30 % and 90 % of the plot area
+        for w in [0.0, 30.0, 90.0] {
+            let mut f = fig.clone();
+            f.panels[0].legend = LegendPos::BottomLeft;
+            f.panels[0].legend_width = w;
+            f.panels[1].legend_width = w;
+            let rd = render(&f, &series);
+            let pm = super::super::canvas::rasterize(&rd.drawing, 150.0 / 72.0, false).unwrap();
+            super::super::canvas::write_png(&pm, 150.0, &out.join(format!("fig_legend_{w}.png"))).unwrap();
         }
     }
 }

@@ -137,6 +137,17 @@ fn combo<T: PartialEq + Copy>(ui: &mut Ui, id: &str, v: &mut T, list: &[(T, &'st
     r.response
 }
 
+/// A grid of labels and inputs. Inside, `interact_size` is as high as the inputs with the padding of the interface:
+/// egui reserves that height for a combo box or a group of inputs in a grid row and centres it in the row, so a lower
+/// value moves those inputs down and narrows the gap to the next row.
+fn form<R>(ui: &mut Ui, grid: egui::Grid, add: impl FnOnce(&mut Ui) -> R) -> egui::InnerResponse<R> {
+    let h = ui.text_style_height(&egui::TextStyle::Button) + 2.0 * ui.spacing().button_padding.y;
+    grid.show(ui, |ui| {
+        ui.spacing_mut().interact_size.y = ui.spacing().interact_size.y.max(h);
+        add(ui)
+    })
+}
+
 /// Label of a grid row with its description.
 fn row(ui: &mut Ui, label: &str) {
     ui.label(label).tip(label);
@@ -684,7 +695,7 @@ fn controls(ui: &mut Ui, st: &mut FigState, fig: &mut Figure, dc: &DataCtx, runs
             });
         }
         let p = &mut fig.panels[st.panel];
-        egui::Grid::new("fig_panel").num_columns(2).show(ui, |ui| {
+        form(ui, egui::Grid::new("fig_panel").num_columns(2), |ui| {
             row(ui, "Panel title");
             ui.add(egui::TextEdit::singleline(&mut p.title).desired_width(230.0).hint_text("e.g. (a) Loam")).tip("Panel title");
             ui.end_row();
@@ -692,8 +703,16 @@ fn controls(ui: &mut Ui, st: &mut FigState, fig: &mut Figure, dc: &DataCtx, runs
             combo(ui, "fig_legend", &mut p.legend, &LEGENDS, 160.0).tip("Legend");
             ui.end_row();
             if p.legend != LegendPos::None {
+                // 0: automatic
                 row(ui, "Legend width (%)");
-                ui.add(DragValue::new(&mut p.legend_width).custom_parser(crate::util::parse_num).range(5.0..=100.0).speed(0.5).max_decimals(0).suffix(" %")).tip("Legend width (%)");
+                ui.add(
+                    DragValue::new(&mut p.legend_width)
+                        .custom_parser(crate::util::parse_num)
+                        .custom_formatter(|v, _| if v > 0.0 { format!("{v:.0} %") } else { "auto".into() })
+                        .range(0.0..=100.0)
+                        .speed(0.5),
+                )
+                .tip("Legend width (%)");
                 ui.end_row();
             }
         });
@@ -712,7 +731,7 @@ fn controls(ui: &mut Ui, st: &mut FigState, fig: &mut Figure, dc: &DataCtx, runs
 
 fn figure_section(ui: &mut Ui, fig: &mut Figure, fold: Option<bool>, slot_labels: &[Vec<SlotLabel>], panel: usize) {
     CollapsingHeader::new(crate::util::section_head(ui, "Figure")).default_open(true).open(fold).show(ui, |ui| {
-        egui::Grid::new("fig_main").num_columns(2).show(ui, |ui| {
+        form(ui, egui::Grid::new("fig_main").num_columns(2), |ui| {
             row(ui, "Figure name");
             ui.add(egui::TextEdit::singleline(&mut fig.name).desired_width(230.0)).tip("Figure name");
             ui.end_row();
@@ -927,7 +946,7 @@ fn custom_colors(
 
 fn text_section(ui: &mut Ui, fig: &mut Figure) {
     CollapsingHeader::new(crate::util::section_head(ui, "Font and text sizes")).show(ui, |ui| {
-        egui::Grid::new("fig_text").num_columns(2).show(ui, |ui| {
+        form(ui, egui::Grid::new("fig_text").num_columns(2), |ui| {
             row(ui, "Font");
             let mut font = fig.font.clone();
             ComboBox::from_id_salt("fig_font").width(220.0).selected_text(&font).height(400.0).show_ui(ui, |ui| {
@@ -1036,7 +1055,7 @@ type PanelPalette<'a> = (&'a mut Palette, &'a mut Vec<Color>, &'a BTreeMap<Strin
 /// The settings of a layer, with the palette of the panel `pal` when the panels have their own; returns a series to
 /// rename (its automatic label and the new name).
 fn layer_editor(ui: &mut Ui, st: &mut FigState, l: &mut Layer, pal: Option<PanelPalette>, fig: &Figure, dc: &DataCtx, runs: &[SavedRun]) -> Option<(String, String)> {
-    egui::Grid::new("fig_layer").num_columns(2).show(ui, |ui| {
+    form(ui, egui::Grid::new("fig_layer").num_columns(2), |ui| {
         row(ui, "Data source");
         let before = l.source.clone();
         let mut shown = data::source_name(&l.source, fig);
@@ -1147,7 +1166,7 @@ fn layer_editor(ui: &mut Ui, st: &mut FigState, l: &mut Layer, pal: Option<Panel
     // the style; the custom colours of the panel between the palette and the rest (two grids with the same columns)
     let dark = fig.theme == Theme::Dark;
     let slot_labels: Vec<Vec<SlotLabel>> = st.rendered.as_ref().map(|r| r.panels.iter().map(|p| p.slot_labels.clone()).collect()).unwrap_or_default();
-    let custom = egui::Grid::new("fig_style").num_columns(2).min_col_width(STYLE_COL).show(ui, |ui| {
+    let custom = form(ui, egui::Grid::new("fig_style").num_columns(2).min_col_width(STYLE_COL), |ui| {
         row(ui, "Geometry");
         combo(ui, "fig_geom", &mut l.geom, &GEOMS, 160.0).tip("Geometry");
         ui.end_row();
@@ -1161,7 +1180,7 @@ fn layer_editor(ui: &mut Ui, st: &mut FigState, l: &mut Layer, pal: Option<Panel
         (*palette == Palette::Custom).then_some((colors, names))
     });
     let rename = custom.inner.and_then(|(colors, names)| custom_colors(ui, "fig_panel_colors", colors, dark, &slot_labels, st.panel, false, names));
-    egui::Grid::new("fig_style2").num_columns(2).min_col_width(STYLE_COL).show(ui, |ui| {
+    form(ui, egui::Grid::new("fig_style2").num_columns(2).min_col_width(STYLE_COL), |ui| {
         if l.geom != Geom::Points {
             row(ui, "Line width (pt)");
             ui.add(DragValue::new(&mut l.width).custom_parser(crate::util::parse_num).range(0.1..=10.0).speed(0.05).max_decimals(2)).tip("Line width (pt)");
@@ -1198,14 +1217,23 @@ fn layer_editor(ui: &mut Ui, st: &mut FigState, l: &mut Layer, pal: Option<Panel
     rename
 }
 
-fn axis_editor(ui: &mut Ui, a: &mut Axis, id: &str) {
-    egui::Grid::new(id).num_columns(2).show(ui, |ui| {
+/// The settings of an axis; `auto` is its automatic title (markup).
+fn axis_editor(ui: &mut Ui, a: &mut Axis, id: &str, auto: &str) {
+    form(ui, egui::Grid::new(id).num_columns(2), |ui| {
+        // the automatic title (grey) until it is edited; Enter starts a new line, ↺ brings back the automatic title
         row(ui, "Axis title");
         ui.horizontal(|ui| {
-            ui.checkbox(&mut a.label_auto, "auto").tip("Axis title");
-            if !a.label_auto {
-                // Enter starts a new line
-                ui.add(egui::TextEdit::multiline(&mut a.label).desired_width(190.0).desired_rows(1).hint_text("e.g. θ (cm^{3} cm^{−3})")).tip("Axis title");
+            let mut text = if a.label_auto { auto.to_string() } else { a.label.clone() };
+            let mut edit = egui::TextEdit::multiline(&mut text).desired_width(210.0).desired_rows(1).hint_text(if a.label_auto { "automatic" } else { "none" });
+            if a.label_auto {
+                edit = edit.text_color(ui.visuals().weak_text_color());
+            }
+            if ui.add(edit).tip("Axis title").changed() {
+                a.label = text;
+                a.label_auto = false;
+            }
+            if !a.label_auto && ui.small_button("↺").tip("Automatic axis title").clicked() {
+                a.label_auto = true;
             }
         });
         ui.end_row();
@@ -1220,7 +1248,15 @@ fn axis_editor(ui: &mut Ui, a: &mut Axis, id: &str) {
         });
         ui.end_row();
         row(ui, "Tick step");
-        num(ui, &mut a.step, 0.0, f64::MAX, "").on_hover_text("0: automatic").tip("Tick step");
+        let s = speed(a.step);
+        ui.add(
+            DragValue::new(&mut a.step)
+                .custom_parser(crate::util::parse_num)
+                .custom_formatter(|v, _| if v > 0.0 { sig(v) } else { "auto".into() })
+                .range(0.0..=f64::MAX)
+                .speed(s),
+        )
+        .tip("Tick step");
         ui.end_row();
     });
     ui.horizontal_wrapped(|ui| {
@@ -1238,14 +1274,15 @@ fn axes_section(ui: &mut Ui, st: &mut FigState, p: &mut Panel) {
                 ui.selectable_value(&mut st.axis, k, *n);
             }
         });
+        let auto = st.rendered.as_ref().and_then(|r| r.panels.get(st.panel)).map(|g| g.auto_titles.clone()).unwrap_or_default();
         match st.axis {
-            0 => axis_editor(ui, &mut p.x, "fig_ax_x"),
-            1 => axis_editor(ui, &mut p.y, "fig_ax_y"),
+            0 => axis_editor(ui, &mut p.x, "fig_ax_x", &auto[0]),
+            1 => axis_editor(ui, &mut p.y, "fig_ax_y", &auto[1]),
             _ => {
                 if !p.layers.iter().any(|l| l.y2) {
                     ui.label(RichText::new("Shown when a layer uses the right y axis.").weak());
                 }
-                axis_editor(ui, &mut p.y2, "fig_ax_y2");
+                axis_editor(ui, &mut p.y2, "fig_ax_y2", &auto[2]);
             }
         }
     });
@@ -1285,7 +1322,7 @@ fn annotations_section(ui: &mut Ui, st: &mut FigState, p: &mut Panel) {
         st.ann = st.ann.min(p.annotations.len().saturating_sub(1));
         let Some(a) = p.annotations.get_mut(st.ann) else { return };
         ui.add_space(4.0);
-        egui::Grid::new("fig_ann").num_columns(2).show(ui, |ui| {
+        form(ui, egui::Grid::new("fig_ann").num_columns(2), |ui| {
             row(ui, "Kind");
             combo(ui, "fig_ann_kind", &mut a.kind, &KINDS, 160.0).tip("Kind");
             ui.end_row();
@@ -1563,3 +1600,4 @@ mod tests {
         assert_ne!(h, figures_hash(&mut a));
     }
 }
+
