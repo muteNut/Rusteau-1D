@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
 fn bin() -> Command {
-    Command::new(env!("CARGO_BIN_EXE_rusteau"))
+    Command::new(env!("CARGO_BIN_EXE_rusteau-cli"))
 }
 
 fn workdir(name: &str) -> PathBuf {
