@@ -243,7 +243,7 @@ impl Tour {
                     f.colors = (0..7)
                         .map(|k| {
                             let [r, g, b] = crate::figure::render::builtin_color(rusteau_core::figure::Palette::Viridis, k, 7, false);
-                            rusteau_core::figure::NamedColor { name: format!("t{}", k * 5), color: rusteau_core::figure::Color::rgb(r, g, b) }
+                            rusteau_core::figure::Color::rgb(r, g, b)
                         })
                         .collect();
                 }

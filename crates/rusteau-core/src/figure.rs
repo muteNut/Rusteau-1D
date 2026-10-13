@@ -68,11 +68,20 @@ impl<'de> Deserialize<'de> for Color {
     }
 }
 
-/// A colour of the custom palette with its name.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct NamedColor {
-    pub name: String,
-    pub color: Color,
+/// Reads the colours of the custom palette: colours, or (as written by earlier versions) objects with a colour.
+fn custom_colors<'de, D: serde::Deserializer<'de>>(d: D) -> Result<Vec<Color>, D::Error> {
+    #[derive(Deserialize)]
+    #[serde(untagged)]
+    enum Entry {
+        Plain(Color),
+        Named { color: Color },
+    }
+    Ok(Vec::<Entry>::deserialize(d)?
+        .into_iter()
+        .map(|e| match e {
+            Entry::Plain(c) | Entry::Named { color: c } => c,
+        })
+        .collect())
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, Default)]
@@ -403,8 +412,9 @@ pub struct Figure {
     pub title_bold: bool,
     pub theme: Theme,
     pub palette: Palette,
-    /// colours of the palette "Custom", in order
-    pub colors: Vec<NamedColor>,
+    /// colours of the palette "Custom", in the order of the series
+    #[serde(deserialize_with = "custom_colors")]
+    pub colors: Vec<Color>,
     /// transparent background in the exported files
     pub transparent: bool,
     /// panels in a grid of `rows` × `cols`, row by row
@@ -500,8 +510,11 @@ mod tests {
         let l: Layer = serde_json::from_str(r##"{"color":"#0a141e80"}"##).unwrap();
         assert_eq!(l.color, Some(Color([10, 20, 30, 128])));
         assert!(serde_json::from_str::<Layer>(r#"{"color":[1,2]}"#).is_err());
-        let f = Figure { palette: Palette::Custom, colors: vec![NamedColor { name: "loam".into(), color: Color([1, 2, 3, 4]) }], ..Default::default() };
+        let f = Figure { palette: Palette::Custom, colors: vec![Color([1, 2, 3, 4])], ..Default::default() };
         let back: Figure = serde_json::from_str(&serde_json::to_string(&f).unwrap()).unwrap();
         assert_eq!(back, f);
+        // custom colours with names (earlier versions) are read, too
+        let g: Figure = serde_json::from_str(r##"{"colors":[{"name":"loam","color":"#010203"},"#040506"]}"##).unwrap();
+        assert_eq!(g.colors, vec![Color([1, 2, 3, 255]), Color([4, 5, 6, 255])]);
     }
 }

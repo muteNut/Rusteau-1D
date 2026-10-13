@@ -44,7 +44,7 @@ The palettes follow the advice to use colours that remain distinguishable for re
 
 ### Custom colours {#custom-colours}
 
-With the palette **Custom (own colours)** the series take the colours of a list of your own, in order (after the last colour the list starts again). When Custom is chosen first, the list starts with the colours of the palette chosen before. Each colour has a name (for you; it is not drawn), a swatch and its code; ⬆ ⬇ change the order, 🗑 removes a colour, **+ Add colour** adds one.
+With the palette **Custom (own colours)** the series take the colours of a list of your own, in order (after the last colour the list starts again). When Custom is chosen first, the list starts with the colours of the palette chosen before. Each row shows the legend label of the series that take the colour in the selected panel (resting the mouse on it lists the series of all panels; *not used* when no series takes it), the swatch and the code; ⬆ ⬇ change the order, 🗑 removes a colour, **+ Add colour** adds one.
 
 A click on a swatch opens the colour picker, as in the developer tools of web browsers: the field sets the saturation (left to right) and the brightness (top to bottom), the sliders below the hue and the opacity (alpha); the code can be typed as `#rrggbb` or `#rrggbbaa`, and R, G, B, A as numbers 0–255. The same picker sets the fixed colour of a layer and the colour of an annotation.
 

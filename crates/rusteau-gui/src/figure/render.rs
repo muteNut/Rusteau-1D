@@ -66,6 +66,8 @@ pub struct PanelGeom {
     pub x: Scale,
     pub y: Scale,
     pub y2: Option<Scale>,
+    /// legend label (plain text) of the first series at each position of the palette
+    pub slot_labels: Vec<String>,
 }
 
 /// A rendered figure.
@@ -157,7 +159,7 @@ const VIRIDIS: [[u8; 3]; 9] = [[68, 1, 84], [71, 45, 123], [59, 82, 139], [44, 1
 pub fn palette_color(fig: &Figure, k: usize, n: usize, dark: bool) -> Rgba {
     match fig.palette {
         Palette::Custom if !fig.colors.is_empty() => {
-            let c = fig.colors[k % fig.colors.len()].color.0;
+            let c = fig.colors[k % fig.colors.len()].0;
             Rgba(c[0], c[1], c[2], c[3])
         }
         Palette::Custom => Rgba::rgb(builtin_color(Palette::OkabeIto, k, n, dark)),
@@ -227,6 +229,8 @@ struct Style {
     marker: Marker,
     marker_size: f32,
     alpha: f64,
+    /// position in the palette (`None`: a fixed colour of the layer)
+    slot: Option<usize>,
 }
 
 /// Styles of the series of the layers of a panel: palette colours in order; a layer with several items and several
@@ -262,12 +266,12 @@ fn styles(fig: &Figure, panel: &Panel, series: &[Vec<Series>], dark: bool) -> Ve
             .enumerate()
             .map(|(k, s)| {
                 let slot = next + if by_item { s.item } else { k };
-                let color = match l.color {
-                    Some(c) => Rgba(c.0[0], c.0[1], c.0[2], c.0[3]),
-                    None => palette_color(fig, slot, total, dark),
+                let (color, slot) = match l.color {
+                    Some(c) => (Rgba(c.0[0], c.0[1], c.0[2], c.0[3]), None),
+                    None => (palette_color(fig, slot, total, dark), Some(slot)),
                 };
                 let (dash, marker) = if by_item { (cycle(&DASHES, l.dash, s.run), cycle(&MARKERS, l.marker, s.run)) } else { (l.dash, l.marker) };
-                Style { color, geom: l.geom, width: l.width as f32, dash, marker, marker_size: l.marker_size as f32, alpha: l.alpha }
+                Style { color, geom: l.geom, width: l.width as f32, dash, marker, marker_size: l.marker_size as f32, alpha: l.alpha, slot }
             })
             .collect();
         next += slots;
@@ -1091,7 +1095,21 @@ fn render_panel(d: &mut Drawing, fig: &Figure, panel: &Panel, series: &[Vec<Seri
             draw_legend(d, &entries, x, y, None, lk, true);
         }
     }
-    PanelGeom { rect, x: sx, y: sy, y2: if has_y2 { Some(sy2) } else { None } }
+    // which series take which colour of the palette (shown with the custom colours of the editor)
+    let mut slot_labels: Vec<String> = vec![];
+    for (k, _) in &visible {
+        for (s, st) in layer_series(*k).iter().zip(&styles[*k]) {
+            if let Some(slot) = st.slot {
+                if slot_labels.len() <= slot {
+                    slot_labels.resize(slot + 1, String::new());
+                }
+                if slot_labels[slot].is_empty() {
+                    slot_labels[slot] = crate::help::markup::plain(&crate::help::markup::inline(&s.label));
+                }
+            }
+        }
+    }
+    PanelGeom { rect, x: sx, y: sy, y2: if has_y2 { Some(sy2) } else { None }, slot_labels }
 }
 
 #[cfg(test)]

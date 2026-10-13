@@ -541,7 +541,6 @@ const TIPS: &[(&str, &str)] = &[
     ("Panels (rows × columns)", "Number of panels (diagrams) in a grid, e.g. 1 × 2 for two diagrams side by side. Each panel has its own layers, axes, legend and annotations."),
     ("Theme", "Look of the panels: Grid (frame and light grid), Classic (axis lines left and bottom, as in many journals), Minimal (no frame), Dark (presentations)."),
     ("Palette", "Colours of the series without a fixed colour, in order. Okabe–Ito is safe for colour-blind readers; Viridis suits series in an order (print times, depths); Grey for black-and-white print; Custom: your own list of colours (it starts with the colours of the palette chosen before)."),
-    ("Colour name", "Name of the custom colour (for you; it is not drawn), e.g. \"loam\" or \"irrigated\"."),
     ("Custom colour", "Click to choose the colour: the field sets saturation (left–right) and brightness (top–bottom), the sliders the hue and the opacity; the hex code (#rrggbb or #rrggbbaa) and the R, G, B, A values (0–255) can be typed."),
     ("Add colour", "Adds a colour at the end of the custom palette."),
     ("Transparent background (PNG, SVG)", "Leaves out the background in the exported files (the preview keeps it)."),

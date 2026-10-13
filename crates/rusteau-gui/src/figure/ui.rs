@@ -11,7 +11,7 @@ use crate::tips::TipExt;
 use crate::util::sig;
 use crate::App;
 use egui::{CollapsingHeader, ComboBox, DragValue, RichText, Ui};
-use rusteau_core::figure::{Anchor, Annotation, AnnotationKind, Axis, Color, Dash, Figure, Geom, Layer, LegendPos, Marker, NamedColor, Palette, Panel, Source, Theme};
+use rusteau_core::figure::{Anchor, Annotation, AnnotationKind, Axis, Color, Dash, Figure, Geom, Layer, LegendPos, Marker, Palette, Panel, Source, Theme};
 use std::hash::{Hash, Hasher};
 
 /// State of the figure window.
@@ -654,7 +654,9 @@ fn start_page(ui: &mut Ui, tc: &TemplateCtx, acts: &mut Vec<Act>) {
 
 fn controls(ui: &mut Ui, st: &mut FigState, fig: &mut Figure, dc: &DataCtx, runs: &[SavedRun], acts: &mut Vec<Act>) {
     ui.spacing_mut().item_spacing.y = 6.0;
-    figure_section(ui, fig, st.fold.take());
+    // the legend labels of the colours of the palette, from the last preview (per panel)
+    let slot_labels: Vec<Vec<String>> = st.rendered.as_ref().map(|r| r.panels.iter().map(|p| p.slot_labels.clone()).collect()).unwrap_or_default();
+    figure_section(ui, fig, st.fold.take(), &slot_labels, st.panel);
     text_section(ui, fig);
     fig.sync_panels();
     st.panel = st.panel.min(fig.panels.len().saturating_sub(1));
@@ -696,7 +698,7 @@ fn controls(ui: &mut Ui, st: &mut FigState, fig: &mut Figure, dc: &DataCtx, runs
     symbols_section(ui, st);
 }
 
-fn figure_section(ui: &mut Ui, fig: &mut Figure, fold: Option<bool>) {
+fn figure_section(ui: &mut Ui, fig: &mut Figure, fold: Option<bool>, slot_labels: &[Vec<String>], panel: usize) {
     CollapsingHeader::new(crate::util::section_head(ui, "Figure")).default_open(true).open(fold).show(ui, |ui| {
         egui::Grid::new("fig_main").num_columns(2).show(ui, |ui| {
             row(ui, "Figure name");
@@ -751,34 +753,56 @@ fn figure_section(ui: &mut Ui, fig: &mut Figure, fold: Option<bool>) {
                 fig.colors = (0..8)
                     .map(|k| {
                         let [r, g, b] = render::builtin_color(before, k, 8, dark);
-                        NamedColor { name: format!("colour {}", k + 1), color: Color::rgb(r, g, b) }
+                        Color::rgb(r, g, b)
                     })
                     .collect();
             }
             ui.end_row();
         });
         if fig.palette == Palette::Custom {
-            custom_colors(ui, fig);
+            custom_colors(ui, fig, slot_labels, panel);
         }
         ui.checkbox(&mut fig.transparent, "Transparent background (PNG, SVG)").tip("Transparent background (PNG, SVG)");
         ui.checkbox(&mut fig.svg_text_as_paths, "SVG: text as outlines").tip("SVG: text as outlines");
     });
 }
 
-/// The colours of the palette "Custom": name, swatch (opens the picker) and code, in the order of the series.
-fn custom_colors(ui: &mut Ui, fig: &mut Figure) {
+/// Legend labels of the series that take colour `k` of `n` custom colours (positions k, k + n, … of the palette).
+fn color_users(labels: &[String], k: usize, n: usize) -> Vec<String> {
+    labels.iter().skip(k).step_by(n.max(1)).filter(|l| !l.is_empty()).cloned().collect()
+}
+
+/// The colours of the palette "Custom" in the order of the series: the legend label of the series that takes the colour
+/// in the selected panel (not editable), the swatch (opens the picker) and the code.
+fn custom_colors(ui: &mut Ui, fig: &mut Figure, slot_labels: &[Vec<String>], panel: usize) {
     ui.label(RichText::new("Custom colours, in the order of the series (click a swatch to change it):").weak());
     let mut action: Option<(usize, i32)> = None;
     let n = fig.colors.len();
+    let none = vec![];
+    let here = slot_labels.get(panel).unwrap_or(&none);
     egui::Grid::new("fig_custom_colors").num_columns(4).spacing([6.0, 4.0]).show(ui, |ui| {
-        for (k, nc) in fig.colors.iter_mut().enumerate() {
-            ui.add(egui::TextEdit::singleline(&mut nc.name).desired_width(110.0).hint_text("name")).tip("Colour name");
-            let r = crate::colorpick::color_button(ui, &mut nc.color.0).tip("Custom colour");
+        for (k, c) in fig.colors.iter_mut().enumerate() {
+            // the series of the selected panel with this colour; all panels in the tooltip
+            let users = color_users(here, k, n);
+            let text = if users.is_empty() { RichText::new("not used").weak().italics() } else { RichText::new(users.join("; ")) };
+            let mut all = vec![];
+            for (p, labels) in slot_labels.iter().enumerate() {
+                let u = color_users(labels, k, n);
+                if !u.is_empty() {
+                    all.push(format!("Panel {}: {}", p + 1, u.join("; ")));
+                }
+            }
+            let hover = if all.is_empty() { "No series of the figure uses this colour.".to_string() } else { all.join("\n") };
+            ui.allocate_ui_with_layout(egui::vec2(130.0, 18.0), egui::Layout::left_to_right(egui::Align::Center), |ui| {
+                ui.set_min_width(130.0);
+                ui.add(egui::Label::new(text).truncate()).on_hover_text(hover);
+            });
+            let r = crate::colorpick::color_button(ui, &mut c.0).tip("Custom colour");
             if k == 0 && ui.ctx().data_mut(|d| d.remove_temp::<bool>(egui::Id::new("tour_open_picker"))).is_some() {
                 // the screenshot tour shows the picker
                 ui.memory_mut(|m| m.open_popup(r.id.with("picker")));
             }
-            ui.monospace(nc.color.hex());
+            ui.monospace(c.hex());
             ui.horizontal(|ui| {
                 if ui.add_enabled(k > 0, egui::Button::new("⬆").small()).on_hover_text("Earlier in the order").clicked() {
                     action = Some((k, -1));
@@ -804,7 +828,7 @@ fn custom_colors(ui: &mut Ui, fig: &mut Figure) {
         let dark = fig.theme == Theme::Dark;
         let k = fig.colors.len();
         let [r, g, b] = render::builtin_color(Palette::OkabeIto, k, 8, dark);
-        fig.colors.push(NamedColor { name: format!("colour {}", k + 1), color: Color::rgb(r, g, b) });
+        fig.colors.push(Color::rgb(r, g, b));
     }
 }
 
@@ -1408,6 +1432,15 @@ fn preview(ui: &mut Ui, st: &mut FigState, fig: &mut Figure, dc: &DataCtx, env: 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn custom_colours_name_their_series() {
+        let labels: Vec<String> = ["t = 0 d", "t = 5 d", "", "t = 15 d", "t = 20 d"].iter().map(|s| s.to_string()).collect();
+        // three colours for five positions: the first colour is used again at position 3
+        assert_eq!(color_users(&labels, 0, 3), vec!["t = 0 d", "t = 15 d"]);
+        assert_eq!(color_users(&labels, 2, 3), Vec::<String>::new());
+        assert_eq!(color_users(&labels, 1, 8), vec!["t = 5 d"]);
+    }
 
     #[test]
     fn file_names_and_hashes() {
