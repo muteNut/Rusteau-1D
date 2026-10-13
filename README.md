@@ -21,6 +21,7 @@ pedotransfer functions (Rosetta 3 and the Rosetta 1 models of HYDRUS' Rosetta Li
 - [Building](#building)
 - [Running](#running)
 - [Interface](#interface)
+- [Figures](#figures)
 - [Help and documentation](#help-and-documentation)
 - [Unit conversion](#unit-conversion)
 - [Parameter estimation](#parameter-estimation)
@@ -186,24 +187,57 @@ folder), edits all inputs, runs the simulation and plots the results. *File → 
   print time, or h and θ / K) and shows them as points with the simulated curves. Columns may be separated by blanks,
   tabs, commas or semicolons (with semicolons a decimal comma is accepted); lines without two numbers are skipped. The
   observations of a `Fit.in` in an imported project folder are loaded automatically.
-- **Plots** are for inspection only; for figures use the CSV output (e.g. with ggplot2 or matplotlib).
+- **Plots** on the results pages are for inspection; figures for reports and papers are made in the
+  [figure editor](#figures) (*Results → 📈 Figures* or *View → Figures*).
+
+## Figures
+
+The figure editor opens in a window of its own and makes diagrams of the results, the input and measured data for
+publications and presentations. The figures are saved with the project (`.h1dr`).
+
+- **Templates:** water content, pressure head and concentration profiles, observation nodes, breakthrough curves,
+  surface and bottom fluxes, cumulative water balance, atmospheric forcing, retention curve and conductivity, mass
+  balance error, simulated against measured data, observed and fitted values of a parameter estimation, comparison
+  of runs, and a four-panel overview.
+- **Data:** each panel has layers; a layer takes x and y from the columns of a source chosen in grouped menus: the
+  results (`T_Level`, observation nodes, profiles at the print times, mass balance, `A_Level`, `T_Level1`, meteorological
+  output), the input (soil hydraulic properties, time-variable boundary data, initial condition), the measured data,
+  the observed and fitted values of a parameter estimation, or tables imported from text / CSV files. Nodes, print
+  times, materials or data sets can be selected; scale factors convert units or signs.
+- **Comparison of runs:** the current results can be kept under a name (with their project), saved and loaded as
+  JSON (also the `--json` output of the command line program); a layer shows any selection of runs (colour by item,
+  line style by run).
+- **Layout and style:** title, subtitle and caption; size in mm (journal column presets) and resolution; 1 × 1 to
+  4 × 4 panels; themes (grid, classic, minimal, dark) and palettes (Okabe–Ito, Tableau, viridis, grey); line, points,
+  steps, area and bars with colour, width, dash and marker; legends inside or outside; linear, logarithmic and reversed
+  axes with fixed or automatic ranges and steps, grid and minor ticks; a second y axis; text, line and arrow
+  annotations placed by value, relative to the plot area or with the mouse.
+- **Text:** titles, axis titles, legends and annotations take the markup of the help (`θ_{s}`, `cm^{3}`, `*italic*`,
+  `**bold**`); a symbol palette copies Greek letters, sub- and superscripts and mathematical signs.
+- **Fonts:** Noto Sans and Noto Sans Math are bundled (SIL Open Font License 1.1, see
+  [`crates/rusteau-gui/fonts`](crates/rusteau-gui/fonts/README.md)): every symbol of soil physics can be drawn, and
+  characters missing in a chosen system font are taken from them glyph by glyph.
+- **Export:** PNG with the resolution stored in the file, SVG (text as text elements or as outlines), or the image on
+  the clipboard. Preview, PNG and SVG are drawn by the same renderer (`crates/rusteau-gui/src/figure`: text layout with
+  ab_glyph, rasterizing with tiny-skia), so the files look like the preview.
 
 ## Help and documentation
 
 The interface has a help modelled on the compiled HTML help of HYDRUS-1D:
 
 - **Tooltips:** the inputs, check boxes, options and table headings describe themselves when the mouse rests on them:
-  meaning, unit (L, T, M as in HYDRUS), typical or default values and the HYDRUS variable (about 500 descriptions).
+  meaning, unit (L, T, M as in HYDRUS), typical or default values and the HYDRUS variable (about 570 descriptions,
+  including every setting of the figure editor).
 - **Help window** (*Help* menu, **F1**, or the **?** next to every page title, which opens the topic of the page): a
-  table of contents, a keyword index and a full-text search; back and forward. 68 topics in six books: introduction
+  table of contents, a keyword index and a full-text search; back and forward. 70 topics in six books: introduction
   (getting started, the main window, workflow, units, relation to HYDRUS-1D), projects and files (HYDRUS-1D import and
   export, examples, output files, command line), one topic per input page and results page with a screenshot and a
-  table of its inputs, the theory with the equations of every calculation (Richards equation, hydraulic models,
+  table of its inputs, the figure editor and the comparison of runs, the theory with the equations of every calculation (Richards equation, hydraulic models,
   hysteresis, dual porosity and permeability, root water and solute uptake, boundary conditions, Penman–Monteith,
   Hargreaves, energy balance, vapor flow, heat and solute transport, non-equilibrium transport, colloids, numerics,
   discretization, parameter estimation, Rosetta) and a reference part (symbols, keyboard and mouse, questions and
   problems, credits).
-- **Scientific sources:** citations in the text link to the topic *References* – 101 publications, with the DOI where
+- **Scientific sources:** citations in the text link to the topic *References* – 109 publications, with the DOI where
   one exists and with what Rusteau bases on each – and every topic that cites sources ends with its literature.
 - **Offline HTML help:** *Open in web browser* (help window or *Help* menu) writes the help as HTML pages and opens
   them; *Help → Export the HTML help…* or `rusteau --export-help DIR` writes them into a folder. The pages are part of
@@ -620,6 +654,12 @@ Department of Environmental Sciences, University of California Riverside.
 
 The Rosetta network weights come from rosetta-soil (USDA-ARS U.S. Salinity Laboratory, CC0 1.0); the models are
 those of Schaap et al. (2001, 2004) and Zhang & Schaap (2017), see [Pedotransfer functions](#pedotransfer-functions-rosetta).
+
+The interface bundles the fonts Noto Sans 2.015 and Noto Sans Math 3.000 (© The Noto Project Authors), unmodified,
+under the SIL Open Font License 1.1; the license texts are in [`crates/rusteau-gui/fonts`](crates/rusteau-gui/fonts),
+in the folder `fonts` of the release archives, in the help topic *Credits and license* and under *Help → About*. The
+figures are drawn with tiny-skia (BSD-3-Clause), ab_glyph and ttf-parser (Apache-2.0 / MIT) and written with png
+(MIT / Apache-2.0).
 
 ## License
 

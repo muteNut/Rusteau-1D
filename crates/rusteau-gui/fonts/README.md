@@ -1,7 +1,9 @@
 # Fonts
 
-The interface bundles these fonts unmodified. They are the default font of the figures and a fallback of the interface
-for symbols that the system font lacks (Greek letters, sub- and superscripts such as θₛ or cm⁻¹, ≤, ≥, √, ∂, arrows).
+The interface of Rusteau-1D bundles these fonts unmodified: they are compiled into the program (`rusteau`,
+`rusteau.exe`). They are the default font of the figures and a fallback of the interface for symbols that the system
+font lacks (Greek letters, sub- and superscripts such as θₛ or cm⁻¹, ≤, ≥, √, ∂, arrows). This file and the license
+texts are in the folder `fonts` of the release archives.
 
 | File | Font | Version | Source | License |
 |---|---|---|---|---|
@@ -12,5 +14,6 @@ Noto Sans covers Latin, Greek and Cyrillic with super- and subscripts; Noto Sans
 and arrows. Text is drawn with Noto Sans and falls back to Noto Sans Math glyph by glyph.
 
 The SIL Open Font License allows the fonts to be bundled, embedded and redistributed with software; the copyright
-notices and the license text must accompany them (these files, the release archives and the help topic *Credits and
-license*). The fonts are not sold by themselves, and they are not modified (no Reserved Font Names are declared).
+notices and the license text must accompany them (these files, the folder `fonts` of the release archives, the help
+topic *Credits and license* and *Help → About Rusteau-1D*). The fonts are not sold by themselves, and they are not
+modified (no Reserved Font Names are declared). Figures made with them (PNG, SVG) are not subject to the license.

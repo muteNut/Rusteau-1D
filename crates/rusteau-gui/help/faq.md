@@ -36,6 +36,10 @@ Long simulations with small time steps (frequent rain, dry soil, fine mesh) take
 
 In memory with the project. Use *File → Export results (CSV)…* to write them ([output files](output_files)).
 
+## How do I make a figure for a paper or a presentation?
+
+Open the [figure editor](figures) (*Results → 📈 Figures*), start from a template, set the size to the column width of the journal (e.g. 85 or 170 mm), add axis titles with units (markup such as `cm^{3} cm^{−3}`), and export a PNG at 300 dpi or an SVG. To compare scenarios, keep the results of each run ([comparison of runs](run_comparison)).
+
 ## How do I cite the methods?
 
 The help topics cite the publications behind every calculation; the topic [References](references) lists all of them, each with what Rusteau bases on it. For the numerical methods cite the HYDRUS-1D manual [@simunek2009; @simunek2013].

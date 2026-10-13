@@ -1039,6 +1039,15 @@ impl App {
                         "https://www.pc-progress.com/en/Default.aspx?hydrus-1d",
                     );
                     ui.label(format!("Version {} – free software under the GNU General Public License, version 3 or later.", env!("CARGO_PKG_VERSION")));
+                    ui.add_space(4.0);
+                    ui.label("Fonts: Noto Sans 2.015 and Noto Sans Math 3.000, © The Noto Project Authors, bundled unmodified under the SIL Open Font License 1.1.");
+                    ui.collapsing("Font license (SIL Open Font License 1.1)", |ui| {
+                        egui::ScrollArea::vertical().max_height(260.0).show(ui, |ui| {
+                            ui.label(egui::RichText::new(fonts::OFL_NOTO_SANS).monospace().small());
+                            ui.separator();
+                            ui.label(egui::RichText::new(fonts::OFL_NOTO_SANS_MATH).monospace().small());
+                        });
+                    });
                 });
         }
     }

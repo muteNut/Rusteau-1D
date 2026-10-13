@@ -11,7 +11,15 @@ The Rosetta network weights come from rosetta-soil of the USDA-ARS U.S. Salinity
 
 ## Interface
 
-The interface is built with egui and eframe (Rust).
+The interface is built with egui and eframe (Rust). The figures are drawn with tiny-skia (BSD-3-Clause license); glyph outlines are read with ab_glyph and ttf-parser (Apache-2.0 / MIT licenses), PNG files are written with the png crate (MIT / Apache-2.0).
+
+## Fonts {#fonts}
+
+The program bundles the fonts **Noto Sans** (version 2.015, regular, bold, italic and bold italic) and **Noto Sans Math** (version 3.000), unmodified. They are the default font of the [figures](figures) and supply the symbols that the system font of the interface lacks.
+
+Copyright 2022 The Noto Project Authors (https://github.com/notofonts/latin-greek-cyrillic) and Copyright 2022 The Noto Project Authors (https://github.com/notofonts/math).
+
+These fonts are licensed under the **SIL Open Font License, Version 1.1** (https://openfontlicense.org). The license allows the fonts to be used, embedded, bundled and redistributed with software, also commercially, as long as they are not sold by themselves and their copyright notice and license accompany them. The full license text is in the files `OFL-NotoSans.txt` and `OFL-NotoSansMath.txt` next to the program (folder `fonts` of the release archive and of the source code, `crates/rusteau-gui/fonts`) and under *Help → About Rusteau-1D*. Figures made with the fonts (PNG, SVG) are not affected by the license.
 
 ## License
 

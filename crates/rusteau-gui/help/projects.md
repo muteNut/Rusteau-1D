@@ -3,7 +3,7 @@ keywords: project; open; save; h1dr; h1d; HYDRUS-1D project; import; export; Fit
 
 ## Rusteau projects (.h1dr) {#h1dr}
 
-A Rusteau project is one file `name.h1dr` (JSON text) with all inputs. *File → Save* (Ctrl+S) writes it, *Save as…* (Ctrl+Shift+S) asks for a new name, *Open project* (Ctrl+O) reads it. A project with unsaved changes shows `*` after the title; *New project*, *Open project* and *Quit* ask before discarding changes.
+A Rusteau project is one file `name.h1dr` (JSON text) with all inputs and the [figures](figures). *File → Save* (Ctrl+S) writes it, *Save as…* (Ctrl+Shift+S) asks for a new name, *Open project* (Ctrl+O) reads it. A project with unsaved changes shows `*` after the title; *New project*, *Open project* and *Quit* ask before discarding changes.
 
 ## HYDRUS-1D projects (.h1d) {#hydrus}
 
@@ -26,7 +26,7 @@ HYDRUS-1D 4.x keeps a project as `<workspace>/<name>.h1d` next to the folder `<w
 
 Input files of the folder that the project does not need any more are removed; output files are left alone. With the option *Save also writes a HYDRUS-1D project* every *Save* also writes `name.h1d` and the folder `name` next to the `.h1dr`.
 
-Settings that HYDRUS-1D cannot store are listed on the page *Check & run* after writing: the interface parameters of the dual-permeability model, irrigation for the full duration, flux-averaged output concentrations, the trapezoidal water-content dependence of reactions, the extended flux output, the Rusteau iteration of the parameter estimation, the [further options](further_options), and the names of materials and solutes.
+Settings that HYDRUS-1D cannot store are listed on the page *Check & run* after writing: the interface parameters of the dual-permeability model, irrigation for the full duration, flux-averaged output concentrations, the trapezoidal water-content dependence of reactions, the extended flux output, the Rusteau iteration of the parameter estimation, the [further options](further_options), the names of materials and solutes, and the [figures](figures).
 
 ## Fit.in {#fitin}
 

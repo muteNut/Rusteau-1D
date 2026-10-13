@@ -13,7 +13,7 @@ rusteau-cli <project-dir | name.h1d | project.h1dr> [options]
 | `-c`, `--compare [DIR]` | compare all columns of the HYDRUS output files in DIR (default: the project directory); exit code 4 on differences |
 | `-q`, `--quiet` | no progress display |
 | `-s`, `--summary` | summary of the run |
-| `--json FILE` | complete results as JSON (readable by the interface) |
+| `--json FILE` | complete results as JSON (readable by the interface, e.g. as a run for the [comparison of runs](run_comparison)) |
 | `--direct` | run an inverse project as a direct problem with the initial estimates |
 | `--hydrus-stop` | parameter estimation: iterate exactly as HYDRUS 4.17 does |
 | `--starts N` | parameter estimation: number of additional starting points (default 8) |

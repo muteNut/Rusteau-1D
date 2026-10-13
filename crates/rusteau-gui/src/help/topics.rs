@@ -53,6 +53,8 @@ pub const TOC: &[Toc] = &[
             Page("res_balance"),
             Page("res_inverse"),
             Page("measured_data"),
+            Page("figures"),
+            Page("run_comparison"),
         ],
     ),
     Book(
@@ -106,6 +108,7 @@ pub const SOURCES: &[Source] = topics![
     "meteo_page", "root_uptake_page", "heat_page", "solute_general", "solute_params", "solute_reactions",
     "solute_advanced", "solute_bc", "iteration", "further_options", "check_run", "inverse_page",
     "res_obs", "res_profiles", "res_fluxes", "res_soilprops", "res_runtime", "res_balance", "res_inverse", "measured_data",
+    "figures", "run_comparison",
     "th_richards", "th_hydraulic_models", "th_hysteresis", "th_scaling", "th_dual_porosity", "th_dual_permeability",
     "th_root_uptake", "th_root_solute", "th_bc_water", "th_atmosphere", "th_penman", "th_hargreaves",
     "th_energy_balance", "th_vapor", "th_heat", "th_solute", "th_nonequilibrium", "th_colloids",
@@ -151,6 +154,10 @@ pub const IMAGES: &[(&str, &[u8])] = images![
     "res_inverse.png",
     "help_window.png",
     "tooltip.png",
+    "figures.png",
+    "figures_layer.png",
+    "figures_comparison.png",
+    "figure_example.png",
 ];
 
 pub fn image(src: &str) -> Option<&'static [u8]> {

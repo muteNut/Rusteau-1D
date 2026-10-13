@@ -31,6 +31,7 @@ jobs:
         run: |
           mkdir dist && cp target/release/rusteau target/release/rusteau-cli dist/
           cp -r docs/help dist/help
+          mkdir dist/fonts && cp crates/rusteau-gui/fonts/OFL-*.txt crates/rusteau-gui/fonts/README.md dist/fonts/
           tar czf rusteau-linux-x86_64.tar.gz -C dist .
       - name: Package (Windows)
         if: runner.os == 'Windows'
@@ -40,6 +41,8 @@ jobs:
           copy target\release\rusteau.exe dist\
           copy target\release\rusteau-cli.exe dist\
           Copy-Item -Recurse docs\help dist\help
+          New-Item -ItemType Directory dist\fonts
+          Copy-Item crates\rusteau-gui\fonts\OFL-*.txt, crates\rusteau-gui\fonts\README.md dist\fonts\
           Compress-Archive -Path dist\* -DestinationPath rusteau-windows-x86_64.zip
       - uses: actions/upload-artifact@v4
         with:

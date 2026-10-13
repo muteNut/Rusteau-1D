@@ -638,8 +638,8 @@ fn controls(ui: &mut Ui, st: &mut FigState, fig: &mut Figure, dc: &DataCtx, runs
 fn figure_section(ui: &mut Ui, fig: &mut Figure, fold: Option<bool>) {
     CollapsingHeader::new(RichText::new("Figure").strong()).default_open(true).open(fold).show(ui, |ui| {
         egui::Grid::new("fig_main").num_columns(2).show(ui, |ui| {
-            row(ui, "Name");
-            ui.add(egui::TextEdit::singleline(&mut fig.name).desired_width(230.0)).tip("Name");
+            row(ui, "Figure name");
+            ui.add(egui::TextEdit::singleline(&mut fig.name).desired_width(230.0)).tip("Figure name");
             ui.end_row();
             row(ui, "Title");
             ui.add(egui::TextEdit::singleline(&mut fig.title).desired_width(230.0).hint_text("none")).tip("Title");
@@ -708,13 +708,13 @@ fn text_section(ui: &mut Ui, fig: &mut Figure) {
             ui.end_row();
             let s = &mut fig.sizes;
             for (label, v) in [
-                ("Title (pt)", &mut s.title),
-                ("Subtitle (pt)", &mut s.subtitle),
-                ("Caption (pt)", &mut s.caption),
-                ("Panel titles (pt)", &mut s.panel_title),
-                ("Axis titles (pt)", &mut s.axis_title),
-                ("Tick labels (pt)", &mut s.ticks),
-                ("Legend (pt)", &mut s.legend),
+                ("Title size (pt)", &mut s.title),
+                ("Subtitle size (pt)", &mut s.subtitle),
+                ("Caption size (pt)", &mut s.caption),
+                ("Panel title size (pt)", &mut s.panel_title),
+                ("Axis title size (pt)", &mut s.axis_title),
+                ("Tick label size (pt)", &mut s.ticks),
+                ("Legend size (pt)", &mut s.legend),
             ] {
                 row(ui, label);
                 ui.add(DragValue::new(v).range(4.0..=48.0).speed(0.1).max_decimals(1)).tip(label);

@@ -5,7 +5,7 @@ keywords: keyboard shortcuts; hotkeys; mouse; F1; F5; Ctrl+S; plots; zoom; profi
 
 | Keys | Action |
 |---|---|
-| F1 | help on the current page (in the Rosetta dialog: help on Rosetta) |
+| F1 | help on the current page (in the Rosetta dialog: help on Rosetta; in the figure window: help on the figure editor) |
 | F5 | run the calculation |
 | Ctrl+N | new project |
 | Ctrl+O | open a project |
@@ -31,6 +31,15 @@ Click a field to type a value; drag it with the mouse to change the value contin
 | Ctrl+scroll | zooms |
 | double-click | resets the axes |
 | click on a legend entry | shows or hides the curve |
+
+## Figure editor
+
+| Mouse | Action |
+|---|---|
+| hover over the preview | the values of the axes of the panel under the pointer in the status bar |
+| click on a panel | selects the panel for the settings |
+| click / right click (with *Place with the mouse*) | moves the selected annotation / sets the end of an arrow |
+| click on a symbol (*Symbols and markup*) | copies it; Ctrl+V pastes it into a text |
 
 ## Soil profile editor
 

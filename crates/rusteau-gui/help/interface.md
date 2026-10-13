@@ -9,7 +9,7 @@ keywords: main window; menu; navigation; status bar; workflow bar; themes; toolt
 |---|---|
 | **File** | *New project* (Ctrl+N), *Examples*, *Open project* (Ctrl+O, `.h1dr` or a HYDRUS-1D `.h1d`), *Import HYDRUS-1D project folder…*, *Import optimization file (Fit.in)…*, *Save* (Ctrl+S), *Save as…* (Ctrl+Shift+S), *Save as HYDRUS-1D project*, the option *Save also writes a HYDRUS-1D project*, *Export results (CSV)…*, *Quit* – see [Projects and files](projects) |
 | **Calculation** | *▶ Run* (F5) and *■ Stop* |
-| **View** | dark and light theme |
+| **View** | *Figures (new window)…* – the [figure editor](figures); dark and light theme |
 | **Help** | help on the current page (F1), contents, getting started, theory, references, the help in the web browser, export of the HTML help, keyboard and mouse, about |
 
 At the right end of the menu bar are the project title (with `*` when there are unsaved changes) and the **▶ Run** button (**▶ Run (inverse)** for a parameter estimation, **■ Stop** while a calculation runs).
@@ -24,7 +24,7 @@ The left panel lists the **input pages** in the steps of a project ([workflow](w
 4. **Uptake & transport**: Root water & solute uptake, Heat transport, the five solute pages – each shown only when the process is switched on
 5. **Run**: Iteration criteria, Further options, Check & run
 
-and **Parameter estimation** with the page *Inverse problem (Fit.in)*. Below follow the **results pages**; they are enabled after a run (the soil hydraulic properties can be viewed at any time).
+and **Parameter estimation** with the page *Inverse problem (Fit.in)*. Below follow the **results pages**; they are enabled after a run (the soil hydraulic properties can be viewed at any time). The last entry, **📈 Figures**, opens the [figure editor](figures) in a window of its own (with the number of figures of the project).
 
 ## Pages
 
