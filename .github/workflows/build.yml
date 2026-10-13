@@ -55,6 +55,8 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
+          name: Rusteau-1D ${{ github.ref_name }}
+          body_path: RELEASE_NOTES.md
           files: |
             rusteau-linux-x86_64.tar.gz
             rusteau-windows-x86_64.zip

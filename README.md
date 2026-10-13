@@ -87,12 +87,13 @@ interface runs through XWayland.
 cargo build --release --workspace
 ```
 
-The programs are `target/release/rusteau` and `target/release/rusteau-gui` (`.exe` on Windows).
+The programs are `target/release/rusteau` (the interface) and `target/release/rusteau-cli` (the command line program;
+`.exe` on Windows).
 
 ## Running
 
 ```sh
-rusteau <project-dir | name.h1d | project.h1dr> [options]
+rusteau-cli <project-dir | name.h1d | project.h1dr> [options]
   -o, --out DIR        output directory (default: <project-dir>/rust_out, or <file>.results)
   -c, --compare [DIR]  compare all columns of the HYDRUS output files in DIR (default: the project directory); exit code 4 on differences
   -q, --quiet          no progress display
@@ -105,8 +106,8 @@ rusteau <project-dir | name.h1d | project.h1dr> [options]
       --save-h1d FILE  write the project as a HYDRUS-1D 4.x project (FILE.h1d + folder FILE) and exit
 ```
 
-`rusteau project.h1dr --save-h1d C:\Hydrus\MyProject.h1d` converts a Rusteau project for HYDRUS-1D;
-`rusteau MyProject.h1d -o out` runs a HYDRUS-1D project.
+`rusteau-cli project.h1dr --save-h1d C:\Hydrus\MyProject.h1d` converts a Rusteau project for HYDRUS-1D;
+`rusteau-cli MyProject.h1d -o out` runs a HYDRUS-1D project.
 
 A project with an inverse problem (`lInverse` in `SELECTOR.IN` with a `Fit.in`, or the inverse settings of a `.h1dr`)
 is optimized: the iterations are printed, and `Fit.out` and the results of the final run with the fitted parameters are
@@ -117,7 +118,7 @@ The CLI accepts a HYDRUS-1D project folder (the folder with `SELECTOR.IN`), the 
 (the folder `name` next to it is read), or a native `.h1dr` project. It writes `T_LEVEL.csv`, `A_LEVEL.csv`,
 `NOD_INF.csv`, `OBS_NODE.csv`, `BALANCE.csv` and, when produced, `T_LEVEL1.csv`, `METEO.csv`, `Meteo.out` and `IRRIG.csv`.
 
-The interface (`rusteau-gui [project]`) opens `.h1dr` projects and imports HYDRUS-1D projects (`.h1d` or project
+The interface (`rusteau [project]`) opens `.h1dr` projects and imports HYDRUS-1D projects (`.h1d` or project
 folder), edits all inputs, runs the simulation and plots the results. *File → Save as HYDRUS-1D project* writes
 `name.h1d` and the folder `name`; with *Save also writes a HYDRUS-1D project* every Save writes them next to the
 `.h1dr`.
@@ -400,7 +401,7 @@ last balance (4.17 prints e.g. 0.0032 % for DRAINAGE, Rusteau 0.0000 %).
 
 HYDRUS-1D 4.x keeps a project as `<workspace>/<name>.h1d` next to the folder `<workspace>/<name>` with the input files.
 Rusteau reads such projects (the `.h1d` file, the folder or any file in it) and writes them (*File → Save as HYDRUS-1D
-project*, the option *Save also writes a HYDRUS-1D project*, or `rusteau … --save-h1d FILE`):
+project*, the option *Save also writes a HYDRUS-1D project*, or `rusteau-cli … --save-h1d FILE`):
 
 - `SELECTOR.IN` (file version 4, the blocks and header lines of 4.17), `PROFILE.DAT`, `ATMOSPH.IN` (with time-variable
   boundary conditions), `METEO.IN` (meteorological data), `FIT.IN` (inverse settings), `MATER.IN` (tabular hydraulic
