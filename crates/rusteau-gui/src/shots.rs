@@ -283,6 +283,8 @@ impl Tour {
             Step {
                 name: "res_inverse".into(),
                 setup: |a, _| {
+                    // its own project: the steps before may have loaded others
+                    a.set_project(examples::inverse_outflow(), None);
                     a.start_run();
                     page(a, Page::InverseResults);
                 },
