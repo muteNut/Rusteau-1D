@@ -176,11 +176,18 @@ pub fn text_path(t: &TextLayout, x: f32, y: f32, angle: f32) -> Path {
     p
 }
 
-/// Rasterizes the drawing at `scale` pixels per point.
-pub fn rasterize(d: &Drawing, scale: f32, transparent: bool) -> tiny_skia::Pixmap {
-    let w = (d.width * scale).round().max(1.0) as u32;
-    let h = (d.height * scale).round().max(1.0) as u32;
-    let mut pm = tiny_skia::Pixmap::new(w, h).expect("pixmap size");
+/// Largest image [pixels] (about 480 MB of memory).
+pub const MAX_PIXELS: u64 = 120_000_000;
+
+/// Rasterizes the drawing at `scale` pixels per point; an image larger than [`MAX_PIXELS`] is an error.
+pub fn rasterize(d: &Drawing, scale: f32, transparent: bool) -> Result<tiny_skia::Pixmap, String> {
+    let w = (d.width * scale).round().max(1.0);
+    let h = (d.height * scale).round().max(1.0);
+    if !(w.is_finite() && h.is_finite()) || (w as f64) * (h as f64) > MAX_PIXELS as f64 {
+        return Err(format!("The image would have {w:.0} × {h:.0} pixels; lower the resolution or the size of the figure."));
+    }
+    let (w, h) = (w as u32, h as u32);
+    let mut pm = tiny_skia::Pixmap::new(w, h).ok_or_else(|| format!("No memory for an image of {w} × {h} pixels."))?;
     if let (Some(bg), false) = (d.background, transparent) {
         pm.fill(tiny_skia::Color::from_rgba8(bg.0, bg.1, bg.2, bg.3));
     }
@@ -223,7 +230,7 @@ pub fn rasterize(d: &Drawing, scale: f32, transparent: bool) -> tiny_skia::Pixma
             Prim::Unclip => mask = None,
         }
     }
-    pm
+    Ok(pm)
 }
 
 /// Colours of the pixels without premultiplied alpha (RGBA, row by row).
@@ -393,7 +400,7 @@ mod tests {
         let t = Arc::new(text::layout("θ_{s} & <x>", 10.0, "Noto Sans", false, None));
         d.text(&t, 40.0, 5.0, 0.0, Rgba(0, 0, 0, 255));
         d.text(&t, 90.0, 45.0, std::f32::consts::FRAC_PI_2, Rgba(0, 0, 0, 255));
-        let pm = rasterize(&d, 2.0, false);
+        let pm = rasterize(&d, 2.0, false).unwrap();
         assert_eq!((pm.width(), pm.height()), (200, 100));
         // red square, white background, the dashed line clipped at x = 50 pt
         let px = |x: u32, y: u32| pm.pixel(x, y).unwrap().demultiply();
@@ -405,7 +412,9 @@ mod tests {
         let dark = (80..200).flat_map(|x| (10..30).map(move |y| (x, y))).filter(|&(x, y)| px(x, y).red() < 100).count();
         assert!(dark > 20, "{dark}");
         // transparent: no background
-        assert_eq!(rasterize(&d, 1.0, true).pixel(90, 2).unwrap().alpha(), 0);
+        assert_eq!(rasterize(&d, 1.0, true).unwrap().pixel(90, 2).unwrap().alpha(), 0);
+        // too large an image is an error, not a crash
+        assert!(rasterize(&d, 1e4, false).is_err());
         let dir = std::env::temp_dir().join(format!("rusteau-canvas-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         write_png(&pm, 300.0, &dir.join("a.png")).unwrap();

@@ -35,6 +35,10 @@ pub struct FigState {
     pub help_here: bool,
     /// opens or closes the section "Figure" once (screenshot tour)
     pub fold: Option<bool>,
+    /// the window failed with an internal error (message)
+    broken: Option<String>,
+    /// the preview of the current state failed (message)
+    preview_error: Option<String>,
     dialog: Option<FileDialog>,
     /// kept run a save dialog is for
     save_run: usize,
@@ -255,7 +259,20 @@ impl App {
         if ctx.input(|i| i.key_pressed(egui::Key::F1)) {
             acts.push(Act::Help);
         }
-        {
+        if let Some(msg) = self.figs.broken.clone() {
+            // the window failed: a message instead of the same error in every frame (the figures are kept)
+            ui.add_space(12.0);
+            ui.label(RichText::new("The figure window could not be shown").heading().color(ui.visuals().error_fg_color));
+            ui.label(&msg);
+            if ui.button("Try again").clicked() {
+                self.figs.broken = None;
+            }
+            self.prj.figures = figures;
+            self.figs.runs = runs;
+            return;
+        }
+        // an internal error while drawing is caught here, so the figures (taken out of the project above) are kept
+        let drawn = crate::guard::catch("Figure window", || {
             let fit = match (&self.inv.settings, &self.inv.result) {
                 (Some(s), Some(r)) => Some((s, r)),
                 _ => None,
@@ -308,6 +325,9 @@ impl App {
                 }
                 st.last_hash = Some(h);
             }
+        });
+        if let Err(e) = drawn {
+            self.figs.broken = Some(e);
         }
         self.prj.figures = figures;
         self.figs.runs = runs;
@@ -370,7 +390,7 @@ impl App {
                     self.figs.dialog = Some(FileDialog::new(purpose, Mode::SaveFile, if png { "Export the figure as PNG" } else { "Export the figure as SVG" }, self.last_dir.clone(), &file_name(&f.name, ext), &[ext]));
                 }
                 Act::CopyImage => {
-                    if let Some(pm) = self.figure_pixmap(4000.0) {
+                    if let Some((pm, _)) = self.safe_pixmap(4000.0) {
                         let img = egui::ColorImage::from_rgba_unmultiplied([pm.width() as usize, pm.height() as usize], &canvas::rgba(&pm));
                         ctx.copy_image(img);
                         self.figs.status = format!("Figure copied to the clipboard ({} × {} pixels)", pm.width(), pm.height());
@@ -416,19 +436,38 @@ impl App {
         }
     }
 
-    /// The selected figure rasterized at its resolution (at most `max_px` pixels wide or high).
-    fn figure_pixmap(&self, max_px: f64) -> Option<tiny_skia::Pixmap> {
-        let f = self.prj.figures.get(self.figs.fig)?;
+    /// The internal error of the figure window or its preview, if any (tests).
+    #[cfg(test)]
+    pub fn figs_failure(&self) -> Option<String> {
+        self.figs.broken.clone().or_else(|| self.figs.preview_error.clone())
+    }
+
+    /// The selected figure rasterized at its resolution, or at a lower one when the image would be wider or higher
+    /// than `max_px`; with the resolution used [dpi].
+    fn figure_pixmap(&self, max_px: f64) -> Result<(tiny_skia::Pixmap, f64), String> {
+        let f = self.prj.figures.get(self.figs.fig).ok_or("There is no figure.")?;
         let r = self.render_figure(f);
-        let scale = (f.dpi / 72.0).min(max_px / (r.drawing.width.max(r.drawing.height) as f64)) as f32;
-        Some(canvas::rasterize(&r.drawing, scale, f.transparent))
+        let scale = (f.dpi / 72.0).min(max_px / (r.drawing.width.max(r.drawing.height) as f64));
+        let pm = canvas::rasterize(&r.drawing, scale as f32, f.transparent)?;
+        Ok((pm, scale * 72.0))
+    }
+
+    /// [`Self::figure_pixmap`] with errors (also internal ones) as a message in the status line.
+    fn safe_pixmap(&mut self, max_px: f64) -> Option<(tiny_skia::Pixmap, f64)> {
+        match crate::guard::catch("Drawing the figure", || self.figure_pixmap(max_px)).and_then(|r| r) {
+            Ok(p) => Some(p),
+            Err(e) => {
+                self.figs.status = e;
+                None
+            }
+        }
     }
 
     /// The selected figure rasterized at `dpi` (example images of the help).
     pub fn figure_pixmap_at(&self, dpi: f64) -> Option<tiny_skia::Pixmap> {
         let f = self.prj.figures.get(self.figs.fig)?;
         let r = self.render_figure(f);
-        Some(canvas::rasterize(&r.drawing, (dpi / 72.0) as f32, false))
+        canvas::rasterize(&r.drawing, (dpi / 72.0) as f32, false).ok()
     }
 
     fn render_figure(&self, f: &Figure) -> Rendered {
@@ -452,24 +491,32 @@ impl App {
                 self.figs.status = match d.purpose {
                     Purpose::FigurePng => {
                         let p = if path.extension().is_none() { path.with_extension("png") } else { path };
-                        match (self.figure_pixmap(20000.0), self.prj.figures.get(k)) {
-                            (Some(pm), Some(f)) => match canvas::write_png(&pm, f.dpi, &p) {
+                        match (self.safe_pixmap(12000.0), self.prj.figures.get(k)) {
+                            (Some((pm, dpi)), Some(f)) => match canvas::write_png(&pm, dpi, &p) {
+                                Ok(()) if dpi < f.dpi - 0.5 => format!(
+                                    "PNG written: {} ({} × {} pixels; at most 12000 pixels on a side, so {:.0} instead of {} dpi)",
+                                    p.display(),
+                                    pm.width(),
+                                    pm.height(),
+                                    dpi,
+                                    f.dpi
+                                ),
                                 Ok(()) => format!("PNG written: {} ({} × {} pixels, {} dpi)", p.display(), pm.width(), pm.height(), f.dpi),
                                 Err(e) => format!("Could not write the PNG: {e}"),
                             },
-                            _ => String::new(),
+                            _ => self.figs.status.clone(),
                         }
                     }
                     Purpose::FigureSvg => {
                         let p = if path.extension().is_none() { path.with_extension("svg") } else { path };
                         match self.prj.figures.get(k) {
-                            Some(f) => {
-                                let r = self.render_figure(f);
-                                match std::fs::write(&p, canvas::to_svg(&r.drawing, f.svg_text_as_paths, f.transparent)) {
+                            Some(f) => match crate::guard::catch("Drawing the figure", || canvas::to_svg(&self.render_figure(f).drawing, f.svg_text_as_paths, f.transparent)) {
+                                Ok(svg) => match std::fs::write(&p, svg) {
                                     Ok(()) => format!("SVG written: {}", p.display()),
                                     Err(e) => format!("Could not write the SVG: {e}"),
-                                }
-                            }
+                                },
+                                Err(e) => e,
+                            },
                             None => String::new(),
                         }
                     }
@@ -1262,17 +1309,35 @@ fn preview(ui: &mut Ui, st: &mut FigState, fig: &mut Figure, dc: &DataCtx, env: 
     let json = serde_json::to_vec(&*fig).unwrap_or_default();
     fig.data = tables;
     let key = hash_of(&(env, json, fig.data.iter().map(|t| (t.name.clone(), t.columns.len())).collect::<Vec<_>>(), (px_per_pt * 1000.0) as i64));
-    if key != st.key || st.tex.is_none() {
-        let series: Vec<Vec<Vec<data::Series>>> = fig.panels.iter().map(|p| p.layers.iter().map(|l| dc.series(l, fig)).collect()).collect();
-        let r = render::render(fig, &series);
-        let pm = canvas::rasterize(&r.drawing, px_per_pt, false);
-        let img = egui::ColorImage::from_rgba_premultiplied([pm.width() as usize, pm.height() as usize], pm.data());
-        match &mut st.tex {
-            Some(t) => t.set(img, egui::TextureOptions::LINEAR),
-            None => st.tex = Some(ctx.load_texture("figure_preview", img, egui::TextureOptions::LINEAR)),
-        }
-        st.rendered = Some(r);
+    if key != st.key || (st.tex.is_none() && st.preview_error.is_none()) {
         st.key = key;
+        let drawn = crate::guard::catch("Drawing the figure", || {
+            let series: Vec<Vec<Vec<data::Series>>> = fig.panels.iter().map(|p| p.layers.iter().map(|l| dc.series(l, fig)).collect()).collect();
+            let r = render::render(fig, &series);
+            let pm = canvas::rasterize(&r.drawing, px_per_pt, false);
+            (r, pm)
+        });
+        match drawn.and_then(|(r, pm)| pm.map(|pm| (r, pm))) {
+            Ok((r, pm)) => {
+                let img = egui::ColorImage::from_rgba_premultiplied([pm.width() as usize, pm.height() as usize], pm.data());
+                match &mut st.tex {
+                    Some(t) => t.set(img, egui::TextureOptions::LINEAR),
+                    None => st.tex = Some(ctx.load_texture("figure_preview", img, egui::TextureOptions::LINEAR)),
+                }
+                st.rendered = Some(r);
+                st.preview_error = None;
+            }
+            Err(e) => {
+                st.preview_error = Some(e);
+                st.rendered = None;
+            }
+        }
+    }
+    if let Some(e) = &st.preview_error {
+        // the next change of the figure or the data tries again
+        ui.label(RichText::new("The figure could not be drawn").heading().color(ui.visuals().error_fg_color));
+        ui.label(e);
+        return;
     }
     let (Some(tex), Some(r)) = (&st.tex, &st.rendered) else { return };
     let size = egui::vec2(wpt * scale, hpt * scale);

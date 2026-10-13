@@ -542,6 +542,14 @@ impl App {
         });
         if model != self.prj.water.model {
             self.prj.water.model = model;
+            // parameters of the second region that are not valid for the new model get its defaults
+            let mut adapted = 0;
+            for m in &mut self.prj.water.materials {
+                adapted += m.adapt_extra(model) as usize;
+            }
+            if adapted > 0 {
+                self.status = format!("{} material(s): the parameters of the second region were set to defaults of the model; check them on the page Materials & parameters.", adapted);
+            }
             *ch = true;
         }
         if self.prj.water.model == SoilModel::DualPermeability {

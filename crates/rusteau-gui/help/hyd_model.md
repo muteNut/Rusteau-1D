@@ -20,6 +20,8 @@ The page follows the *Soil Hydraulic Model* dialog of HYDRUS-1D 4.17: the model 
 
 The equations are given in [soil hydraulic property models](th_hydraulic_models); the parameters are entered on the page [Materials & parameters](soil_params).
 
+The parameters of the second region (θm, θa, θk, Kk of the modified van Genuchten model; w2, α2, n2 of Durner; θr,im, θs,im, ω … of the dual-porosity models; the matrix of the dual-permeability model) share the same columns. When the model is changed and the present values are not valid for the new model (e.g. θs,im smaller than θr,im), they are set to defaults of the model and the status bar says so; valid values are kept. *Check & run* lists invalid parameters before a run.
+
 ## Hysteresis {#hysteresis}
 
 | Option | Description |

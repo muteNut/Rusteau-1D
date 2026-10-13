@@ -4,6 +4,7 @@ mod colorpick;
 mod figure;
 mod files;
 mod fonts;
+mod guard;
 mod help;
 mod hydro;
 mod inverse_ui;
@@ -13,6 +14,8 @@ mod pre;
 mod profile;
 mod rosetta_ui;
 mod shots;
+#[cfg(test)]
+mod smoke;
 mod tips;
 mod util;
 
@@ -211,6 +214,12 @@ pub struct App {
     tour: Option<shots::Tour>,
     /// figure editor (its own window)
     pub figs: figure::ui::FigState,
+    /// copy of the unsaved project for a restart after a crash
+    recovery: guard::Recovery,
+    /// a recovery copy of an earlier session that did not end normally (path, age)
+    recover_offer: Option<(PathBuf, std::time::Duration)>,
+    /// a page whose drawing failed with an internal error, and the message
+    broken_page: Option<(Page, String)>,
 }
 
 #[derive(Clone, Debug)]
@@ -241,8 +250,19 @@ impl App {
         style.spacing.window_margin = egui::Margin::same(12);
         cc.egui_ctx.set_style(style);
 
-        let prj = rusteau_core::examples::infiltration_evaporation();
-        let mut app = App {
+        let mut app = App::with_project(rusteau_core::examples::infiltration_evaporation());
+        if app.tour.is_none() {
+            app.recover_offer = guard::pending_recovery();
+        }
+        if let Some(arg) = std::env::args().nth(1) {
+            app.open_path(&PathBuf::from(&arg));
+        }
+        app
+    }
+
+    /// The state of the interface with project `prj` (without a window).
+    fn with_project(prj: Project) -> Self {
+        App {
             prj,
             path: None,
             dirty: false,
@@ -273,11 +293,10 @@ impl App {
             help: help::HelpState::default(),
             tour: shots::Tour::from_env(),
             figs: Default::default(),
-        };
-        if let Some(arg) = std::env::args().nth(1) {
-            app.open_path(&PathBuf::from(&arg));
+            recovery: Default::default(),
+            recover_offer: None,
+            broken_page: None,
         }
-        app
     }
 
     /// Opens a project: a Rusteau project (`.h1dr`, `.json`) or a HYDRUS-1D project (the `.h1d` file, its folder or any
@@ -386,7 +405,8 @@ impl App {
         let (p2, c2) = (progress.clone(), cancel.clone());
         let (t_init, t_max) = (prj.time.t_init, prj.time.t_max);
         std::thread::spawn(move || {
-            let res = match Simulation::new(prj) {
+            // an internal error of the engine ends the run with a message instead of a run that never finishes
+            let res = guard::catch("Calculation", || match Simulation::new(prj) {
                 Ok(mut sim) => {
                     sim.run(|s| {
                         p2.store(s.t.to_bits(), Ordering::Relaxed);
@@ -395,7 +415,8 @@ impl App {
                     Ok(std::mem::take(&mut sim.res))
                 }
                 Err(e) => Err(e.to_string()),
-            };
+            })
+            .and_then(|r| r);
             let _ = tx.send(res);
         });
         self.run = Some(RunHandle {
@@ -413,12 +434,14 @@ impl App {
         let mut finished = None;
         if let Some(r) = &self.run {
             ctx.request_repaint_after(std::time::Duration::from_millis(80));
-            if let Ok(res) = r.rx.try_recv() {
-                finished = Some((
-                    res,
-                    r.started.elapsed().as_secs_f64(),
-                    r.cancel.load(Ordering::Relaxed),
-                ));
+            match r.rx.try_recv() {
+                Ok(res) => {
+                    finished = Some((res, r.started.elapsed().as_secs_f64(), r.cancel.load(Ordering::Relaxed)));
+                }
+                Err(std::sync::mpsc::TryRecvError::Disconnected) => {
+                    finished = Some((Err("The calculation ended without results (internal error).".into()), r.started.elapsed().as_secs_f64(), false));
+                }
+                Err(std::sync::mpsc::TryRecvError::Empty) => {}
             }
         }
         if let Some((res, secs, cancelled)) = finished {
@@ -1009,6 +1032,37 @@ impl App {
                 }
             }
         }
+        if let Some((path, age)) = self.recover_offer.clone() {
+            egui::Window::new("Recover unsaved project")
+                .collapsible(false)
+                .resizable(false)
+                .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
+                .show(ctx, |ui| {
+                    let mins = age.as_secs() / 60;
+                    let when = if mins < 120 { format!("{mins} minutes") } else { format!("{} hours", mins / 60) };
+                    ui.label(format!("Rusteau-1D did not close normally. A copy of a project with unsaved changes was kept {when} ago."));
+                    ui.label(egui::RichText::new(path.display().to_string()).weak());
+                    ui.add_space(8.0);
+                    ui.horizontal(|ui| {
+                        if ui.button("Open the copy").clicked() {
+                            match rusteau_io::load_project(&path) {
+                                Ok(p) => {
+                                    self.set_project(p, None);
+                                    self.dirty = true;
+                                    self.status = "Recovered the unsaved project: save it with File → Save as…".into();
+                                }
+                                Err(e) => self.status = format!("The recovery copy could not be read: {e}"),
+                            }
+                            self.recover_offer = None;
+                        }
+                        if ui.button("Discard it").clicked() {
+                            self.recovery.discard();
+                            self.recover_offer = None;
+                        }
+                    });
+                    ui.label(egui::RichText::new(format!("Error reports: {}", guard::crash_log().display())).weak().small());
+                });
+        }
         if self.show_about {
             egui::Window::new("About Rusteau-1D")
                 .open(&mut self.show_about)
@@ -1190,8 +1244,25 @@ impl App {
 }
 
 impl eframe::App for App {
+    /// A normal end: the recovery copy is not needed (unless the copy of an earlier crash was not answered).
+    fn on_exit(&mut self, _gl: Option<&eframe::glow::Context>) {
+        if self.recover_offer.is_none() {
+            self.recovery.discard();
+        }
+    }
+
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        self.frame(ctx);
+    }
+}
+
+impl App {
+    /// One frame of the interface.
+    fn frame(&mut self, ctx: &egui::Context) {
         util::filter_number_input(ctx);
+        if self.tour.is_none() && self.recover_offer.is_none() {
+            self.recovery.tick(&self.prj, self.dirty);
+        }
         if let Some(mut tour) = self.tour.take() {
             if tour.frame(self, ctx) {
                 self.tour = Some(tour);
@@ -1225,16 +1296,35 @@ impl eframe::App for App {
         self.flow_bar(ctx);
         self.nav(ctx);
         egui::CentralPanel::default().show(ctx, |ui| {
-            if self.page == Page::Profile {
-                // the profile editor fits the window and scrolls its own parts
-                self.page_ui(ui);
-                return;
+            if let Some((page, msg)) = self.broken_page.clone() {
+                if page == self.page {
+                    // the page failed: a message instead of the same error in every frame
+                    ui.add_space(12.0);
+                    ui.label(egui::RichText::new("This page could not be shown").heading().color(ui.visuals().error_fg_color));
+                    ui.label(&msg);
+                    ui.label("Save the project (File → Save as…) and report the error with the crash log.");
+                    if ui.button("Try again").clicked() {
+                        self.broken_page = None;
+                    }
+                    return;
+                }
+                self.broken_page = None;
             }
-            egui::ScrollArea::both()
-                .auto_shrink([false, false])
-                .show(ui, |ui| {
+            let page = self.page;
+            let r = guard::catch("Drawing the page", || {
+                if self.page == Page::Profile {
+                    // the profile editor fits the window and scrolls its own parts
+                    self.page_ui(ui);
+                    return;
+                }
+                egui::ScrollArea::both().auto_shrink([false, false]).show(ui, |ui| {
                     self.page_ui(ui);
                 });
+            });
+            if let Err(e) = r {
+                self.status = e.clone();
+                self.broken_page = Some((page, e));
+            }
         });
         self.dialogs(ctx);
         self.rosetta_window(ctx);
@@ -1296,6 +1386,7 @@ fn is_project_path(p: &std::path::Path) -> bool {
 }
 
 fn main() -> eframe::Result<()> {
+    guard::install_panic_hook();
     // rusteau --export-help DIR: write the HTML help and exit (no window)
     let args: Vec<String> = std::env::args().collect();
     if let Some(k) = args.iter().position(|a| a == "--export-help") {

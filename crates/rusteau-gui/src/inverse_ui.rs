@@ -123,10 +123,13 @@ impl App {
         let s2 = s.clone();
         std::thread::spawn(move || {
             let tx2 = tx.clone();
-            let r = optimize(&prj, &s2, &MarqOptions::default(), Some(&c2), |p| {
-                let _ = tx2.send(InvMsg::Progress(p.clone()));
+            let r = crate::guard::catch("Parameter estimation", || {
+                optimize(&prj, &s2, &MarqOptions::default(), Some(&c2), |p| {
+                    let _ = tx2.send(InvMsg::Progress(p.clone()));
+                })
+                .map_err(|e| e.to_string())
             })
-            .map_err(|e| e.to_string());
+            .and_then(|r| r);
             let _ = tx.send(InvMsg::Done(Box::new(r)));
         });
         let n_starts = if s.hydrus_stop { 1 } else { 1 + s.extra_starts };
@@ -140,7 +143,15 @@ impl App {
         let mut done = None;
         if let Some(h) = self.inv.run.as_mut() {
             ctx.request_repaint_after(std::time::Duration::from_millis(100));
-            while let Ok(m) = h.rx.try_recv() {
+            loop {
+                let m = match h.rx.try_recv() {
+                    Ok(m) => m,
+                    Err(std::sync::mpsc::TryRecvError::Empty) => break,
+                    Err(std::sync::mpsc::TryRecvError::Disconnected) => {
+                        done = Some((Err("The parameter estimation ended without results (internal error).".to_string()), h.started.elapsed().as_secs_f64()));
+                        break;
+                    }
+                };
                 match m {
                     InvMsg::Progress(p) if p.finished => {
                         h.finished.push(p);
@@ -161,7 +172,7 @@ impl App {
                     self.status = format!(
                         "Parameter estimation finished in {:.1} s: {} iterations, SSQ {:.4e}, R² {:.5} ({}).",
                         secs,
-                        res.iterations.len() - 1,
+                        res.iterations.len().saturating_sub(1),
                         res.ssq,
                         res.measures.r_squared,
                         stop_text(res.stop)

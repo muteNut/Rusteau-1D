@@ -236,6 +236,29 @@ pub struct SoilMaterial {
     pub ks_w: f64,
 }
 
+impl SoilMaterial {
+    /// Sets the parameters of the second pore region (`extra`) to defaults of `model` when the present values are not
+    /// valid for it (e.g. the modified van Genuchten values after a change to a dual-porosity model); valid values are
+    /// kept. Returns whether they were changed.
+    pub fn adapt_extra(&mut self, model: SoilModel) -> bool {
+        let e = self.extra;
+        let ok = |v: f64| v.is_finite();
+        let (valid, default) = match model {
+            SoilModel::ModifiedVG => (e[0] >= self.qs && e[1] <= self.qr && e[2] <= e[0] && e[3] > 0.0, [self.qs, self.qr, self.qs, self.ks, 0.0]),
+            SoilModel::Durner => ((0.0..=1.0).contains(&e[0]) && e[1] > 0.0 && e[2] > 1.0, [0.2, 10.0 * self.alpha, self.n.max(1.1), 0.0, 0.0]),
+            SoilModel::DualPorosityW => (e[0] >= 0.0 && e[1] > e[0] && e[2] >= 0.0, [0.0, 0.1, 0.0, 0.0, 0.0]),
+            SoilModel::DualPorosityH => (e[0] >= 0.0 && e[1] > e[0] && e[2] > 0.0 && e[3] > 1.0 && e[4] >= 0.0, [0.0, 0.1, self.alpha, self.n.max(1.1), 0.0]),
+            SoilModel::DualPermeability => (e[0] >= 0.0 && e[1] > e[0] && e[2] > 0.0 && e[3] > 1.0 && e[4] > 0.0, [self.qr, self.qs, self.alpha, self.n.max(1.1), self.ks]),
+            _ => (true, e),
+        };
+        if valid && e.iter().all(|v| ok(*v)) {
+            return false;
+        }
+        self.extra = default;
+        true
+    }
+}
+
 impl Default for SoilMaterial {
     fn default() -> Self {
         SoilMaterial {
@@ -1202,6 +1225,30 @@ impl Project {
             if m.ks <= 0.0 {
                 e.push(format!("Material {}: Ks must be > 0.", i + 1));
             }
+            if m.extra.iter().any(|v| !v.is_finite()) || [m.qr, m.qs, m.alpha, m.n, m.ks, m.l].iter().any(|v| !v.is_finite()) {
+                e.push(format!("Material {}: every hydraulic parameter must be a number.", i + 1));
+            }
+            // the immobile region (dual porosity) and the matrix (dual permeability) need their own θr < θs
+            match self.water.model {
+                SoilModel::DualPorosityW | SoilModel::DualPorosityH if m.extra[1] <= m.extra[0] => {
+                    e.push(format!("Material {}: θs,im must be larger than θr,im (dual-porosity model).", i + 1));
+                }
+                SoilModel::DualPermeability if m.extra[1] <= m.extra[0] => {
+                    e.push(format!("Material {}: θs,m must be larger than θr,m (dual-permeability model).", i + 1));
+                }
+                _ => {}
+            }
+            let omega = match self.water.model {
+                SoilModel::DualPorosityW => Some(m.extra[2]),
+                SoilModel::DualPorosityH => Some(m.extra[4]),
+                _ => None,
+            };
+            if omega.is_some_and(|w| w < 0.0) {
+                e.push(format!("Material {}: the mass transfer coefficient ω must be ≥ 0.", i + 1));
+            }
+        }
+        if self.water.model == SoilModel::Tabular && self.water.tabs.as_ref().map_or(0, |t| t.len()) < self.water.materials.len() {
+            e.push("The tabular model needs a table of θ, K and C (Mater.in) for every material: import a HYDRUS-1D project with Mater.in or choose another hydraulic model.".into());
         }
         if self.time.t_max <= self.time.t_init {
             e.push("Final time must be larger than the initial time.".into());
@@ -1390,5 +1437,34 @@ impl Hysteresis {
             Hysteresis::None => -1,
             _ => RetentionBranch::from_code(init_kappa).code(),
         }
+    }
+}
+#[cfg(test)]
+mod validation_tests {
+    use super::*;
+
+    #[test]
+    fn second_region_parameters_are_checked_and_adapted() {
+        let mut p = crate::examples::infiltration_evaporation();
+        assert!(p.validate().is_empty(), "{:?}", p.validate());
+        // the defaults of the modified van Genuchten model are no valid immobile region
+        p.water.model = SoilModel::DualPorosityW;
+        assert!(p.validate().iter().any(|e| e.contains("θs,im")), "{:?}", p.validate());
+        for m in &mut p.water.materials {
+            assert!(m.adapt_extra(SoilModel::DualPorosityW));
+            assert!(!m.adapt_extra(SoilModel::DualPorosityW), "valid values stay");
+        }
+        assert!(p.validate().is_empty(), "{:?}", p.validate());
+        // back to the modified van Genuchten model: θm ≥ θs again
+        let m = &mut p.water.materials[0];
+        assert!(m.adapt_extra(SoilModel::ModifiedVG));
+        assert_eq!(m.extra[0], m.qs);
+        // the tabular model needs the tables
+        p.water.model = SoilModel::Tabular;
+        assert!(p.validate().iter().any(|e| e.contains("Mater.in")));
+        // numbers only
+        p.water.model = SoilModel::VanGenuchten;
+        p.water.materials[0].alpha = f64::NAN;
+        assert!(p.validate().iter().any(|e| e.contains("must be a number")));
     }
 }

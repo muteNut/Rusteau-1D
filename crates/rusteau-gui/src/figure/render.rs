@@ -1184,7 +1184,7 @@ mod tests {
                 let f = Figure { theme, palette, ..fig.clone() };
                 let r = render(&f, &[]);
                 assert!(r.drawing.prims.iter().any(|p| matches!(p, Prim::Text { t, .. } if t.spans.iter().any(|s| s.text.contains("No data")))));
-                let pm = super::super::canvas::rasterize(&r.drawing, 0.5, false);
+                let pm = super::super::canvas::rasterize(&r.drawing, 0.5, false).unwrap();
                 assert!(pm.width() > 10);
             }
         }
@@ -1269,7 +1269,7 @@ mod visual {
         for theme in [Theme::Grid, Theme::Classic, Theme::Dark] {
             let f = Figure { theme, ..fig.clone() };
             let rd = render(&f, &series);
-            let pm = super::super::canvas::rasterize(&rd.drawing, 150.0 / 72.0, false);
+            let pm = super::super::canvas::rasterize(&rd.drawing, 150.0 / 72.0, false).unwrap();
             super::super::canvas::write_png(&pm, 150.0, &out.join(format!("fig_{theme:?}.png"))).unwrap();
             std::fs::write(out.join(format!("fig_{theme:?}.svg")), super::super::canvas::to_svg(&rd.drawing, false, false)).unwrap();
         }
