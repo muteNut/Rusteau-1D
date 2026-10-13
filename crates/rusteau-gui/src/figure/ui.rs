@@ -40,8 +40,8 @@ pub struct FigState {
     /// the preview of the current state failed (message)
     preview_error: Option<String>,
     dialog: Option<FileDialog>,
-    /// kept run a save dialog is for
-    save_run: usize,
+    /// name of the kept run a save dialog is for
+    save_run: String,
     tex: Option<egui::TextureHandle>,
     key: u64,
     /// columns of the sources (the menus of the variables) for the data of `cols_env`
@@ -408,7 +408,10 @@ impl App {
                         while self.figs.runs.iter().any(|x| x.name == name) {
                             name.push('\'');
                         }
-                        self.figs.runs.push(SavedRun { name: name.clone(), project: self.prj.clone(), results: r.clone() });
+                        // the project without its figures (they belong to the project, not to the run)
+                        let mut project = self.prj.clone();
+                        project.figures.clear();
+                        self.figs.runs.push(SavedRun { name: name.clone(), project, results: r.clone() });
                         self.figs.run_name.clear();
                         self.figs.status = format!("Results kept as run \"{name}\": choose it in the runs of a layer to compare");
                     }
@@ -418,7 +421,7 @@ impl App {
                 }
                 Act::SaveRun(k) => {
                     if let Some(r) = self.figs.runs.get(k) {
-                        self.figs.save_run = k;
+                        self.figs.save_run = r.name.clone();
                         self.figs.dialog = Some(FileDialog::new(Purpose::FigureSaveRun, Mode::SaveFile, "Save the kept run", self.last_dir.clone(), &file_name(&r.name, "json"), &["json"]));
                     }
                 }
@@ -555,7 +558,7 @@ impl App {
                         }
                         Err(e) => e,
                     },
-                    Purpose::FigureSaveRun => match self.figs.runs.get(self.figs.save_run) {
+                    Purpose::FigureSaveRun => match self.figs.runs.iter().find(|r| r.name == self.figs.save_run) {
                         Some(r) => {
                             let p = if path.extension().is_none() { path.with_extension("json") } else { path };
                             match data::save_run(r, &p) {

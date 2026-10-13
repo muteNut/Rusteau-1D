@@ -697,17 +697,19 @@ pub fn read_table(path: &std::path::Path) -> Result<rusteau_core::figure::DataTa
         if l.is_empty() || l.starts_with('#') {
             continue;
         }
-        let semi = l.contains(';');
+        // separators: tab, semicolon, comma ("1.5, 0.25" or "1.5,0.25") or blanks ("1,5 0,25"); with every separator but
+        // the comma a comma is a decimal separator
+        let comma_sep = !l.contains('\t') && !l.contains(';') && l.contains(',') && (l.contains(", ") || !l.contains(char::is_whitespace));
         let fields: Vec<String> = if l.contains('\t') {
             l.split('\t').map(|s| s.trim().to_string()).collect()
-        } else if semi {
+        } else if l.contains(';') {
             l.split(';').map(|s| s.trim().to_string()).collect()
-        } else if l.contains(',') {
+        } else if comma_sep {
             l.split(',').map(|s| s.trim().to_string()).collect()
         } else {
             l.split_whitespace().map(|s| s.to_string()).collect()
         };
-        let nums: Vec<Option<f64>> = fields.iter().map(|f| if semi { f.replace(',', ".") } else { f.clone() }).map(|f| f.replace(['d', 'D'], "e").parse::<f64>().ok()).collect();
+        let nums: Vec<Option<f64>> = fields.iter().map(|f| if comma_sep { f.clone() } else { f.replace(',', ".") }).map(|f| f.replace(['d', 'D'], "e").parse::<f64>().ok()).collect();
         if nums.iter().all(|v| v.is_some()) {
             rows.push(nums.into_iter().map(|v| v.unwrap()).collect());
         } else if rows.is_empty() {
@@ -824,6 +826,15 @@ mod tests {
         assert_eq!(t.columns, vec!["time (d)", "theta (-)"]);
         assert_eq!(t.values[1], vec![0.25, 0.30]);
         assert_eq!(split_unit("time (d)"), ("time".into(), "d".into()));
+        // tabs or blanks with decimal commas; commas with blanks as separators
+        std::fs::write(&f, "t\ttheta\n1,5\t0,25\n").unwrap();
+        assert_eq!(read_table(&f).unwrap().values, vec![vec![1.5], vec![0.25]]);
+        std::fs::write(&f, "1,5 0,25\n2,5 0,5\n").unwrap();
+        assert_eq!(read_table(&f).unwrap().values, vec![vec![1.5, 2.5], vec![0.25, 0.5]]);
+        std::fs::write(&f, "t, theta\n1.5, 0.25\n").unwrap();
+        assert_eq!(read_table(&f).unwrap().values, vec![vec![1.5], vec![0.25]]);
+        std::fs::write(&f, "1.5,0.25\n").unwrap();
+        assert_eq!(read_table(&f).unwrap().values, vec![vec![1.5], vec![0.25]]);
         let (p, r) = run_example();
         let run = SavedRun { name: "Ks 10".into(), project: p, results: r };
         save_run(&run, &dir.join("run.json")).unwrap();

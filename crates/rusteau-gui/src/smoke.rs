@@ -134,8 +134,11 @@ fn every_page_figure_and_help_topic_draws() {
     let ctx = context();
     for (name, p) in projects() {
         let mut app = App::with_project(rusteau_core::examples::infiltration_evaporation());
+        let inverse = p.inverse.clone();
         app.set_project(p, None);
         draw_everything(&ctx, &mut app, &format!("{name} (no results)"));
+        // drawing the pages keeps the inverse settings
+        assert_eq!(app.prj.inverse.is_some(), inverse.is_some(), "{name}");
         // a direct run as the interface starts it (only a valid project; the inverse examples too; at most a few
         // seconds) and a kept run for the comparisons
         let mut p = app.prj.clone();

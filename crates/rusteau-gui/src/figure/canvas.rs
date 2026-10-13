@@ -339,7 +339,8 @@ pub fn to_svg(d: &Drawing, text_as_paths: bool, transparent: bool) -> String {
                     let family = if t.fonts.family == crate::fonts::DEFAULT_FAMILY {
                         "'Noto Sans', 'Noto Sans Math', sans-serif".to_string()
                     } else {
-                        format!("'{}', 'Noto Sans', 'Noto Sans Math', sans-serif", esc(&t.fonts.family))
+                        // the family name as a CSS string (a quote or backslash in the name is escaped)
+                        format!("'{}', 'Noto Sans', 'Noto Sans Math', sans-serif", esc(&t.fonts.family.replace('\\', "\\\\").replace('\'', "\\'")))
                     };
                     write!(s, r#"<text xml:space="preserve" font-family="{family}" {}{rot}>"#, color_attr("fill", *color)).ok();
                     for sp in &t.spans {

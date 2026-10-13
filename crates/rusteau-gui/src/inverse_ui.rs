@@ -228,7 +228,9 @@ impl App {
         let n_mat = self.prj.water.materials.len();
         let solute = self.prj.processes.solute && !self.prj.solute.species.is_empty();
         let hyst = self.prj.water.hysteresis.code();
-        let mut s = self.prj.inverse.take().unwrap();
+        // a copy, written back at the end: an internal error while drawing (caught by the page guard) cannot lose the
+        // settings
+        let Some(mut s) = self.prj.inverse.clone() else { return };
         // keep the parameter records in line with the project (materials added or removed, solute switched on)
         sync_records(&mut s, &self.prj);
 
@@ -531,9 +533,8 @@ impl App {
                 self.page = Page::InverseResults;
             }
         });
-        if self.prj.inverse.is_none() {
-            self.prj.inverse = Some(s);
-        }
+        // the edited copy back into the project
+        self.prj.inverse = Some(s);
     }
 
     /// Results page (the content of Fit.out).
