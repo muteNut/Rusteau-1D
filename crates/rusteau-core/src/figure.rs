@@ -3,6 +3,7 @@
 //! (series of x–y values taken from the results, the input, measured data or data files) and annotations.
 
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 
 /// A colour with opacity (sRGB and alpha, 0–255). Stored as `"#rrggbb"` or `"#rrggbbaa"`; `[r, g, b]` and
 /// `[r, g, b, a]` are read, too.
@@ -211,8 +212,6 @@ pub struct Layer {
     pub x_scale: f64,
     pub y_scale: f64,
     pub geom: Geom,
-    /// fixed colour; `None`: the next colours of the palette
-    pub color: Option<Color>,
     /// line width [pt]
     pub width: f64,
     pub dash: Dash,
@@ -242,7 +241,6 @@ impl Default for Layer {
             x_scale: 1.0,
             y_scale: 1.0,
             geom: Geom::Line,
-            color: None,
             width: 1.2,
             dash: Dash::Solid,
             marker: Marker::Circle,
@@ -357,11 +355,51 @@ pub struct Panel {
     pub layers: Vec<Layer>,
     pub annotations: Vec<Annotation>,
     pub legend: LegendPos,
+    /// maximum width of the legend (below the plot: of an entry) in percent of the width of the panel; longer labels
+    /// are wrapped at blanks
+    pub legend_width: f64,
+    /// legend labels given to single series, in place of their automatic labels (the keys)
+    pub legend_names: BTreeMap<String, String>,
+    /// palette of this panel (used when `Figure::palette_per_panel` is on and the figure has several panels)
+    pub palette: Palette,
+    /// colours of the palette "Custom" of this panel
+    #[serde(deserialize_with = "custom_colors")]
+    pub colors: Vec<Color>,
+}
+
+impl Panel {
+    /// The legend label of a series with the automatic label `auto`: the name given to it, or `auto`.
+    pub fn legend_label<'a>(&'a self, auto: &'a str) -> &'a str {
+        self.legend_names.get(auto).map(String::as_str).unwrap_or(auto)
+    }
+
+    /// Gives the series with the automatic label `auto` the legend label `name`; an empty name or `auto` itself
+    /// restores the automatic label.
+    pub fn rename_series(&mut self, auto: &str, name: &str) {
+        let name = name.trim();
+        if name.is_empty() || name == auto {
+            self.legend_names.remove(auto);
+        } else {
+            self.legend_names.insert(auto.to_string(), name.to_string());
+        }
+    }
 }
 
 impl Default for Panel {
     fn default() -> Self {
-        Panel { title: String::new(), x: Axis::default(), y: Axis::default(), y2: Axis { grid: false, ..Axis::default() }, layers: vec![Layer::default()], annotations: vec![], legend: LegendPos::TopRight }
+        Panel {
+            title: String::new(),
+            x: Axis::default(),
+            y: Axis::default(),
+            y2: Axis { grid: false, ..Axis::default() },
+            layers: vec![Layer::default()],
+            annotations: vec![],
+            legend: LegendPos::TopRight,
+            legend_width: 40.0,
+            legend_names: BTreeMap::new(),
+            palette: Palette::OkabeIto,
+            colors: vec![],
+        }
     }
 }
 
@@ -415,6 +453,8 @@ pub struct Figure {
     /// colours of the palette "Custom", in the order of the series
     #[serde(deserialize_with = "custom_colors")]
     pub colors: Vec<Color>,
+    /// every panel has its own palette (`Panel::palette`, `Panel::colors`) instead of `palette` and `colors`
+    pub palette_per_panel: bool,
     /// transparent background in the exported files
     pub transparent: bool,
     /// panels in a grid of `rows` × `cols`, row by row
@@ -442,6 +482,7 @@ impl Default for Figure {
             theme: Theme::Grid,
             palette: Palette::OkabeIto,
             colors: vec![],
+            palette_per_panel: false,
             transparent: false,
             rows: 1,
             cols: 1,
@@ -456,6 +497,31 @@ impl Figure {
     /// Number of panel cells of the grid (at least 1).
     pub fn cells(&self) -> usize {
         (self.rows.max(1) * self.cols.max(1)).max(1)
+    }
+
+    /// Whether the panels use their own palettes: `palette_per_panel` with several panels.
+    pub fn own_panel_palettes(&self) -> bool {
+        self.palette_per_panel && self.cells() > 1
+    }
+
+    /// The palette of panel `k`: its own with [`Figure::own_panel_palettes`], otherwise the figure's.
+    pub fn panel_palette(&self, k: usize) -> (Palette, &[Color]) {
+        match self.panels.get(k) {
+            Some(p) if self.own_panel_palettes() => (p.palette, &p.colors),
+            _ => (self.palette, &self.colors),
+        }
+    }
+
+    /// Switches between one palette for all panels and one per panel; the panels start from the palette of the figure,
+    /// so the figure looks the same after the switch.
+    pub fn set_palette_per_panel(&mut self, on: bool) {
+        if on && !self.palette_per_panel {
+            for p in &mut self.panels {
+                p.palette = self.palette;
+                p.colors = self.colors.clone();
+            }
+        }
+        self.palette_per_panel = on;
     }
 
     /// Adds or removes panels so that every cell of the grid has one.
@@ -490,6 +556,17 @@ mod tests {
         v.as_object_mut().unwrap().remove("figures");
         let q: crate::Project = serde_json::from_value(v).unwrap();
         assert!(q.figures.is_empty());
+        // names given to series; panels written before them take the defaults
+        let mut panel = Panel::default();
+        panel.rename_series("Bottom flux", " Drainage ");
+        assert_eq!(panel.legend_label("Bottom flux"), "Drainage");
+        assert_eq!(panel.legend_label("Runoff"), "Runoff");
+        panel.rename_series("Bottom flux", "");
+        assert!(panel.legend_names.is_empty());
+        panel.rename_series("Runoff", "Runoff");
+        assert!(panel.legend_names.is_empty());
+        let old: Panel = serde_json::from_str(r#"{"title":"(a)"}"#).unwrap();
+        assert_eq!((old.legend_width, old.legend_names.len()), (40.0, 0));
         // a figure with missing fields takes the defaults
         let g: Figure = serde_json::from_str(r#"{"name":"F","panels":[{"layers":[{"y":"theta"}]}]}"#).unwrap();
         assert_eq!(g.panels[0].layers[0].y, "theta");
@@ -505,11 +582,25 @@ mod tests {
         assert_eq!(Color::parse("#12345"), None);
         assert_eq!(Color::parse("#gg0000"), None);
         assert_eq!(Color([1, 2, 3, 255]).hex(), "#010203");
-        let l: Layer = serde_json::from_str(r#"{"color":[10,20,30]}"#).unwrap();
-        assert_eq!(l.color, Some(Color([10, 20, 30, 255])));
-        let l: Layer = serde_json::from_str(r##"{"color":"#0a141e80"}"##).unwrap();
-        assert_eq!(l.color, Some(Color([10, 20, 30, 128])));
-        assert!(serde_json::from_str::<Layer>(r#"{"color":[1,2]}"#).is_err());
+        let a: Annotation = serde_json::from_str(r#"{"color":[10,20,30]}"#).unwrap();
+        assert_eq!(a.color, Color([10, 20, 30, 255]));
+        let a: Annotation = serde_json::from_str(r##"{"color":"#0a141e80"}"##).unwrap();
+        assert_eq!(a.color, Color([10, 20, 30, 128]));
+        assert!(serde_json::from_str::<Annotation>(r#"{"color":[1,2]}"#).is_err());
+        // the palette of the figure, or of every panel
+        let mut two = Figure { cols: 2, palette: Palette::Viridis, ..Default::default() };
+        two.sync_panels();
+        assert_eq!(two.panel_palette(1).0, Palette::Viridis);
+        two.set_palette_per_panel(true);
+        assert_eq!(two.panel_palette(1).0, Palette::Viridis, "the panels start from the scheme of the figure");
+        two.panels[1].palette = Palette::Grey;
+        assert_eq!((two.panel_palette(0).0, two.panel_palette(1).0), (Palette::Viridis, Palette::Grey));
+        two.cols = 1;
+        two.sync_panels();
+        assert_eq!(two.panel_palette(0).0, Palette::Viridis, "one panel: the scheme of the figure");
+        // a fixed layer colour of earlier versions is ignored
+        let l: Layer = serde_json::from_str(r##"{"y":"h","color":"#0a0b0c"}"##).unwrap();
+        assert_eq!(l.y, "h");
         let f = Figure { palette: Palette::Custom, colors: vec![Color([1, 2, 3, 4])], ..Default::default() };
         let back: Figure = serde_json::from_str(&serde_json::to_string(&f).unwrap()).unwrap();
         assert_eq!(back, f);

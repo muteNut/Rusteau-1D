@@ -1,6 +1,6 @@
 //! Ready-made figures: the usual diagrams of a simulation, a start for one's own figures.
 
-use rusteau_core::figure::{Axis, Color, Dash, Figure, Geom, Layer, LegendPos, Marker, Palette, Panel, Source};
+use rusteau_core::figure::{Axis, Dash, Figure, Geom, Layer, LegendPos, Marker, Palette, Panel, Source};
 use rusteau_core::Project;
 
 /// What the templates may use.
@@ -113,7 +113,7 @@ pub fn all() -> Vec<Template> {
             make: |c| {
                 let mut ls = vec![layer(Source::TimeLevel, "t", "vTop"), layer(Source::TimeLevel, "t", "vBot")];
                 if !c.prj.atmosphere.records.is_empty() && c.prj.water.bc.atmospheric {
-                    ls.push(Layer { geom: Geom::Steps, y2: true, color: Some(Color::rgb(150, 150, 150)), ..layer(Source::AtmInput, "t", "prec") });
+                    ls.push(Layer { geom: Geom::Steps, y2: true, ..layer(Source::AtmInput, "t", "prec") });
                 }
                 let mut p = panel("", ls);
                 p.y.label_auto = false;
@@ -146,10 +146,10 @@ pub fn all() -> Vec<Template> {
                 !c.prj.atmosphere.records.is_empty() && (bc.atmospheric || bc.top_time_variable || bc.bot_time_variable)
             },
             make: |c| {
-                let mut ls = vec![Layer { geom: Geom::Bars, color: Some(Color::rgb(0, 114, 178)), alpha: 0.6, ..layer(Source::AtmInput, "t", "prec") }];
-                ls.push(Layer { geom: Geom::Steps, color: Some(Color::rgb(213, 94, 0)), ..layer(Source::AtmInput, "t", "evap") });
+                let mut ls = vec![Layer { geom: Geom::Bars, alpha: 0.6, ..layer(Source::AtmInput, "t", "prec") }];
+                ls.push(Layer { geom: Geom::Steps, ..layer(Source::AtmInput, "t", "evap") });
                 if !c.prj.atmosphere.lai_partitioning {
-                    ls.push(Layer { geom: Geom::Steps, color: Some(Color::rgb(0, 158, 115)), dash: Dash::Dashed, ..layer(Source::AtmInput, "t", "transp") });
+                    ls.push(Layer { geom: Geom::Steps, dash: Dash::Dashed, ..layer(Source::AtmInput, "t", "transp") });
                 }
                 let mut p = panel("", ls);
                 p.y.label_auto = false;
@@ -222,16 +222,24 @@ pub fn all() -> Vec<Template> {
             name: "Overview (four panels)",
             desc: "Water content and pressure head profiles, boundary fluxes and cumulative fluxes.",
             fits: always,
-            make: |_| {
+            make: |ctx| {
+                // the profiles in the order of the print times, the fluxes in distinct colours
                 let mut a = profiles("theta", "(a) Water content");
                 a.legend = LegendPos::None;
+                a.palette = Palette::Viridis;
                 let mut b = profiles("h", "(b) Pressure head");
                 b.legend = LegendPos::Right;
+                b.palette = Palette::Viridis;
                 let mut c = panel("(c) Fluxes", vec![layer(Source::TimeLevel, "t", "vTop"), layer(Source::TimeLevel, "t", "vBot")]);
                 c.legend = LegendPos::BottomRight;
+                // short axis titles (the automatic ones name every variable)
+                c.y.label_auto = false;
+                c.y.label = format!("Flux ({} {}^{{−1}})", ctx.prj.units.length_str(), ctx.prj.units.time_str());
                 let mut d = panel("(d) Cumulative fluxes", vec![layer(Source::TimeLevel, "t", "sum_infil"), layer(Source::TimeLevel, "t", "sum_evap"), layer(Source::TimeLevel, "t", "sum_vBot")]);
                 d.legend = LegendPos::Right;
-                Figure { name: "Overview".into(), rows: 2, cols: 2, height_mm: 150.0, palette: Palette::Viridis, panels: vec![a, b, c, d], ..Default::default() }
+                d.y.label_auto = false;
+                d.y.label = format!("Cumulative flux ({})", ctx.prj.units.length_str());
+                Figure { name: "Overview".into(), rows: 2, cols: 2, height_mm: 150.0, palette_per_panel: true, panels: vec![a, b, c, d], ..Default::default() }
             },
         },
     ]

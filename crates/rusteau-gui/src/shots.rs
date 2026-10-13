@@ -228,13 +228,16 @@ impl Tour {
                 hover: None,
                 topic: None,
             },
-            s("figures_layer", |a, _| {
-                a.figs.fig = 0;
-                a.figs.panel = 0;
+            s("figures_layer", |a, ctx| {
+                // the overview: its panels have their own palettes, chosen with the layers
+                a.figs.fig = 1;
+                a.figs.panel = 2;
                 a.figs.layer = 0;
                 a.figs.fold = Some(false);
+                ctx.data_mut(|d| d.insert_temp(egui::Id::new("tour_scroll_style"), true));
             }),
             s("figures_colors", |a, ctx| {
+                ctx.data_mut(|d| d.remove::<bool>(egui::Id::new("tour_scroll_style")));
                 a.figs.fig = 0;
                 a.figs.panel = 0;
                 a.figs.fold = Some(true);

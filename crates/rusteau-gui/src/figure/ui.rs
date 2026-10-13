@@ -4,7 +4,7 @@
 
 use super::canvas;
 use super::data::{self, ColInfo, DataCtx, SavedRun};
-use super::render::{self, Rendered, PT_PER_MM};
+use super::render::{self, Rendered, SlotLabel, PT_PER_MM};
 use super::templates::{self, TemplateCtx};
 use crate::files::{DialogResult, FileDialog, Mode, Purpose};
 use crate::tips::TipExt;
@@ -12,6 +12,7 @@ use crate::util::sig;
 use crate::App;
 use egui::{CollapsingHeader, ComboBox, DragValue, RichText, Ui};
 use rusteau_core::figure::{Anchor, Annotation, AnnotationKind, Axis, Color, Dash, Figure, Geom, Layer, LegendPos, Marker, Palette, Panel, Source, Theme};
+use std::collections::BTreeMap;
 use std::hash::{Hash, Hasher};
 
 /// State of the figure window.
@@ -81,6 +82,9 @@ enum Act {
 }
 
 const THEMES: [(Theme, &str); 4] = [(Theme::Grid, "Grid"), (Theme::Classic, "Classic (axis lines)"), (Theme::Minimal, "Minimal"), (Theme::Dark, "Dark")];
+/// Width of the label column of the style of a layer (its two grids line up).
+const STYLE_COL: f32 = 110.0;
+
 const PALETTES: [(Palette, &str); 5] = [
     (Palette::OkabeIto, "Okabe–Ito (colour-blind safe)"),
     (Palette::Tableau, "Tableau 10"),
@@ -658,7 +662,7 @@ fn start_page(ui: &mut Ui, tc: &TemplateCtx, acts: &mut Vec<Act>) {
 fn controls(ui: &mut Ui, st: &mut FigState, fig: &mut Figure, dc: &DataCtx, runs: &[SavedRun], acts: &mut Vec<Act>) {
     ui.spacing_mut().item_spacing.y = 6.0;
     // the legend labels of the colours of the palette, from the last preview (per panel)
-    let slot_labels: Vec<Vec<String>> = st.rendered.as_ref().map(|r| r.panels.iter().map(|p| p.slot_labels.clone()).collect()).unwrap_or_default();
+    let slot_labels: Vec<Vec<SlotLabel>> = st.rendered.as_ref().map(|r| r.panels.iter().map(|p| p.slot_labels.clone()).collect()).unwrap_or_default();
     figure_section(ui, fig, st.fold.take(), &slot_labels, st.panel);
     text_section(ui, fig);
     fig.sync_panels();
@@ -687,6 +691,11 @@ fn controls(ui: &mut Ui, st: &mut FigState, fig: &mut Figure, dc: &DataCtx, runs
             row(ui, "Legend");
             combo(ui, "fig_legend", &mut p.legend, &LEGENDS, 160.0).tip("Legend");
             ui.end_row();
+            if p.legend != LegendPos::None {
+                row(ui, "Legend width (%)");
+                ui.add(DragValue::new(&mut p.legend_width).custom_parser(crate::util::parse_num).range(5.0..=100.0).speed(0.5).max_decimals(0).suffix(" %")).tip("Legend width (%)");
+                ui.end_row();
+            }
         });
     });
     // the panels are edited while the figure (its data tables) is read
@@ -701,7 +710,7 @@ fn controls(ui: &mut Ui, st: &mut FigState, fig: &mut Figure, dc: &DataCtx, runs
     symbols_section(ui, st);
 }
 
-fn figure_section(ui: &mut Ui, fig: &mut Figure, fold: Option<bool>, slot_labels: &[Vec<String>], panel: usize) {
+fn figure_section(ui: &mut Ui, fig: &mut Figure, fold: Option<bool>, slot_labels: &[Vec<SlotLabel>], panel: usize) {
     CollapsingHeader::new(crate::util::section_head(ui, "Figure")).default_open(true).open(fold).show(ui, |ui| {
         egui::Grid::new("fig_main").num_columns(2).show(ui, |ui| {
             row(ui, "Figure name");
@@ -747,58 +756,129 @@ fn figure_section(ui: &mut Ui, fig: &mut Figure, fold: Option<bool>, slot_labels
             row(ui, "Theme");
             combo(ui, "fig_theme", &mut fig.theme, &THEMES, 200.0).tip("Theme");
             ui.end_row();
+            // one palette for the figure, or (with several panels) one per panel, chosen with its layers
+            let dark = fig.theme == Theme::Dark;
+            let multi = fig.cells() > 1;
             row(ui, "Palette");
-            let before = fig.palette;
-            combo(ui, "fig_palette", &mut fig.palette, &PALETTES, 200.0).tip("Palette");
-            if fig.palette == Palette::Custom && before != Palette::Custom && fig.colors.is_empty() {
-                // start from the colours of the palette chosen before
-                let dark = fig.theme == Theme::Dark;
-                fig.colors = (0..8)
-                    .map(|k| {
-                        let [r, g, b] = render::builtin_color(before, k, 8, dark);
-                        Color::rgb(r, g, b)
-                    })
-                    .collect();
-            }
+            ui.vertical(|ui| {
+                if !fig.own_panel_palettes() {
+                    // as many colours of an ordered palette as the panel with the most series has
+                    let n = slot_labels.iter().map(Vec::len).max().unwrap_or(0);
+                    palette_combo(ui, "fig_palette", &mut fig.palette, &mut fig.colors, dark, n, "Palette");
+                }
+                if multi {
+                    let mut same = !fig.palette_per_panel;
+                    if ui.checkbox(&mut same, "Same palette for all panels").tip("Same palette for all panels").changed() {
+                        fig.set_palette_per_panel(!same);
+                    }
+                    if !same {
+                        ui.label(RichText::new("chosen for each panel under Layers (data)").weak());
+                    }
+                }
+            });
             ui.end_row();
         });
-        if fig.palette == Palette::Custom {
-            custom_colors(ui, fig, slot_labels, panel);
+        if fig.palette == Palette::Custom && !fig.own_panel_palettes() {
+            let dark = fig.theme == Theme::Dark;
+            let none = BTreeMap::new();
+            let names = fig.panels.get(panel).map(|p| &p.legend_names).unwrap_or(&none);
+            let rename = custom_colors(ui, "fig_custom_colors", &mut fig.colors, dark, slot_labels, panel, true, names);
+            if let (Some((auto, name)), Some(p)) = (rename, fig.panels.get_mut(panel)) {
+                p.rename_series(&auto, &name);
+            }
         }
         ui.checkbox(&mut fig.transparent, "Transparent background (PNG, SVG)").tip("Transparent background (PNG, SVG)");
         ui.checkbox(&mut fig.svg_text_as_paths, "SVG: text as outlines").tip("SVG: text as outlines");
     });
 }
 
-/// Legend labels of the series that take colour `k` of `n` custom colours (positions k, k + n, … of the palette).
-fn color_users(labels: &[String], k: usize, n: usize) -> Vec<String> {
-    labels.iter().skip(k).step_by(n.max(1)).filter(|l| !l.is_empty()).cloned().collect()
+/// The series that take colour `k` of `n` custom colours (positions k, k + n, … of the palette).
+fn color_users(labels: &[SlotLabel], k: usize, n: usize) -> Vec<&SlotLabel> {
+    labels.iter().skip(k).step_by(n.max(1)).filter(|l| !l.auto.is_empty()).collect()
 }
 
-/// The colours of the palette "Custom" in the order of the series: the legend label of the series that takes the colour
-/// in the selected panel (not editable), the swatch (opens the picker) and the code.
-fn custom_colors(ui: &mut Ui, fig: &mut Figure, slot_labels: &[Vec<String>], panel: usize) {
-    ui.label(RichText::new("Custom colours, in the order of the series (click a swatch to change it):").weak());
+/// The palette combo box and **Edit**, which turns the palette into the palette "Custom" with its colours (`n`: the
+/// number of series, for the ordered palettes). Choosing Custom with an empty list starts it with the colours of the
+/// palette before.
+#[allow(clippy::too_many_arguments)]
+fn palette_combo(ui: &mut Ui, id: &str, palette: &mut Palette, colors: &mut Vec<Color>, dark: bool, n: usize, tip: &str) {
+    ui.horizontal(|ui| {
+        let before = *palette;
+        combo(ui, id, palette, &PALETTES, 190.0).tip(tip);
+        if *palette == Palette::Custom && before != Palette::Custom && colors.is_empty() {
+            *colors = render::builtin_colors(before, n, dark);
+        }
+        if *palette != Palette::Custom && ui.button("Edit").tip("Edit palette").clicked() {
+            *colors = render::builtin_colors(*palette, n, dark);
+            *palette = Palette::Custom;
+        }
+    });
+}
+
+/// The colours of the palette "Custom" in the order of the series: the legend labels of the series that take the colour
+/// in the selected panel (a double click renames a series: the result is the automatic label and the new name), the
+/// swatch (opens the picker) and the code. The tooltip of a label lists the series of all panels with `all_panels` (the
+/// palette of the figure), otherwise those of the selected panel; `names` are the names given in the selected panel.
+#[allow(clippy::too_many_arguments)]
+fn custom_colors(
+    ui: &mut Ui,
+    id: &str,
+    colors: &mut Vec<Color>,
+    dark: bool,
+    slot_labels: &[Vec<SlotLabel>],
+    panel: usize,
+    all_panels: bool,
+    names: &BTreeMap<String, String>,
+) -> Option<(String, String)> {
+    ui.label(RichText::new("Custom colours, in the order of the series (click a swatch to change it, double-click a label to rename the series):").weak());
     let mut action: Option<(usize, i32)> = None;
-    let n = fig.colors.len();
+    let n = colors.len();
     let none = vec![];
     let here = slot_labels.get(panel).unwrap_or(&none);
-    egui::Grid::new("fig_custom_colors").num_columns(4).spacing([6.0, 4.0]).show(ui, |ui| {
-        for (k, c) in fig.colors.iter_mut().enumerate() {
-            // the series of the selected panel with this colour; all panels in the tooltip
+    // the label being renamed: automatic label, text, focus requested
+    let edit_id = egui::Id::new((id, "rename"));
+    let mut editing: Option<(String, String, bool)> = ui.data(|d| d.get_temp(edit_id));
+    let (mut start, mut finish, mut rename) = (None, false, None);
+    egui::Grid::new(id).num_columns(4).spacing([6.0, 4.0]).show(ui, |ui| {
+        for (k, c) in colors.iter_mut().enumerate() {
+            // the series of the selected panel with this colour, one per line; all panels in the tooltip
             let users = color_users(here, k, n);
-            let text = if users.is_empty() { RichText::new("not used").weak().italics() } else { RichText::new(users.join("; ")) };
             let mut all = vec![];
-            for (p, labels) in slot_labels.iter().enumerate() {
-                let u = color_users(labels, k, n);
+            for (p, labels) in slot_labels.iter().enumerate().filter(|(p, _)| all_panels || *p == panel) {
+                let u: Vec<&str> = color_users(labels, k, n).iter().map(|l| l.shown.as_str()).collect();
                 if !u.is_empty() {
                     all.push(format!("Panel {}: {}", p + 1, u.join("; ")));
                 }
             }
-            let hover = if all.is_empty() { "No series of the figure uses this colour.".to_string() } else { all.join("\n") };
-            ui.allocate_ui_with_layout(egui::vec2(130.0, 18.0), egui::Layout::left_to_right(egui::Align::Center), |ui| {
-                ui.set_min_width(130.0);
-                ui.add(egui::Label::new(text).truncate()).on_hover_text(hover);
+            let hover = format!("{}\nDouble-click: rename the series in the legend.", all.join("\n"));
+            ui.vertical(|ui| {
+                ui.set_width(150.0);
+                if users.is_empty() {
+                    ui.label(RichText::new("not used").weak().italics()).on_hover_text("No series of the figure uses this colour.");
+                }
+                for u in users {
+                    match &mut editing {
+                        Some((auto, text, focused)) if *auto == u.auto => {
+                            let r = ui.add(egui::TextEdit::singleline(text).desired_width(150.0)).tip("Rename series");
+                            if !*focused {
+                                r.request_focus();
+                                *focused = true;
+                            } else if !r.has_focus() {
+                                // Enter or a click elsewhere: rename; Escape: keep the label
+                                if !ui.input(|i| i.key_pressed(egui::Key::Escape)) {
+                                    rename = Some((auto.clone(), text.clone()));
+                                }
+                                finish = true;
+                            }
+                        }
+                        _ => {
+                            let r = ui.add(egui::Label::new(&u.shown).truncate().sense(egui::Sense::click())).on_hover_text(&hover);
+                            if r.double_clicked() {
+                                start = Some((u.auto.clone(), names.get(&u.auto).cloned().unwrap_or_else(|| u.auto.clone()), false));
+                            }
+                        }
+                    }
+                }
             });
             let r = crate::colorpick::color_button(ui, &mut c.0).tip("Custom colour");
             if k == 0 && ui.ctx().data_mut(|d| d.remove_temp::<bool>(egui::Id::new("tour_open_picker"))).is_some() {
@@ -822,17 +902,27 @@ fn custom_colors(ui: &mut Ui, fig: &mut Figure, slot_labels: &[Vec<String>], pan
     });
     match action {
         Some((k, 0)) => {
-            fig.colors.remove(k);
+            colors.remove(k);
         }
-        Some((k, d)) => fig.colors.swap(k, (k as i32 + d) as usize),
+        Some((k, d)) => colors.swap(k, (k as i32 + d) as usize),
         None => {}
     }
     if ui.button("+ Add colour").tip("Add colour").clicked() {
-        let dark = fig.theme == Theme::Dark;
-        let k = fig.colors.len();
+        let k = colors.len();
         let [r, g, b] = render::builtin_color(Palette::OkabeIto, k, 8, dark);
-        fig.colors.push(Color::rgb(r, g, b));
+        colors.push(Color::rgb(r, g, b));
     }
+    if finish {
+        editing = None;
+    }
+    if start.is_some() {
+        editing = start;
+    }
+    ui.data_mut(|d| match editing {
+        Some(e) => d.insert_temp(edit_id, e),
+        None => d.remove::<(String, String, bool)>(edit_id),
+    });
+    rename
 }
 
 fn text_section(ui: &mut Ui, fig: &mut Figure) {
@@ -916,7 +1006,7 @@ fn layers_section(ui: &mut Ui, st: &mut FigState, p: &mut Panel, fig: &Figure, d
         }
         ui.horizontal(|ui| {
             if ui.button("+ Add layer").tip("Add layer").clicked() {
-                let l = p.layers.get(st.layer).cloned().map(|l| Layer { color: None, label: String::new(), ..l }).unwrap_or_default();
+                let l = p.layers.get(st.layer).cloned().map(|l| Layer { label: String::new(), ..l }).unwrap_or_default();
                 p.layers.push(l);
                 st.layer = p.layers.len() - 1;
             }
@@ -924,7 +1014,11 @@ fn layers_section(ui: &mut Ui, st: &mut FigState, p: &mut Panel, fig: &Figure, d
         let Some(l) = p.layers.get_mut(st.layer) else { return };
         ui.add_space(4.0);
         ui.label(RichText::new(format!("Layer {}", st.layer + 1)).strong());
-        layer_editor(ui, st, l, fig, dc, runs);
+        // the palette of the panel when the panels have their own
+        let pal = fig.own_panel_palettes().then_some((&mut p.palette, &mut p.colors, &p.legend_names));
+        if let Some((auto, name)) = layer_editor(ui, st, l, pal, fig, dc, runs) {
+            p.rename_series(&auto, &name);
+        }
     });
 }
 
@@ -936,7 +1030,12 @@ fn columns(st: &mut FigState, dc: &DataCtx, src: &Source, fig: &Figure) -> Vec<C
     st.cols.entry(format!("{src:?}")).or_insert_with(|| dc.columns(src, fig)).clone()
 }
 
-fn layer_editor(ui: &mut Ui, st: &mut FigState, l: &mut Layer, fig: &Figure, dc: &DataCtx, runs: &[SavedRun]) {
+/// The palette of a panel with its colours and the names given to its series.
+type PanelPalette<'a> = (&'a mut Palette, &'a mut Vec<Color>, &'a BTreeMap<String, String>);
+
+/// The settings of a layer, with the palette of the panel `pal` when the panels have their own; returns a series to
+/// rename (its automatic label and the new name).
+fn layer_editor(ui: &mut Ui, st: &mut FigState, l: &mut Layer, pal: Option<PanelPalette>, fig: &Figure, dc: &DataCtx, runs: &[SavedRun]) -> Option<(String, String)> {
     egui::Grid::new("fig_layer").num_columns(2).show(ui, |ui| {
         row(ui, "Data source");
         let before = l.source.clone();
@@ -1045,22 +1144,24 @@ fn layer_editor(ui: &mut Ui, st: &mut FigState, l: &mut Layer, fig: &Figure, dc:
         });
     }
     ui.add_space(4.0);
-    egui::Grid::new("fig_style").num_columns(2).show(ui, |ui| {
+    // the style; the custom colours of the panel between the palette and the rest (two grids with the same columns)
+    let dark = fig.theme == Theme::Dark;
+    let slot_labels: Vec<Vec<SlotLabel>> = st.rendered.as_ref().map(|r| r.panels.iter().map(|p| p.slot_labels.clone()).collect()).unwrap_or_default();
+    let custom = egui::Grid::new("fig_style").num_columns(2).min_col_width(STYLE_COL).show(ui, |ui| {
         row(ui, "Geometry");
         combo(ui, "fig_geom", &mut l.geom, &GEOMS, 160.0).tip("Geometry");
         ui.end_row();
-        row(ui, "Colour");
-        ui.horizontal(|ui| {
-            let mut auto = l.color.is_none();
-            if ui.checkbox(&mut auto, "palette").tip("Colour").changed() {
-                l.color = if auto { None } else { Some(Color::rgb(0, 114, 178)) };
-            }
-            if let Some(c) = &mut l.color {
-                crate::colorpick::color_button(ui, &mut c.0).tip("Colour");
-                ui.monospace(c.hex());
-            }
+        let (palette, colors, names) = pal?;
+        ui.label("Palette").tip("Palette of the panel");
+        ui.vertical(|ui| {
+            palette_combo(ui, "fig_panel_palette", palette, colors, dark, slot_labels.get(st.panel).map_or(0, Vec::len), "Palette of the panel");
+            ui.label(RichText::new(format!("for all layers of panel {}", st.panel + 1)).weak());
         });
         ui.end_row();
+        (*palette == Palette::Custom).then_some((colors, names))
+    });
+    let rename = custom.inner.and_then(|(colors, names)| custom_colors(ui, "fig_panel_colors", colors, dark, &slot_labels, st.panel, false, names));
+    egui::Grid::new("fig_style2").num_columns(2).min_col_width(STYLE_COL).show(ui, |ui| {
         if l.geom != Geom::Points {
             row(ui, "Line width (pt)");
             ui.add(DragValue::new(&mut l.width).custom_parser(crate::util::parse_num).range(0.1..=10.0).speed(0.05).max_decimals(2)).tip("Line width (pt)");
@@ -1090,6 +1191,11 @@ fn layer_editor(ui: &mut Ui, st: &mut FigState, l: &mut Layer, fig: &Figure, dc:
         ui.checkbox(&mut l.in_legend, "In the legend").tip("In the legend");
         ui.checkbox(&mut l.y2, "Right y axis").tip("Right y axis");
     });
+    if ui.ctx().data(|d| d.get_temp::<bool>(egui::Id::new("tour_scroll_style"))).is_some() {
+        // the screenshot tour shows the style of the layer
+        ui.scroll_to_cursor(Some(egui::Align::Max));
+    }
+    rename
 }
 
 fn axis_editor(ui: &mut Ui, a: &mut Axis, id: &str) {
@@ -1098,7 +1204,8 @@ fn axis_editor(ui: &mut Ui, a: &mut Axis, id: &str) {
         ui.horizontal(|ui| {
             ui.checkbox(&mut a.label_auto, "auto").tip("Axis title");
             if !a.label_auto {
-                ui.add(egui::TextEdit::singleline(&mut a.label).desired_width(190.0).hint_text("e.g. θ (cm^{3} cm^{−3})")).tip("Axis title");
+                // Enter starts a new line
+                ui.add(egui::TextEdit::multiline(&mut a.label).desired_width(190.0).desired_rows(1).hint_text("e.g. θ (cm^{3} cm^{−3})")).tip("Axis title");
             }
         });
         ui.end_row();
@@ -1438,11 +1545,12 @@ mod tests {
 
     #[test]
     fn custom_colours_name_their_series() {
-        let labels: Vec<String> = ["t = 0 d", "t = 5 d", "", "t = 15 d", "t = 20 d"].iter().map(|s| s.to_string()).collect();
+        let labels: Vec<SlotLabel> = ["t = 0 d", "t = 5 d", "", "t = 15 d", "t = 20 d"].iter().map(|s| SlotLabel { auto: s.to_string(), shown: s.to_string() }).collect();
+        let shown = |v: Vec<&SlotLabel>| v.iter().map(|l| l.shown.clone()).collect::<Vec<_>>();
         // three colours for five positions: the first colour is used again at position 3
-        assert_eq!(color_users(&labels, 0, 3), vec!["t = 0 d", "t = 15 d"]);
-        assert_eq!(color_users(&labels, 2, 3), Vec::<String>::new());
-        assert_eq!(color_users(&labels, 1, 8), vec!["t = 5 d"]);
+        assert_eq!(shown(color_users(&labels, 0, 3)), vec!["t = 0 d", "t = 15 d"]);
+        assert_eq!(shown(color_users(&labels, 2, 3)), Vec::<String>::new());
+        assert_eq!(shown(color_users(&labels, 1, 8)), vec!["t = 5 d"]);
     }
 
     #[test]

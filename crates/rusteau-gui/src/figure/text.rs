@@ -148,6 +148,15 @@ struct Atom {
 /// Lays out `text` (markup of the help, lines separated by `\n`) at `size` pt; lines longer than `max_width` are
 /// wrapped at blanks.
 pub fn layout(text: &str, size: f32, family: &str, bold: bool, max_width: Option<f32>) -> TextLayout {
+    layout_aligned(text, size, family, bold, max_width, false)
+}
+
+/// As [`layout`], with every line centred in the box.
+pub fn layout_centred(text: &str, size: f32, family: &str, bold: bool, max_width: Option<f32>) -> TextLayout {
+    layout_aligned(text, size, family, bold, max_width, true)
+}
+
+fn layout_aligned(text: &str, size: f32, family: &str, bold: bool, max_width: Option<f32>, centre: bool) -> TextLayout {
     let fs = font_set(family);
     let mut lines: Vec<Vec<Atom>> = vec![];
     for par in text.split('\n') {
@@ -208,7 +217,10 @@ pub fn layout(text: &str, size: f32, family: &str, bold: bool, max_width: Option
     }
     let mut out = TextLayout { glyphs: vec![], spans: vec![], width: 0.0, height: 0.0, baseline: 0.0, fonts: fs.clone() };
     let mut y = 0.0;
+    // first glyph, first span and width of every line
+    let mut starts: Vec<(usize, usize, f32)> = vec![];
     for (li, line) in lines.iter().enumerate() {
+        let (g0, s0) = (out.glyphs.len(), out.spans.len());
         // the first line: room for superscripts above the capitals
         let asc = line.iter().map(|a| ASCENT * a.size - a.shift).fold(ASCENT * size, f32::max);
         let desc = line.iter().map(|a| DESCENT * a.size + a.shift).fold(DESCENT * size, f32::max);
@@ -238,6 +250,15 @@ pub fn layout(text: &str, size: f32, family: &str, bold: bool, max_width: Option
         }
         out.width = out.width.max(x);
         out.height = y + desc;
+        starts.push((g0, s0, x));
+    }
+    if centre {
+        for (k, &(g0, s0, w)) in starts.iter().enumerate() {
+            let (g1, s1) = starts.get(k + 1).map(|n| (n.0, n.1)).unwrap_or((out.glyphs.len(), out.spans.len()));
+            let dx = (out.width - w) / 2.0;
+            out.glyphs[g0..g1].iter_mut().for_each(|g| g.x += dx);
+            out.spans[s0..s1].iter_mut().for_each(|s| s.x += dx);
+        }
     }
     // blanks at the ends of the spans do not matter; empty texts have no height
     if out.glyphs.is_empty() {

@@ -34,19 +34,29 @@ Every change shows at once in the preview. A click on a panel of the preview sel
 | Resolution (dpi) | dots per inch of the PNG (300 for print, 150–200 for screens) |
 | Panels (rows × columns) | number of diagrams in a grid (up to 4 × 4) |
 | Theme | Grid (frame and light grid), Classic (axis lines left and bottom), Minimal (no frame), Dark (presentations) |
-| Palette | colours of the series in order: Okabe–Ito, Tableau 10, Viridis, Grey, or Custom (your own list, see [custom colours](figures#custom-colours)) |
+| Palette | colours of the series in order: Okabe–Ito, Tableau 10, Viridis, Grey, or Custom (your own list, see [custom colours](figures#custom-colours)); **Edit** turns the palette into a custom one with the same colours; with several panels, **Same palette for all panels** (see [below](figures#panel-palettes)) |
 | Transparent background | the exported files have no background |
 | SVG: text as outlines | see [Export](figures#export) |
 
 The size is the size in the document: the fonts are given in points (1 pt = 1/72 inch ≈ 0.35 mm) and keep their size whatever the resolution. Journals usually ask for text of at least 6–8 pt at the printed size; the defaults (8.5 pt for the numbers, 10 pt for the axis titles) fit a figure of 85–170 mm.
 
+The series of all layers of a panel take the colours of the palette one after the other: two layers with one series each get the first and the second colour. Viridis and Grey spread their range over all series of the panel.
+
 The palettes follow the advice to use colours that remain distinguishable for readers with a colour vision deficiency and in print [@crameri2020]: Okabe–Ito, the default, is the palette of [@okabeIto2008], recommended for scientific figures by [@wong2011]. Viridis [@smith2015viridis] is a perceptually uniform sequence for series in an order such as print times or depths. Grey suits black-and-white print.
+
+### One palette per panel {#panel-palettes}
+
+With several panels, **Same palette for all panels** (on at first) gives the whole figure the palette chosen in the section Figure. Off, every panel has its own palette, e.g. Viridis for the profiles at the print times and Okabe–Ito for the fluxes beside them: it is chosen in **Layers (data)** under the geometry of the layer, and applies to all layers of the selected panel. When the option is switched off, every panel starts with the palette of the figure. With one panel (1 × 1) the option is not shown and the palette of the figure applies.
 
 ### Custom colours {#custom-colours}
 
-With the palette **Custom (own colours)** the series take the colours of a list of your own, in order (after the last colour the list starts again). When Custom is chosen first, the list starts with the colours of the palette chosen before. Each row shows the legend label of the series that take the colour in the selected panel (resting the mouse on it lists the series of all panels; *not used* when no series takes it), the swatch and the code; ⬆ ⬇ change the order, 🗑 removes a colour, **+ Add colour** adds one.
+With the palette **Custom (own colours)** the series take the colours of a list of your own, in order (after the last colour the list starts again). The list is shown under the palette: in the section Figure, or in Layers (data) when the panels have their own palettes (each panel then has its own list). **Edit** next to a palette turns it into a custom palette with the same colours, so the figure looks the same until a colour is changed: the cycle of Okabe–Ito or Tableau 10, or one colour per series from Viridis or Grey (as many as the panel with the most series has). When Custom is chosen in the list, an empty list starts with the colours of the palette chosen before.
 
-A click on a swatch opens the colour picker, as in the developer tools of web browsers: the field sets the saturation (left to right) and the brightness (top to bottom), the sliders below the hue and the opacity (alpha); the code can be typed as `#rrggbb` or `#rrggbbaa`, and R, G, B, A as numbers 0–255. The same picker sets the fixed colour of a layer and the colour of an annotation.
+Each row shows the legend labels of the series that take the colour in the selected panel (resting the mouse on them lists the series of all panels; *not used* when no series takes it), the swatch and the code; ⬆ ⬇ change the order, 🗑 removes a colour, **+ Add colour** adds one.
+
+A double click on a legend label renames the series in the legend of the selected panel, e.g. "Cumulative infiltration" to "Infiltration": Enter or a click elsewhere applies the name, Escape cancels it, and an empty name brings back the automatic label. The name belongs to the series (it is stored with the automatic label of the series) and is kept when the colours change; the **Legend label** of a layer, with `{item}`, `{run}` and `{y}`, names all series of the layer at once.
+
+A click on a swatch opens the colour picker, as in the developer tools of web browsers: the field sets the saturation (left to right) and the brightness (top to bottom), the sliders below the hue and the opacity (alpha); the code can be typed as `#rrggbb` or `#rrggbbaa`, and R, G, B, A as numbers 0–255. The same picker sets the colour of an annotation.
 
 ![The custom palette with the colour picker of the first colour.](img/figures_colors.png)
 
@@ -66,15 +76,15 @@ All texts (titles, axis titles, legend labels, annotations) understand the marku
 | `**Loam**` | bold |
 | `\*` | a literal * |
 
-A line break in the title or the caption starts a new line. The section **Symbols and markup** has buttons for the common symbols (θ, α, ψ, Δ, °, ±, ≤, √, ∂, →, ², ⁻¹, ₛ …): a click copies the symbol, Ctrl+V pastes it.
+A line break in the title, the caption or an axis title starts a new line. The section **Symbols and markup** has buttons for the common symbols (θ, α, ψ, Δ, °, ±, ≤, √, ∂, →, ², ⁻¹, ₛ …): a click copies the symbol, Ctrl+V pastes it.
 
 ## Panels and layers {#layers}
 
-A panel is one diagram with its axes, legend and annotations. Its title (e.g. "(a) Loam") and the position of its legend (a corner inside the plot area, outside on the right, below, or none) are set in the section **Panel**; with several panels the row of numbers selects the panel.
+A panel is one diagram with its axes, legend and annotations. Its title (e.g. "(a) Loam"), the position of its legend (a corner inside the plot area, outside on the right, below, or none) and the **Legend width** are set in the section **Panel**; with several panels the row of numbers selects the panel. The legend width is the largest width of the legend in percent of the width of the panel (below the plot: of each entry); longer labels are wrapped at blanks, so a legend outside on the right takes at most this share of the panel from the plot.
 
 A panel shows one or more **layers**. A layer takes its x and y values from two columns of a data source; it draws one series for each selected item (observation node, print time, material, data set) and run. The check box shows or hides a layer, ⬆ ⬇ change the drawing order (later layers are drawn on top), 🗑 removes it, **+ Add layer** adds a copy of the selected one.
 
-![The settings of a layer: source, variables, style.](img/figures_layer.png)
+![The settings of a layer: source, variables, the palette of the panel (here the panels have their own palettes), style.](img/figures_layer.png)
 
 ### Data sources
 
@@ -101,11 +111,11 @@ The depth increases downward: the templates of profiles reverse the y axis (**Re
 | Setting | Meaning |
 |---|---|
 | Geometry | Line; Points; Line and points; Steps (the value of a point holds from the previous x, as the records of the time-variable boundary data); Area (filled down to zero); Bars (centred, 80 % of the distance to the neighbours) |
-| Colour | the next colours of the palette, or one fixed colour |
+| Palette | only when the panels have their own palettes: the palette of the selected panel, for all its layers (see [One palette per panel](figures#panel-palettes)) |
 | Line width, Line style | in points; solid, dashed, dotted, dash-dot |
 | Marker | shape (filled or open circle, square, triangle, diamond, cross, plus) and size |
 | Fill opacity | of areas and bars |
-| Legend label | empty: automatic; `{item}`, `{run}` and `{y}` are replaced by the item, the run and the variable |
+| Legend label | empty: automatic; `{item}`, `{run}` and `{y}` are replaced by the item, the run and the variable; single series can be renamed in the list of [custom colours](figures#custom-colours) |
 | In the legend, Right y axis | list the series in the legend; plot against a second y axis on the right |
 
 ## Axes
@@ -114,7 +124,7 @@ The section **Axes** has the x axis, the y axis and the right y axis of the sele
 
 | Setting | Meaning |
 |---|---|
-| Axis title | auto: the variables of the layers with their unit (e.g. "Water content θ (–)"); otherwise your own text with markup, e.g. `K (cm d^{−1})` |
+| Axis title | auto: the variables of the layers with their unit (e.g. "Water content θ (–)"); otherwise your own text with markup, e.g. `K (cm d^{−1})`; Enter starts a new line. A title longer than its axis is wrapped at blanks into centred lines |
 | Range | auto: from the data, extended to the next ticks; otherwise from – to |
 | Tick step | distance of the labelled ticks; 0: automatic (1, 2, 2.5 or 5 times a power of ten, as many as fit) [@heckbert1990; @talbot2010] |
 | Logarithmic | decades labelled 10⁻¹, 10⁰ … (plain numbers between 0.01 and 1000); values ≤ 0 are left out, which the status bar notes |

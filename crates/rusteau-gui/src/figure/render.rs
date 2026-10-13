@@ -66,8 +66,17 @@ pub struct PanelGeom {
     pub x: Scale,
     pub y: Scale,
     pub y2: Option<Scale>,
-    /// legend label (plain text) of the first series at each position of the palette
-    pub slot_labels: Vec<String>,
+    /// the first series at each position of the palette (none: an empty automatic label)
+    pub slot_labels: Vec<SlotLabel>,
+}
+
+/// The legend label of a series.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct SlotLabel {
+    /// the automatic label (markup), the key of a name given to the series
+    pub auto: String,
+    /// the label of the legend, as plain text
+    pub shown: String,
 }
 
 /// A rendered figure.
@@ -155,16 +164,32 @@ fn look(t: Theme) -> Look {
 const OKABE_ITO: [[u8; 3]; 8] = [[0, 114, 178], [213, 94, 0], [0, 158, 115], [230, 159, 0], [86, 180, 233], [204, 121, 167], [240, 228, 66], [0, 0, 0]];
 const VIRIDIS: [[u8; 3]; 9] = [[68, 1, 84], [71, 45, 123], [59, 82, 139], [44, 114, 142], [33, 145, 140], [40, 174, 128], [94, 201, 98], [173, 220, 48], [253, 231, 37]];
 
-/// Colour `k` of `n` series of the palette of a figure (the custom colours repeat; without any, Okabe–Ito).
-pub fn palette_color(fig: &Figure, k: usize, n: usize, dark: bool) -> Rgba {
-    match fig.palette {
-        Palette::Custom if !fig.colors.is_empty() => {
-            let c = fig.colors[k % fig.colors.len()].0;
+/// Colour `k` of `n` series of a palette (the custom colours `colors` repeat; without any, Okabe–Ito).
+pub fn palette_color(palette: Palette, colors: &[Color], k: usize, n: usize, dark: bool) -> Rgba {
+    match palette {
+        Palette::Custom if !colors.is_empty() => {
+            let c = colors[k % colors.len()].0;
             Rgba(c[0], c[1], c[2], c[3])
         }
         Palette::Custom => Rgba::rgb(builtin_color(Palette::OkabeIto, k, n, dark)),
         p => Rgba::rgb(builtin_color(p, k, n, dark)),
     }
+}
+
+/// The colours of a built-in palette as a list for the palette "Custom", as `n` series of a panel show them: the
+/// cycle of a categorical palette, `n` steps of an ordered one (at least 2).
+pub fn builtin_colors(p: Palette, n: usize, dark: bool) -> Vec<Color> {
+    let len = match p {
+        Palette::OkabeIto | Palette::Custom => OKABE_ITO.len(),
+        Palette::Tableau => crate::util::PALETTE.len(),
+        Palette::Viridis | Palette::Grey => n.max(2),
+    };
+    (0..len)
+        .map(|k| {
+            let [r, g, b] = builtin_color(p, k, len, dark);
+            Color::rgb(r, g, b)
+        })
+        .collect()
 }
 
 /// Colour `k` of `n` series of a built-in palette.
@@ -229,13 +254,14 @@ struct Style {
     marker: Marker,
     marker_size: f32,
     alpha: f64,
-    /// position in the palette (`None`: a fixed colour of the layer)
-    slot: Option<usize>,
+    /// position in the palette of the panel
+    slot: usize,
 }
 
 /// Styles of the series of the layers of a panel: palette colours in order; a layer with several items and several
 /// runs (comparison) keeps the colour of an item and changes the line style and marker with the run.
-fn styles(fig: &Figure, panel: &Panel, series: &[Vec<Series>], dark: bool) -> Vec<Vec<Style>> {
+fn styles(fig: &Figure, pi: usize, panel: &Panel, series: &[Vec<Series>], dark: bool) -> Vec<Vec<Style>> {
+    let (palette, colors) = fig.panel_palette(pi);
     let empty = vec![];
     let of = |k: usize| series.get(k).unwrap_or(&empty);
     let plan: Vec<(bool, usize)> = panel
@@ -247,7 +273,7 @@ fn styles(fig: &Figure, panel: &Panel, series: &[Vec<Series>], dark: bool) -> Ve
             let n_items = ss.iter().map(|s| s.item).max().map(|m| m + 1).unwrap_or(0);
             let n_runs = ss.iter().map(|s| s.run).max().map(|m| m + 1).unwrap_or(0);
             let by_item = n_items > 1 && n_runs > 1;
-            let slots = if !l.visible || l.color.is_some() {
+            let slots = if !l.visible {
                 0
             } else if by_item {
                 n_items
@@ -266,10 +292,7 @@ fn styles(fig: &Figure, panel: &Panel, series: &[Vec<Series>], dark: bool) -> Ve
             .enumerate()
             .map(|(k, s)| {
                 let slot = next + if by_item { s.item } else { k };
-                let (color, slot) = match l.color {
-                    Some(c) => (Rgba(c.0[0], c.0[1], c.0[2], c.0[3]), None),
-                    None => (palette_color(fig, slot, total, dark), Some(slot)),
-                };
+                let color = palette_color(palette, colors, slot, total, dark);
                 let (dash, marker) = if by_item { (cycle(&DASHES, l.dash, s.run), cycle(&MARKERS, l.marker, s.run)) } else { (l.dash, l.marker) };
                 Style { color, geom: l.geom, width: l.width as f32, dash, marker, marker_size: l.marker_size as f32, alpha: l.alpha, slot }
             })
@@ -288,6 +311,11 @@ struct Typo<'a> {
 impl Typo<'_> {
     fn t(&self, s: &str, size: f64, bold: bool, wrap: Option<f32>) -> Arc<TextLayout> {
         Arc::new(text::layout(s, size as f32, self.family, bold, wrap))
+    }
+
+    /// Centred lines, wrapped at `wrap`.
+    fn centred(&self, s: &str, size: f64, wrap: f32) -> Arc<TextLayout> {
+        Arc::new(text::layout_centred(s, size as f32, self.family, false, Some(wrap)))
     }
 }
 
@@ -626,13 +654,21 @@ struct Entry {
 
 const SAMPLE_W: f32 = 20.0;
 
+/// Width of the line or marker of a legend entry.
+fn sample_w(st: &Style) -> f32 {
+    if st.geom == Geom::Points {
+        st.marker_size.max(8.0)
+    } else {
+        SAMPLE_W
+    }
+}
+
 fn entry_size(e: &Entry) -> (f32, f32) {
-    let sw = if e.style.geom == Geom::Points { e.style.marker_size.max(8.0) } else { SAMPLE_W };
-    (sw + 4.0 + e.label.width, e.label.height.max(e.style.marker_size).max(6.0))
+    (sample_w(&e.style) + 4.0 + e.label.width, e.label.height.max(e.style.marker_size).max(6.0))
 }
 
 fn draw_sample(d: &mut Drawing, st: &Style, x: f32, yc: f32, bg: Rgba) {
-    let sw = if st.geom == Geom::Points { st.marker_size.max(8.0) } else { SAMPLE_W };
+    let sw = sample_w(st);
     match st.geom {
         Geom::Area | Geom::Bars => {
             let r = Path::rect(x + 1.0, yc - 4.0, x + sw - 1.0, yc + 4.0);
@@ -696,7 +732,7 @@ fn draw_legend(d: &mut Drawing, entries: &[Entry], x: f32, y: f32, rows_of: Opti
         }
     }
     let item = |d: &mut Drawing, e: &Entry, ex: f32, ey: f32, eh: f32| {
-        let sw = if e.style.geom == Geom::Points { e.style.marker_size.max(8.0) } else { SAMPLE_W };
+        let sw = sample_w(&e.style);
         let yc = ey + eh / 2.0;
         draw_sample(d, &e.style, ex, yc, lk.bg);
         d.text(&e.label, ex + sw + 4.0, yc - e.label.height / 2.0, 0.0, lk.fg);
@@ -770,7 +806,7 @@ pub fn render(fig: &Figure, series: &[Vec<Vec<Series>>]) -> Rendered {
         let (r, c) = (pi / cols, pi % cols);
         let cell = [pad + c as f32 * (cw + gap), top + r as f32 * (ch + gap), pad + c as f32 * (cw + gap) + cw, top + r as f32 * (ch + gap) + ch];
         let ps = series.get(pi).unwrap_or(&empty);
-        let g = render_panel(&mut d, fig, panel, ps, cell, &lk, dark, &ty, &mut notes);
+        let g = render_panel(&mut d, fig, pi, panel, ps, cell, &lk, dark, &ty, &mut notes);
         out_panels.push(g);
     }
     notes.dedup();
@@ -778,7 +814,7 @@ pub fn render(fig: &Figure, series: &[Vec<Vec<Series>>]) -> Rendered {
 }
 
 #[allow(clippy::too_many_arguments)]
-fn render_panel(d: &mut Drawing, fig: &Figure, panel: &Panel, series: &[Vec<Series>], cell: [f32; 4], lk: &Look, dark: bool, ty: &Typo, notes: &mut Vec<String>) -> PanelGeom {
+fn render_panel(d: &mut Drawing, fig: &Figure, pi: usize, panel: &Panel, series: &[Vec<Series>], cell: [f32; 4], lk: &Look, dark: bool, ty: &Typo, notes: &mut Vec<String>) -> PanelGeom {
     let sz = &fig.sizes;
     let [cx0, cy0, cx1, cy1] = cell;
     let mut top = cy0;
@@ -790,7 +826,7 @@ fn render_panel(d: &mut Drawing, fig: &Figure, panel: &Panel, series: &[Vec<Seri
     let empty = vec![];
     let layer_series = |k: usize| series.get(k).unwrap_or(&empty);
     let visible: Vec<(usize, &Layer)> = panel.layers.iter().enumerate().filter(|(_, l)| l.visible).collect();
-    let styles = styles(fig, panel, series, dark);
+    let styles = styles(fig, pi, panel, series, dark);
     let has_y2 = visible.iter().any(|(k, l)| l.y2 && !layer_series(*k).is_empty());
     // data ranges
     let (mut rx, mut ry, mut ry2) = (None, None, None);
@@ -829,10 +865,14 @@ fn render_panel(d: &mut Drawing, fig: &Figure, panel: &Panel, series: &[Vec<Seri
         v
     };
     let title_of = |a: &Axis, x: bool, right: bool| if a.label_auto { escape_markup(&auto_title(&infos(x, right))) } else { a.label.clone() };
-    let xt = ty.t(&title_of(&panel.x, true, false), sz.axis_title, false, None);
-    let yt = ty.t(&title_of(&panel.y, false, false), sz.axis_title, false, None);
-    let y2t = ty.t(&title_of(&panel.y2, false, true), sz.axis_title, false, None);
-    // legend
+    let titles = [title_of(&panel.x, true, false), title_of(&panel.y, false, false), title_of(&panel.y2, false, true)];
+    // a title longer than its axis is wrapped to the length of the axis (in lines centred on it)
+    let axis_titles = |rect: &[f32; 4]| {
+        let (w, h) = ((rect[2] - rect[0]).max(40.0), (rect[3] - rect[1]).max(40.0));
+        (ty.centred(&titles[0], sz.axis_title, w), ty.centred(&titles[1], sz.axis_title, h), ty.centred(&titles[2], sz.axis_title, h))
+    };
+    // legend: at most `legend_width` % of the panel wide (below the plot: each entry), longer labels wrapped at blanks
+    let legend_w = panel.legend_width.clamp(5.0, 100.0) as f32 / 100.0 * (cx1 - cx0);
     let mut entries = vec![];
     for (k, l) in &visible {
         if !l.in_legend {
@@ -840,7 +880,8 @@ fn render_panel(d: &mut Drawing, fig: &Figure, panel: &Panel, series: &[Vec<Seri
         }
         for (s, st) in layer_series(*k).iter().zip(&styles[*k]) {
             if entries.len() < 40 {
-                entries.push(Entry { style: st.clone(), label: ty.t(&s.label, sz.legend, false, Some(200.0)) });
+                let wrap = (legend_w - 8.0 - sample_w(st) - 4.0).max(20.0);
+                entries.push(Entry { style: st.clone(), label: ty.t(panel.legend_label(&s.label), sz.legend, false, Some(wrap)) });
             }
         }
     }
@@ -851,7 +892,9 @@ fn render_panel(d: &mut Drawing, fig: &Figure, panel: &Panel, series: &[Vec<Seri
     let mut rect = [cx0 + 40.0, top + 4.0, cx1 - 10.0, cy1 - 30.0];
     let mut x_spacing = 50.0f32;
     let mut res = None;
+    let (mut xt, mut yt, mut y2t) = axis_titles(&rect);
     for _ in 0..3 {
+        (xt, yt, y2t) = axis_titles(&rect);
         let (xr, xticks) = axis_ticks(&panel.x, rx, rect[2] - rect[0], x_spacing);
         let (yr, yticks) = axis_ticks(&panel.y, ry, rect[3] - rect[1], 3.6 * sz.ticks as f32);
         let (y2r, y2ticks) = axis_ticks(&panel.y2, ry2, rect[3] - rect[1], 3.6 * sz.ticks as f32);
@@ -1096,16 +1139,16 @@ fn render_panel(d: &mut Drawing, fig: &Figure, panel: &Panel, series: &[Vec<Seri
         }
     }
     // which series take which colour of the palette (shown with the custom colours of the editor)
-    let mut slot_labels: Vec<String> = vec![];
+    let mut slot_labels: Vec<SlotLabel> = vec![];
     for (k, _) in &visible {
         for (s, st) in layer_series(*k).iter().zip(&styles[*k]) {
-            if let Some(slot) = st.slot {
-                if slot_labels.len() <= slot {
-                    slot_labels.resize(slot + 1, String::new());
-                }
-                if slot_labels[slot].is_empty() {
-                    slot_labels[slot] = crate::help::markup::plain(&crate::help::markup::inline(&s.label));
-                }
+            let slot = st.slot;
+            if slot_labels.len() <= slot {
+                slot_labels.resize(slot + 1, SlotLabel::default());
+            }
+            if slot_labels[slot].auto.is_empty() {
+                let shown = crate::help::markup::plain(&crate::help::markup::inline(panel.legend_label(&s.label)));
+                slot_labels[slot] = SlotLabel { auto: s.label.clone(), shown };
             }
         }
     }
@@ -1213,7 +1256,7 @@ mod tests {
         b.item = 1;
         c.run = 1;
         let panel = Panel::default();
-        let st = styles(&fig, &panel, &[vec![a, b, c]], false);
+        let st = styles(&fig, 0, &panel, &[vec![a, b, c]], false);
         assert_eq!(st[0][0].color, st[0][2].color);
         assert_ne!(st[0][0].color, st[0][1].color);
         assert_ne!(st[0][0].dash, st[0][2].dash);
@@ -1222,6 +1265,58 @@ mod tests {
         f.panels[0].y.log = true;
         let r = render(&f, &[vec![vec![series(5, |t| t - 1.0, "x")]]]);
         assert!(!r.notes.is_empty());
+    }
+
+    #[test]
+    fn long_titles_and_legend_labels_wrap_and_series_can_be_renamed() {
+        // a small panel: the long automatic y title wraps to the height of the plot, the long legend label to the
+        // width of the legend
+        let mut fig = Figure { width_mm: 70.0, height_mm: 50.0, ..Default::default() };
+        fig.panels[0].legend = LegendPos::Right;
+        fig.panels[0].legend_width = 30.0;
+        let long = "Cumulative infiltration into the soil profile";
+        let mut s = series(10, |t| t, long);
+        s.y_info.name = "Cumulative infiltration, cumulative evaporation, cumulative bottom flux".into();
+        let text_with = |r: &Rendered, word: &str| -> Option<Arc<TextLayout>> {
+            r.drawing.prims.iter().find_map(|p| match p {
+                Prim::Text { t, .. } if t.spans.iter().any(|s| s.text.contains(word)) => Some(t.clone()),
+                _ => None,
+            })
+        };
+        let lines = |t: &TextLayout| {
+            let mut ys: Vec<i32> = t.spans.iter().map(|s| s.y.round() as i32).collect();
+            ys.dedup();
+            ys.len()
+        };
+        let r = render(&fig, &[vec![vec![s.clone()]]]);
+        let g = &r.panels[0];
+        let title = text_with(&r, "evaporation").expect("y title");
+        assert!(lines(&title) > 1 && title.width <= g.rect[3] - g.rect[1] + 1.0, "{title:?} {:?}", g.rect);
+        let label = text_with(&r, "soil").expect("legend label");
+        assert!(lines(&label) > 1 && label.width <= 0.3 * r.drawing.width, "{label:?}");
+        assert_eq!(g.slot_labels[0], SlotLabel { auto: long.into(), shown: long.into() });
+        // renamed: the legend and the labels of the palette show the new name
+        fig.panels[0].rename_series(long, "**Infiltration**");
+        let r = render(&fig, &[vec![vec![s]]]);
+        assert!(text_with(&r, "soil").is_none() && text_with(&r, "Infiltration").is_some());
+        assert_eq!(r.panels[0].slot_labels[0], SlotLabel { auto: long.into(), shown: "Infiltration".into() });
+        // lines of centred text
+        let t = text::layout_centred("a long line\nshort", 10.0, crate::fonts::DEFAULT_FAMILY, false, None);
+        let second = t.spans.iter().find(|s| s.text.contains("short")).unwrap();
+        assert!(second.x > 1.0 && (2.0 * second.x - (t.width - text::layout("short", 10.0, crate::fonts::DEFAULT_FAMILY, false, None).width)).abs() < 0.5);
+    }
+
+    /// **Edit** turns a palette into custom colours without changing the figure.
+    #[test]
+    fn palettes_as_custom_colours_look_the_same() {
+        for (p, n) in [(Palette::Viridis, 5), (Palette::Grey, 3), (Palette::Viridis, 1), (Palette::OkabeIto, 11), (Palette::Tableau, 12)] {
+            for dark in [false, true] {
+                let list = builtin_colors(p, n, dark);
+                for k in 0..n {
+                    assert_eq!(palette_color(Palette::Custom, &list, k, n, dark), palette_color(p, &[], k, n, dark), "{p:?} {n} {k}");
+                }
+            }
+        }
     }
 
     #[test]
@@ -1275,7 +1370,7 @@ mod visual {
             title: "(b) Surface flux, comparison".into(),
             layers: vec![
                 Layer { source: Source::TimeLevel, runs: vec![String::new(), "Ks × 0.3".into()], x: "t".into(), y: "vTop".into(), ..Default::default() },
-                Layer { source: Source::AtmInput, x: "t".into(), y: "prec".into(), geom: Geom::Steps, y2: true, color: Some(Color::rgb(120, 120, 120)), ..Default::default() },
+                Layer { source: Source::AtmInput, x: "t".into(), y: "prec".into(), geom: Geom::Steps, y2: true, ..Default::default() },
             ],
             annotations: vec![Annotation { kind: AnnotationKind::Arrow, text: "rain".into(), x: 0.55, y: 0.8, x2: 0.4, y2: 0.6, ..Default::default() }],
             legend: LegendPos::Bottom,
