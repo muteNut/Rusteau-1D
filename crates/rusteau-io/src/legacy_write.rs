@@ -175,6 +175,9 @@ pub fn legacy_save_warnings(prj: &Project) -> Vec<String> {
     if prj.inverse.as_ref().is_some_and(|s| !s.hydrus_stop) && prj.processes.inverse {
         w.push("The Rusteau iteration of the parameter estimation (frozen time levels, several starting points) is not stored; HYDRUS-1D runs its own.".into());
     }
+    if !prj.figures.is_empty() {
+        w.push(format!("The {} figure(s) of the figure editor are stored only in the Rusteau project (.h1dr).", prj.figures.len()));
+    }
     w
 }
 

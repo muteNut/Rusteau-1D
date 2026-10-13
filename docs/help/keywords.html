@@ -1,0 +1,1096 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Index – Rusteau-1D Help</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html"><img src="favicon.png" alt="" width="22" height="22">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li><a href="units.html">Units</a></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details><summary>Solute transport</summary>
+<ul>
+<li><a href="solute_general.html">Solute transport: general</a></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+<li><a href="figures.html">Figure editor</a></li>
+<li><a href="run_comparison.html">Comparison of runs</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Theory and equations</summary>
+<ul>
+<li><a href="th_richards.html">Variably saturated water flow</a></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<h1>Index</h1>
+<p>Keywords and section headings of all topics.</p>
+<ul class="index">
+<li><a href="run_comparison.html">--json</a> <span class="where">Comparison of runs</span></li>
+<li><a href="getting_started.html#1-open-the-example">1. Open the example (Getting started)</a> <span class="where">Getting started</span></li>
+<li><a href="getting_started.html#2-look-at-the-project">2. Look at the project (Getting started)</a> <span class="where">Getting started</span></li>
+<li><a href="getting_started.html#3-run-the-calculation">3. Run the calculation (Getting started)</a> <span class="where">Getting started</span></li>
+<li><a href="getting_started.html#4-look-at-the-results">4. Look at the results (Getting started)</a> <span class="where">Getting started</span></li>
+<li><a href="getting_started.html#5-change-something-and-compare">5. Change something and compare (Getting started)</a> <span class="where">Getting started</span></li>
+<li><a href="output_files.html">A_LEVEL</a> <span class="where">Output files</span></li>
+<li><a href="output_files.html#alevel">A_LEVEL.csv – atmospheric records (Output files)</a> <span class="where">Output files</span></li>
+<li><a href="credits.html">acknowledgements</a> <span class="where">Credits and license</span></li>
+<li><a href="solute_advanced.html#activation-energies">Activation energies (Solute transport: temperature and water-content dependence, colloids)</a> <span class="where">Solute transport: temperature and water-content dependence, colloids</span></li>
+<li><a href="solute_advanced.html">activation energy</a> <span class="where">Solute transport: temperature and water-content dependence, colloids</span></li>
+<li><a href="th_reaction_dependence.html">activation energy</a> <span class="where">Temperature and water-content dependence of reactions</span></li>
+<li><a href="root_uptake_page.html">active uptake</a> <span class="where">Root water and solute uptake</span></li>
+<li><a href="th_root_solute.html">active uptake</a> <span class="where">Root solute uptake</span></li>
+<li><a href="th_root_solute.html#active">Active uptake (Root solute uptake)</a> <span class="where">Root solute uptake</span></li>
+<li><a href="res_fluxes.html">actual evaporation</a> <span class="where">Boundary fluxes, heads and cumulative quantities</span></li>
+<li><a href="res_fluxes.html">actual transpiration</a> <span class="where">Boundary fluxes, heads and cumulative quantities</span></li>
+<li><a href="soil_params.html">add material</a> <span class="where">Materials &amp; parameters</span></li>
+<li><a href="hydrus_relation.html#additions-of-rusteau">Additions of Rusteau (Relation to HYDRUS-1D)</a> <span class="where">Relation to HYDRUS-1D</span></li>
+<li><a href="th_solute.html">advection dispersion equation</a> <span class="where">Solute transport equations</span></li>
+<li><a href="th_penman.html#aerodynamic-and-canopy-resistance">Aerodynamic and canopy resistance (Penman–Monteith combination equation)</a> <span class="where">Penman–Monteith combination equation</span></li>
+<li><a href="th_energy_balance.html">aerodynamic resistance</a> <span class="where">Surface energy balance</span></li>
+<li><a href="th_penman.html">aerodynamic resistance</a> <span class="where">Penman–Monteith combination equation</span></li>
+<li><a href="res_inverse.html">AIC</a> <span class="where">Parameter estimation results</span></li>
+<li><a href="th_inverse.html">AIC</a> <span class="where">Parameter estimation</span></li>
+<li><a href="th_hysteresis.html">air entrapment</a> <span class="where">Hysteresis</span></li>
+<li><a href="th_hydraulic_models.html">air entry value</a> <span class="where">Soil hydraulic property models</span></li>
+<li><a href="meteo_page.html">albedo</a> <span class="where">Meteorological data</span></li>
+<li><a href="th_energy_balance.html">albedo</a> <span class="where">Surface energy balance</span></li>
+<li><a href="soil_params.html">alpha</a> <span class="where">Materials &amp; parameters</span></li>
+<li><a href="th_scaling.html">alpha h</a> <span class="where">Scaling of the hydraulic properties</span></li>
+<li><a href="th_scaling.html">alpha K</a> <span class="where">Scaling of the hydraulic properties</span></li>
+<li><a href="th_scaling.html">alpha theta</a> <span class="where">Scaling of the hydraulic properties</span></li>
+<li><a href="meteo_page.html">altitude</a> <span class="where">Meteorological data</span></li>
+<li><a href="th_penman.html">Angstrom</a> <span class="where">Penman–Monteith combination equation</span></li>
+<li><a href="res_profiles.html">animation</a> <span class="where">Profiles</span></li>
+<li><a href="figures.html">annotation</a> <span class="where">Figure editor</span></li>
+<li><a href="figures.html#annotations">Annotations (Figure editor)</a> <span class="where">Figure editor</span></li>
+<li><a href="solute_advanced.html">Arrhenius</a> <span class="where">Solute transport: temperature and water-content dependence, colloids</span></li>
+<li><a href="th_reaction_dependence.html">Arrhenius</a> <span class="where">Temperature and water-content dependence of reactions</span></li>
+<li><a href="solute_general.html">artificial dispersion</a> <span class="where">Solute transport: general</span></li>
+<li><a href="th_numerics.html">artificial dispersion</a> <span class="where">Numerical solution</span></li>
+<li><a href="time_variable_bc.html">ATMOSPH.IN</a> <span class="where">Time-variable boundary data</span></li>
+<li><a href="th_bc_water.html">atmospheric boundary condition</a> <span class="where">Boundary conditions of water flow</span></li>
+<li><a href="water_bc.html">atmospheric boundary condition</a> <span class="where">Water flow boundary conditions</span></li>
+<li><a href="th_bc_water.html#atmospheric">Atmospheric boundary condition (Boundary conditions of water flow)</a> <span class="where">Boundary conditions of water flow</span></li>
+<li><a href="time_variable_bc.html">atmospheric data</a> <span class="where">Time-variable boundary data</span></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a> <span class="where">Atmospheric inputs: partitioning, daily variation, interception, snow</span></li>
+<li><a href="th_colloids.html">attachment</a> <span class="where">Colloid, virus and bacteria transport</span></li>
+<li><a href="th_colloids.html#filtration">Attachment from filtration theory (Colloid, virus and bacteria transport)</a> <span class="where">Colloid, virus and bacteria transport</span></li>
+<li><a href="credits.html">authors</a> <span class="where">Credits and license</span></li>
+<li><a href="figures.html#axes">Axes (Figure editor)</a> <span class="where">Figure editor</span></li>
+<li><a href="figures.html">axis</a> <span class="where">Figure editor</span></li>
+<li><a href="solute_advanced.html">bacteria</a> <span class="where">Solute transport: temperature and water-content dependence, colloids</span></li>
+<li><a href="th_colloids.html">bacteria</a> <span class="where">Colloid, virus and bacteria transport</span></li>
+<li><a href="output_files.html">BALANCE</a> <span class="where">Output files</span></li>
+<li><a href="res_balance.html">balance error</a> <span class="where">Mass balance</span></li>
+<li><a href="output_files.html#balance">BALANCE.csv – mass balance (Output files)</a> <span class="where">Output files</span></li>
+<li><a href="res_balance.html">Balance.out</a> <span class="where">Mass balance</span></li>
+<li><a href="cli.html">batch</a> <span class="where">Command line program</span></li>
+<li><a href="references.html">bibliography</a> <span class="where">References</span></li>
+<li><a href="res_inverse.html">BIC</a> <span class="where">Parameter estimation results</span></li>
+<li><a href="th_inverse.html">BIC</a> <span class="where">Parameter estimation</span></li>
+<li><a href="solute_advanced.html">blocking</a> <span class="where">Solute transport: temperature and water-content dependence, colloids</span></li>
+<li><a href="th_colloids.html">blocking</a> <span class="where">Colloid, virus and bacteria transport</span></li>
+<li><a href="th_colloids.html#psi">Blocking and straining functions (Colloid, virus and bacteria transport)</a> <span class="where">Colloid, virus and bacteria transport</span></li>
+<li><a href="th_rosetta.html">bootstrap</a> <span class="where">Pedotransfer functions (Rosetta)</span></li>
+<li><a href="th_richards.html#boundary-and-initial-conditions">Boundary and initial conditions (Variably saturated water flow)</a> <span class="where">Variably saturated water flow</span></li>
+<li><a href="th_bc_water.html">boundary conditions</a> <span class="where">Boundary conditions of water flow</span></li>
+<li><a href="water_bc.html">boundary conditions</a> <span class="where">Water flow boundary conditions</span></li>
+<li><a href="heat_page.html#boundary-conditions">Boundary conditions (Heat transport)</a> <span class="where">Heat transport</span></li>
+<li><a href="th_heat.html#boundary-conditions">Boundary conditions (Heat transport)</a> <span class="where">Heat transport</span></li>
+<li><a href="th_solute.html#bc">Boundary conditions (Solute transport equations)</a> <span class="where">Solute transport equations</span></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a> <span class="where">Boundary conditions of water flow</span></li>
+<li><a href="th_dual_permeability.html#boundary-fluxes">Boundary fluxes (Dual-permeability model)</a> <span class="where">Dual-permeability model</span></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a> <span class="where">Boundary fluxes, heads and cumulative quantities</span></li>
+<li><a href="res_fluxes.html">boundary information</a> <span class="where">Boundary fluxes, heads and cumulative quantities</span></li>
+<li><a href="res_obs.html">breakthrough curve</a> <span class="where">Observation points</span></li>
+<li><a href="th_hydraulic_models.html#bc">Brooks and Corey (Soil hydraulic property models)</a> <span class="where">Soil hydraulic property models</span></li>
+<li><a href="hyd_model.html">Brooks Corey</a> <span class="where">Soil hydraulic model</span></li>
+<li><a href="th_hydraulic_models.html">Brooks Corey</a> <span class="where">Soil hydraulic property models</span></li>
+<li><a href="figures.html#building-a-figure">Building a figure (Figure editor)</a> <span class="where">Figure editor</span></li>
+<li><a href="rosetta.html">bulk density</a> <span class="where">Neural network prediction (Rosetta)</span></li>
+<li><a href="solute_params.html">bulk density</a> <span class="where">Solute transport: transport parameters</span></li>
+<li><a href="th_rosetta.html">bulk density</a> <span class="where">Pedotransfer functions (Rosetta)</span></li>
+<li><a href="res_soilprops.html">C(h)</a> <span class="where">Soil hydraulic properties</span></li>
+<li><a href="heat_page.html">Campbell</a> <span class="where">Heat transport</span></li>
+<li><a href="th_heat.html">Campbell</a> <span class="where">Heat transport</span></li>
+<li><a href="th_atmosphere.html#interception">Canopy interception (Atmospheric inputs: partitioning, daily variation, interception, snow)</a> <span class="where">Atmospheric inputs: partitioning, daily variation, interception, snow</span></li>
+<li><a href="th_penman.html">canopy resistance</a> <span class="where">Penman–Monteith combination equation</span></li>
+<li><a href="introduction.html">capabilities</a> <span class="where">Introduction to Rusteau-1D</span></li>
+<li><a href="figures.html">caption</a> <span class="where">Figure editor</span></li>
+<li><a href="soil_params.html">Carsel Parrish</a> <span class="where">Materials &amp; parameters</span></li>
+<li><a href="solute_bc.html">Cauchy</a> <span class="where">Solute transport: boundary conditions</span></li>
+<li><a href="th_advanced_options.html">centrifugal acceleration</a> <span class="where">Non-equilibrium water flow, centrifuge and density-dependent flow</span></li>
+<li><a href="further_options.html">centrifuge</a> <span class="where">Further options of the HYDRUS code</span></li>
+<li><a href="th_advanced_options.html">centrifuge</a> <span class="where">Non-equilibrium water flow, centrifuge and density-dependent flow</span></li>
+<li><a href="further_options.html#centrifuge-lcentrif">Centrifuge (lCentrif) (Further options of the HYDRUS code)</a> <span class="where">Further options of the HYDRUS code</span></li>
+<li><a href="th_advanced_options.html#centrifuge">Centrifuge (Non-equilibrium water flow, centrifuge and density-dependent flow)</a> <span class="where">Non-equilibrium water flow, centrifuge and density-dependent flow</span></li>
+<li><a href="contents.html#chapters">Chapters (Rusteau-1D Help)</a> <span class="where">Rusteau-1D Help</span></li>
+<li><a href="figures.html">chart</a> <span class="where">Figure editor</span></li>
+<li><a href="check_run.html">check</a> <span class="where">Check &amp; run</span></li>
+<li><a href="check_run.html">Check &amp; run</a> <span class="where">Check &amp; run</span></li>
+<li><a href="check_run.html#checks">Checks (Check &amp; run)</a> <span class="where">Check &amp; run</span></li>
+<li><a href="th_nonequilibrium.html">chemical non-equilibrium</a> <span class="where">Non-equilibrium solute transport</span></li>
+<li><a href="heat_page.html">Chung Horton</a> <span class="where">Heat transport</span></li>
+<li><a href="th_heat.html">Chung Horton</a> <span class="where">Heat transport</span></li>
+<li><a href="references.html">citations</a> <span class="where">References</span></li>
+<li><a href="cli.html">CLI</a> <span class="where">Command line program</span></li>
+<li><a href="solute_advanced.html">colloid attachment</a> <span class="where">Solute transport: temperature and water-content dependence, colloids</span></li>
+<li><a href="solute_advanced.html#colloid-attachment-parameters">Colloid attachment parameters (Solute transport: temperature and water-content dependence, colloids)</a> <span class="where">Solute transport: temperature and water-content dependence, colloids</span></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a> <span class="where">Colloid, virus and bacteria transport</span></li>
+<li><a href="solute_general.html">colloids</a> <span class="where">Solute transport: general</span></li>
+<li><a href="th_colloids.html">colloids</a> <span class="where">Colloid, virus and bacteria transport</span></li>
+<li><a href="figures.html">colour</a> <span class="where">Figure editor</span></li>
+<li><a href="res_balance.html#columns">Columns (Mass balance)</a> <span class="where">Mass balance</span></li>
+<li><a href="time_variable_bc.html#columns">Columns (Time-variable boundary data)</a> <span class="where">Time-variable boundary data</span></li>
+<li><a href="cli.html">command line</a> <span class="where">Command line program</span></li>
+<li><a href="cli.html">Command line program</a> <span class="where">Command line program</span></li>
+<li><a href="run_comparison.html">compare runs</a> <span class="where">Comparison of runs</span></li>
+<li><a href="measured_data.html">comparison</a> <span class="where">Measured data</span></li>
+<li><a href="run_comparison.html">comparison</a> <span class="where">Comparison of runs</span></li>
+<li><a href="run_comparison.html">Comparison of runs</a> <span class="where">Comparison of runs</span></li>
+<li><a href="hydrus_relation.html">compatibility</a> <span class="where">Relation to HYDRUS-1D</span></li>
+<li><a href="hydrus_relation.html#compatibility">Compatibility (Relation to HYDRUS-1D)</a> <span class="where">Relation to HYDRUS-1D</span></li>
+<li><a href="th_root_uptake.html#compensation">Compensated root water uptake (Root water uptake)</a> <span class="where">Root water uptake</span></li>
+<li><a href="th_root_uptake.html">compensated uptake</a> <span class="where">Root water uptake</span></li>
+<li><a href="root_uptake_page.html">compensation</a> <span class="where">Root water and solute uptake</span></li>
+<li><a href="th_root_solute.html">compensation</a> <span class="where">Root solute uptake</span></li>
+<li><a href="solute_bc.html">concentration boundary condition</a> <span class="where">Solute transport: boundary conditions</span></li>
+<li><a href="solute_bc.html">concentration flux</a> <span class="where">Solute transport: boundary conditions</span></li>
+<li><a href="solute_bc.html#concentrations">Concentrations (Solute transport: boundary conditions)</a> <span class="where">Solute transport: boundary conditions</span></li>
+<li><a href="faq.html#concentrations-oscillate-or-become-negative">Concentrations oscillate or become negative (Questions and problems)</a> <span class="where">Questions and problems</span></li>
+<li><a href="th_heat.html">conduction</a> <span class="where">Heat transport</span></li>
+<li><a href="res_soilprops.html">conductivity function</a> <span class="where">Soil hydraulic properties</span></li>
+<li><a href="th_hydraulic_models.html">conductivity function</a> <span class="where">Soil hydraulic property models</span></li>
+<li><a href="res_inverse.html">confidence intervals</a> <span class="where">Parameter estimation results</span></li>
+<li><a href="th_inverse.html">confidence intervals</a> <span class="where">Parameter estimation</span></li>
+<li><a href="water_bc.html">constant flux</a> <span class="where">Water flow boundary conditions</span></li>
+<li><a href="water_bc.html">constant head</a> <span class="where">Water flow boundary conditions</span></li>
+<li><a href="inverse_page.html">constraints</a> <span class="where">Parameter estimation (inverse problem)</span></li>
+<li><a href="contents.html">contents</a> <span class="where">Rusteau-1D Help</span></li>
+<li><a href="th_heat.html">convection</a> <span class="where">Heat transport</span></li>
+<li><a href="th_solute.html">convection dispersion</a> <span class="where">Solute transport equations</span></li>
+<li><a href="faq.html">convergence</a> <span class="where">Questions and problems</span></li>
+<li><a href="iteration.html">convergence</a> <span class="where">Iteration criteria</span></li>
+<li><a href="th_inverse.html">correlation</a> <span class="where">Parameter estimation</span></li>
+<li><a href="res_inverse.html">correlation matrix</a> <span class="where">Parameter estimation results</span></li>
+<li><a href="th_vapor.html">coupled transport</a> <span class="where">Coupled water, vapor and heat flow</span></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a> <span class="where">Coupled water, vapor and heat flow</span></li>
+<li><a href="th_energy_balance.html#coupling">Coupling (Surface energy balance)</a> <span class="where">Surface energy balance</span></li>
+<li><a href="res_runtime.html">Courant number</a> <span class="where">Run-time information</span></li>
+<li><a href="th_discretization.html">Courant number</a> <span class="where">Notes on spatial and temporal discretization</span></li>
+<li><a href="solute_general.html">Crank-Nicolson</a> <span class="where">Solute transport: general</span></li>
+<li><a href="th_numerics.html">Crank-Nicolson</a> <span class="where">Numerical solution</span></li>
+<li><a href="credits.html">credits</a> <span class="where">Credits and license</span></li>
+<li><a href="credits.html">Credits and license</a> <span class="where">Credits and license</span></li>
+<li><a href="meteo_page.html">crop</a> <span class="where">Meteorological data</span></li>
+<li><a href="meteo_page.html#crop">Crop (Meteorological data)</a> <span class="where">Meteorological data</span></li>
+<li><a href="figures.html">CSV</a> <span class="where">Figure editor</span></li>
+<li><a href="measured_data.html">CSV</a> <span class="where">Measured data</span></li>
+<li><a href="output_files.html">CSV</a> <span class="where">Output files</span></li>
+<li><a href="shortcuts.html">Ctrl+S</a> <span class="where">Keyboard and mouse</span></li>
+<li><a href="res_fluxes.html">cumulative fluxes</a> <span class="where">Boundary fluxes, heads and cumulative quantities</span></li>
+<li><a href="soil_params.html#curves">Curves (Materials &amp; parameters)</a> <span class="where">Materials &amp; parameters</span></li>
+<li><a href="th_atmosphere.html">daily variation</a> <span class="where">Atmospheric inputs: partitioning, daily variation, interception, snow</span></li>
+<li><a href="time_variable_bc.html">daily variation</a> <span class="where">Time-variable boundary data</span></li>
+<li><a href="th_atmosphere.html#daily">Daily variation of evaporation and transpiration (Atmospheric inputs: partitioning, daily variation, interception, snow)</a> <span class="where">Atmospheric inputs: partitioning, daily variation, interception, snow</span></li>
+<li><a href="figures.html">data file</a> <span class="where">Figure editor</span></li>
+<li><a href="figures.html#data-files">Data files (Figure editor)</a> <span class="where">Figure editor</span></li>
+<li><a href="measured_data.html#data-of-fit-in">Data of Fit.in (Measured data)</a> <span class="where">Measured data</span></li>
+<li><a href="inverse_page.html">data types</a> <span class="where">Parameter estimation (inverse problem)</span></li>
+<li><a href="th_heat.html">de Vries</a> <span class="where">Heat transport</span></li>
+<li><a href="solute_reactions.html">decay</a> <span class="where">Solute transport: reactions</span></li>
+<li><a href="solute_reactions.html">decay chain</a> <span class="where">Solute transport: reactions</span></li>
+<li><a href="th_solute.html">decay chain</a> <span class="where">Solute transport equations</span></li>
+<li><a href="th_bc_water.html">deep drainage</a> <span class="where">Boundary conditions of water flow</span></li>
+<li><a href="water_bc.html">deep drainage</a> <span class="where">Water flow boundary conditions</span></li>
+<li><a href="th_bc_water.html#deep">Deep drainage (Boundary conditions of water flow)</a> <span class="where">Boundary conditions of water flow</span></li>
+<li><a href="glossary.html">definitions</a> <span class="where">Symbols and glossary</span></li>
+<li><a href="th_reaction_dependence.html">degradation</a> <span class="where">Temperature and water-content dependence of reactions</span></li>
+<li><a href="th_atmosphere.html">degree-day</a> <span class="where">Atmospheric inputs: partitioning, daily variation, interception, snow</span></li>
+<li><a href="examples.html">demonstration</a> <span class="where">Examples</span></li>
+<li><a href="further_options.html">density-dependent flow</a> <span class="where">Further options of the HYDRUS code</span></li>
+<li><a href="th_advanced_options.html">density-dependent flow</a> <span class="where">Non-equilibrium water flow, centrifuge and density-dependent flow</span></li>
+<li><a href="further_options.html#density-dependent-flow-ldensity">Density-dependent flow (lDensity) (Further options of the HYDRUS code)</a> <span class="where">Further options of the HYDRUS code</span></li>
+<li><a href="th_advanced_options.html#density">Density-dependent flow (Non-equilibrium water flow, centrifuge and density-dependent flow)</a> <span class="where">Non-equilibrium water flow, centrifuge and density-dependent flow</span></li>
+<li><a href="th_colloids.html">detachment</a> <span class="where">Colloid, virus and bacteria transport</span></li>
+<li><a href="figures.html">diagram</a> <span class="where">Figure editor</span></li>
+<li><a href="hydrus_relation.html">differences</a> <span class="where">Relation to HYDRUS-1D</span></li>
+<li><a href="solute_params.html">diffusion coefficient</a> <span class="where">Solute transport: transport parameters</span></li>
+<li><a href="units.html">dimensions</a> <span class="where">Units</span></li>
+<li><a href="solute_bc.html">Dirichlet</a> <span class="where">Solute transport: boundary conditions</span></li>
+<li><a href="th_bc_water.html">Dirichlet</a> <span class="where">Boundary conditions of water flow</span></li>
+<li><a href="credits.html">disclaimer</a> <span class="where">Credits and license</span></li>
+<li><a href="profile_editor.html">discretization</a> <span class="where">Soil profile</span></li>
+<li><a href="th_discretization.html">discretization</a> <span class="where">Notes on spatial and temporal discretization</span></li>
+<li><a href="th_solute.html#dispersion">Dispersion (Solute transport equations)</a> <span class="where">Solute transport equations</span></li>
+<li><a href="th_solute.html">dispersion coefficient</a> <span class="where">Solute transport equations</span></li>
+<li><a href="solute_params.html">dispersivity</a> <span class="where">Solute transport: transport parameters</span></li>
+<li><a href="figures.html">dpi</a> <span class="where">Figure editor</span></li>
+<li><a href="interface.html">drag and drop</a> <span class="where">The main window</span></li>
+<li><a href="shortcuts.html#drag-and-drop">Drag and drop (Keyboard and mouse)</a> <span class="where">Keyboard and mouse</span></li>
+<li><a href="interface.html#drag-and-drop">Drag and drop (The main window)</a> <span class="where">The main window</span></li>
+<li><a href="th_bc_water.html">drains</a> <span class="where">Boundary conditions of water flow</span></li>
+<li><a href="time_output.html">dtMax</a> <span class="where">Time &amp; output</span></li>
+<li><a href="time_output.html">dtMin</a> <span class="where">Time &amp; output</span></li>
+<li><a href="th_nonequilibrium.html">dual non-equilibrium</a> <span class="where">Non-equilibrium solute transport</span></li>
+<li><a href="th_nonequilibrium.html#dual">Dual non-equilibrium (Non-equilibrium solute transport)</a> <span class="where">Non-equilibrium solute transport</span></li>
+<li><a href="hyd_model.html">dual permeability</a> <span class="where">Soil hydraulic model</span></li>
+<li><a href="th_dual_permeability.html">dual permeability</a> <span class="where">Dual-permeability model</span></li>
+<li><a href="th_nonequilibrium.html#dualperm">Dual permeability (Non-equilibrium solute transport)</a> <span class="where">Non-equilibrium solute transport</span></li>
+<li><a href="hyd_model.html">dual porosity</a> <span class="where">Soil hydraulic model</span></li>
+<li><a href="th_dual_porosity.html">dual porosity</a> <span class="where">Dual-porosity models</span></li>
+<li><a href="th_nonequilibrium.html">dual porosity</a> <span class="where">Non-equilibrium solute transport</span></li>
+<li><a href="th_dual_permeability.html#dual-porosity-inside-the-matrix">Dual porosity inside the matrix (Dual-permeability model)</a> <span class="where">Dual-permeability model</span></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a> <span class="where">Dual-permeability model</span></li>
+<li><a href="hyd_model.html#dualperm">Dual-permeability parameters (Soil hydraulic model)</a> <span class="where">Soil hydraulic model</span></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a> <span class="where">Dual-porosity models</span></li>
+<li><a href="res_inverse.html#during-the-run">During the run (Parameter estimation results)</a> <span class="where">Parameter estimation results</span></li>
+<li><a href="hyd_model.html">Durner</a> <span class="where">Soil hydraulic model</span></li>
+<li><a href="th_hydraulic_models.html">Durner</a> <span class="where">Soil hydraulic property models</span></li>
+<li><a href="th_hydraulic_models.html#durner">Durner (dual porosity) (Soil hydraulic property models)</a> <span class="where">Soil hydraulic property models</span></li>
+<li><a href="th_dual_porosity.html#durner-s-model">Durner's model (Dual-porosity models)</a> <span class="where">Dual-porosity models</span></li>
+<li><a href="th_hydraulic_models.html">effective saturation</a> <span class="where">Soil hydraulic property models</span></li>
+<li><a href="th_discretization.html">element size</a> <span class="where">Notes on spatial and temporal discretization</span></li>
+<li><a href="th_energy_balance.html">emissivity</a> <span class="where">Surface energy balance</span></li>
+<li><a href="meteo_page.html">energy balance</a> <span class="where">Meteorological data</span></li>
+<li><a href="th_energy_balance.html">energy balance</a> <span class="where">Surface energy balance</span></li>
+<li><a href="further_options.html">enhancement factor</a> <span class="where">Further options of the HYDRUS code</span></li>
+<li><a href="th_vapor.html">enhancement factor</a> <span class="where">Coupled water, vapor and heat flow</span></li>
+<li><a href="th_bc_water.html">Ernst</a> <span class="where">Boundary conditions of water flow</span></li>
+<li><a href="faq.html">errors</a> <span class="where">Questions and problems</span></li>
+<li><a href="inverse_page.html#estimate">Estimate (Parameter estimation (inverse problem))</a> <span class="where">Parameter estimation (inverse problem)</span></li>
+<li><a href="th_energy_balance.html">evaporation</a> <span class="where">Surface energy balance</span></li>
+<li><a href="time_variable_bc.html">evaporation</a> <span class="where">Time-variable boundary data</span></li>
+<li><a href="getting_started.html">example</a> <span class="where">Getting started</span></li>
+<li><a href="examples.html">example projects</a> <span class="where">Examples</span></li>
+<li><a href="examples.html">Examples</a> <span class="where">Examples</span></li>
+<li><a href="projects.html#examples">Examples (Projects and files)</a> <span class="where">Projects and files</span></li>
+<li><a href="figures.html">export</a> <span class="where">Figure editor</span></li>
+<li><a href="output_files.html">export</a> <span class="where">Output files</span></li>
+<li><a href="projects.html">export</a> <span class="where">Projects and files</span></li>
+<li><a href="figures.html#export">Export (Figure editor)</a> <span class="where">Figure editor</span></li>
+<li><a href="cli.html">export help</a> <span class="where">Command line program</span></li>
+<li><a href="th_richards.html#extensions">Extensions (Variably saturated water flow)</a> <span class="where">Variably saturated water flow</span></li>
+<li><a href="further_options.html">extrapolation</a> <span class="where">Further options of the HYDRUS code</span></li>
+<li><a href="th_hargreaves.html">extraterrestrial radiation</a> <span class="where">Hargreaves equation</span></li>
+<li><a href="shortcuts.html">F1</a> <span class="where">Keyboard and mouse</span></li>
+<li><a href="check_run.html">F5</a> <span class="where">Check &amp; run</span></li>
+<li><a href="shortcuts.html">F5</a> <span class="where">Keyboard and mouse</span></li>
+<li><a href="th_penman.html">FAO-56</a> <span class="where">Penman–Monteith combination equation</span></li>
+<li><a href="faq.html">FAQ</a> <span class="where">Questions and problems</span></li>
+<li><a href="introduction.html">features</a> <span class="where">Introduction to Rusteau-1D</span></li>
+<li><a href="root_uptake_page.html">Feddes</a> <span class="where">Root water and solute uptake</span></li>
+<li><a href="th_root_uptake.html">Feddes</a> <span class="where">Root water uptake</span></li>
+<li><a href="root_uptake_page.html#feddes-parameters">Feddes parameters (Root water and solute uptake)</a> <span class="where">Root water and solute uptake</span></li>
+<li><a href="figures.html#figure">Figure (Figure editor)</a> <span class="where">Figure editor</span></li>
+<li><a href="figures.html">Figure editor</a> <span class="where">Figure editor</span></li>
+<li><a href="shortcuts.html#figure-editor">Figure editor (Keyboard and mouse)</a> <span class="where">Keyboard and mouse</span></li>
+<li><a href="figures.html">figures</a> <span class="where">Figure editor</span></li>
+<li><a href="projects.html">file menu</a> <span class="where">Projects and files</span></li>
+<li><a href="solute_advanced.html">filtration theory</a> <span class="where">Solute transport: temperature and water-content dependence, colloids</span></li>
+<li><a href="th_colloids.html">filtration theory</a> <span class="where">Colloid, virus and bacteria transport</span></li>
+<li><a href="time_output.html">final time</a> <span class="where">Time &amp; output</span></li>
+<li><a href="th_numerics.html">finite elements</a> <span class="where">Numerical solution</span></li>
+<li><a href="getting_started.html">first simulation</a> <span class="where">Getting started</span></li>
+<li><a href="solute_reactions.html">first-order</a> <span class="where">Solute transport: reactions</span></li>
+<li><a href="th_solute.html">first-order decay</a> <span class="where">Solute transport equations</span></li>
+<li><a href="inverse_page.html">Fit.in</a> <span class="where">Parameter estimation (inverse problem)</span></li>
+<li><a href="projects.html">Fit.in</a> <span class="where">Projects and files</span></li>
+<li><a href="th_inverse.html">Fit.in</a> <span class="where">Parameter estimation</span></li>
+<li><a href="projects.html#fitin">Fit.in (Projects and files)</a> <span class="where">Projects and files</span></li>
+<li><a href="measured_data.html">Fit.in data</a> <span class="where">Measured data</span></li>
+<li><a href="res_inverse.html">Fit.out</a> <span class="where">Parameter estimation results</span></li>
+<li><a href="output_files.html#fit-out">Fit.out (Output files)</a> <span class="where">Output files</span></li>
+<li><a href="res_inverse.html">fitted parameters</a> <span class="where">Parameter estimation results</span></li>
+<li><a href="profile_editor.html">fixed points</a> <span class="where">Soil profile</span></li>
+<li><a href="figures.html">font</a> <span class="where">Figure editor</span></li>
+<li><a href="figures.html#font-and-text-sizes">Font and text sizes (Figure editor)</a> <span class="where">Figure editor</span></li>
+<li><a href="credits.html#fonts">Fonts (Credits and license)</a> <span class="where">Credits and license</span></li>
+<li><a href="solute_params.html">fraction of equilibrium sites</a> <span class="where">Solute transport: transport parameters</span></li>
+<li><a href="th_dual_permeability.html">fractures</a> <span class="where">Dual-permeability model</span></li>
+<li><a href="th_bc_water.html">free drainage</a> <span class="where">Boundary conditions of water flow</span></li>
+<li><a href="water_bc.html">free drainage</a> <span class="where">Water flow boundary conditions</span></li>
+<li><a href="th_bc_water.html#free">Free drainage (Boundary conditions of water flow)</a> <span class="where">Boundary conditions of water flow</span></li>
+<li><a href="solute_reactions.html">Freundlich</a> <span class="where">Solute transport: reactions</span></li>
+<li><a href="th_solute.html">Freundlich</a> <span class="where">Solute transport equations</span></li>
+<li><a href="th_inverse.html">frozen time levels</a> <span class="where">Parameter estimation</span></li>
+<li><a href="further_options.html">further options</a> <span class="where">Further options of the HYDRUS code</span></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a> <span class="where">Further options of the HYDRUS code</span></li>
+<li><a href="th_numerics.html">Galerkin</a> <span class="where">Numerical solution</span></li>
+<li><a href="th_solute.html#gas">Gas phase (Solute transport equations)</a> <span class="where">Solute transport equations</span></li>
+<li><a href="solute_general.html">general solute information</a> <span class="where">Solute transport: general</span></li>
+<li><a href="meteo_page.html#geographical-and-radiation-parameters">Geographical and radiation parameters (Meteorological data)</a> <span class="where">Meteorological data</span></li>
+<li><a href="th_dual_permeability.html">Gerke van Genuchten</a> <span class="where">Dual-permeability model</span></li>
+<li><a href="getting_started.html">Getting started</a> <span class="where">Getting started</span></li>
+<li><a href="glossary.html">glossary</a> <span class="where">Symbols and glossary</span></li>
+<li><a href="glossary.html#glossary">Glossary (Symbols and glossary)</a> <span class="where">Symbols and glossary</span></li>
+<li><a href="th_inverse.html#good-practice">Good practice (Parameter estimation)</a> <span class="where">Parameter estimation</span></li>
+<li><a href="res_inverse.html">goodness of fit</a> <span class="where">Parameter estimation results</span></li>
+<li><a href="th_richards.html">governing equation</a> <span class="where">Variably saturated water flow</span></li>
+<li><a href="th_solute.html#governing-equation">Governing equation (Solute transport equations)</a> <span class="where">Solute transport equations</span></li>
+<li><a href="th_dual_permeability.html#governing-equations">Governing equations (Dual-permeability model)</a> <span class="where">Dual-permeability model</span></li>
+<li><a href="th_dual_porosity.html#governing-equations">Governing equations (Dual-porosity models)</a> <span class="where">Dual-porosity models</span></li>
+<li><a href="credits.html">GPL</a> <span class="where">Credits and license</span></li>
+<li><a href="figures.html">graph</a> <span class="where">Figure editor</span></li>
+<li><a href="projects.html">h1d</a> <span class="where">Projects and files</span></li>
+<li><a href="projects.html">h1dr</a> <span class="where">Projects and files</span></li>
+<li><a href="meteo_page.html">Hargreaves</a> <span class="where">Meteorological data</span></li>
+<li><a href="th_hargreaves.html">Hargreaves</a> <span class="where">Hargreaves equation</span></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a> <span class="where">Hargreaves equation</span></li>
+<li><a href="th_hargreaves.html">Hargreaves-Samani</a> <span class="where">Hargreaves equation</span></li>
+<li><a href="th_bc_water.html">hCritA</a> <span class="where">Boundary conditions of water flow</span></li>
+<li><a href="time_variable_bc.html">hCritA</a> <span class="where">Time-variable boundary data</span></li>
+<li><a href="th_bc_water.html">hCritS</a> <span class="where">Boundary conditions of water flow</span></li>
+<li><a href="water_bc.html">hCritS</a> <span class="where">Water flow boundary conditions</span></li>
+<li><a href="heat_page.html">heat capacity</a> <span class="where">Heat transport</span></li>
+<li><a href="th_heat.html">heat capacity</a> <span class="where">Heat transport</span></li>
+<li><a href="th_heat.html#capacity">Heat capacity (Heat transport)</a> <span class="where">Heat transport</span></li>
+<li><a href="heat_page.html">Heat transport</a> <span class="where">Heat transport</span></li>
+<li><a href="processes.html">heat transport</a> <span class="where">Processes &amp; units</span></li>
+<li><a href="th_heat.html">Heat transport</a> <span class="where">Heat transport</span></li>
+<li><a href="heat_page.html">heat transport parameters</a> <span class="where">Heat transport</span></li>
+<li><a href="contents.html">help</a> <span class="where">Rusteau-1D Help</span></li>
+<li><a href="interface.html#help-window">Help window (The main window)</a> <span class="where">The main window</span></li>
+<li><a href="solute_reactions.html">Henry</a> <span class="where">Solute transport: reactions</span></li>
+<li><a href="th_solute.html">Henry</a> <span class="where">Solute transport equations</span></li>
+<li><a href="th_rosetta.html">hierarchical</a> <span class="where">Pedotransfer functions (Rosetta)</span></li>
+<li><a href="run_comparison.html#hints">Hints (Comparison of runs)</a> <span class="where">Comparison of runs</span></li>
+<li><a href="solute_reactions.html#hints">Hints (Solute transport: reactions)</a> <span class="where">Solute transport: reactions</span></li>
+<li><a href="time_output.html#hints">Hints (Time &amp; output)</a> <span class="where">Time &amp; output</span></li>
+<li><a href="th_bc_water.html">Hooghoudt</a> <span class="where">Boundary conditions of water flow</span></li>
+<li><a href="water_bc.html">horizontal drains</a> <span class="where">Water flow boundary conditions</span></li>
+<li><a href="th_bc_water.html#drains">Horizontal drains (Boundary conditions of water flow)</a> <span class="where">Boundary conditions of water flow</span></li>
+<li><a href="shortcuts.html">hotkeys</a> <span class="where">Keyboard and mouse</span></li>
+<li><a href="faq.html#how-do-i-cite-the-methods">How do I cite the methods? (Questions and problems)</a> <span class="where">Questions and problems</span></li>
+<li><a href="faq.html#how-do-i-make-a-figure-for-a-paper-or-a-presentation">How do I make a figure for a paper or a presentation? (Questions and problems)</a> <span class="where">Questions and problems</span></li>
+<li><a href="contents.html#how-to-use-this-help">How to use this help (Rusteau-1D Help)</a> <span class="where">Rusteau-1D Help</span></li>
+<li><a href="iteration.html">hTab</a> <span class="where">Iteration criteria</span></li>
+<li><a href="meteo_page.html">humidity</a> <span class="where">Meteorological data</span></li>
+<li><a href="th_richards.html">hydraulic conductivity</a> <span class="where">Variably saturated water flow</span></li>
+<li><a href="hyd_model.html#hydraulic-models">Hydraulic models (Soil hydraulic model)</a> <span class="where">Soil hydraulic model</span></li>
+<li><a href="profile_editor.html">hydrostatic equilibrium</a> <span class="where">Soil profile</span></li>
+<li><a href="hydrus_relation.html">HYDRUS 4.17</a> <span class="where">Relation to HYDRUS-1D</span></li>
+<li><a href="glossary.html">HYDRUS variable names</a> <span class="where">Symbols and glossary</span></li>
+<li><a href="glossary.html#hydrus-variable-names">HYDRUS variable names (Symbols and glossary)</a> <span class="where">Symbols and glossary</span></li>
+<li><a href="hydrus_relation.html">HYDRUS-1D</a> <span class="where">Relation to HYDRUS-1D</span></li>
+<li><a href="introduction.html">HYDRUS-1D</a> <span class="where">Introduction to Rusteau-1D</span></li>
+<li><a href="examples.html#hydrus-1d-examples">HYDRUS-1D examples (Examples)</a> <span class="where">Examples</span></li>
+<li><a href="projects.html">HYDRUS-1D project</a> <span class="where">Projects and files</span></li>
+<li><a href="projects.html#hydrus">HYDRUS-1D projects (.h1d) (Projects and files)</a> <span class="where">Projects and files</span></li>
+<li><a href="hyd_model.html">hysteresis</a> <span class="where">Soil hydraulic model</span></li>
+<li><a href="th_hysteresis.html">Hysteresis</a> <span class="where">Hysteresis</span></li>
+<li><a href="hyd_model.html#hysteresis">Hysteresis (Soil hydraulic model)</a> <span class="where">Soil hydraulic model</span></li>
+<li><a href="res_soilprops.html">hysteresis curves</a> <span class="where">Soil hydraulic properties</span></li>
+<li><a href="hyd_model.html">Hysteresis.in</a> <span class="where">Soil hydraulic model</span></li>
+<li><a href="further_options.html">iEnhanc</a> <span class="where">Further options of the HYDRUS code</span></li>
+<li><a href="th_dual_porosity.html">immobile water</a> <span class="where">Dual-porosity models</span></li>
+<li><a href="solute_params.html">immobile water content</a> <span class="where">Solute transport: transport parameters</span></li>
+<li><a href="projects.html">import</a> <span class="where">Projects and files</span></li>
+<li><a href="measured_data.html">import data</a> <span class="where">Measured data</span></li>
+<li><a href="th_richards.html">inclination</a> <span class="where">Variably saturated water flow</span></li>
+<li><a href="profile_editor.html#inclination">Inclination (Soil profile)</a> <span class="where">Soil profile</span></li>
+<li><a href="res_fluxes.html">infiltration</a> <span class="where">Boundary fluxes, heads and cumulative quantities</span></li>
+<li><a href="examples.html#infiltration-evaporation-with-roots">Infiltration &amp; evaporation with roots (Examples)</a> <span class="where">Examples</span></li>
+<li><a href="profile_editor.html">initial condition</a> <span class="where">Soil profile</span></li>
+<li><a href="th_nonequilibrium.html#initial-condition">Initial condition (Non-equilibrium solute transport)</a> <span class="where">Non-equilibrium solute transport</span></li>
+<li><a href="inverse_page.html">initial estimates</a> <span class="where">Parameter estimation (inverse problem)</span></li>
+<li><a href="hyd_model.html#restart">Initial hysteresis state (Hysteresis.in) (Soil hydraulic model)</a> <span class="where">Soil hydraulic model</span></li>
+<li><a href="time_output.html">initial time</a> <span class="where">Time &amp; output</span></li>
+<li><a href="rosetta.html#input-data">Input data (Neural network prediction (Rosetta))</a> <span class="where">Neural network prediction (Rosetta)</span></li>
+<li><a href="th_atmosphere.html">interception</a> <span class="where">Atmospheric inputs: partitioning, daily variation, interception, snow</span></li>
+<li><a href="time_variable_bc.html">interception</a> <span class="where">Time-variable boundary data</span></li>
+<li><a href="credits.html#interface">Interface (Credits and license)</a> <span class="where">Credits and license</span></li>
+<li><a href="iteration.html#tables">Internal interpolation tables (Iteration criteria)</a> <span class="where">Iteration criteria</span></li>
+<li><a href="iteration.html">interpolation tables</a> <span class="where">Iteration criteria</span></li>
+<li><a href="th_numerics.html">interpolation tables</a> <span class="where">Numerical solution</span></li>
+<li><a href="th_numerics.html#tables">Interpolation tables (Numerical solution)</a> <span class="where">Numerical solution</span></li>
+<li><a href="res_inverse.html#interpreting-the-results">Interpreting the results (Parameter estimation results)</a> <span class="where">Parameter estimation results</span></li>
+<li><a href="introduction.html">introduction</a> <span class="where">Introduction to Rusteau-1D</span></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a> <span class="where">Introduction to Rusteau-1D</span></li>
+<li><a href="inverse_page.html">inverse problem</a> <span class="where">Parameter estimation (inverse problem)</span></li>
+<li><a href="processes.html">inverse problem</a> <span class="where">Processes &amp; units</span></li>
+<li><a href="th_inverse.html">inverse problem</a> <span class="where">Parameter estimation</span></li>
+<li><a href="res_inverse.html">inverse results</a> <span class="where">Parameter estimation results</span></li>
+<li><a href="output_files.html#irrig">IRRIG.csv (Output files)</a> <span class="where">Output files</span></li>
+<li><a href="th_vapor.html">isothermal vapor flux</a> <span class="where">Coupled water, vapor and heat flow</span></li>
+<li><a href="inverse_page.html#iteration">Iteration (Parameter estimation (inverse problem))</a> <span class="where">Parameter estimation (inverse problem)</span></li>
+<li><a href="iteration.html">Iteration criteria</a> <span class="where">Iteration criteria</span></li>
+<li><a href="res_inverse.html">iterations</a> <span class="where">Parameter estimation results</span></li>
+<li><a href="res_runtime.html">iterations</a> <span class="where">Run-time information</span></li>
+<li><a href="run_comparison.html">JSON</a> <span class="where">Comparison of runs</span></li>
+<li><a href="res_soilprops.html">K(h)</a> <span class="where">Soil hydraulic properties</span></li>
+<li><a href="res_soilprops.html">K(theta)</a> <span class="where">Soil hydraulic properties</span></li>
+<li><a href="solute_reactions.html">Kd</a> <span class="where">Solute transport: reactions</span></li>
+<li><a href="run_comparison.html">keep results</a> <span class="where">Comparison of runs</span></li>
+<li><a href="run_comparison.html#keeping-and-loading-runs">Keeping and loading runs (Comparison of runs)</a> <span class="where">Comparison of runs</span></li>
+<li><a href="run_comparison.html">kept run</a> <span class="where">Comparison of runs</span></li>
+<li><a href="shortcuts.html#keyboard">Keyboard (Keyboard and mouse)</a> <span class="where">Keyboard and mouse</span></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a> <span class="where">Keyboard and mouse</span></li>
+<li><a href="shortcuts.html">keyboard shortcuts</a> <span class="where">Keyboard and mouse</span></li>
+<li><a href="th_nonequilibrium.html">kinetic sorption</a> <span class="where">Non-equilibrium solute transport</span></li>
+<li><a href="th_hysteresis.html#koolparker">Kool and Parker model (Hysteresis)</a> <span class="where">Hysteresis</span></li>
+<li><a href="th_hysteresis.html">Kool Parker</a> <span class="where">Hysteresis</span></li>
+<li><a href="hyd_model.html">Kosugi</a> <span class="where">Soil hydraulic model</span></li>
+<li><a href="th_hydraulic_models.html">Kosugi</a> <span class="where">Soil hydraulic property models</span></li>
+<li><a href="th_hydraulic_models.html#kosugi">Kosugi (log-normal) (Soil hydraulic property models)</a> <span class="where">Soil hydraulic property models</span></li>
+<li><a href="soil_params.html">Ks</a> <span class="where">Materials &amp; parameters</span></li>
+<li><a href="soil_params.html">l</a> <span class="where">Materials &amp; parameters</span></li>
+<li><a href="meteo_page.html">LAI</a> <span class="where">Meteorological data</span></li>
+<li><a href="th_atmosphere.html">LAI</a> <span class="where">Atmospheric inputs: partitioning, daily variation, interception, snow</span></li>
+<li><a href="time_variable_bc.html">LAI</a> <span class="where">Time-variable boundary data</span></li>
+<li><a href="solute_reactions.html">Langmuir</a> <span class="where">Solute transport: reactions</span></li>
+<li><a href="th_colloids.html">Langmuir</a> <span class="where">Colloid, virus and bacteria transport</span></li>
+<li><a href="th_solute.html">Langmuir</a> <span class="where">Solute transport equations</span></li>
+<li><a href="th_energy_balance.html">latent heat</a> <span class="where">Surface energy balance</span></li>
+<li><a href="meteo_page.html">latitude</a> <span class="where">Meteorological data</span></li>
+<li><a href="figures.html">layer</a> <span class="where">Figure editor</span></li>
+<li><a href="further_options.html">lCentrif</a> <span class="where">Further options of the HYDRUS code</span></li>
+<li><a href="further_options.html">lDensity</a> <span class="where">Further options of the HYDRUS code</span></li>
+<li><a href="th_atmosphere.html">leaf area index</a> <span class="where">Atmospheric inputs: partitioning, daily variation, interception, snow</span></li>
+<li><a href="figures.html">legend</a> <span class="where">Figure editor</span></li>
+<li><a href="units.html">length unit</a> <span class="where">Units</span></li>
+<li><a href="th_hysteresis.html">Lenhard</a> <span class="where">Hysteresis</span></li>
+<li><a href="further_options.html">lExtrap</a> <span class="where">Further options of the HYDRUS code</span></li>
+<li><a href="credits.html">license</a> <span class="where">Credits and license</span></li>
+<li><a href="credits.html#license">License (Credits and license)</a> <span class="where">Credits and license</span></li>
+<li><a href="th_rosetta.html#limitations">Limitations (Pedotransfer functions (Rosetta))</a> <span class="where">Pedotransfer functions (Rosetta)</span></li>
+<li><a href="th_solute.html">linear sorption</a> <span class="where">Solute transport equations</span></li>
+<li><a href="references.html">literature</a> <span class="where">References</span></li>
+<li><a href="run_comparison.html">load run</a> <span class="where">Comparison of runs</span></li>
+<li><a href="measured_data.html#loading">Loading (Measured data)</a> <span class="where">Measured data</span></li>
+<li><a href="figures.html">logarithmic axis</a> <span class="where">Figure editor</span></li>
+<li><a href="th_root_uptake.html">logistic function</a> <span class="where">Root water uptake</span></li>
+<li><a href="root_uptake_page.html">logistic growth</a> <span class="where">Root water and solute uptake</span></li>
+<li><a href="th_penman.html">long-wave radiation</a> <span class="where">Penman–Monteith combination equation</span></li>
+<li><a href="hyd_model.html">look-up tables</a> <span class="where">Soil hydraulic model</span></li>
+<li><a href="th_hydraulic_models.html#tables">Look-up tables (Soil hydraulic property models)</a> <span class="where">Soil hydraulic property models</span></li>
+<li><a href="water_bc.html">lower boundary</a> <span class="where">Water flow boundary conditions</span></li>
+<li><a href="solute_bc.html#lower-boundary">Lower boundary (Solute transport: boundary conditions)</a> <span class="where">Solute transport: boundary conditions</span></li>
+<li><a href="water_bc.html#lower-boundary">Lower boundary (Water flow boundary conditions)</a> <span class="where">Water flow boundary conditions</span></li>
+<li><a href="th_dual_permeability.html">macropores</a> <span class="where">Dual-permeability model</span></li>
+<li><a href="th_hysteresis.html">main drying curve</a> <span class="where">Hysteresis</span></li>
+<li><a href="processes.html">main processes</a> <span class="where">Processes &amp; units</span></li>
+<li><a href="th_hysteresis.html">main wetting curve</a> <span class="where">Hysteresis</span></li>
+<li><a href="interface.html">main window</a> <span class="where">The main window</span></li>
+<li><a href="figures.html">markup</a> <span class="where">Figure editor</span></li>
+<li><a href="inverse_page.html">Marquardt</a> <span class="where">Parameter estimation (inverse problem)</span></li>
+<li><a href="th_inverse.html">Marquardt-Levenberg</a> <span class="where">Parameter estimation</span></li>
+<li><a href="th_inverse.html#marquardt">Marquardt–Levenberg iteration (Parameter estimation)</a> <span class="where">Parameter estimation</span></li>
+<li><a href="res_balance.html">Mass balance</a> <span class="where">Mass balance</span></li>
+<li><a href="th_numerics.html#balance">Mass balance (Numerical solution)</a> <span class="where">Numerical solution</span></li>
+<li><a href="faq.html">mass balance error</a> <span class="where">Questions and problems</span></li>
+<li><a href="th_numerics.html">mass conservative</a> <span class="where">Numerical solution</span></li>
+<li><a href="th_dual_porosity.html">mass transfer</a> <span class="where">Dual-porosity models</span></li>
+<li><a href="th_nonequilibrium.html">mass transfer coefficient</a> <span class="where">Non-equilibrium solute transport</span></li>
+<li><a href="th_dual_porosity.html#head">Mass transfer driven by the pressure head (Dual-porosity models)</a> <span class="where">Dual-porosity models</span></li>
+<li><a href="th_dual_porosity.html#water">Mass transfer driven by the water content (Dual-porosity models)</a> <span class="where">Dual-porosity models</span></li>
+<li><a href="units.html">mass unit</a> <span class="where">Units</span></li>
+<li><a href="profile_editor.html">materials</a> <span class="where">Soil profile</span></li>
+<li><a href="soil_params.html">materials</a> <span class="where">Materials &amp; parameters</span></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a> <span class="where">Materials &amp; parameters</span></li>
+<li><a href="soil_params.html#materials">Materials (Materials &amp; parameters)</a> <span class="where">Materials &amp; parameters</span></li>
+<li><a href="th_dual_permeability.html">matrix</a> <span class="where">Dual-permeability model</span></li>
+<li><a href="iteration.html">maximum number of iterations</a> <span class="where">Iteration criteria</span></li>
+<li><a href="measured_data.html">Measured data</a> <span class="where">Measured data</span></li>
+<li><a href="interface.html">menu</a> <span class="where">The main window</span></li>
+<li><a href="interface.html#menu">Menu bar (The main window)</a> <span class="where">The main window</span></li>
+<li><a href="th_discretization.html">mesh</a> <span class="where">Notes on spatial and temporal discretization</span></li>
+<li><a href="output_files.html#meteo">METEO.csv and Meteo.out (Output files)</a> <span class="where">Output files</span></li>
+<li><a href="meteo_page.html">METEO.IN</a> <span class="where">Meteorological data</span></li>
+<li><a href="output_files.html">Meteo.out</a> <span class="where">Output files</span></li>
+<li><a href="meteo_page.html">Meteorological data</a> <span class="where">Meteorological data</span></li>
+<li><a href="processes.html">meteorological data</a> <span class="where">Processes &amp; units</span></li>
+<li><a href="th_rosetta.html#method">Method (Pedotransfer functions (Rosetta))</a> <span class="where">Pedotransfer functions (Rosetta)</span></li>
+<li><a href="root_uptake_page.html">Michaelis-Menten</a> <span class="where">Root water and solute uptake</span></li>
+<li><a href="th_root_solute.html">Michaelis-Menten</a> <span class="where">Root solute uptake</span></li>
+<li><a href="th_scaling.html">Miller Miller</a> <span class="where">Scaling of the hydraulic properties</span></li>
+<li><a href="solute_general.html">Millington Quirk</a> <span class="where">Solute transport: general</span></li>
+<li><a href="th_dual_porosity.html">mobile immobile</a> <span class="where">Dual-porosity models</span></li>
+<li><a href="th_nonequilibrium.html">mobile immobile</a> <span class="where">Non-equilibrium solute transport</span></li>
+<li><a href="th_nonequilibrium.html#mim">Mobile–immobile water (physical non-equilibrium) (Non-equilibrium solute transport)</a> <span class="where">Non-equilibrium solute transport</span></li>
+<li><a href="rosetta.html#models">Models (Neural network prediction (Rosetta))</a> <span class="where">Neural network prediction (Rosetta)</span></li>
+<li><a href="th_hydraulic_models.html">modified van Genuchten</a> <span class="where">Soil hydraulic property models</span></li>
+<li><a href="th_hydraulic_models.html#modified">Modified van Genuchten (Vogel and Císlerová) (Soil hydraulic property models)</a> <span class="where">Soil hydraulic property models</span></li>
+<li><a href="th_reaction_dependence.html">MoistDep</a> <span class="where">Temperature and water-content dependence of reactions</span></li>
+<li><a href="solute_advanced.html">MoistDep.in</a> <span class="where">Solute transport: temperature and water-content dependence, colloids</span></li>
+<li><a href="th_reaction_dependence.html">moisture dependence</a> <span class="where">Temperature and water-content dependence of reactions</span></li>
+<li><a href="solute_params.html">molecular diffusion</a> <span class="where">Solute transport: transport parameters</span></li>
+<li><a href="solute_params.html#molecular-diffusion">Molecular diffusion (Solute transport: transport parameters)</a> <span class="where">Solute transport: transport parameters</span></li>
+<li><a href="shortcuts.html">mouse</a> <span class="where">Keyboard and mouse</span></li>
+<li><a href="th_discretization.html#moving-fronts">Moving fronts (Notes on spatial and temporal discretization)</a> <span class="where">Notes on spatial and temporal discretization</span></li>
+<li><a href="th_hydraulic_models.html">Mualem</a> <span class="where">Soil hydraulic property models</span></li>
+<li><a href="soil_params.html">n</a> <span class="where">Materials &amp; parameters</span></li>
+<li><a href="interface.html">navigation</a> <span class="where">The main window</span></li>
+<li><a href="interface.html#navigation">Navigation panel (The main window)</a> <span class="where">The main window</span></li>
+<li><a href="th_penman.html">net radiation</a> <span class="where">Penman–Monteith combination equation</span></li>
+<li><a href="th_energy_balance.html#net-radiation">Net radiation (Surface energy balance)</a> <span class="where">Surface energy balance</span></li>
+<li><a href="th_bc_water.html">Neumann</a> <span class="where">Boundary conditions of water flow</span></li>
+<li><a href="rosetta.html">neural network</a> <span class="where">Neural network prediction (Rosetta)</span></li>
+<li><a href="th_rosetta.html">neural network</a> <span class="where">Pedotransfer functions (Rosetta)</span></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a> <span class="where">Neural network prediction (Rosetta)</span></li>
+<li><a href="soil_params.html#neural-network-prediction-rosetta">Neural network prediction (Rosetta) (Materials &amp; parameters)</a> <span class="where">Materials &amp; parameters</span></li>
+<li><a href="workflow.html">new project</a> <span class="where">Workflow of a project</span></li>
+<li><a href="getting_started.html#next-steps">Next steps (Getting started)</a> <span class="where">Getting started</span></li>
+<li><a href="output_files.html">NOD_INF</a> <span class="where">Output files</span></li>
+<li><a href="res_profiles.html">Nod_Inf</a> <span class="where">Profiles</span></li>
+<li><a href="output_files.html#nodinf">NOD_INF.csv – profiles at the print times (Output files)</a> <span class="where">Output files</span></li>
+<li><a href="th_discretization.html">node spacing</a> <span class="where">Notes on spatial and temporal discretization</span></li>
+<li><a href="profile_editor.html">nodes</a> <span class="where">Soil profile</span></li>
+<li><a href="faq.html">non-convergence</a> <span class="where">Questions and problems</span></li>
+<li><a href="solute_general.html">non-equilibrium</a> <span class="where">Solute transport: general</span></li>
+<li><a href="th_dual_porosity.html">non-equilibrium flow</a> <span class="where">Dual-porosity models</span></li>
+<li><a href="solute_reactions.html">non-equilibrium rate</a> <span class="where">Solute transport: reactions</span></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a> <span class="where">Non-equilibrium solute transport</span></li>
+<li><a href="th_nonequilibrium.html">non-equilibrium transport</a> <span class="where">Non-equilibrium solute transport</span></li>
+<li><a href="th_solute.html#non-equilibrium-transport">Non-equilibrium transport (Solute transport equations)</a> <span class="where">Solute transport equations</span></li>
+<li><a href="further_options.html">non-equilibrium water flow</a> <span class="where">Further options of the HYDRUS code</span></li>
+<li><a href="th_advanced_options.html">non-equilibrium water flow</a> <span class="where">Non-equilibrium water flow, centrifuge and density-dependent flow</span></li>
+<li><a href="th_advanced_options.html#nonequilibrium">Non-equilibrium water flow (Non-equilibrium water flow, centrifuge and density-dependent flow)</a> <span class="where">Non-equilibrium water flow, centrifuge and density-dependent flow</span></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a> <span class="where">Non-equilibrium water flow, centrifuge and density-dependent flow</span></li>
+<li><a href="th_vapor.html">non-isothermal flow</a> <span class="where">Coupled water, vapor and heat flow</span></li>
+<li><a href="introduction.html#not-included">Not included (Introduction to Rusteau-1D)</a> <span class="where">Introduction to Rusteau-1D</span></li>
+<li><a href="hydrus_relation.html#not-supported">Not supported (Relation to HYDRUS-1D)</a> <span class="where">Relation to HYDRUS-1D</span></li>
+<li><a href="glossary.html">notation</a> <span class="where">Symbols and glossary</span></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a> <span class="where">Notes on spatial and temporal discretization</span></li>
+<li><a href="figures.html">Noto Sans</a> <span class="where">Figure editor</span></li>
+<li><a href="shortcuts.html#number-fields">Number fields (Keyboard and mouse)</a> <span class="where">Keyboard and mouse</span></li>
+<li><a href="solute_general.html">number of solutes</a> <span class="where">Solute transport: general</span></li>
+<li><a href="th_discretization.html">numerical dispersion</a> <span class="where">Notes on spatial and temporal discretization</span></li>
+<li><a href="credits.html#numerical-methods">Numerical methods (Credits and license)</a> <span class="where">Credits and license</span></li>
+<li><a href="th_discretization.html">numerical oscillations</a> <span class="where">Notes on spatial and temporal discretization</span></li>
+<li><a href="solute_general.html#numerical-scheme">Numerical scheme (Solute transport: general)</a> <span class="where">Solute transport: general</span></li>
+<li><a href="th_numerics.html">Numerical solution</a> <span class="where">Numerical solution</span></li>
+<li><a href="th_heat.html#numerical-solution">Numerical solution (Heat transport)</a> <span class="where">Heat transport</span></li>
+<li><a href="th_solute.html#numerical-solution">Numerical solution (Solute transport equations)</a> <span class="where">Solute transport equations</span></li>
+<li><a href="th_root_solute.html">nutrient uptake</a> <span class="where">Root solute uptake</span></li>
+<li><a href="inverse_page.html">objective function</a> <span class="where">Parameter estimation (inverse problem)</span></li>
+<li><a href="th_inverse.html">objective function</a> <span class="where">Parameter estimation</span></li>
+<li><a href="th_inverse.html#objective">Objective function (Parameter estimation)</a> <span class="where">Parameter estimation</span></li>
+<li><a href="output_files.html">OBS_NODE</a> <span class="where">Output files</span></li>
+<li><a href="res_obs.html">Obs_Node</a> <span class="where">Observation points</span></li>
+<li><a href="output_files.html#obsnode">OBS_NODE.csv – observation nodes (Output files)</a> <span class="where">Output files</span></li>
+<li><a href="profile_editor.html">observation nodes</a> <span class="where">Soil profile</span></li>
+<li><a href="res_obs.html">observation nodes</a> <span class="where">Observation points</span></li>
+<li><a href="profile_editor.html#observation">Observation nodes (Soil profile)</a> <span class="where">Soil profile</span></li>
+<li><a href="res_obs.html">Observation points</a> <span class="where">Observation points</span></li>
+<li><a href="inverse_page.html">observations</a> <span class="where">Parameter estimation (inverse problem)</span></li>
+<li><a href="measured_data.html">observations</a> <span class="where">Measured data</span></li>
+<li><a href="inverse_page.html#observations">Observations (Parameter estimation (inverse problem))</a> <span class="where">Parameter estimation (inverse problem)</span></li>
+<li><a href="root_uptake_page.html">omega c</a> <span class="where">Root water and solute uptake</span></li>
+<li><a href="projects.html">open</a> <span class="where">Projects and files</span></li>
+<li><a href="inverse_page.html">optimization</a> <span class="where">Parameter estimation (inverse problem)</span></li>
+<li><a href="time_variable_bc.html#options">Options (Time-variable boundary data)</a> <span class="where">Time-variable boundary data</span></li>
+<li><a href="further_options.html">Options.in</a> <span class="where">Further options of the HYDRUS code</span></li>
+<li><a href="th_advanced_options.html">Options.in</a> <span class="where">Non-equilibrium water flow, centrifuge and density-dependent flow</span></li>
+<li><a href="faq.html">oscillations</a> <span class="where">Questions and problems</span></li>
+<li><a href="th_root_uptake.html#osmotic">Osmotic (salinity) stress (Root water uptake)</a> <span class="where">Root water uptake</span></li>
+<li><a href="root_uptake_page.html">osmotic stress</a> <span class="where">Root water and solute uptake</span></li>
+<li><a href="th_root_uptake.html">osmotic stress</a> <span class="where">Root water uptake</span></li>
+<li><a href="output_files.html">output</a> <span class="where">Output files</span></li>
+<li><a href="time_output.html">output</a> <span class="where">Time &amp; output</span></li>
+<li><a href="output_files.html">Output files</a> <span class="where">Output files</span></li>
+<li><a href="contents.html">overview</a> <span class="where">Rusteau-1D Help</span></li>
+<li><a href="introduction.html">overview</a> <span class="where">Introduction to Rusteau-1D</span></li>
+<li><a href="check_run.html#overview">Overview (Check &amp; run)</a> <span class="where">Check &amp; run</span></li>
+<li><a href="interface.html#pages">Pages (The main window)</a> <span class="where">The main window</span></li>
+<li><a href="figures.html">palette</a> <span class="where">Figure editor</span></li>
+<li><a href="figures.html">panel</a> <span class="where">Figure editor</span></li>
+<li><a href="figures.html#layers">Panels and layers (Figure editor)</a> <span class="where">Figure editor</span></li>
+<li><a href="inverse_page.html">parameter estimation</a> <span class="where">Parameter estimation (inverse problem)</span></li>
+<li><a href="th_inverse.html">Parameter estimation</a> <span class="where">Parameter estimation</span></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a> <span class="where">Parameter estimation (inverse problem)</span></li>
+<li><a href="hydrus_relation.html#parameter-estimation">Parameter estimation (Relation to HYDRUS-1D)</a> <span class="where">Relation to HYDRUS-1D</span></li>
+<li><a href="workflow.html#parameter-estimation">Parameter estimation (Workflow of a project)</a> <span class="where">Workflow of a project</span></li>
+<li><a href="res_inverse.html">Parameter estimation results</a> <span class="where">Parameter estimation results</span></li>
+<li><a href="examples.html#parameter-estimation-one-step-outflow">Parameter estimation: one-step outflow (Examples)</a> <span class="where">Examples</span></li>
+<li><a href="examples.html#parameter-estimation-soil-temperature">Parameter estimation: soil temperature (Examples)</a> <span class="where">Examples</span></li>
+<li><a href="th_colloids.html#parameters">Parameters (Colloid, virus and bacteria transport)</a> <span class="where">Colloid, virus and bacteria transport</span></li>
+<li><a href="th_hysteresis.html#parameters">Parameters (Hysteresis)</a> <span class="where">Hysteresis</span></li>
+<li><a href="soil_params.html#parameters">Parameters (Materials &amp; parameters)</a> <span class="where">Materials &amp; parameters</span></li>
+<li><a href="inverse_page.html#parameters">Parameters (Parameter estimation (inverse problem))</a> <span class="where">Parameter estimation (inverse problem)</span></li>
+<li><a href="solute_reactions.html#parameters">Parameters (Solute transport: reactions)</a> <span class="where">Solute transport: reactions</span></li>
+<li><a href="heat_page.html#parameters-per-material">Parameters per material (Heat transport)</a> <span class="where">Heat transport</span></li>
+<li><a href="th_atmosphere.html">partitioning</a> <span class="where">Atmospheric inputs: partitioning, daily variation, interception, snow</span></li>
+<li><a href="th_penman.html#partitioning">Partitioning (Penman–Monteith combination equation)</a> <span class="where">Penman–Monteith combination equation</span></li>
+<li><a href="th_atmosphere.html#lai">Partitioning of the potential evapotranspiration (Atmospheric inputs: partitioning, daily variation, interception, snow)</a> <span class="where">Atmospheric inputs: partitioning, daily variation, interception, snow</span></li>
+<li><a href="root_uptake_page.html">passive uptake</a> <span class="where">Root water and solute uptake</span></li>
+<li><a href="th_root_solute.html">passive uptake</a> <span class="where">Root solute uptake</span></li>
+<li><a href="th_root_solute.html#passive">Passive uptake (Root solute uptake)</a> <span class="where">Root solute uptake</span></li>
+<li><a href="solute_general.html">Peclet</a> <span class="where">Solute transport: general</span></li>
+<li><a href="res_runtime.html">Peclet number</a> <span class="where">Run-time information</span></li>
+<li><a href="th_discretization.html">Peclet number</a> <span class="where">Notes on spatial and temporal discretization</span></li>
+<li><a href="rosetta.html">pedotransfer functions</a> <span class="where">Neural network prediction (Rosetta)</span></li>
+<li><a href="th_rosetta.html">pedotransfer functions</a> <span class="where">Pedotransfer functions (Rosetta)</span></li>
+<li><a href="credits.html#pedotransfer-functions">Pedotransfer functions (Credits and license)</a> <span class="where">Credits and license</span></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a> <span class="where">Pedotransfer functions (Rosetta)</span></li>
+<li><a href="meteo_page.html">Penman-Monteith</a> <span class="where">Meteorological data</span></li>
+<li><a href="th_penman.html">Penman-Monteith</a> <span class="where">Penman–Monteith combination equation</span></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a> <span class="where">Penman–Monteith combination equation</span></li>
+<li><a href="solute_params.html#per-material">Per material (Solute transport: transport parameters)</a> <span class="where">Solute transport: transport parameters</span></li>
+<li><a href="res_runtime.html">performance</a> <span class="where">Run-time information</span></li>
+<li><a href="th_vapor.html">Philip de Vries</a> <span class="where">Coupled water, vapor and heat flow</span></li>
+<li><a href="th_nonequilibrium.html">physical non-equilibrium</a> <span class="where">Non-equilibrium solute transport</span></li>
+<li><a href="th_numerics.html">Picard iteration</a> <span class="where">Numerical solution</span></li>
+<li><a href="figures.html">plot</a> <span class="where">Figure editor</span></li>
+<li><a href="shortcuts.html">plots</a> <span class="where">Keyboard and mouse</span></li>
+<li><a href="shortcuts.html#plots">Plots (Keyboard and mouse)</a> <span class="where">Keyboard and mouse</span></li>
+<li><a href="figures.html">PNG</a> <span class="where">Figure editor</span></li>
+<li><a href="th_bc_water.html">ponding</a> <span class="where">Boundary conditions of water flow</span></li>
+<li><a href="water_bc.html">ponding</a> <span class="where">Water flow boundary conditions</span></li>
+<li><a href="soil_params.html">pore connectivity</a> <span class="where">Materials &amp; parameters</span></li>
+<li><a href="hydrus_relation.html">port</a> <span class="where">Relation to HYDRUS-1D</span></li>
+<li><a href="th_atmosphere.html">potential evapotranspiration</a> <span class="where">Atmospheric inputs: partitioning, daily variation, interception, snow</span></li>
+<li><a href="th_hargreaves.html">potential evapotranspiration</a> <span class="where">Hargreaves equation</span></li>
+<li><a href="th_penman.html">potential evapotranspiration</a> <span class="where">Penman–Monteith combination equation</span></li>
+<li><a href="time_variable_bc.html">precipitation</a> <span class="where">Time-variable boundary data</span></li>
+<li><a href="hydrus_relation.html">precision</a> <span class="where">Relation to HYDRUS-1D</span></li>
+<li><a href="hydrus_relation.html#precision">Precision (Relation to HYDRUS-1D)</a> <span class="where">Relation to HYDRUS-1D</span></li>
+<li><a href="th_dual_permeability.html">preferential flow</a> <span class="where">Dual-permeability model</span></li>
+<li><a href="th_dual_porosity.html">preferential flow</a> <span class="where">Dual-porosity models</span></li>
+<li><a href="th_richards.html">pressure head</a> <span class="where">Variably saturated water flow</span></li>
+<li><a href="th_bc_water.html#pressure-head-and-flux-conditions">Pressure head and flux conditions (Boundary conditions of water flow)</a> <span class="where">Boundary conditions of water flow</span></li>
+<li><a href="res_profiles.html">pressure head profile</a> <span class="where">Profiles</span></li>
+<li><a href="iteration.html">pressure head tolerance</a> <span class="where">Iteration criteria</span></li>
+<li><a href="res_profiles.html">print times</a> <span class="where">Profiles</span></li>
+<li><a href="time_output.html">print times</a> <span class="where">Time &amp; output</span></li>
+<li><a href="time_output.html#printing">Printing (Time &amp; output)</a> <span class="where">Time &amp; output</span></li>
+<li><a href="check_run.html">problems</a> <span class="where">Check &amp; run</span></li>
+<li><a href="faq.html">problems</a> <span class="where">Questions and problems</span></li>
+<li><a href="workflow.html">procedure</a> <span class="where">Workflow of a project</span></li>
+<li><a href="processes.html">Processes &amp; units</a> <span class="where">Processes &amp; units</span></li>
+<li><a href="processes.html#processes">Processes (Processes &amp; units)</a> <span class="where">Processes &amp; units</span></li>
+<li><a href="solute_reactions.html">production</a> <span class="where">Solute transport: reactions</span></li>
+<li><a href="profile_editor.html#discretization">Profile depth and discretization (Soil profile)</a> <span class="where">Soil profile</span></li>
+<li><a href="profile_editor.html">profile editor</a> <span class="where">Soil profile</span></li>
+<li><a href="shortcuts.html">profile editor</a> <span class="where">Keyboard and mouse</span></li>
+<li><a href="res_profiles.html">profile information</a> <span class="where">Profiles</span></li>
+<li><a href="profile_editor.html">PROFILE.DAT</a> <span class="where">Soil profile</span></li>
+<li><a href="res_profiles.html">Profiles</a> <span class="where">Profiles</span></li>
+<li><a href="projects.html">project</a> <span class="where">Projects and files</span></li>
+<li><a href="processes.html#project-and-units">Project and units (Processes &amp; units)</a> <span class="where">Processes &amp; units</span></li>
+<li><a href="processes.html">project title</a> <span class="where">Processes &amp; units</span></li>
+<li><a href="projects.html">Projects and files</a> <span class="where">Projects and files</span></li>
+<li><a href="th_penman.html">psychrometric constant</a> <span class="where">Penman–Monteith combination equation</span></li>
+<li><a href="rosetta.html">PTF</a> <span class="where">Neural network prediction (Rosetta)</span></li>
+<li><a href="th_rosetta.html">PTF</a> <span class="where">Pedotransfer functions (Rosetta)</span></li>
+<li><a href="figures.html">publication figure</a> <span class="where">Figure editor</span></li>
+<li><a href="solute_bc.html">pulse duration</a> <span class="where">Solute transport: boundary conditions</span></li>
+<li><a href="th_hysteresis.html">pumping effect</a> <span class="where">Hysteresis</span></li>
+<li><a href="profile_editor.html#quantities">Quantities (Soil profile)</a> <span class="where">Soil profile</span></li>
+<li><a href="faq.html">Questions and problems</a> <span class="where">Questions and problems</span></li>
+<li><a href="getting_started.html">quick start</a> <span class="where">Getting started</span></li>
+<li><a href="res_inverse.html">R2</a> <span class="where">Parameter estimation results</span></li>
+<li><a href="meteo_page.html">radiation</a> <span class="where">Meteorological data</span></li>
+<li><a href="th_penman.html#radiation">Radiation (Penman–Monteith combination equation)</a> <span class="where">Penman–Monteith combination equation</span></li>
+<li><a href="meteo_page.html#radiation-and-cloudiness">Radiation and cloudiness (Meteorological data)</a> <span class="where">Meteorological data</span></li>
+<li><a href="th_colloids.html">random sequential adsorption</a> <span class="where">Colloid, virus and bacteria transport</span></li>
+<li><a href="solute_reactions.html">reaction parameters</a> <span class="where">Solute transport: reactions</span></li>
+<li><a href="time_variable_bc.html">records</a> <span class="where">Time-variable boundary data</span></li>
+<li><a href="meteo_page.html#records">Records (Meteorological data)</a> <span class="where">Meteorological data</span></li>
+<li><a href="references.html">References</a> <span class="where">References</span></li>
+<li><a href="processes.html#related-topics">Related topics (Processes &amp; units)</a> <span class="where">Processes &amp; units</span></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a> <span class="where">Relation to HYDRUS-1D</span></li>
+<li><a href="figures.html">resolution</a> <span class="where">Figure editor</span></li>
+<li><a href="hyd_model.html">restart</a> <span class="where">Soil hydraulic model</span></li>
+<li><a href="rosetta.html#result">Result (Neural network prediction (Rosetta))</a> <span class="where">Neural network prediction (Rosetta)</span></li>
+<li><a href="res_inverse.html#results">Results (Parameter estimation results)</a> <span class="where">Parameter estimation results</span></li>
+<li><a href="projects.html#results">Results (Projects and files)</a> <span class="where">Projects and files</span></li>
+<li><a href="run_comparison.html">results file</a> <span class="where">Comparison of runs</span></li>
+<li><a href="output_files.html">results files</a> <span class="where">Output files</span></li>
+<li><a href="th_solute.html">retardation</a> <span class="where">Solute transport equations</span></li>
+<li><a href="res_soilprops.html">retention curve</a> <span class="where">Soil hydraulic properties</span></li>
+<li><a href="th_hydraulic_models.html">retention curve</a> <span class="where">Soil hydraulic property models</span></li>
+<li><a href="th_hysteresis.html">reversal point</a> <span class="where">Hysteresis</span></li>
+<li><a href="th_richards.html">Richards equation</a> <span class="where">Variably saturated water flow</span></li>
+<li><a href="th_colloids.html">ripening</a> <span class="where">Colloid, virus and bacteria transport</span></li>
+<li><a href="profile_editor.html">root distribution</a> <span class="where">Soil profile</span></li>
+<li><a href="th_root_uptake.html">root distribution</a> <span class="where">Root water uptake</span></li>
+<li><a href="th_root_uptake.html#distribution">Root distribution (Root water uptake)</a> <span class="where">Root water uptake</span></li>
+<li><a href="root_uptake_page.html#growth">Root distribution and growth (Root water and solute uptake)</a> <span class="where">Root water and solute uptake</span></li>
+<li><a href="processes.html">root growth</a> <span class="where">Processes &amp; units</span></li>
+<li><a href="root_uptake_page.html">root growth</a> <span class="where">Root water and solute uptake</span></li>
+<li><a href="th_root_uptake.html">root growth</a> <span class="where">Root water uptake</span></li>
+<li><a href="th_root_uptake.html#growth">Root growth (Root water uptake)</a> <span class="where">Root water uptake</span></li>
+<li><a href="th_root_solute.html">Root solute uptake</a> <span class="where">Root solute uptake</span></li>
+<li><a href="root_uptake_page.html#root-solute-uptake">Root solute uptake (Root water and solute uptake)</a> <span class="where">Root water and solute uptake</span></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a> <span class="where">Root water and solute uptake</span></li>
+<li><a href="processes.html">root water uptake</a> <span class="where">Processes &amp; units</span></li>
+<li><a href="root_uptake_page.html">root water uptake</a> <span class="where">Root water and solute uptake</span></li>
+<li><a href="th_root_uptake.html">Root water uptake</a> <span class="where">Root water uptake</span></li>
+<li><a href="root_uptake_page.html#root-water-uptake-model">Root water uptake model (Root water and solute uptake)</a> <span class="where">Root water and solute uptake</span></li>
+<li><a href="rosetta.html">Rosetta</a> <span class="where">Neural network prediction (Rosetta)</span></li>
+<li><a href="soil_params.html">Rosetta</a> <span class="where">Materials &amp; parameters</span></li>
+<li><a href="th_rosetta.html">Rosetta</a> <span class="where">Pedotransfer functions (Rosetta)</span></li>
+<li><a href="rosetta.html">Rosetta 3</a> <span class="where">Neural network prediction (Rosetta)</span></li>
+<li><a href="rosetta.html">Rosetta Lite</a> <span class="where">Neural network prediction (Rosetta)</span></li>
+<li><a href="th_advanced_options.html">Ross Smettem</a> <span class="where">Non-equilibrium water flow, centrifuge and density-dependent flow</span></li>
+<li><a href="th_colloids.html">RSA</a> <span class="where">Colloid, virus and bacteria transport</span></li>
+<li><a href="check_run.html">run</a> <span class="where">Check &amp; run</span></li>
+<li><a href="res_runtime.html">run time information</a> <span class="where">Run-time information</span></li>
+<li><a href="res_runtime.html">Run-time information</a> <span class="where">Run-time information</span></li>
+<li><a href="res_runtime.html">Run_Inf</a> <span class="where">Run-time information</span></li>
+<li><a href="check_run.html#running">Running (Check &amp; run)</a> <span class="where">Check &amp; run</span></li>
+<li><a href="res_fluxes.html">runoff</a> <span class="where">Boundary fluxes, heads and cumulative quantities</span></li>
+<li><a href="th_bc_water.html">runoff</a> <span class="where">Boundary conditions of water flow</span></li>
+<li><a href="water_bc.html">runoff</a> <span class="where">Water flow boundary conditions</span></li>
+<li><a href="th_inverse.html#rusteau">Rusteau iteration (Parameter estimation)</a> <span class="where">Parameter estimation</span></li>
+<li><a href="projects.html#h1dr">Rusteau projects (.h1dr) (Projects and files)</a> <span class="where">Projects and files</span></li>
+<li><a href="contents.html">Rusteau-1D Help</a> <span class="where">Rusteau-1D Help</span></li>
+<li><a href="cli.html">rusteau-cli</a> <span class="where">Command line program</span></li>
+<li><a href="root_uptake_page.html">S-shape</a> <span class="where">Root water and solute uptake</span></li>
+<li><a href="th_root_uptake.html">S-shape</a> <span class="where">Root water uptake</span></li>
+<li><a href="th_root_uptake.html">salinity</a> <span class="where">Root water uptake</span></li>
+<li><a href="rosetta.html">sand silt clay</a> <span class="where">Neural network prediction (Rosetta)</span></li>
+<li><a href="projects.html">save</a> <span class="where">Projects and files</span></li>
+<li><a href="run_comparison.html">save run</a> <span class="where">Comparison of runs</span></li>
+<li><a href="profile_editor.html">scaling factors</a> <span class="where">Soil profile</span></li>
+<li><a href="th_scaling.html">scaling factors</a> <span class="where">Scaling of the hydraulic properties</span></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a> <span class="where">Scaling of the hydraulic properties</span></li>
+<li><a href="th_hysteresis.html">scanning curves</a> <span class="where">Hysteresis</span></li>
+<li><a href="run_comparison.html">scenario</a> <span class="where">Comparison of runs</span></li>
+<li><a href="cli.html">scripting</a> <span class="where">Command line program</span></li>
+<li><a href="figures.html#see-also">See also (Figure editor)</a> <span class="where">Figure editor</span></li>
+<li><a href="th_bc_water.html">seepage face</a> <span class="where">Boundary conditions of water flow</span></li>
+<li><a href="water_bc.html">seepage face</a> <span class="where">Water flow boundary conditions</span></li>
+<li><a href="th_bc_water.html#seepage">Seepage face (Boundary conditions of water flow)</a> <span class="where">Boundary conditions of water flow</span></li>
+<li><a href="profile_editor.html#selecting-nodes">Selecting nodes (Soil profile)</a> <span class="where">Soil profile</span></li>
+<li><a href="th_energy_balance.html#sensible-and-latent-heat">Sensible and latent heat (Surface energy balance)</a> <span class="where">Surface energy balance</span></li>
+<li><a href="th_energy_balance.html">sensible heat</a> <span class="where">Surface energy balance</span></li>
+<li><a href="run_comparison.html">sensitivity</a> <span class="where">Comparison of runs</span></li>
+<li><a href="workflow.html">setting up a model</a> <span class="where">Workflow of a project</span></li>
+<li><a href="profile_editor.html#setting-values-in-the-selection">Setting values in the selection (Soil profile)</a> <span class="where">Soil profile</span></li>
+<li><a href="run_comparison.html#showing-runs-in-a-figure">Showing runs in a figure (Comparison of runs)</a> <span class="where">Comparison of runs</span></li>
+<li><a href="th_scaling.html">similar media</a> <span class="where">Scaling of the hydraulic properties</span></li>
+<li><a href="th_richards.html">sink term</a> <span class="where">Variably saturated water flow</span></li>
+<li><a href="th_root_uptake.html">sink term</a> <span class="where">Root water uptake</span></li>
+<li><a href="th_root_uptake.html#sink-term">Sink term (Root water uptake)</a> <span class="where">Root water uptake</span></li>
+<li><a href="th_atmosphere.html#sinusoidal-precipitation">Sinusoidal precipitation (Atmospheric inputs: partitioning, daily variation, interception, snow)</a> <span class="where">Atmospheric inputs: partitioning, daily variation, interception, snow</span></li>
+<li><a href="faq.html">slow simulation</a> <span class="where">Questions and problems</span></li>
+<li><a href="th_atmosphere.html">snow</a> <span class="where">Atmospheric inputs: partitioning, daily variation, interception, snow</span></li>
+<li><a href="time_variable_bc.html">snow</a> <span class="where">Time-variable boundary data</span></li>
+<li><a href="th_atmosphere.html#snow">Snow (Atmospheric inputs: partitioning, daily variation, interception, snow)</a> <span class="where">Atmospheric inputs: partitioning, daily variation, interception, snow</span></li>
+<li><a href="th_atmosphere.html">snow melt</a> <span class="where">Atmospheric inputs: partitioning, daily variation, interception, snow</span></li>
+<li><a href="soil_params.html">soil catalog</a> <span class="where">Materials &amp; parameters</span></li>
+<li><a href="soil_params.html#catalog">Soil catalog (Materials &amp; parameters)</a> <span class="where">Materials &amp; parameters</span></li>
+<li><a href="th_atmosphere.html">soil cover fraction</a> <span class="where">Atmospheric inputs: partitioning, daily variation, interception, snow</span></li>
+<li><a href="th_energy_balance.html">soil heat flux</a> <span class="where">Surface energy balance</span></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a> <span class="where">Soil hydraulic model</span></li>
+<li><a href="soil_params.html">soil hydraulic parameters</a> <span class="where">Materials &amp; parameters</span></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a> <span class="where">Soil hydraulic properties</span></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a> <span class="where">Soil hydraulic property models</span></li>
+<li><a href="profile_editor.html">Soil profile</a> <span class="where">Soil profile</span></li>
+<li><a href="shortcuts.html#soil-profile-editor">Soil profile editor (Keyboard and mouse)</a> <span class="where">Keyboard and mouse</span></li>
+<li><a href="th_energy_balance.html">soil surface resistance</a> <span class="where">Surface energy balance</span></li>
+<li><a href="th_discretization.html#transport">Solute and heat transport (Notes on spatial and temporal discretization)</a> <span class="where">Notes on spatial and temporal discretization</span></li>
+<li><a href="th_numerics.html#solute">Solute and heat transport (Numerical solution)</a> <span class="where">Numerical solution</span></li>
+<li><a href="solute_bc.html">solute boundary conditions</a> <span class="where">Solute transport: boundary conditions</span></li>
+<li><a href="res_fluxes.html">solute fluxes</a> <span class="where">Boundary fluxes, heads and cumulative quantities</span></li>
+<li><a href="th_discretization.html">solute front</a> <span class="where">Notes on spatial and temporal discretization</span></li>
+<li><a href="res_balance.html">solute mass balance</a> <span class="where">Mass balance</span></li>
+<li><a href="examples.html#solute-pulse-with-sorption-and-decay">Solute pulse with sorption and decay (Examples)</a> <span class="where">Examples</span></li>
+<li><a href="root_uptake_page.html">solute stress</a> <span class="where">Root water and solute uptake</span></li>
+<li><a href="root_uptake_page.html#solute-stress-parameters">Solute stress parameters (Root water and solute uptake)</a> <span class="where">Root water and solute uptake</span></li>
+<li><a href="th_dual_permeability.html">solute transfer</a> <span class="where">Dual-permeability model</span></li>
+<li><a href="processes.html">solute transport</a> <span class="where">Processes &amp; units</span></li>
+<li><a href="solute_general.html">solute transport</a> <span class="where">Solute transport: general</span></li>
+<li><a href="th_dual_permeability.html#solute-transport">Solute transport (Dual-permeability model)</a> <span class="where">Dual-permeability model</span></li>
+<li><a href="th_dual_porosity.html#solute-transport">Solute transport (Dual-porosity models)</a> <span class="where">Dual-porosity models</span></li>
+<li><a href="th_solute.html">Solute transport equations</a> <span class="where">Solute transport equations</span></li>
+<li><a href="solute_params.html">solute transport parameters</a> <span class="where">Solute transport: transport parameters</span></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a> <span class="where">Solute transport: boundary conditions</span></li>
+<li><a href="solute_general.html">Solute transport: general</a> <span class="where">Solute transport: general</span></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a> <span class="where">Solute transport: reactions</span></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a> <span class="where">Solute transport: temperature and water-content dependence, colloids</span></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a> <span class="where">Solute transport: transport parameters</span></li>
+<li><a href="solute_general.html#solutes">Solutes (Solute transport: general)</a> <span class="where">Solute transport: general</span></li>
+<li><a href="solute_reactions.html">sorption</a> <span class="where">Solute transport: reactions</span></li>
+<li><a href="th_solute.html">sorption</a> <span class="where">Solute transport equations</span></li>
+<li><a href="th_solute.html#sorption">Sorption (Solute transport equations)</a> <span class="where">Solute transport equations</span></li>
+<li><a href="references.html">sources</a> <span class="where">References</span></li>
+<li><a href="th_scaling.html">spatial variability</a> <span class="where">Scaling of the hydraulic properties</span></li>
+<li><a href="res_inverse.html">standard error</a> <span class="where">Parameter estimation results</span></li>
+<li><a href="check_run.html">start calculation</a> <span class="where">Check &amp; run</span></li>
+<li><a href="contents.html">start page</a> <span class="where">Rusteau-1D Help</span></li>
+<li><a href="res_inverse.html">starting points</a> <span class="where">Parameter estimation results</span></li>
+<li><a href="th_inverse.html">starting points</a> <span class="where">Parameter estimation</span></li>
+<li><a href="th_inverse.html#statistics">Statistics (Parameter estimation)</a> <span class="where">Parameter estimation</span></li>
+<li><a href="interface.html">status bar</a> <span class="where">The main window</span></li>
+<li><a href="workflow.html#step-1-project">Step 1 – Project (Workflow of a project)</a> <span class="where">Workflow of a project</span></li>
+<li><a href="workflow.html#step-2-soil">Step 2 – Soil (Workflow of a project)</a> <span class="where">Workflow of a project</span></li>
+<li><a href="workflow.html#step-3-boundary-conditions">Step 3 – Boundary conditions (Workflow of a project)</a> <span class="where">Workflow of a project</span></li>
+<li><a href="workflow.html#step-4-uptake-and-transport">Step 4 – Uptake and transport (Workflow of a project)</a> <span class="where">Workflow of a project</span></li>
+<li><a href="workflow.html#step-5-run">Step 5 – Run (Workflow of a project)</a> <span class="where">Workflow of a project</span></li>
+<li><a href="getting_started.html">step by step</a> <span class="where">Getting started</span></li>
+<li><a href="workflow.html">steps</a> <span class="where">Workflow of a project</span></li>
+<li><a href="check_run.html">stop</a> <span class="where">Check &amp; run</span></li>
+<li><a href="solute_advanced.html">straining</a> <span class="where">Solute transport: temperature and water-content dependence, colloids</span></li>
+<li><a href="th_colloids.html">straining</a> <span class="where">Colloid, virus and bacteria transport</span></li>
+<li><a href="th_dual_porosity.html">structured soils</a> <span class="where">Dual-porosity models</span></li>
+<li><a href="profile_editor.html">sub-regions</a> <span class="where">Soil profile</span></li>
+<li><a href="res_balance.html">sub-regions</a> <span class="where">Mass balance</span></li>
+<li><a href="res_balance.html#sub-regions">Sub-regions (Mass balance)</a> <span class="where">Mass balance</span></li>
+<li><a href="figures.html">subtitle</a> <span class="where">Figure editor</span></li>
+<li><a href="check_run.html">summary</a> <span class="where">Check &amp; run</span></li>
+<li><a href="meteo_page.html">sunshine</a> <span class="where">Meteorological data</span></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a> <span class="where">Surface energy balance</span></li>
+<li><a href="th_energy_balance.html">surface temperature</a> <span class="where">Surface energy balance</span></li>
+<li><a href="figures.html">SVG</a> <span class="where">Figure editor</span></li>
+<li><a href="figures.html">symbols</a> <span class="where">Figure editor</span></li>
+<li><a href="glossary.html">symbols</a> <span class="where">Symbols and glossary</span></li>
+<li><a href="glossary.html#symbols">Symbols (Symbols and glossary)</a> <span class="where">Symbols and glossary</span></li>
+<li><a href="glossary.html">Symbols and glossary</a> <span class="where">Symbols and glossary</span></li>
+<li><a href="output_files.html">T_LEVEL</a> <span class="where">Output files</span></li>
+<li><a href="res_fluxes.html">T_Level</a> <span class="where">Boundary fluxes, heads and cumulative quantities</span></li>
+<li><a href="output_files.html#tlevel">T_LEVEL.csv – time-level information (Output files)</a> <span class="where">Output files</span></li>
+<li><a href="output_files.html#tlevel1">T_LEVEL1.csv – extended fluxes (Output files)</a> <span class="where">Output files</span></li>
+<li><a href="further_options.html">TauW</a> <span class="where">Further options of the HYDRUS code</span></li>
+<li><a href="th_advanced_options.html">TauW</a> <span class="where">Non-equilibrium water flow, centrifuge and density-dependent flow</span></li>
+<li><a href="th_heat.html">temperature</a> <span class="where">Heat transport</span></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a> <span class="where">Temperature and water-content dependence of reactions</span></li>
+<li><a href="heat_page.html">temperature boundary conditions</a> <span class="where">Heat transport</span></li>
+<li><a href="hyd_model.html">temperature dependence</a> <span class="where">Soil hydraulic model</span></li>
+<li><a href="solute_advanced.html">temperature dependence</a> <span class="where">Solute transport: temperature and water-content dependence, colloids</span></li>
+<li><a href="th_hydraulic_models.html">temperature dependence</a> <span class="where">Soil hydraulic property models</span></li>
+<li><a href="th_reaction_dependence.html">temperature dependence</a> <span class="where">Temperature and water-content dependence of reactions</span></li>
+<li><a href="hyd_model.html#temperature-dependence">Temperature dependence (Soil hydraulic model)</a> <span class="where">Soil hydraulic model</span></li>
+<li><a href="th_hydraulic_models.html#temperature">Temperature dependence (Soil hydraulic property models)</a> <span class="where">Soil hydraulic property models</span></li>
+<li><a href="th_reaction_dependence.html#temperature">Temperature dependence (Temperature and water-content dependence of reactions)</a> <span class="where">Temperature and water-content dependence of reactions</span></li>
+<li><a href="th_hargreaves.html">temperature-based</a> <span class="where">Hargreaves equation</span></li>
+<li><a href="figures.html">template</a> <span class="where">Figure editor</span></li>
+<li><a href="measured_data.html">text file</a> <span class="where">Measured data</span></li>
+<li><a href="figures.html#markup">Text: markup and symbols (Figure editor)</a> <span class="where">Figure editor</span></li>
+<li><a href="rosetta.html">texture</a> <span class="where">Neural network prediction (Rosetta)</span></li>
+<li><a href="th_rosetta.html">texture</a> <span class="where">Pedotransfer functions (Rosetta)</span></li>
+<li><a href="faq.html#the-actual-transpiration-is-smaller-than-the-potential-one">The actual transpiration is smaller than the potential one (Questions and problems)</a> <span class="where">Questions and problems</span></li>
+<li><a href="faq.html#convergence">The calculation stops: the iteration does not converge (Questions and problems)</a> <span class="where">Questions and problems</span></li>
+<li><a href="introduction.html#the-interface">The interface (Introduction to Rusteau-1D)</a> <span class="where">Introduction to Rusteau-1D</span></li>
+<li><a href="interface.html">The main window</a> <span class="where">The main window</span></li>
+<li><a href="faq.html#the-mass-balance-error-is-large">The mass balance error is large (Questions and problems)</a> <span class="where">Questions and problems</span></li>
+<li><a href="soil_params.html#l">The parameter l (Materials &amp; parameters)</a> <span class="where">Materials &amp; parameters</span></li>
+<li><a href="faq.html#crash">The program stopped unexpectedly (Questions and problems)</a> <span class="where">Questions and problems</span></li>
+<li><a href="th_hysteresis.html#lenhard">The pumping effect and the model of Lenhard et al. (Hysteresis)</a> <span class="where">Hysteresis</span></li>
+<li><a href="faq.html#the-results-differ-from-hydrus-1d">The results differ from HYDRUS-1D (Questions and problems)</a> <span class="where">Questions and problems</span></li>
+<li><a href="faq.html#the-run-is-slow">The run is slow (Questions and problems)</a> <span class="where">Questions and problems</span></li>
+<li><a href="figures.html#the-window">The window (Figure editor)</a> <span class="where">Figure editor</span></li>
+<li><a href="figures.html">theme</a> <span class="where">Figure editor</span></li>
+<li><a href="interface.html">themes</a> <span class="where">The main window</span></li>
+<li><a href="interface.html#themes">Themes (The main window)</a> <span class="where">The main window</span></li>
+<li><a href="heat_page.html">thermal conductivity</a> <span class="where">Heat transport</span></li>
+<li><a href="th_heat.html">thermal conductivity</a> <span class="where">Heat transport</span></li>
+<li><a href="th_heat.html#conductivity">Thermal conductivity (Heat transport)</a> <span class="where">Heat transport</span></li>
+<li><a href="heat_page.html">thermal dispersivity</a> <span class="where">Heat transport</span></li>
+<li><a href="th_heat.html">thermal dispersivity</a> <span class="where">Heat transport</span></li>
+<li><a href="th_vapor.html">thermal vapor flux</a> <span class="where">Coupled water, vapor and heat flow</span></li>
+<li><a href="soil_params.html">theta r</a> <span class="where">Materials &amp; parameters</span></li>
+<li><a href="soil_params.html">theta s</a> <span class="where">Materials &amp; parameters</span></li>
+<li><a href="res_soilprops.html">theta(h)</a> <span class="where">Soil hydraulic properties</span></li>
+<li><a href="th_numerics.html">Thomas algorithm</a> <span class="where">Numerical solution</span></li>
+<li><a href="time_output.html">Time &amp; output</a> <span class="where">Time &amp; output</span></li>
+<li><a href="time_output.html">time discretization</a> <span class="where">Time &amp; output</span></li>
+<li><a href="time_output.html#time-discretization">Time discretization (Time &amp; output)</a> <span class="where">Time &amp; output</span></li>
+<li><a href="time_output.html">time information</a> <span class="where">Time &amp; output</span></li>
+<li><a href="res_obs.html">time series</a> <span class="where">Observation points</span></li>
+<li><a href="res_profiles.html">time slider</a> <span class="where">Profiles</span></li>
+<li><a href="time_output.html">time step</a> <span class="where">Time &amp; output</span></li>
+<li><a href="th_numerics.html">time step control</a> <span class="where">Numerical solution</span></li>
+<li><a href="th_numerics.html#timestep">Time step control (Numerical solution)</a> <span class="where">Numerical solution</span></li>
+<li><a href="res_runtime.html">time steps</a> <span class="where">Run-time information</span></li>
+<li><a href="units.html">time unit</a> <span class="where">Units</span></li>
+<li><a href="solute_general.html">time weighting</a> <span class="where">Solute transport: general</span></li>
+<li><a href="time_variable_bc.html">time-variable boundary conditions</a> <span class="where">Time-variable boundary data</span></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a> <span class="where">Time-variable boundary data</span></li>
+<li><a href="th_bc_water.html#time-variable-conditions">Time-variable conditions (Boundary conditions of water flow)</a> <span class="where">Boundary conditions of water flow</span></li>
+<li><a href="workflow.html#tips">Tips (Workflow of a project)</a> <span class="where">Workflow of a project</span></li>
+<li><a href="figures.html">title</a> <span class="where">Figure editor</span></li>
+<li><a href="iteration.html">tolerance</a> <span class="where">Iteration criteria</span></li>
+<li><a href="interface.html">tooltips</a> <span class="where">The main window</span></li>
+<li><a href="solute_general.html">tortuosity</a> <span class="where">Solute transport: general</span></li>
+<li><a href="th_solute.html">tortuosity</a> <span class="where">Solute transport equations</span></li>
+<li><a href="th_root_uptake.html">transpiration</a> <span class="where">Root water uptake</span></li>
+<li><a href="time_variable_bc.html">transpiration</a> <span class="where">Time-variable boundary data</span></li>
+<li><a href="solute_general.html#transport-model">Transport model (Solute transport: general)</a> <span class="where">Solute transport: general</span></li>
+<li><a href="water_bc.html">triggered irrigation</a> <span class="where">Water flow boundary conditions</span></li>
+<li><a href="water_bc.html#irrigation">Triggered irrigation (Water flow boundary conditions)</a> <span class="where">Water flow boundary conditions</span></li>
+<li><a href="faq.html">troubleshooting</a> <span class="where">Questions and problems</span></li>
+<li><a href="getting_started.html">tutorial</a> <span class="where">Getting started</span></li>
+<li><a href="examples.html">tutorial projects</a> <span class="where">Examples</span></li>
+<li><a href="th_nonequilibrium.html">two-region</a> <span class="where">Non-equilibrium solute transport</span></li>
+<li><a href="th_nonequilibrium.html">two-site sorption</a> <span class="where">Non-equilibrium solute transport</span></li>
+<li><a href="th_nonequilibrium.html#twosite">Two-site sorption (chemical non-equilibrium) (Non-equilibrium solute transport)</a> <span class="where">Non-equilibrium solute transport</span></li>
+<li><a href="th_nonequilibrium.html#typical-behaviour">Typical behaviour (Non-equilibrium solute transport)</a> <span class="where">Non-equilibrium solute transport</span></li>
+<li><a href="th_hydraulic_models.html#typical-values">Typical values (Soil hydraulic property models)</a> <span class="where">Soil hydraulic property models</span></li>
+<li><a href="units.html">unit conversion</a> <span class="where">Units</span></li>
+<li><a href="units.html#conversion">Unit conversion (Units)</a> <span class="where">Units</span></li>
+<li><a href="processes.html">units</a> <span class="where">Processes &amp; units</span></li>
+<li><a href="units.html">Units</a> <span class="where">Units</span></li>
+<li><a href="units.html#heat">Units of the heat parameters (Units)</a> <span class="where">Units</span></li>
+<li><a href="th_richards.html">unsaturated flow</a> <span class="where">Variably saturated water flow</span></li>
+<li><a href="th_rosetta.html">UNSODA</a> <span class="where">Pedotransfer functions (Rosetta)</span></li>
+<li><a href="water_bc.html">upper boundary</a> <span class="where">Water flow boundary conditions</span></li>
+<li><a href="solute_bc.html#upper-boundary">Upper boundary (Solute transport: boundary conditions)</a> <span class="where">Solute transport: boundary conditions</span></li>
+<li><a href="water_bc.html#upper-boundary">Upper boundary (Water flow boundary conditions)</a> <span class="where">Water flow boundary conditions</span></li>
+<li><a href="solute_general.html">upstream weighting</a> <span class="where">Solute transport: general</span></li>
+<li><a href="th_numerics.html">upstream weighting</a> <span class="where">Numerical solution</span></li>
+<li><a href="introduction.html">vadose zone</a> <span class="where">Introduction to Rusteau-1D</span></li>
+<li><a href="check_run.html">validation</a> <span class="where">Check &amp; run</span></li>
+<li><a href="hyd_model.html">van Genuchten</a> <span class="where">Soil hydraulic model</span></li>
+<li><a href="th_hydraulic_models.html">van Genuchten</a> <span class="where">Soil hydraulic property models</span></li>
+<li><a href="th_hydraulic_models.html#airentry">van Genuchten with an air-entry value of −2 cm (Soil hydraulic property models)</a> <span class="where">Soil hydraulic property models</span></li>
+<li><a href="th_hydraulic_models.html#vg">van Genuchten – Mualem (Soil hydraulic property models)</a> <span class="where">Soil hydraulic property models</span></li>
+<li><a href="processes.html">vapor flow</a> <span class="where">Processes &amp; units</span></li>
+<li><a href="th_vapor.html">vapor flow</a> <span class="where">Coupled water, vapor and heat flow</span></li>
+<li><a href="further_options.html#vapor-flow">Vapor flow (Further options of the HYDRUS code)</a> <span class="where">Further options of the HYDRUS code</span></li>
+<li><a href="th_penman.html#vapor-pressure">Vapor pressure (Penman–Monteith combination equation)</a> <span class="where">Penman–Monteith combination equation</span></li>
+<li><a href="th_penman.html">vapor pressure deficit</a> <span class="where">Penman–Monteith combination equation</span></li>
+<li><a href="glossary.html">variables</a> <span class="where">Symbols and glossary</span></li>
+<li><a href="th_richards.html">Variably saturated water flow</a> <span class="where">Variably saturated water flow</span></li>
+<li><a href="hydrus_relation.html">verification</a> <span class="where">Relation to HYDRUS-1D</span></li>
+<li><a href="introduction.html#verification">Verification (Introduction to Rusteau-1D)</a> <span class="where">Introduction to Rusteau-1D</span></li>
+<li><a href="hydrus_relation.html#verification">Verification against HYDRUS 4.17 (Relation to HYDRUS-1D)</a> <span class="where">Relation to HYDRUS-1D</span></li>
+<li><a href="profile_editor.html#views">Views (Soil profile)</a> <span class="where">Soil profile</span></li>
+<li><a href="solute_advanced.html">virus</a> <span class="where">Solute transport: temperature and water-content dependence, colloids</span></li>
+<li><a href="th_colloids.html">viruses</a> <span class="where">Colloid, virus and bacteria transport</span></li>
+<li><a href="th_advanced_options.html">viscosity</a> <span class="where">Non-equilibrium water flow, centrifuge and density-dependent flow</span></li>
+<li><a href="solute_bc.html">volatilization</a> <span class="where">Solute transport: boundary conditions</span></li>
+<li><a href="th_solute.html">volatilization</a> <span class="where">Solute transport equations</span></li>
+<li><a href="solute_advanced.html">Walker</a> <span class="where">Solute transport: temperature and water-content dependence, colloids</span></li>
+<li><a href="th_reaction_dependence.html">Walker</a> <span class="where">Temperature and water-content dependence of reactions</span></li>
+<li><a href="res_balance.html">WatBalR</a> <span class="where">Mass balance</span></li>
+<li><a href="res_balance.html">WatBalT</a> <span class="where">Mass balance</span></li>
+<li><a href="res_balance.html">water balance</a> <span class="where">Mass balance</span></li>
+<li><a href="res_soilprops.html">water capacity</a> <span class="where">Soil hydraulic properties</span></li>
+<li><a href="th_richards.html">water content</a> <span class="where">Variably saturated water flow</span></li>
+<li><a href="solute_advanced.html">water content dependence</a> <span class="where">Solute transport: temperature and water-content dependence, colloids</span></li>
+<li><a href="th_reaction_dependence.html">water content dependence</a> <span class="where">Temperature and water-content dependence of reactions</span></li>
+<li><a href="res_profiles.html">water content profile</a> <span class="where">Profiles</span></li>
+<li><a href="iteration.html">water content tolerance</a> <span class="where">Iteration criteria</span></li>
+<li><a href="processes.html">water flow</a> <span class="where">Processes &amp; units</span></li>
+<li><a href="th_richards.html">water flow</a> <span class="where">Variably saturated water flow</span></li>
+<li><a href="further_options.html#water-flow">Water flow (Further options of the HYDRUS code)</a> <span class="where">Further options of the HYDRUS code</span></li>
+<li><a href="th_discretization.html#water">Water flow (Notes on spatial and temporal discretization)</a> <span class="where">Notes on spatial and temporal discretization</span></li>
+<li><a href="th_numerics.html#water">Water flow (Numerical solution)</a> <span class="where">Numerical solution</span></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a> <span class="where">Water flow boundary conditions</span></li>
+<li><a href="res_fluxes.html">water fluxes</a> <span class="where">Boundary fluxes, heads and cumulative quantities</span></li>
+<li><a href="root_uptake_page.html">water stress</a> <span class="where">Root water and solute uptake</span></li>
+<li><a href="th_root_uptake.html">water stress</a> <span class="where">Root water uptake</span></li>
+<li><a href="th_root_uptake.html#stress">Water stress response functions (Root water uptake)</a> <span class="where">Root water uptake</span></li>
+<li><a href="th_dual_permeability.html">water transfer</a> <span class="where">Dual-permeability model</span></li>
+<li><a href="th_dual_permeability.html#water-transfer">Water transfer (Dual-permeability model)</a> <span class="where">Dual-permeability model</span></li>
+<li><a href="th_vapor.html">water vapor</a> <span class="where">Coupled water, vapor and heat flow</span></li>
+<li><a href="solute_advanced.html#water-content-dependence">Water-content dependence (Solute transport: temperature and water-content dependence, colloids)</a> <span class="where">Solute transport: temperature and water-content dependence, colloids</span></li>
+<li><a href="th_reaction_dependence.html#water">Water-content dependence (Temperature and water-content dependence of reactions)</a> <span class="where">Temperature and water-content dependence of reactions</span></li>
+<li><a href="inverse_page.html">weighting</a> <span class="where">Parameter estimation (inverse problem)</span></li>
+<li><a href="th_inverse.html">weighting</a> <span class="where">Parameter estimation</span></li>
+<li><a href="inverse_page.html#weighting-of-the-measurement-sets">Weighting of the measurement sets (Parameter estimation (inverse problem))</a> <span class="where">Parameter estimation (inverse problem)</span></li>
+<li><a href="th_discretization.html">wetting front</a> <span class="where">Notes on spatial and temporal discretization</span></li>
+<li><a href="introduction.html#what-the-program-computes">What the program computes (Introduction to Rusteau-1D)</a> <span class="where">Introduction to Rusteau-1D</span></li>
+<li><a href="faq.html#where-are-the-results-stored">Where are the results stored? (Questions and problems)</a> <span class="where">Questions and problems</span></li>
+<li><a href="meteo_page.html">wind</a> <span class="where">Meteorological data</span></li>
+<li><a href="workflow.html">workflow</a> <span class="where">Workflow of a project</span></li>
+<li><a href="interface.html">workflow bar</a> <span class="where">The main window</span></li>
+<li><a href="interface.html#bars">Workflow bar and status bar (The main window)</a> <span class="where">The main window</span></li>
+<li><a href="workflow.html">Workflow of a project</a> <span class="where">Workflow of a project</span></li>
+<li><a href="cli.html#writing-the-html-help">Writing the HTML help (Command line program)</a> <span class="where">Command line program</span></li>
+<li><a href="solute_bc.html">zero gradient</a> <span class="where">Solute transport: boundary conditions</span></li>
+<li><a href="solute_reactions.html">zero-order</a> <span class="where">Solute transport: reactions</span></li>
+<li><a href="th_solute.html">zero-order production</a> <span class="where">Solute transport equations</span></li>
+<li><a href="shortcuts.html">zoom</a> <span class="where">Keyboard and mouse</span></li>
+</ul>
+</article>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 1.0.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>

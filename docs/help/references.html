@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>References – Rusteau-1D Help</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html"><img src="favicon.png" alt="" width="22" height="22">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li><a href="units.html">Units</a></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details><summary>Solute transport</summary>
+<ul>
+<li><a href="solute_general.html">Solute transport: general</a></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+<li><a href="figures.html">Figure editor</a></li>
+<li><a href="run_comparison.html">Comparison of runs</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Theory and equations</summary>
+<ul>
+<li><a href="th_richards.html">Variably saturated water flow</a></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details open><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li class="current"><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<div class="crumbs">Reference</div>
+<h1>References</h1>
+<p>The equations and methods of Rusteau-1D come from the HYDRUS-1D code (version 4.08) and its technical manual <a href="references.html#simunek2009" class="cite" title="Šimůnek, J., M. Šejna, H. Saito, M. Sakai, and M. Th. van Genuchten (2009). The HYDRUS-1D Software Package for Simulating the One-Dimensional Movement of Water, Heat, and Multiple Solutes in Variably-Saturated Media, Version 4.08. HYDRUS Software Series 3, Department of Environmental Sciences, University of California Riverside, Riverside, CA, USA, 330 pp.">Šimůnek et al. (2009)</a>, which the numerical engine ports, and from the publications below. Each entry names what Rusteau-1D bases on it. Citations in the help topics link to this list; each topic also ends with the sources it cites.</p>
+<h3 id="letter-a">A</h3>
+<span class="anchor" id="adamczyk1994"></span>
+<p>Adamczyk, Z., B. Siwek, M. Zembala, and P. Belouschek (1994). Kinetics of localized adsorption of colloid particles. <em>Advances in Colloid and Interface Science</em> 48: 151–280. doi:<a href="https://doi.org/10.1016/0001-8686(94)80008-1" target="_blank" rel="noopener">10.1016/0001-8686(94)80008-1</a></p>
+<div class="note"><em>Basis for: </em><em>Random sequential adsorption (RSA) blocking function.</em></div>
+<span class="anchor" id="akaike1974"></span>
+<p>Akaike, H. (1974). A new look at the statistical model identification. <em>IEEE Transactions on Automatic Control</em> 19(6): 716–723. doi:<a href="https://doi.org/10.1109/TAC.1974.1100705" target="_blank" rel="noopener">10.1109/TAC.1974.1100705</a></p>
+<div class="note"><em>Basis for: </em><em>Akaike information criterion AIC.</em></div>
+<span class="anchor" id="allen1998"></span>
+<p>Allen, R. G., L. S. Pereira, D. Raes, and M. Smith (1998). <em>Crop Evapotranspiration – Guidelines for Computing Crop Water Requirements.</em> FAO Irrigation and Drainage Paper 56, Food and Agriculture Organization of the United Nations, Rome, 300 pp. <a href="https://www.fao.org/4/x0490e/x0490e00.htm" target="_blank" rel="noopener">https://www.fao.org/4/x0490e/x0490e00.htm</a></p>
+<div class="note"><em>Basis for: </em><em>Penman–Monteith equation: radiation terms, aerodynamic and canopy resistance, vapor pressure, psychrometric constant; LAI from the crop height.</em></div>
+<span class="anchor" id="angstrom1924"></span>
+<p>Ångström, A. (1924). Solar and terrestrial radiation. <em>Quarterly Journal of the Royal Meteorological Society</em> 50(210): 121–126. doi:<a href="https://doi.org/10.1002/qj.49705021008" target="_blank" rel="noopener">10.1002/qj.49705021008</a></p>
+<div class="note"><em>Basis for: </em><em>Solar radiation from the relative sunshine duration, Rs = (as + bs n/N) Ra.</em></div>
+<h3 id="letter-b">B</h3>
+<span class="anchor" id="bear1972"></span>
+<p>Bear, J. (1972). <em>Dynamics of Fluids in Porous Media.</em> Elsevier, New York, 764 pp.</p>
+<div class="note"><em>Basis for: </em><em>Advection–dispersion equation and hydrodynamic dispersion.</em></div>
+<span class="anchor" id="braden1985"></span>
+<p>Braden, H. (1985). Ein Energiehaushalts- und Verdunstungsmodell für Wasser- und Stoffhaushaltsuntersuchungen landwirtschaftlich genutzter Einzugsgebiete. <em>Mitteilungen der Deutschen Bodenkundlichen Gesellschaft</em> 42: 294–299.</p>
+<div class="note"><em>Basis for: </em><em>Canopy interception as a function of the leaf area index and the soil cover fraction.</em></div>
+<span class="anchor" id="bradford2003"></span>
+<p>Bradford, S. A., J. Šimůnek, M. Bettahar, M. Th. van Genuchten, and S. R. Yates (2003). Modeling colloid attachment, straining, and exclusion in saturated porous media. <em>Environmental Science &amp; Technology</em> 37(10): 2242–2250. doi:<a href="https://doi.org/10.1021/es025899u" target="_blank" rel="noopener">10.1021/es025899u</a></p>
+<div class="note"><em>Basis for: </em><em>Straining function of the colloid transport model.</em></div>
+<span class="anchor" id="brooksCorey1964"></span>
+<p>Brooks, R. H., and A. T. Corey (1964). <em>Hydraulic Properties of Porous Media.</em> Hydrology Paper No. 3, Colorado State University, Fort Collins, CO, 27 pp.</p>
+<div class="note"><em>Basis for: </em><em>Brooks–Corey retention and conductivity functions.</em></div>
+<span class="anchor" id="brutsaert1975"></span>
+<p>Brutsaert, W. (1975). On a derivable formula for long-wave radiation from clear skies. <em>Water Resources Research</em> 11(5): 742–744. doi:<a href="https://doi.org/10.1029/WR011i005p00742" target="_blank" rel="noopener">10.1029/WR011i005p00742</a></p>
+<div class="note"><em>Basis for: </em><em>Clear-sky emissivity of the atmosphere in the energy balance.</em></div>
+<h3 id="letter-c">C</h3>
+<span class="anchor" id="campbell1985"></span>
+<p>Campbell, G. S. (1985). <em>Soil Physics with BASIC: Transport Models for Soil-Plant Systems.</em> Elsevier, Amsterdam, 150 pp.</p>
+<div class="note"><em>Basis for: </em><em>Alternative thermal conductivity function from the quartz, mineral and clay fractions.</em></div>
+<span class="anchor" id="campbellNorman1998"></span>
+<p>Campbell, G. S., and J. M. Norman (1998). <em>An Introduction to Environmental Biophysics.</em> 2nd ed., Springer, New York, 286 pp.</p>
+<div class="note"><em>Basis for: </em><em>Emissivity of a cloudy sky; aerodynamic resistance with atmospheric stability corrections.</em></div>
+<span class="anchor" id="carselParrish1988"></span>
+<p>Carsel, R. F., and R. S. Parrish (1988). Developing joint probability distributions of soil water retention characteristics. <em>Water Resources Research</em> 24(5): 755–769. doi:<a href="https://doi.org/10.1029/WR024i005p00755" target="_blank" rel="noopener">10.1029/WR024i005p00755</a></p>
+<div class="note"><em>Basis for: </em><em>Soil catalog: average van Genuchten parameters of the 12 USDA textural classes.</em></div>
+<span class="anchor" id="cass1984"></span>
+<p>Cass, A., G. S. Campbell, and T. L. Jones (1984). Enhancement of thermal water vapor diffusion in soil. <em>Soil Science Society of America Journal</em> 48(1): 25–32. doi:<a href="https://doi.org/10.2136/sssaj1984.03615995004800010005x" target="_blank" rel="noopener">10.2136/sssaj1984.03615995004800010005x</a></p>
+<div class="note"><em>Basis for: </em><em>Enhancement factor of the thermal vapor flux.</em></div>
+<span class="anchor" id="celia1990"></span>
+<p>Celia, M. A., E. T. Bouloutas, and R. L. Zarba (1990). A general mass-conservative numerical solution for the unsaturated flow equation. <em>Water Resources Research</em> 26(7): 1483–1496. doi:<a href="https://doi.org/10.1029/WR026i007p01483" target="_blank" rel="noopener">10.1029/WR026i007p01483</a></p>
+<div class="note"><em>Basis for: </em><em>Mass-conservative modified Picard iteration for the Richards equation.</em></div>
+<span class="anchor" id="christie1976"></span>
+<p>Christie, I., D. F. Griffiths, A. R. Mitchell, and O. C. Zienkiewicz (1976). Finite element methods for second order differential equations with significant first derivatives. <em>International Journal for Numerical Methods in Engineering</em> 10(6): 1389–1396. doi:<a href="https://doi.org/10.1002/nme.1620100617" target="_blank" rel="noopener">10.1002/nme.1620100617</a></p>
+<div class="note"><em>Basis for: </em><em>Upstream weighting of the solute transport equation.</em></div>
+<span class="anchor" id="chungHorton1987"></span>
+<p>Chung, S.-O., and R. Horton (1987). Soil heat and water flow with a partial surface mulch. <em>Water Resources Research</em> 23(12): 2175–2186. doi:<a href="https://doi.org/10.1029/WR023i012p02175" target="_blank" rel="noopener">10.1029/WR023i012p02175</a></p>
+<div class="note"><em>Basis for: </em><em>Thermal conductivity λ0(θ) = b1 + b2 θ + b3 θ^0.5 and the coefficients for sand, loam and clay.</em></div>
+<span class="anchor" id="constantz1982"></span>
+<p>Constantz, J. (1982). Temperature dependence of unsaturated hydraulic conductivity of two soils. <em>Soil Science Society of America Journal</em> 46(3): 466–470. doi:<a href="https://doi.org/10.2136/sssaj1982.03615995004600030005x" target="_blank" rel="noopener">10.2136/sssaj1982.03615995004600030005x</a></p>
+<div class="note"><em>Basis for: </em><em>Temperature dependence of the hydraulic conductivity (viscosity and density of water).</em></div>
+<span class="anchor" id="crameri2020"></span>
+<p>Crameri, F., G. E. Shephard, and P. J. Heron (2020). The misuse of colour in science communication. <em>Nature Communications</em> 11: 5444. doi:<a href="https://doi.org/10.1038/s41467-020-19160-7" target="_blank" rel="noopener">10.1038/s41467-020-19160-7</a></p>
+<div class="note"><em>Basis for: </em><em>Choice of the palettes: perceptually uniform and readable with colour vision deficiencies and in grey-scale print.</em></div>
+<h3 id="letter-d">D</h3>
+<span class="anchor" id="deMarsily1986"></span>
+<p>de Marsily, G. (1986). <em>Quantitative Hydrogeology: Groundwater Hydrology for Engineers.</em> Academic Press, London, 440 pp.</p>
+<div class="note"><em>Basis for: </em><em>Thermal dispersivity in the apparent thermal conductivity.</em></div>
+<span class="anchor" id="deVries1963"></span>
+<p>de Vries, D. A. (1963). Thermal properties of soils. In: W. R. van Wijk (ed.), <em>Physics of Plant Environment</em>, North-Holland, Amsterdam, pp. 210–235.</p>
+<div class="note"><em>Basis for: </em><em>Volumetric heat capacity of the soil from its phase fractions.</em></div>
+<span class="anchor" id="doorenbosPruitt1977"></span>
+<p>Doorenbos, J., and W. O. Pruitt (1977). <em>Guidelines for Predicting Crop Water Requirements.</em> FAO Irrigation and Drainage Paper 24, Food and Agriculture Organization of the United Nations, Rome, 144 pp.</p>
+<div class="note"><em>Basis for: </em><em>Cloudiness factor of the net long-wave radiation from the relative sunshine duration (a1, b1).</em></div>
+<span class="anchor" id="durner1994"></span>
+<p>Durner, W. (1994). Hydraulic conductivity estimation for soils with heterogeneous pore structure. <em>Water Resources Research</em> 30(2): 211–223. doi:<a href="https://doi.org/10.1029/93WR02676" target="_blank" rel="noopener">10.1029/93WR02676</a></p>
+<div class="note"><em>Basis for: </em><em>Dual-porosity (bimodal) retention and conductivity functions.</em></div>
+<h3 id="letter-e">E</h3>
+<span class="anchor" id="ernst1962"></span>
+<p>Ernst, L. F. (1962). <em>Grondwaterstromingen in de verzadigde zone en hun berekening bij aanwezigheid van horizontale evenwijdige open leidingen.</em> Verslagen van Landbouwkundige Onderzoekingen 67(15), Pudoc, Wageningen, 189 pp.</p>
+<div class="note"><em>Basis for: </em><em>Drainage to parallel drains in layered soils (horizontal drains).</em></div>
+<h3 id="letter-f">F</h3>
+<span class="anchor" id="fayer2000"></span>
+<p>Fayer, M. J. (2000). <em>UNSAT-H Version 3.0: Unsaturated Soil Water and Heat Flow Model. Theory, User Manual, and Examples.</em> Report PNNL-13249, Pacific Northwest National Laboratory, Richland, WA.</p>
+<div class="note"><em>Basis for: </em><em>Daily sinusoidal variation of the evaporation and transpiration rates.</em></div>
+<span class="anchor" id="feddes1978"></span>
+<p>Feddes, R. A., P. J. Kowalik, and H. Zaradny (1978). <em>Simulation of Field Water Use and Crop Yield.</em> Simulation Monographs, Pudoc, Wageningen, 189 pp.</p>
+<div class="note"><em>Basis for: </em><em>Piecewise-linear water stress response function of root water uptake (P0, POpt, P2H, P2L, P3).</em></div>
+<h3 id="letter-g">G</h3>
+<span class="anchor" id="gerkeVG1993a"></span>
+<p>Gerke, H. H., and M. Th. van Genuchten (1993a). A dual-porosity model for simulating the preferential movement of water and solutes in structured porous media. <em>Water Resources Research</em> 29(2): 305–319. doi:<a href="https://doi.org/10.1029/92WR02339" target="_blank" rel="noopener">10.1029/92WR02339</a></p>
+<div class="note"><em>Basis for: </em><em>Dual-permeability model: water and solute transfer between the fracture and the matrix domain.</em></div>
+<span class="anchor" id="gerkeVG1993b"></span>
+<p>Gerke, H. H., and M. Th. van Genuchten (1993b). Evaluation of a first-order water transfer term for variably saturated dual-porosity flow models. <em>Water Resources Research</em> 29(4): 1225–1238. doi:<a href="https://doi.org/10.1029/92WR02467" target="_blank" rel="noopener">10.1029/92WR02467</a></p>
+<div class="note"><em>Basis for: </em><em>First-order water transfer coefficient αw = β/a² γw Ka.</em></div>
+<span class="anchor" id="gerkeVG1996"></span>
+<p>Gerke, H. H., and M. Th. van Genuchten (1996). Macroscopic representation of structural geometry for simulating water and solute movement in dual-porosity media. <em>Advances in Water Resources</em> 19(6): 343–357. doi:<a href="https://doi.org/10.1016/0309-1708(96)00012-7" target="_blank" rel="noopener">10.1016/0309-1708(96)00012-7</a></p>
+<div class="note"><em>Basis for: </em><em>Shape factor β of the aggregates in the transfer terms.</em></div>
+<h3 id="letter-h">H</h3>
+<span class="anchor" id="halton1960"></span>
+<p>Halton, J. H. (1960). On the efficiency of certain quasi-random sequences of points in evaluating multi-dimensional integrals. <em>Numerische Mathematik</em> 2: 84–90. doi:<a href="https://doi.org/10.1007/BF01386213" target="_blank" rel="noopener">10.1007/BF01386213</a></p>
+<div class="note"><em>Basis for: </em><em>Deterministic placement of the further starting points of the Rusteau parameter estimation.</em></div>
+<span class="anchor" id="hargreaves1994"></span>
+<p>Hargreaves, G. H. (1994). Defining and using reference evapotranspiration. <em>Journal of Irrigation and Drainage Engineering</em> 120(6): 1132–1139. doi:<a href="https://doi.org/10.1061/(ASCE)0733-9437(1994)120:6(1132)" target="_blank" rel="noopener">10.1061/(ASCE)0733-9437(1994)120:6(1132)</a></p>
+<div class="note"><em>Basis for: </em><em>Hargreaves equation.</em></div>
+<span class="anchor" id="hargreavesSamani1985"></span>
+<p>Hargreaves, G. H., and Z. A. Samani (1985). Reference crop evapotranspiration from temperature. <em>Applied Engineering in Agriculture</em> 1(2): 96–99. doi:<a href="https://doi.org/10.13031/2013.26773" target="_blank" rel="noopener">10.13031/2013.26773</a></p>
+<div class="note"><em>Basis for: </em><em>Hargreaves equation for the potential evapotranspiration.</em></div>
+<span class="anchor" id="heckbert1990"></span>
+<p>Heckbert, P. S. (1990). Nice numbers for graph labels. In: A. S. Glassner (ed.), <em>Graphics Gems</em>, Academic Press, Boston, 61–63.</p>
+<div class="note"><em>Basis for: </em><em>Tick steps of 1, 2 and 5 times a power of ten and axis ranges extended to the ticks.</em></div>
+<span class="anchor" id="hock2003"></span>
+<p>Hock, R. (2003). Temperature index melt modelling in mountain areas. <em>Journal of Hydrology</em> 282(1–4): 104–115. doi:<a href="https://doi.org/10.1016/S0022-1694(03)00257-9" target="_blank" rel="noopener">10.1016/S0022-1694(03)00257-9</a></p>
+<div class="note"><em>Basis for: </em><em>Background of the degree-day (temperature index) snow melt approach.</em></div>
+<span class="anchor" id="hoffmanVG1983"></span>
+<p>Hoffman, G. J., and M. Th. van Genuchten (1983). Soil properties for efficient use of water and salinity control. In: H. M. Taylor, W. R. Jordan, and T. R. Sinclair (eds.), <em>Limitations to Efficient Water Use in Crop Production</em>, ASA, CSSA, SSSA, Madison, WI, pp. 73–85.</p>
+<div class="note"><em>Basis for: </em><em>Root distribution function of the soil profile editor.</em></div>
+<span class="anchor" id="hooghoudt1940"></span>
+<p>Hooghoudt, S. B. (1940). Bijdragen tot de kennis van eenige natuurkundige grootheden van den grond, 7. Algemeene beschouwing van het probleem van de detail ontwatering en de infiltratie door middel van parallel loopende drains, greppels, slooten en kanalen. <em>Verslagen van Landbouwkundige Onderzoekingen</em> 46(14)B: 515–707.</p>
+<div class="note"><em>Basis for: </em><em>Drainage to parallel drains (horizontal drains).</em></div>
+<span class="anchor" id="hopmansStricker1989"></span>
+<p>Hopmans, J. W., and J. N. M. Stricker (1989). Stochastic analysis of soil water regime in a watershed. <em>Journal of Hydrology</em> 105(1–2): 57–84. doi:<a href="https://doi.org/10.1016/0022-1694(89)90096-6" target="_blank" rel="noopener">10.1016/0022-1694(89)90096-6</a></p>
+<div class="note"><em>Basis for: </em><em>Deep drainage: bottom flux as a function of the groundwater level, q = Aqh exp(Bqh |h − GWL0|).</em></div>
+<span class="anchor" id="hopmans2002"></span>
+<p>Hopmans, J. W., J. Šimůnek, N. Romano, and W. Durner (2002). Inverse methods. In: J. H. Dane and G. C. Topp (eds.), <em>Methods of Soil Analysis, Part 4, Physical Methods</em>, SSSA Book Series No. 5, Soil Science Society of America, Madison, WI, pp. 963–1008.</p>
+<div class="note"><em>Basis for: </em><em>Inverse estimation of soil hydraulic parameters (objective function, weighting, multistep outflow, evaporation).</em></div>
+<span class="anchor" id="huyakornPinder1983"></span>
+<p>Huyakorn, P. S., and G. F. Pinder (1983). <em>Computational Methods in Subsurface Flow.</em> Academic Press, New York, 473 pp.</p>
+<div class="note"><em>Basis for: </em><em>Galerkin finite elements, time weighting and upstream weighting.</em></div>
+<h3 id="letter-j">J</h3>
+<span class="anchor" id="jarvis1989"></span>
+<p>Jarvis, N. J. (1989). A simple empirical model of root water uptake. <em>Journal of Hydrology</em> 107(1–4): 57–72.</p>
+<div class="note"><em>Basis for: </em><em>Compensated root water uptake (critical stress index ωc).</em></div>
+<span class="anchor" id="johnsonElimelech1995"></span>
+<p>Johnson, P. R., and M. Elimelech (1995). Dynamics of colloid deposition in porous media: blocking based on random sequential adsorption. <em>Langmuir</em> 11(3): 801–812. doi:<a href="https://doi.org/10.1021/la00003a023" target="_blank" rel="noopener">10.1021/la00003a023</a></p>
+<div class="note"><em>Basis for: </em><em>Random sequential adsorption (RSA) blocking function.</em></div>
+<span class="anchor" id="jury1983"></span>
+<p>Jury, W. A., W. F. Spencer, and W. J. Farmer (1983). Behavior assessment model for trace organics in soil: I. Model description. <em>Journal of Environmental Quality</em> 12(4): 558–564. doi:<a href="https://doi.org/10.2134/jeq1983.00472425001200040025x" target="_blank" rel="noopener">10.2134/jeq1983.00472425001200040025x</a></p>
+<div class="note"><em>Basis for: </em><em>Volatilization through a stagnant boundary layer at the soil surface; gas-phase partitioning with Henry's constant.</em></div>
+<h3 id="letter-k">K</h3>
+<span class="anchor" id="koolParker1987"></span>
+<p>Kool, J. B., and J. C. Parker (1987). Development and evaluation of closed-form expressions for hysteretic soil hydraulic properties. <em>Water Resources Research</em> 23(1): 105–114. doi:<a href="https://doi.org/10.1029/WR023i001p00105" target="_blank" rel="noopener">10.1029/WR023i001p00105</a></p>
+<div class="note"><em>Basis for: </em><em>Hysteresis in the retention curve and the conductivity (scanning curves, air entrapment); Hysteresis.in restart.</em></div>
+<span class="anchor" id="kool1987"></span>
+<p>Kool, J. B., J. C. Parker, and M. Th. van Genuchten (1987). Parameter estimation for unsaturated flow and transport models – A review. <em>Journal of Hydrology</em> 91(3–4): 255–293. doi:<a href="https://doi.org/10.1016/0022-1694(87)90207-1" target="_blank" rel="noopener">10.1016/0022-1694(87)90207-1</a></p>
+<div class="note"><em>Basis for: </em><em>Inverse problems of unsaturated flow and transport; objective function and statistics.</em></div>
+<span class="anchor" id="kosugi1996"></span>
+<p>Kosugi, K. (1996). Lognormal distribution model for unsaturated soil hydraulic properties. <em>Water Resources Research</em> 32(9): 2697–2703. doi:<a href="https://doi.org/10.1029/96WR01776" target="_blank" rel="noopener">10.1029/96WR01776</a></p>
+<div class="note"><em>Basis for: </em><em>Log-normal retention and conductivity functions.</em></div>
+<h3 id="letter-l">L</h3>
+<span class="anchor" id="land1968"></span>
+<p>Land, C. S. (1968). Calculation of imbibition relative permeability for two- and three-phase flow from rock properties. <em>Society of Petroleum Engineers Journal</em> 8(2): 149–156. doi:<a href="https://doi.org/10.2118/1942-PA" target="_blank" rel="noopener">10.2118/1942-PA</a></p>
+<div class="note"><em>Basis for: </em><em>Air entrapment on wetting: the saturated water content of a wetting scanning curve in the Kool–Parker hysteresis model.</em></div>
+<span class="anchor" id="lenhardParker1992"></span>
+<p>Lenhard, R. J., and J. C. Parker (1992). Modeling multiphase fluid hysteresis and comparing results to laboratory investigations. In: M. Th. van Genuchten, F. J. Leij, and L. J. Lund (eds.), <em>Proc. Intl. Workshop on Indirect Methods for Estimating the Hydraulic Properties of Unsaturated Soils</em>, University of California, Riverside, CA, pp. 233–248.</p>
+<div class="note"><em>Basis for: </em><em>Hysteresis model without pumping.</em></div>
+<span class="anchor" id="lenhard1991"></span>
+<p>Lenhard, R. J., J. C. Parker, and J. J. Kaluarachchi (1991). Comparing simulated and experimental hysteretic two-phase transient fluid flow phenomena. <em>Water Resources Research</em> 27(8): 2113–2124. doi:<a href="https://doi.org/10.1029/91WR01272" target="_blank" rel="noopener">10.1029/91WR01272</a></p>
+<div class="note"><em>Basis for: </em><em>Hysteresis model without pumping (reversal points are remembered).</em></div>
+<span class="anchor" id="logan1995"></span>
+<p>Logan, B. E., D. G. Jewett, R. G. Arnold, E. J. Bouwer, and C. R. O'Melia (1995). Clarification of clean-bed filtration models. <em>Journal of Environmental Engineering</em> 121(12): 869–873. doi:<a href="https://doi.org/10.1061/(ASCE)0733-9372(1995)121:12(869)" target="_blank" rel="noopener">10.1061/(ASCE)0733-9372(1995)121:12(869)</a></p>
+<div class="note"><em>Basis for: </em><em>Attachment coefficient from filtration theory, katt = 3(1 − n)/(2 dc) η α v.</em></div>
+<h3 id="letter-m">M</h3>
+<span class="anchor" id="maas1990"></span>
+<p>Maas, E. V. (1990). Crop salt tolerance. In: K. K. Tanji (ed.), <em>Agricultural Salinity Assessment and Management</em>, ASCE Manuals and Reports on Engineering Practice No. 71, American Society of Civil Engineers, New York, pp. 262–304.</p>
+<div class="note"><em>Basis for: </em><em>Threshold–slope salinity stress function.</em></div>
+<span class="anchor" id="maasHoffman1977"></span>
+<p>Maas, E. V., and G. J. Hoffman (1977). Crop salt tolerance – current assessment. <em>Journal of the Irrigation and Drainage Division, ASCE</em> 103(IR2): 115–134.</p>
+<div class="note"><em>Basis for: </em><em>Threshold–slope salinity stress function.</em></div>
+<span class="anchor" id="marquardt1963"></span>
+<p>Marquardt, D. W. (1963). An algorithm for least-squares estimation of nonlinear parameters. <em>Journal of the Society for Industrial and Applied Mathematics</em> 11(2): 431–441. doi:<a href="https://doi.org/10.1137/0111030" target="_blank" rel="noopener">10.1137/0111030</a></p>
+<div class="note"><em>Basis for: </em><em>Marquardt–Levenberg iteration of the parameter estimation.</em></div>
+<span class="anchor" id="millerMiller1956"></span>
+<p>Miller, E. E., and R. D. Miller (1956). Physical theory for capillary flow phenomena. <em>Journal of Applied Physics</em> 27(4): 324–332. doi:<a href="https://doi.org/10.1063/1.1722370" target="_blank" rel="noopener">10.1063/1.1722370</a></p>
+<div class="note"><em>Basis for: </em><em>Similar-media scaling, the basis of the scaling factors αh, αK and αθ.</em></div>
+<span class="anchor" id="millingtonQuirk1961"></span>
+<p>Millington, R. J., and J. P. Quirk (1961). Permeability of porous solids. <em>Transactions of the Faraday Society</em> 57: 1200–1207. doi:<a href="https://doi.org/10.1039/TF9615701200" target="_blank" rel="noopener">10.1039/TF9615701200</a></p>
+<div class="note"><em>Basis for: </em><em>Tortuosity factors of the liquid and gas phases.</em></div>
+<span class="anchor" id="moldrup1997"></span>
+<p>Moldrup, P., T. Olesen, D. E. Rolston, and T. Yamaguchi (1997). Modeling diffusion and reaction in soils: VII. Predicting gas and ion diffusivity in undisturbed and sieved soils. <em>Soil Science</em> 162(9): 632–640.</p>
+<div class="note"><em>Basis for: </em><em>Tortuosity model of Moldrup and Olesen for the liquid phase.</em></div>
+<span class="anchor" id="moldrup2000"></span>
+<p>Moldrup, P., T. Olesen, J. Gamst, P. Schjønning, T. Yamaguchi, and D. E. Rolston (2000). Predicting the gas diffusion coefficient in repacked soil: water-induced linear reduction model. <em>Soil Science Society of America Journal</em> 64(5): 1588–1594. doi:<a href="https://doi.org/10.2136/sssaj2000.6451588x" target="_blank" rel="noopener">10.2136/sssaj2000.6451588x</a></p>
+<div class="note"><em>Basis for: </em><em>Tortuosity model of Moldrup and Olesen for the gas phase.</em></div>
+<span class="anchor" id="monteith1981"></span>
+<p>Monteith, J. L. (1981). Evaporation and surface temperature. <em>Quarterly Journal of the Royal Meteorological Society</em> 107(451): 1–27. doi:<a href="https://doi.org/10.1002/qj.49710745102" target="_blank" rel="noopener">10.1002/qj.49710745102</a></p>
+<div class="note"><em>Basis for: </em><em>Combination (Penman–Monteith) equation.</em></div>
+<span class="anchor" id="monteithUnsworth1990"></span>
+<p>Monteith, J. L., and M. H. Unsworth (1990). <em>Principles of Environmental Physics.</em> 2nd ed., Edward Arnold, London, 291 pp.</p>
+<div class="note"><em>Basis for: </em><em>Physics of evaporation, radiation and the surface energy balance.</em></div>
+<span class="anchor" id="mualem1976"></span>
+<p>Mualem, Y. (1976). A new model for predicting the hydraulic conductivity of unsaturated porous media. <em>Water Resources Research</em> 12(3): 513–522. doi:<a href="https://doi.org/10.1029/WR012i003p00513" target="_blank" rel="noopener">10.1029/WR012i003p00513</a></p>
+<div class="note"><em>Basis for: </em><em>Pore-size distribution model for the relative conductivity; pore-connectivity parameter l.</em></div>
+<h3 id="letter-n">N</h3>
+<span class="anchor" id="neuman1974"></span>
+<p>Neuman, S. P., R. A. Feddes, and E. Bresler (1974). <em>Finite Element Simulation of Flow in Saturated-Unsaturated Soils Considering Water Uptake by Plants.</em> Third Annual Report, Project No. ALO-SWC-77, Hydraulic Engineering Laboratory, Technion, Haifa, Israel.</p>
+<div class="note"><em>Basis for: </em><em>Atmospheric boundary condition (switching between flux and head conditions at the soil surface).</em></div>
+<h3 id="letter-o">O</h3>
+<span class="anchor" id="okabeIto2008"></span>
+<p>Okabe, M., and K. Ito (2008). <em>Color Universal Design (CUD): How to make figures and presentations that are friendly to colorblind people.</em> J*Fly, Department of Molecular Biology, University of Tokyo. <a href="https://jfly.uni-koeln.de/color/" target="_blank" rel="noopener">https://jfly.uni-koeln.de/color/</a></p>
+<div class="note"><em>Basis for: </em><em>The default palette of the figures (eight colours distinguishable with colour vision deficiencies).</em></div>
+<h3 id="letter-p">P</h3>
+<span class="anchor" id="perrochetBerod1993"></span>
+<p>Perrochet, P., and D. Berod (1993). Stability of the standard Crank-Nicolson-Galerkin scheme applied to the diffusion-convection equation: some new insights. <em>Water Resources Research</em> 29(9): 3291–3297. doi:<a href="https://doi.org/10.1029/93WR00927" target="_blank" rel="noopener">10.1029/93WR00927</a></p>
+<div class="note"><em>Basis for: </em><em>Stability criterion Pe·Cr ≤ 2 and the artificial dispersion of the solute and heat transport.</em></div>
+<span class="anchor" id="philipDeVries1957"></span>
+<p>Philip, J. R., and D. A. de Vries (1957). Moisture movement in porous materials under temperature gradients. <em>Transactions, American Geophysical Union</em> 38(2): 222–232. doi:<a href="https://doi.org/10.1029/TR038i002p00222" target="_blank" rel="noopener">10.1029/TR038i002p00222</a></p>
+<div class="note"><em>Basis for: </em><em>Isothermal and thermal vapor fluxes in soil.</em></div>
+<h3 id="letter-r">R</h3>
+<span class="anchor" id="rajagopalanTien1976"></span>
+<p>Rajagopalan, R., and C. Tien (1976). Trajectory analysis of deep-bed filtration with the sphere-in-cell porous media model. <em>AIChE Journal</em> 22(3): 523–533. doi:<a href="https://doi.org/10.1002/aic.690220316" target="_blank" rel="noopener">10.1002/aic.690220316</a></p>
+<div class="note"><em>Basis for: </em><em>Single-collector efficiency of the filtration theory.</em></div>
+<span class="anchor" id="rawls1982"></span>
+<p>Rawls, W. J., D. L. Brakensiek, and K. E. Saxton (1982). Estimation of soil water properties. <em>Transactions of the ASAE</em> 25(5): 1316–1320. doi:<a href="https://doi.org/10.13031/2013.33720" target="_blank" rel="noopener">10.13031/2013.33720</a></p>
+<div class="note"><em>Basis for: </em><em>Data from which the catalog values of Carsel and Parrish (1988) were derived.</em></div>
+<span class="anchor" id="ritchie1972"></span>
+<p>Ritchie, J. T. (1972). Model for predicting evaporation from a row crop with incomplete cover. <em>Water Resources Research</em> 8(5): 1204–1213. doi:<a href="https://doi.org/10.1029/WR008i005p01204" target="_blank" rel="noopener">10.1029/WR008i005p01204</a></p>
+<div class="note"><em>Basis for: </em><em>Partitioning of the potential evapotranspiration into evaporation and transpiration with the leaf area index.</em></div>
+<span class="anchor" id="rossSmettem2000"></span>
+<p>Ross, P. J., and K. R. J. Smettem (2000). A simple treatment of physical nonequilibrium water flow in soils. <em>Soil Science Society of America Journal</em> 64(6): 1926–1930. doi:<a href="https://doi.org/10.2136/sssaj2000.6461926x" target="_blank" rel="noopener">10.2136/sssaj2000.6461926x</a></p>
+<div class="note"><em>Basis for: </em><em>Non-equilibrium water flow with the time constant τw (Further options).</em></div>
+<h3 id="letter-s">S</h3>
+<span class="anchor" id="saito2006"></span>
+<p>Saito, H., J. Šimůnek, and B. P. Mohanty (2006). Numerical analysis of coupled water, vapor, and heat transport in the vadose zone. <em>Vadose Zone Journal</em> 5(2): 784–800. doi:<a href="https://doi.org/10.2136/vzj2006.0007" target="_blank" rel="noopener">10.2136/vzj2006.0007</a></p>
+<div class="note"><em>Basis for: </em><em>Coupled liquid water, water vapor and heat transport; surface energy balance with meteorological data.</em></div>
+<span class="anchor" id="schaap2004"></span>
+<p>Schaap, M. G., A. Nemes, and M. Th. van Genuchten (2004). Comparison of models for indirect estimation of water retention and available water in surface soils. <em>Vadose Zone Journal</em> 3(4): 1455–1463. doi:<a href="https://doi.org/10.2136/vzj2004.1455" target="_blank" rel="noopener">10.2136/vzj2004.1455</a></p>
+<div class="note"><em>Basis for: </em><em>Rosetta 2 retention models.</em></div>
+<span class="anchor" id="schaapLeij2000"></span>
+<p>Schaap, M. G., and F. J. Leij (2000). Improved prediction of unsaturated hydraulic conductivity with the Mualem–van Genuchten model. <em>Soil Science Society of America Journal</em> 64(3): 843–851. doi:<a href="https://doi.org/10.2136/sssaj2000.643843x" target="_blank" rel="noopener">10.2136/sssaj2000.643843x</a></p>
+<div class="note"><em>Basis for: </em><em>Prediction of K0 and L by Rosetta.</em></div>
+<span class="anchor" id="schaapVG2006"></span>
+<p>Schaap, M. G., and M. Th. van Genuchten (2006). A modified Mualem–van Genuchten formulation for improved description of the hydraulic conductivity near saturation. <em>Vadose Zone Journal</em> 5(1): 27–34. doi:<a href="https://doi.org/10.2136/vzj2005.0005" target="_blank" rel="noopener">10.2136/vzj2005.0005</a></p>
+<div class="note"><em>Basis for: </em><em>Air-entry value of −2 cm in the van Genuchten–Mualem model.</em></div>
+<span class="anchor" id="schaap2001"></span>
+<p>Schaap, M. G., F. J. Leij, and M. Th. van Genuchten (2001). Rosetta: a computer program for estimating soil hydraulic parameters with hierarchical pedotransfer functions. <em>Journal of Hydrology</em> 251(3–4): 163–176. doi:<a href="https://doi.org/10.1016/S0022-1694(01)00466-8" target="_blank" rel="noopener">10.1016/S0022-1694(01)00466-8</a></p>
+<div class="note"><em>Basis for: </em><em>Rosetta 1 neural network models (H1–H5) and the class averages of the textural classes.</em></div>
+<span class="anchor" id="schijvenSimunek2002"></span>
+<p>Schijven, J. F., and J. Šimůnek (2002). Kinetic modeling of virus transport at the field scale. <em>Journal of Contaminant Hydrology</em> 55(1–2): 113–135. doi:<a href="https://doi.org/10.1016/S0169-7722(01)00188-7" target="_blank" rel="noopener">10.1016/S0169-7722(01)00188-7</a></p>
+<div class="note"><em>Basis for: </em><em>Two-site kinetic attachment–detachment model of viruses.</em></div>
+<span class="anchor" id="schwarz1978"></span>
+<p>Schwarz, G. (1978). Estimating the dimension of a model. <em>The Annals of Statistics</em> 6(2): 461–464. doi:<a href="https://doi.org/10.1214/aos/1176344136" target="_blank" rel="noopener">10.1214/aos/1176344136</a></p>
+<div class="note"><em>Basis for: </em><em>Bayesian (Schwarz) information criterion BIC.</em></div>
+<span class="anchor" id="scott1983"></span>
+<p>Scott, P. S., G. J. Farquhar, and N. Kouwen (1983). Hysteretic effects on net infiltration. In: <em>Advances in Infiltration</em>, Publ. 11-83, American Society of Agricultural Engineers, St. Joseph, MI, pp. 163–170.</p>
+<div class="note"><em>Basis for: </em><em>Empirical scanning curves of the hysteresis model.</em></div>
+<span class="anchor" id="selim1976"></span>
+<p>Selim, H. M., J. M. Davidson, and R. S. Mansell (1976). Evaluation of a two-site adsorption-desorption model for describing solute transport in soils. In: <em>Proceedings of the Summer Computer Simulation Conference</em>, Washington, D.C., pp. 444–448.</p>
+<div class="note"><em>Basis for: </em><em>Two-site (equilibrium and kinetic) sorption model.</em></div>
+<span class="anchor" id="simunekSuarez1993"></span>
+<p>Šimůnek, J., and D. L. Suarez (1993). Modeling of carbon dioxide transport and production in soil: 1. Model development. <em>Water Resources Research</em> 29(2): 487–497. doi:<a href="https://doi.org/10.1029/92WR02225" target="_blank" rel="noopener">10.1029/92WR02225</a></p>
+<div class="note"><em>Basis for: </em><em>Root growth after the Verhulst–Pearl logistic function.</em></div>
+<span class="anchor" id="simunekHopmans2002"></span>
+<p>Šimůnek, J., and J. W. Hopmans (2002). Parameter optimization and nonlinear fitting. In: J. H. Dane and G. C. Topp (eds.), <em>Methods of Soil Analysis, Part 4, Physical Methods</em>, SSSA Book Series No. 5, Soil Science Society of America, Madison, WI, pp. 139–157.</p>
+<div class="note"><em>Basis for: </em><em>Statistics of the fitted parameters (standard errors, confidence intervals, correlation matrix).</em></div>
+<span class="anchor" id="simunekHopmans2009"></span>
+<p>Šimůnek, J., and J. W. Hopmans (2009). Modeling compensated root water and nutrient uptake. <em>Ecological Modelling</em> 220(4): 505–521. doi:<a href="https://doi.org/10.1016/j.ecolmodel.2008.11.004" target="_blank" rel="noopener">10.1016/j.ecolmodel.2008.11.004</a></p>
+<div class="note"><em>Basis for: </em><em>Compensated root water uptake, passive and active (Michaelis–Menten) root solute uptake.</em></div>
+<span class="anchor" id="simunekVG2008"></span>
+<p>Šimůnek, J., and M. Th. van Genuchten (2008). Modeling nonequilibrium flow and transport processes using HYDRUS. <em>Vadose Zone Journal</em> 7(2): 782–797. doi:<a href="https://doi.org/10.2136/vzj2007.0074" target="_blank" rel="noopener">10.2136/vzj2007.0074</a></p>
+<div class="note"><em>Basis for: </em><em>Physical and chemical non-equilibrium models of HYDRUS (two-site, mobile–immobile, dual non-equilibrium, dual permeability).</em></div>
+<span class="anchor" id="simunek2009"></span>
+<p>Šimůnek, J., M. Šejna, H. Saito, M. Sakai, and M. Th. van Genuchten (2009). <em>The HYDRUS-1D Software Package for Simulating the One-Dimensional Movement of Water, Heat, and Multiple Solutes in Variably-Saturated Media, Version 4.08.</em> HYDRUS Software Series 3, Department of Environmental Sciences, University of California Riverside, Riverside, CA, USA, 330 pp. <a href="https://www.pc-progress.com/en/Default.aspx?h1d-description" target="_blank" rel="noopener">https://www.pc-progress.com/en/Default.aspx?h1d-description</a></p>
+<div class="note"><em>Basis for: </em><em>Technical manual of the HYDRUS-1D code that the Rusteau engine ports (governing equations, numerical methods, input files).</em></div>
+<span class="anchor" id="simunek2013"></span>
+<p>Šimůnek, J., M. Šejna, H. Saito, M. Sakai, and M. Th. van Genuchten (2013). <em>The HYDRUS-1D Software Package for Simulating the One-Dimensional Movement of Water, Heat, and Multiple Solutes in Variably-Saturated Media, Version 4.17.</em> HYDRUS Software Series 3, Department of Environmental Sciences, University of California Riverside, Riverside, CA, USA, 307 pp. <a href="https://www.pc-progress.com/en/Default.aspx?hydrus-1d" target="_blank" rel="noopener">https://www.pc-progress.com/en/Default.aspx?hydrus-1d</a></p>
+<div class="note"><em>Basis for: </em><em>Manual of HYDRUS-1D 4.17, the version whose results Rusteau reproduces: inverse problem (Fit.in, Table 9.1), heat parameter estimation, triggered irrigation, active solute uptake of a chosen solute.</em></div>
+<span class="anchor" id="simunek2008"></span>
+<p>Šimůnek, J., M. Th. van Genuchten, and M. Šejna (2008). Development and applications of the HYDRUS and STANMOD software packages and related codes. <em>Vadose Zone Journal</em> 7(2): 587–600. doi:<a href="https://doi.org/10.2136/vzj2007.0077" target="_blank" rel="noopener">10.2136/vzj2007.0077</a></p>
+<div class="note"><em>Basis for: </em><em>Overview of the HYDRUS codes and their capabilities.</em></div>
+<span class="anchor" id="simunek2016"></span>
+<p>Šimůnek, J., M. Th. van Genuchten, and M. Šejna (2016). Recent developments and applications of the HYDRUS computer software packages. <em>Vadose Zone Journal</em> 15(7). doi:<a href="https://doi.org/10.2136/vzj2016.04.0033" target="_blank" rel="noopener">10.2136/vzj2016.04.0033</a></p>
+<div class="note"><em>Basis for: </em><em>Features of HYDRUS-1D 4.x (triggered irrigation, Lenhard hysteresis, active root solute uptake) that Rusteau reproduces.</em></div>
+<span class="anchor" id="simunek2003"></span>
+<p>Šimůnek, J., N. J. Jarvis, M. Th. van Genuchten, and A. Gärdenäs (2003). Review and comparison of models for describing non-equilibrium and preferential flow and transport in the vadose zone. <em>Journal of Hydrology</em> 272(1–4): 14–35. doi:<a href="https://doi.org/10.1016/S0022-1694(02)00252-4" target="_blank" rel="noopener">10.1016/S0022-1694(02)00252-4</a></p>
+<div class="note"><em>Basis for: </em><em>Dual-porosity (mobile–immobile) water flow models and their transfer terms.</em></div>
+<span class="anchor" id="simunek2001"></span>
+<p>Šimůnek, J., O. Wendroth, N. Wypler, and M. Th. van Genuchten (2001). Non-equilibrium water flow characterized by means of upward infiltration experiments. <em>European Journal of Soil Science</em> 52(1): 13–24. doi:<a href="https://doi.org/10.1046/j.1365-2389.2001.00361.x" target="_blank" rel="noopener">10.1046/j.1365-2389.2001.00361.x</a></p>
+<div class="note"><em>Basis for: </em><em>Dual-porosity model with mass transfer driven by the difference of effective saturations.</em></div>
+<span class="anchor" id="smith2015viridis"></span>
+<p>Smith, N. J., and S. van der Walt (2015). <em>A Better Default Colormap for Matplotlib.</em> SciPy 2015 conference, Austin, TX. <a href="https://bids.github.io/colormap/" target="_blank" rel="noopener">https://bids.github.io/colormap/</a></p>
+<div class="note"><em>Basis for: </em><em>The perceptually uniform viridis palette for ordered series (print times, depths).</em></div>
+<span class="anchor" id="sophocleous1979"></span>
+<p>Sophocleous, M. (1979). Analysis of water and heat flow in unsaturated-saturated porous media. <em>Water Resources Research</em> 15(5): 1195–1206. doi:<a href="https://doi.org/10.1029/WR015i005p01195" target="_blank" rel="noopener">10.1029/WR015i005p01195</a></p>
+<div class="note"><em>Basis for: </em><em>Heat transport equation with convection by the liquid flux.</em></div>
+<span class="anchor" id="stummMorgan1981"></span>
+<p>Stumm, W., and J. J. Morgan (1981). <em>Aquatic Chemistry.</em> 2nd ed., John Wiley &amp; Sons, New York, 780 pp.</p>
+<div class="note"><em>Basis for: </em><em>Arrhenius temperature dependence of the transport and reaction parameters.</em></div>
+<h3 id="letter-t">T</h3>
+<span class="anchor" id="talbot2010"></span>
+<p>Talbot, J., S. Lin, and P. Hanrahan (2010). An extension of Wilkinson's algorithm for positioning tick labels on axes. <em>IEEE Transactions on Visualization and Computer Graphics</em> 16(6): 1036–1043. doi:<a href="https://doi.org/10.1109/TVCG.2010.130" target="_blank" rel="noopener">10.1109/TVCG.2010.130</a></p>
+<div class="note"><em>Basis for: </em><em>Choice of the number of ticks from the space of the labels; the step 2.5 between 2 and 5.</em></div>
+<h3 id="letter-u">U</h3>
+<span class="anchor" id="rosettaSoil"></span>
+<p>USDA-ARS U.S. Salinity Laboratory. <em>rosetta-soil</em>, version 0.3.2: Python implementation of the Rosetta pedotransfer functions (CC0 1.0). <a href="https://github.com/usda-ars-ussl/rosetta-soil" target="_blank" rel="noopener">https://github.com/usda-ars-ussl/rosetta-soil</a></p>
+<div class="note"><em>Basis for: </em><em>Network weights of the Rosetta 1, 2 and 3 models (converted into the program; the unit tests reproduce its predictions).</em></div>
+<h3 id="letter-v">V</h3>
+<span class="anchor" id="vanBavelHillel1976"></span>
+<p>van Bavel, C. H. M., and D. Hillel (1976). Calculating potential and actual evaporation from a bare soil surface by simulation of concurrent flow of water and heat. <em>Agricultural Meteorology</em> 17(6): 453–476. doi:<a href="https://doi.org/10.1016/0002-1571(76)90022-4" target="_blank" rel="noopener">10.1016/0002-1571(76)90022-4</a></p>
+<div class="note"><em>Basis for: </em><em>Surface albedo and emissivity as functions of the surface water content.</em></div>
+<span class="anchor" id="vanDamFeddes2000"></span>
+<p>van Dam, J. C., and R. A. Feddes (2000). Numerical simulation of infiltration, evaporation and shallow groundwater levels with the Richards equation. <em>Journal of Hydrology</em> 233(1–4): 72–85. doi:<a href="https://doi.org/10.1016/S0022-1694(00)00227-4" target="_blank" rel="noopener">10.1016/S0022-1694(00)00227-4</a></p>
+<div class="note"><em>Basis for: </em><em>Guidance on the spatial discretization near the soil surface.</em></div>
+<span class="anchor" id="vanDam1997"></span>
+<p>van Dam, J. C., J. Huygen, J. G. Wesseling, R. A. Feddes, P. Kabat, P. E. V. van Walsum, P. Groenendijk, and C. A. van Diepen (1997). <em>Theory of SWAP Version 2.0.</em> Report 71, Department of Water Resources, Wageningen Agricultural University, Wageningen, 167 pp.</p>
+<div class="note"><em>Basis for: </em><em>Drainage formulas of the horizontal-drain boundary condition (as implemented in SWAP and HYDRUS).</em></div>
+<span class="anchor" id="vanDeGriendOwe1994"></span>
+<p>van de Griend, A. A., and M. Owe (1994). Bare soil surface resistance to evaporation by vapor diffusion under semiarid conditions. <em>Water Resources Research</em> 30(2): 181–188. doi:<a href="https://doi.org/10.1029/93WR02747" target="_blank" rel="noopener">10.1029/93WR02747</a></p>
+<div class="note"><em>Basis for: </em><em>Soil surface resistance to evaporation in the energy balance.</em></div>
+<span class="anchor" id="vanGenuchten1980"></span>
+<p>van Genuchten, M. Th. (1980). A closed-form equation for predicting the hydraulic conductivity of unsaturated soils. <em>Soil Science Society of America Journal</em> 44(5): 892–898. doi:<a href="https://doi.org/10.2136/sssaj1980.03615995004400050002x" target="_blank" rel="noopener">10.2136/sssaj1980.03615995004400050002x</a></p>
+<div class="note"><em>Basis for: </em><em>Retention function θ(h) and the van Genuchten–Mualem conductivity function K(h) (all van Genuchten-type models).</em></div>
+<span class="anchor" id="vanGenuchten1987"></span>
+<p>van Genuchten, M. Th. (1987). <em>A Numerical Model for Water and Solute Movement in and below the Root Zone.</em> Research Report No. 121, U.S. Salinity Laboratory, USDA-ARS, Riverside, CA.</p>
+<div class="note"><em>Basis for: </em><em>S-shaped water and osmotic stress response functions; additive and multiplicative osmotic stress.</em></div>
+<span class="anchor" id="vanGenuchtenWierenga1976"></span>
+<p>van Genuchten, M. Th., and P. J. Wierenga (1976). Mass transfer studies in sorbing porous media I. Analytical solutions. <em>Soil Science Society of America Journal</em> 40(4): 473–480. doi:<a href="https://doi.org/10.2136/sssaj1976.03615995004000040011x" target="_blank" rel="noopener">10.2136/sssaj1976.03615995004000040011x</a></p>
+<div class="note"><em>Basis for: </em><em>Mobile–immobile (two-region) physical non-equilibrium transport.</em></div>
+<span class="anchor" id="vanGenuchtenWagenet1989"></span>
+<p>van Genuchten, M. Th., and R. J. Wagenet (1989). Two-site/two-region models for pesticide transport and degradation: Theoretical development and analytical solutions. <em>Soil Science Society of America Journal</em> 53(5): 1303–1310. doi:<a href="https://doi.org/10.2136/sssaj1989.03615995005300050001x" target="_blank" rel="noopener">10.2136/sssaj1989.03615995005300050001x</a></p>
+<div class="note"><em>Basis for: </em><em>Two-site sorption with first-order degradation in the equilibrium and kinetic phases.</em></div>
+<span class="anchor" id="vogel1987"></span>
+<p>Vogel, T. (1987). <em>SWMII – Numerical Model of Two-Dimensional Flow in a Variably Saturated Porous Medium.</em> Research Report No. 87, Department of Hydraulics and Catchment Hydrology, Agricultural University, Wageningen, The Netherlands.</p>
+<div class="note"><em>Basis for: </em><em>Finite element formulation and internal interpolation tables of the hydraulic functions.</em></div>
+<span class="anchor" id="vogelCislerova1988"></span>
+<p>Vogel, T., and M. Císlerová (1988). On the reliability of unsaturated hydraulic conductivity calculated from the moisture retention curve. <em>Transport in Porous Media</em> 3: 1–15. doi:<a href="https://doi.org/10.1007/BF00222683" target="_blank" rel="noopener">10.1007/BF00222683</a></p>
+<div class="note"><em>Basis for: </em><em>Modified van Genuchten model (parameters θm, θa, θk, Kk).</em></div>
+<span class="anchor" id="vogel1991"></span>
+<p>Vogel, T., M. Císlerová, and J. W. Hopmans (1991). Porous media with linearly variable hydraulic properties. <em>Water Resources Research</em> 27(10): 2735–2741. doi:<a href="https://doi.org/10.1029/91WR01676" target="_blank" rel="noopener">10.1029/91WR01676</a></p>
+<div class="note"><em>Basis for: </em><em>Linear scaling transformations of the hydraulic functions with three independent scaling factors.</em></div>
+<span class="anchor" id="vogel2001"></span>
+<p>Vogel, T., M. Th. van Genuchten, and M. Císlerová (2001). Effect of the shape of the soil hydraulic functions near saturation on variably-saturated flow predictions. <em>Advances in Water Resources</em> 24(2): 133–144. doi:<a href="https://doi.org/10.1016/S0309-1708(00)00037-3" target="_blank" rel="noopener">10.1016/S0309-1708(00)00037-3</a></p>
+<div class="note"><em>Basis for: </em><em>van Genuchten model with an air-entry value of −2 cm.</em></div>
+<span class="anchor" id="vonHoyningenHune1983"></span>
+<p>von Hoyningen-Hüne, J. (1983). Die Interception des Niederschlags in landwirtschaftlichen Beständen. <em>Schriftenreihe des DVWK</em> 57: 1–53.</p>
+<div class="note"><em>Basis for: </em><em>Canopy interception as a function of the leaf area index.</em></div>
+<span class="anchor" id="vrugt2001"></span>
+<p>Vrugt, J. A., M. T. van Wijk, J. W. Hopmans, and J. Šimůnek (2001). One-, two-, and three-dimensional root water uptake functions for transient modeling. <em>Water Resources Research</em> 37(10): 2457–2470. doi:<a href="https://doi.org/10.1029/2000WR000027" target="_blank" rel="noopener">10.1029/2000WR000027</a></p>
+<div class="note"><em>Basis for: </em><em>Root distribution function with the depth of maximum intensity z</em><em> and the shape parameter pz.</em></div>
+<h3 id="letter-w">W</h3>
+<span class="anchor" id="walker1974"></span>
+<p>Walker, A. (1974). A simulation model for prediction of herbicide persistence. <em>Journal of Environmental Quality</em> 3(4): 396–401. doi:<a href="https://doi.org/10.2134/jeq1974.00472425000300040021x" target="_blank" rel="noopener">10.2134/jeq1974.00472425000300040021x</a></p>
+<div class="note"><em>Basis for: </em><em>Water-content dependence of the degradation rates (Walker's formula).</em></div>
+<span class="anchor" id="wickham2016"></span>
+<p>Wickham, H. (2016). <em>ggplot2: Elegant Graphics for Data Analysis</em>, 2nd edition. Springer, Cham, 260 pp. doi:<a href="https://doi.org/10.1007/978-3-319-24277-4" target="_blank" rel="noopener">10.1007/978-3-319-24277-4</a></p>
+<div class="note"><em>Basis for: </em><em>Layers, themes (grid, classic, minimal), legend positions and automatic axis titles of the figure editor.</em></div>
+<span class="anchor" id="wilkinson2005"></span>
+<p>Wilkinson, L. (2005). <em>The Grammar of Graphics</em>, 2nd edition. Springer, New York, 690 pp. doi:<a href="https://doi.org/10.1007/0-387-28695-0" target="_blank" rel="noopener">10.1007/0-387-28695-0</a></p>
+<div class="note"><em>Basis for: </em><em>Structure of the figures: layers of data drawn with a geometry against scales, in panels.</em></div>
+<span class="anchor" id="wong2011"></span>
+<p>Wong, B. (2011). Points of view: Color blindness. <em>Nature Methods</em> 8(6): 441. doi:<a href="https://doi.org/10.1038/nmeth.1618" target="_blank" rel="noopener">10.1038/nmeth.1618</a></p>
+<div class="note"><em>Basis for: </em><em>Recommendation of the Okabe–Ito palette for scientific figures.</em></div>
+<h3 id="letter-z">Z</h3>
+<span class="anchor" id="zhangSchaap2017"></span>
+<p>Zhang, Y., and M. G. Schaap (2017). Weighted recalibration of the Rosetta pedotransfer model with improved estimates of hydraulic parameter distributions and summary statistics (Rosetta3). <em>Journal of Hydrology</em> 547: 39–53. doi:<a href="https://doi.org/10.1016/j.jhydrol.2017.01.004" target="_blank" rel="noopener">10.1016/j.jhydrol.2017.01.004</a></p>
+<div class="note"><em>Basis for: </em><em>Rosetta 3 neural network models (the default prediction).</em></div>
+</article>
+<div class="pager"><a class="prev" href="faq.html">← Questions and problems</a><a class="next" href="credits.html">Credits and license →</a></div>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 1.0.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>

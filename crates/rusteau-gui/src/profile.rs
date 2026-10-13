@@ -7,6 +7,7 @@
 //! of nodes, fixed points with relative element sizes) regenerates the nodes and interpolates the nodal values. The
 //! table view lists all nodal values.
 
+use crate::tips::{hdr, lbl, TipExt};
 use crate::util::*;
 use crate::{App, Page};
 use egui::{Align2, Color32, ComboBox, Pos2, RichText, Stroke, Ui, Vec2b};
@@ -163,6 +164,9 @@ pub struct ProfEdit {
     pub root_zstar: f64,
     pub root_pz: f64,
     pub obs_depth: f64,
+    /// selected observation node (node number, 1-based) and the node being dragged
+    pub obs_sel: Option<usize>,
+    obs_drag: Option<usize>,
     pub fixed_depth: f64,
     /// Discretization being edited (applied with "Generate nodes")
     pub g_depth: f64,
@@ -197,6 +201,8 @@ impl Default for ProfEdit {
             root_zstar: 0.0,
             root_pz: 1.0,
             obs_depth: 0.0,
+            obs_sel: None,
+            obs_drag: None,
             fixed_depth: 0.0,
             g_depth: 100.0,
             g_nodes: 101,
@@ -285,6 +291,31 @@ fn runs(vals: &[f64]) -> Vec<(usize, usize, f64)> {
 }
 
 impl App {
+    /// Moves observation node `from` to node `to` (1-based node numbers); a node that is already an observation node
+    /// is skipped in the direction of the move. Keeps the selection on the moved node.
+    fn move_obs(&mut self, from: usize, to: usize) -> bool {
+        let n = self.prj.profile.nodes.len();
+        let obs = &mut self.prj.profile.observation_nodes;
+        let Some(i) = obs.iter().position(|&o| o == from) else { return false };
+        let mut to = to.clamp(1, n.max(1));
+        if to == from {
+            return false;
+        }
+        let up = to < from;
+        while obs.contains(&to) {
+            to = if up { to.wrapping_sub(1) } else { to + 1 };
+            if to == 0 || to > n {
+                return false;
+            }
+        }
+        obs[i] = to;
+        obs.sort_unstable();
+        if self.pe.obs_sel == Some(from) {
+            self.pe.obs_sel = Some(to);
+        }
+        true
+    }
+
     fn qty_list(&self) -> Vec<Qty> {
         let p = &self.prj;
         let mut q = vec![Qty::Material, Qty::SubRegion, Qty::Init];
@@ -383,7 +414,7 @@ impl App {
             );
         });
         ui.horizontal_wrapped(|ui| {
-            ui.label("Quantity:");
+            lbl(ui, "Quantity:");
             for qq in &qtys {
                 if ui.selectable_label(self.pe.qty == *qq, qq.short(&self.prj)).on_hover_text(qq.label(&self.prj)).clicked() {
                     self.pe.qty = *qq;
@@ -399,7 +430,7 @@ impl App {
             ui.label("Mouse:");
             ui.selectable_value(&mut self.pe.tool, Tool::Select, "▭ Select nodes")
                 .on_hover_text("Drag to select a range of nodes; click selects one node (a whole layer for material and sub-region); Shift+click extends the selection; Ctrl+A selects all");
-            ui.selectable_value(&mut self.pe.tool, Tool::Obs, "◉ Observation nodes").on_hover_text("Click to add or remove an observation node");
+            ui.selectable_value(&mut self.pe.tool, Tool::Obs, "◉ Observation nodes").on_hover_text("Click: add an observation node or select one · drag: move it · double-click or Delete: remove it");
             ui.selectable_value(&mut self.pe.tool, Tool::Fixed, "◆ Fixed points")
                 .on_hover_text("Click to add or remove a fixed point of the discretization (applied with “Generate nodes”)");
             ui.label(RichText::new("Wheel: scroll · Ctrl+wheel: zoom · double-click: whole profile").weak());
@@ -508,7 +539,9 @@ impl App {
         } else {
             vec![]
         };
-        let obs: Vec<(usize, f64)> = p.profile.observation_nodes.iter().enumerate().filter_map(|(k, &o)| d.get(o.wrapping_sub(1)).map(|&dd| (k + 1, dd))).collect();
+        let obs_sel = self.pe.obs_sel;
+        let obs: Vec<(usize, f64, bool)> =
+            p.profile.observation_nodes.iter().enumerate().filter_map(|(k, &o)| d.get(o.wrapping_sub(1)).map(|&dd| (k + 1, dd, obs_sel == Some(o)))).collect();
         let fixed: Vec<f64> = self.pe.g_fixed.iter().map(|f| f.depth).collect();
         let fixed_pending = self.pe.g_dirty;
         let show_pts = n <= 150;
@@ -594,9 +627,13 @@ impl App {
                     .stroke(sel_stroke)
                     .allow_hover(false),
             );
-            // observation nodes
-            for (k, z) in &obs {
-                pu.points(Points::new(vec![[-0.55, -z]]).shape(MarkerShape::Right).radius(6.0_f32).filled(true).color(OBS_COLOR).allow_hover(false));
+            // observation nodes (the selected one larger, with a light outline)
+            for (k, z, selected) in &obs {
+                if *selected {
+                    pu.points(Points::new(vec![[-0.55, -z]]).shape(MarkerShape::Right).radius(10.0_f32).filled(true).color(Color32::WHITE).allow_hover(false));
+                }
+                let r = if *selected { 8.0_f32 } else { 6.0_f32 };
+                pu.points(Points::new(vec![[-0.55, -z]]).shape(MarkerShape::Right).radius(r).filled(true).color(OBS_COLOR).allow_hover(false));
                 pu.text(Text::new(PlotPoint::new(-0.59, -z), RichText::new(k.to_string()).color(OBS_COLOR).size(14.0).strong()).anchor(Align2::RIGHT_CENTER).allow_hover(false));
                 if !cat {
                     pu.line(Line::new(PlotPoints::new(vec![[0.0, -z], [1.0, -z]])).color(OBS_COLOR.gamma_multiply(0.6)).style(LineStyle::dotted_dense()).allow_hover(false));
@@ -662,18 +699,80 @@ impl App {
                 }
             }
             Tool::Obs => {
-                if response.clicked() && !response.double_clicked() {
-                    if let Some(pos) = response.interact_pointer_pos() {
-                        let k = nearest(depth_at(pos)) + 1;
-                        let obs = &mut self.prj.profile.observation_nodes;
-                        if let Some(i) = obs.iter().position(|&o| o == k) {
-                            obs.remove(i);
-                        } else if obs.len() < 100 {
-                            obs.push(k);
-                            obs.sort_unstable();
+                // an observation node within 8 pixels of the pointer
+                let pick = 8.0 / self.pe.px_per_unit.max(1e-9);
+                let hit = |z: f64, obs: &[usize]| -> Option<usize> {
+                    obs.iter()
+                        .filter_map(|&o| d.get(o.wrapping_sub(1)).map(|&dd| (o, (dd - z).abs())))
+                        .filter(|(_, dist)| *dist < pick)
+                        .min_by(|a, b| a.1.total_cmp(&b.1))
+                        .map(|(o, _)| o)
+                };
+                if response.drag_started() {
+                    if let Some(pos) = ui.input(|i| i.pointer.press_origin()).or(response.interact_pointer_pos()) {
+                        self.pe.obs_drag = hit(depth_at(pos), &self.prj.profile.observation_nodes);
+                        if self.pe.obs_drag.is_some() {
+                            self.pe.obs_sel = self.pe.obs_drag;
                         }
+                    }
+                }
+                if response.dragged() {
+                    if let (Some(from), Some(pos)) = (self.pe.obs_drag, response.interact_pointer_pos()) {
+                        let to = nearest(depth_at(pos)) + 1;
+                        if self.move_obs(from, to) {
+                            self.pe.obs_drag = Some(to);
+                            *ch = true;
+                        }
+                    }
+                }
+                if response.drag_stopped() {
+                    self.pe.obs_drag = None;
+                }
+                if response.double_clicked() {
+                    // remove the node under the pointer
+                    if let Some(pos) = response.interact_pointer_pos() {
+                        if let Some(o) = hit(depth_at(pos), &self.prj.profile.observation_nodes) {
+                            self.prj.profile.observation_nodes.retain(|&x| x != o);
+                            self.pe.obs_sel = None;
+                            *ch = true;
+                        }
+                    }
+                } else if response.clicked() {
+                    // select the node under the pointer, or add one at the nearest node
+                    if let Some(pos) = response.interact_pointer_pos() {
+                        let z = depth_at(pos);
+                        match hit(z, &self.prj.profile.observation_nodes) {
+                            Some(o) => self.pe.obs_sel = Some(o),
+                            None => {
+                                let k = nearest(z) + 1;
+                                let obs = &mut self.prj.profile.observation_nodes;
+                                if !obs.contains(&k) && obs.len() < 100 {
+                                    obs.push(k);
+                                    obs.sort_unstable();
+                                    *ch = true;
+                                }
+                                self.pe.obs_sel = Some(k);
+                            }
+                        }
+                    }
+                }
+                // Delete removes the selected node (unless a text field has the keyboard)
+                let typing = ui.ctx().wants_keyboard_input();
+                if !typing && (response.hovered() || response.has_focus()) && ui.input(|i| i.key_pressed(egui::Key::Delete) || i.key_pressed(egui::Key::Backspace)) {
+                    if let Some(o) = self.pe.obs_sel.take() {
+                        self.prj.profile.observation_nodes.retain(|&x| x != o);
                         *ch = true;
                     }
+                }
+                if response.hovered() {
+                    let over = response.hover_pos().and_then(|p| hit(depth_at(p), &self.prj.profile.observation_nodes));
+                    ui.ctx().set_cursor_icon(if self.pe.obs_drag.is_some() {
+                        egui::CursorIcon::Grabbing
+                    } else if over.is_some() {
+                        egui::CursorIcon::Grab
+                    } else {
+                        egui::CursorIcon::Crosshair
+                    });
                 }
             }
             Tool::Fixed => {
@@ -711,7 +810,7 @@ impl App {
             } else if q == Qty::SubRegion {
                 t.push_str(&format!("\nsub-region {}", nd.layer));
             }
-            if let Some((o, _)) = obs.iter().find(|(_, z)| (*z - nd.depth).abs() < 1e-12) {
+            if let Some((o, _, _)) = obs.iter().find(|(_, z, _)| (*z - nd.depth).abs() < 1e-12) {
                 t.push_str(&format!("\nobservation node {o}"));
             }
             response.on_hover_text_at_pointer(t);
@@ -831,9 +930,9 @@ impl App {
         ui.horizontal(|ui| {
             let (mut fa, mut fb) = (da, db);
             ui.label("From");
-            let ra = ui.add(egui::DragValue::new(&mut fa).speed(0.2).suffix(format!(" {lu}")));
+            let ra = ui.add(egui::DragValue::new(&mut fa).custom_parser(crate::util::parse_num).speed(0.2).suffix(format!(" {lu}"))).tip_text("Depth of the top of the selection (the nearest node is taken)");
             ui.label("to");
-            let rb = ui.add(egui::DragValue::new(&mut fb).speed(0.2).suffix(format!(" {lu}")));
+            let rb = ui.add(egui::DragValue::new(&mut fb).custom_parser(crate::util::parse_num).speed(0.2).suffix(format!(" {lu}"))).tip_text("Depth of the bottom of the selection (the nearest node is taken)");
             if ra.changed() || rb.changed() {
                 let ka = self.prj.profile.nearest_node(fa);
                 let kb = self.prj.profile.nearest_node(fb);
@@ -849,7 +948,7 @@ impl App {
         match q {
             Qty::Material => {
                 ui.horizontal(|ui| {
-                    ui.label("Material");
+                    lbl(ui, "Material");
                     let nm = self.prj.water.materials.len();
                     self.pe.mat = self.pe.mat.clamp(1, nm);
                     let names: Vec<(String, Color32)> = (1..=nm).map(|m| (self.mat_name(m), soil_mat_color(&self.prj, m))).collect();
@@ -861,7 +960,7 @@ impl App {
                             });
                         }
                     });
-                    if ui.button("Apply").clicked() {
+                    if ui.button("Apply").tip_text("Assigns the material to the selected nodes").clicked() {
                         self.apply_values(ch);
                     }
                 });
@@ -871,13 +970,13 @@ impl App {
             }
             Qty::SubRegion => {
                 ui.horizontal(|ui| {
-                    ui.label("Sub-region");
-                    ui.add(egui::DragValue::new(&mut self.pe.sub).range(1..=100));
-                    if ui.button("Apply").clicked() {
+                    lbl(ui, "Sub-region");
+                    crate::util::int(ui.add(egui::DragValue::new(&mut self.pe.sub).range(1..=100))).tip("Sub-region");
+                    if ui.button("Apply").tip_text("Assigns the sub-region to the selected nodes").clicked() {
                         self.apply_values(ch);
                     }
                 });
-                if ui.button("Sub-regions = materials").on_hover_text("Set the sub-region of every node to its material number").clicked() {
+                if ui.button("Sub-regions = materials").tip("Sub-regions = materials").clicked() {
                     for nd in self.prj.profile.nodes.iter_mut() {
                         nd.layer = nd.mat;
                     }
@@ -892,24 +991,57 @@ impl App {
         // ---- observation nodes
         section(ui, &format!("Observation nodes ({})", self.prj.profile.observation_nodes.len()));
         let mut remove = None;
-        egui::Grid::new("pe_obs").num_columns(4).striped(true).show(ui, |ui| {
-            for (k, &o) in self.prj.profile.observation_nodes.iter().enumerate() {
-                ui.colored_label(OBS_COLOR, format!("{}", k + 1));
-                ui.label(format!("node {o}"));
-                ui.label(format!("{} {lu}", self.prj.profile.nodes.get(o.wrapping_sub(1)).map(|x| sig(x.depth)).unwrap_or_default()));
-                if ui.small_button("✖").on_hover_text("remove").clicked() {
-                    remove = Some(k);
-                }
+        let mut moves: Vec<(usize, usize)> = vec![];
+        let n_nodes = self.prj.profile.nodes.len();
+        let spacing = if n_nodes > 1 { (self.prj.profile.nodes[n_nodes - 1].depth - self.prj.profile.nodes[0].depth).abs() / (n_nodes - 1) as f64 } else { 1.0 };
+        let obs_list = self.prj.profile.observation_nodes.clone();
+        if !obs_list.is_empty() {
+            egui::Grid::new("pe_obs").num_columns(4).striped(true).show(ui, |ui| {
+                ui.label("");
+                hdr(ui, "Node");
+                hdr(ui, "Depth");
+                ui.label("");
                 ui.end_row();
+                for (k, &o) in obs_list.iter().enumerate() {
+                    if ui.selectable_label(self.pe.obs_sel == Some(o), RichText::new(format!("{}", k + 1)).color(OBS_COLOR).strong()).on_hover_text("Select (marked in the profile)").clicked() {
+                        self.pe.obs_sel = Some(o);
+                    }
+                    let mut node = o;
+                    if crate::util::int(ui.add(egui::DragValue::new(&mut node).range(1..=n_nodes.max(1)).speed(0.2))).tip("Node").changed() {
+                        moves.push((o, node));
+                    }
+                    let depth = self.prj.profile.nodes.get(o.wrapping_sub(1)).map(|x| x.depth).unwrap_or(0.0);
+                    let mut z = depth;
+                    if ui.add(egui::DragValue::new(&mut z).custom_parser(crate::util::parse_num).speed(spacing.max(1e-9)).suffix(format!(" {lu}"))).tip("Depth").changed() {
+                        // the nearest node; a move of less than half a node spacing moves to the neighbour
+                        let mut to = self.prj.profile.nearest_node(z) + 1;
+                        if to == o && (z - depth).abs() > 1e-12 {
+                            to = if z > depth { o + 1 } else { o.saturating_sub(1) };
+                        }
+                        moves.push((o, to));
+                    }
+                    if ui.small_button("✖").on_hover_text("remove").clicked() {
+                        remove = Some(o);
+                    }
+                    ui.end_row();
+                }
+            });
+        }
+        for (from, to) in moves {
+            if self.move_obs(from, to) {
+                *ch = true;
             }
-        });
-        if let Some(k) = remove {
-            self.prj.profile.observation_nodes.remove(k);
+        }
+        if let Some(o) = remove {
+            self.prj.profile.observation_nodes.retain(|&x| x != o);
+            if self.pe.obs_sel == Some(o) {
+                self.pe.obs_sel = None;
+            }
             *ch = true;
         }
         ui.horizontal(|ui| {
-            ui.label("Add at depth");
-            ui.add(egui::DragValue::new(&mut self.pe.obs_depth).speed(0.2).suffix(format!(" {lu}")));
+            lbl(ui, "Add at depth");
+            ui.add(egui::DragValue::new(&mut self.pe.obs_depth).custom_parser(crate::util::parse_num).speed(0.2).suffix(format!(" {lu}"))).tip("Add at depth");
             if ui.button("Add").clicked() {
                 let k = self.prj.profile.nearest_node(self.pe.obs_depth) + 1;
                 let obs = &mut self.prj.profile.observation_nodes;
@@ -924,18 +1056,18 @@ impl App {
                 *ch = true;
             }
         });
-        ui.label(RichText::new("Or choose the mouse tool “Observation nodes” and click in the profile.").weak());
+        ui.label(RichText::new("Or choose the mouse tool “Observation nodes”: click in the profile adds a node or selects one, drag moves it, double-click or Delete removes it.").weak());
 
         // ---- discretization
         section(ui, "Profile depth & discretization");
         egui::Grid::new("pe_geo").num_columns(2).show(ui, |ui| {
-            ui.label("Profile depth");
-            if ui.add(egui::DragValue::new(&mut self.pe.g_depth).speed(0.5).range(1e-6..=1e9).suffix(format!(" {lu}"))).changed() {
+            lbl(ui, "Profile depth");
+            if ui.add(egui::DragValue::new(&mut self.pe.g_depth).custom_parser(crate::util::parse_num).speed(0.5).range(1e-6..=1e9).suffix(format!(" {lu}"))).tip("Profile depth").changed() {
                 self.pe.g_dirty = true;
             }
             ui.end_row();
-            ui.label("Number of nodes");
-            if ui.add(egui::DragValue::new(&mut self.pe.g_nodes).range(2..=1001)).changed() {
+            lbl(ui, "Number of nodes");
+            if crate::util::int(ui.add(egui::DragValue::new(&mut self.pe.g_nodes).range(2..=1001))).tip("Number of nodes").changed() {
                 self.pe.g_dirty = true;
             }
             ui.end_row();
@@ -945,9 +1077,9 @@ impl App {
         let mut remove = None;
         let mut dirty = false;
         egui::Grid::new("pe_fixed").num_columns(4).striped(true).show(ui, |ui| {
-            ui.strong(format!("depth ({lu})"));
-            ui.strong("size above");
-            ui.strong("size below");
+            ui.strong(format!("depth ({lu})")).tip_text("Depth of the fixed point (the surface and the bottom are always fixed points)");
+            hdr(ui, "size above");
+            hdr(ui, "size below");
             ui.label("");
             ui.end_row();
             let m = self.pe.g_fixed.len();
@@ -955,16 +1087,16 @@ impl App {
                 let end = f.depth <= 1e-9 * total || f.depth >= total * (1.0 - 1e-9);
                 if end {
                     ui.label(sig(f.depth));
-                } else if ui.add(egui::DragValue::new(&mut f.depth).speed(0.2).range(0.0..=total)).changed() {
+                } else if ui.add(egui::DragValue::new(&mut f.depth).custom_parser(crate::util::parse_num).speed(0.2).range(0.0..=total)).changed() {
                     dirty = true;
                 }
                 if i > 0 {
-                    dirty |= ui.add(egui::DragValue::new(&mut f.size_above).speed(0.05).range(1e-3..=1e3)).changed();
+                    dirty |= ui.add(egui::DragValue::new(&mut f.size_above).custom_parser(crate::util::parse_num).speed(0.05).range(1e-3..=1e3)).changed();
                 } else {
                     ui.label("–");
                 }
                 if i + 1 < m {
-                    dirty |= ui.add(egui::DragValue::new(&mut f.size_below).speed(0.05).range(1e-3..=1e3)).changed();
+                    dirty |= ui.add(egui::DragValue::new(&mut f.size_below).custom_parser(crate::util::parse_num).speed(0.05).range(1e-3..=1e3)).changed();
                 } else {
                     ui.label("–");
                 }
@@ -985,8 +1117,8 @@ impl App {
             self.pe.g_fixed.sort_by(|a, b| a.depth.total_cmp(&b.depth));
         }
         ui.horizontal(|ui| {
-            ui.label("Add fixed point at");
-            ui.add(egui::DragValue::new(&mut self.pe.fixed_depth).speed(0.2).range(0.0..=total).suffix(format!(" {lu}")));
+            lbl(ui, "Add fixed point at");
+            ui.add(egui::DragValue::new(&mut self.pe.fixed_depth).custom_parser(crate::util::parse_num).speed(0.2).range(0.0..=total).suffix(format!(" {lu}")));
             if ui.button("Add").clicked() {
                 self.add_fixed_point(self.pe.fixed_depth);
             }
@@ -1034,63 +1166,62 @@ impl App {
         let unit = q.unit(&self.prj);
         let lu = self.prj.units.length_str().to_string();
         let theta = self.prj.water.init_in_water_content;
-        if q == Qty::Init && ui.checkbox(&mut self.prj.water.init_in_water_content, "Initial condition as water content θ").changed() {
+        if q == Qty::Init && ui.checkbox(&mut self.prj.water.init_in_water_content, "Initial condition as water content θ").tip("Initial condition as water content θ").changed() {
             *ch = true;
         }
         ui.horizontal_wrapped(|ui| {
-            ui.radio_value(&mut self.pe.dist, Dist::Constant, "Constant");
-            ui.radio_value(&mut self.pe.dist, Dist::Linear, "Linear");
+            ui.radio_value(&mut self.pe.dist, Dist::Constant, "Constant").tip("Constant");
+            ui.radio_value(&mut self.pe.dist, Dist::Linear, "Linear").tip("Linear");
             if q == Qty::Init && !theta {
-                ui.radio_value(&mut self.pe.dist, Dist::Equilibrium, "Hydrostatic equilibrium")
-                    .on_hover_text("h = h(bottom) − (z(bottom) − z)·cos α from the lowest selected node");
+                ui.radio_value(&mut self.pe.dist, Dist::Equilibrium, "Hydrostatic equilibrium").tip("Hydrostatic equilibrium");
             }
             if q == Qty::Root {
-                ui.radio_value(&mut self.pe.dist, Dist::HoffmanVG, "Hoffman & van Genuchten (1983)");
-                ui.radio_value(&mut self.pe.dist, Dist::Vrugt, "Vrugt et al. (2001)");
+                ui.radio_value(&mut self.pe.dist, Dist::HoffmanVG, "Hoffman & van Genuchten (1983)").tip("Hoffman & van Genuchten (1983)");
+                ui.radio_value(&mut self.pe.dist, Dist::Vrugt, "Vrugt et al. (2001)").tip("Vrugt et al. (2001)");
             }
         });
         let dv_u = |ui: &mut Ui, v: &mut f64, u: &str| {
             let speed = (v.abs() * 0.01).max(1e-3);
             let suffix = if u == "–" { String::new() } else { format!(" {u}") };
-            ui.add(egui::DragValue::new(v).speed(speed).max_decimals(6).suffix(suffix));
+            ui.add(egui::DragValue::new(v).custom_parser(crate::util::parse_num).speed(speed).max_decimals(6).suffix(suffix));
         };
         egui::Grid::new("pe_val").num_columns(2).show(ui, |ui| match self.pe.dist {
             Dist::Constant => {
-                ui.label("Value");
+                ui.label("Value").tip_text("Value set at the selected nodes.");
                 dv_u(ui, &mut self.pe.v_top, &unit);
                 ui.end_row();
             }
             Dist::Linear => {
-                ui.label("Top of the selection");
+                lbl(ui, "Top of the selection");
                 dv_u(ui, &mut self.pe.v_top, &unit);
                 ui.end_row();
-                ui.label("Bottom of the selection");
+                lbl(ui, "Bottom of the selection");
                 dv_u(ui, &mut self.pe.v_bot, &unit);
                 ui.end_row();
             }
             Dist::Equilibrium => {
-                ui.label("h at the lowest selected node");
+                lbl(ui, "h at the lowest selected node");
                 dv_u(ui, &mut self.pe.v_bot, &unit);
                 ui.end_row();
             }
             Dist::HoffmanVG => {
-                ui.label("Rooting depth Lr");
+                lbl(ui, "Rooting depth Lr");
                 dv_u(ui, &mut self.pe.root_depth, &lu);
                 ui.end_row();
             }
             Dist::Vrugt => {
-                ui.label("Maximum rooting depth zm");
+                lbl(ui, "Maximum rooting depth zm");
                 dv_u(ui, &mut self.pe.root_depth, &lu);
                 ui.end_row();
-                ui.label("Depth of maximum intensity z*");
+                lbl(ui, "Depth of maximum intensity z*");
                 dv_u(ui, &mut self.pe.root_zstar, &lu);
                 ui.end_row();
-                ui.label("Shape parameter pz");
+                lbl(ui, "Shape parameter pz");
                 dv_u(ui, &mut self.pe.root_pz, "–");
                 ui.end_row();
             }
         });
-        if ui.button(RichText::new("Apply to selection").strong()).clicked() {
+        if ui.button(RichText::new("Apply to selection").strong()).tip_text("Sets the values of the selected nodes with the chosen distribution").clicked() {
             self.apply_values(ch);
         }
         // initial condition from the results of the last run (any print time), interpolated in depth
@@ -1230,7 +1361,7 @@ impl App {
             }
         }
         ui.horizontal(|ui| {
-            ui.checkbox(&mut self.pe.table_sel_only, "Only the selected nodes");
+            ui.checkbox(&mut self.pe.table_sel_only, "Only the selected nodes").tip("Only the selected nodes");
             let (a, b) = self.pe.sel;
             ui.label(RichText::new(format!("Selection: nodes {}–{}. Click a row to select it, Shift+click to extend.", a + 1, b + 1)).weak());
         });
@@ -1272,12 +1403,12 @@ impl App {
                 });
                 row.col(|ui| dv(ui, ch, &mut nd.h));
                 row.col(|ui| {
-                    if ui.add(egui::DragValue::new(&mut nd.mat).range(1..=nm)).changed() {
+                    if crate::util::int(ui.add(egui::DragValue::new(&mut nd.mat).range(1..=nm))).changed() {
                         *ch = true;
                     }
                 });
                 row.col(|ui| {
-                    if ui.add(egui::DragValue::new(&mut nd.layer).range(1..=100)).changed() {
+                    if crate::util::int(ui.add(egui::DragValue::new(&mut nd.layer).range(1..=100))).changed() {
                         *ch = true;
                     }
                 });

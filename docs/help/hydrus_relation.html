@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relation to HYDRUS-1D – Rusteau-1D Help</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html"><img src="favicon.png" alt="" width="22" height="22">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details open><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li><a href="units.html">Units</a></li>
+<li class="current"><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details><summary>Solute transport</summary>
+<ul>
+<li><a href="solute_general.html">Solute transport: general</a></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+<li><a href="figures.html">Figure editor</a></li>
+<li><a href="run_comparison.html">Comparison of runs</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Theory and equations</summary>
+<ul>
+<li><a href="th_richards.html">Variably saturated water flow</a></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<div class="crumbs">Introduction</div>
+<h1>Relation to HYDRUS-1D</h1>
+<p>Rusteau-1D ports the numerical engine of HYDRUS-1D (Fortran source version 4.08, 2009) <a href="references.html#simunek2009" class="cite" title="Šimůnek, J., M. Šejna, H. Saito, M. Sakai, and M. Th. van Genuchten (2009). The HYDRUS-1D Software Package for Simulating the One-Dimensional Movement of Water, Heat, and Multiple Solutes in Variably-Saturated Media, Version 4.08. HYDRUS Software Series 3, Department of Environmental Sciences, University of California Riverside, Riverside, CA, USA, 330 pp.">Šimůnek et al. (2009)</a> to Rust. Its results are compared with HYDRUS-1D 4.17 <a href="references.html#simunek2013" class="cite" title="Šimůnek, J., M. Šejna, H. Saito, M. Sakai, and M. Th. van Genuchten (2013). The HYDRUS-1D Software Package for Simulating the One-Dimensional Movement of Water, Heat, and Multiple Solutes in Variably-Saturated Media, Version 4.17. HYDRUS Software Series 3, Department of Environmental Sciences, University of California Riverside, Riverside, CA, USA, 307 pp.">Šimůnek et al. (2013)</a> for all examples of the HYDRUS-1D distribution. Where HYDRUS 4.17 behaves differently from the 2009 source, Rusteau follows 4.17.</p>
+<h2 id="compatibility">Compatibility</h2>
+<ul>
+<li>HYDRUS-1D 4.x projects (<code>name.h1d</code> and the folder <code>name</code> with <code>SELECTOR.IN</code>, <code>PROFILE.DAT</code>, <code>ATMOSPH.IN</code>, <code>METEO.IN</code>, <code>FIT.IN</code>, <code>MATER.IN</code>, <code>Hysteresis.in</code>) are read and written (<a href="projects.html">projects</a>).</li>
+<li>The input pages follow the dialogs of HYDRUS-1D 4.17; the names of the HYDRUS variables (e.g. <code>hCritA</code>, <code>TolTh</code>, <code>iKappa</code>) are given in the tooltips and the help so that the HYDRUS manual can be used alongside.</li>
+<li>Settings HYDRUS-1D cannot store are listed when a HYDRUS-1D project is written.</li>
+</ul>
+<h2 id="verification">Verification against HYDRUS 4.17</h2>
+<p>All columns of <code>T_Level.out</code>, <code>A_Level.out</code>, <code>Nod_Inf.out</code>, <code>Obs_Node.out</code>, <code>Balance.out</code>, <code>Solute&lt;i&gt;.out</code>, <code>Meteo.out</code> and <code>Irrig.out</code> are compared with the output of HYDRUS 4.17, with the print precision of the reference files as tolerance.</p>
+<div class="table"><table>
+<thead><tr><th>Result</th><th>Examples</th></tr></thead>
+<tbody>
+<tr><td>identical within print precision</td><td>1SCALING, 2NOHYSTR, 3LAIJURI, 3SELIM, 4HEAT, 5SEASON, DRAINAGE, TEST3, TEST4, TEST5, TEST9a, Test9, Test10, UPINFIL</td></tr>
+<tr><td>known differences</td><td>1DRAINAG, 1INFILTR, 2HYSTER, EnBal2b, ROOTUPTK, TEST1, TEST2, TEST11, VOLATILE</td></tr>
+</tbody></table></div>
+<p>End-of-run water and solute totals agree with HYDRUS 4.17 within 0.07 % in all examples. The known differences come from the single precision of HYDRUS (iteration counts near the tolerance limits change the time steps), from chaotic situations (onset of ponding with a coarse head tolerance, a dry surface oscillating between evaporation and zero flux), and from the conductivity of the top node at a hysteresis reversal after ponding, where 4.17 differs from its own manual and source. The README of the project lists them in detail.</p>
+<h2 id="precision">Precision</h2>
+<p>HYDRUS-1D stores pressure heads, water contents, conductivities and temperatures in single precision; Rusteau computes in double precision throughout. The time-step control emulates the single-precision time step of HYDRUS, so that the time levels match. The hydraulic properties are interpolated from internal tables as in HYDRUS (<a href="th_numerics.html#tables">numerical solution</a>).</p>
+<h2 id="parameter-estimation">Parameter estimation</h2>
+<p>The source code of the inverse solution is not part of the 2009 Fortran source. Its algorithm was reconstructed from the manual and from the <code>Fit.out</code> files of HYDRUS 4.17; the objective function, the weighting, the statistics and the first Marquardt iteration reproduce 4.17. By default Rusteau iterates in stages on frozen time levels from several starting points, which reaches the same or a lower objective than 4.17 in all examples; the HYDRUS iteration is available (<a href="th_inverse.html">theory</a>).</p>
+<h2 id="additions-of-rusteau">Additions of Rusteau</h2>
+<ul>
+<li>The <a href="further_options.html">further options</a> of the HYDRUS code that HYDRUS-1D does not offer (non-equilibrium water flow, centrifuge, density-dependent flow, enhancement factor, extrapolation).</li>
+<li>Rosetta 3 besides the Rosetta 1 models of Rosetta Lite (<a href="rosetta.html">Rosetta</a>).</li>
+<li>A restart state with conductivities for hysteresis (<a href="hyd_model.html#restart">soil hydraulic model</a>).</li>
+<li>Irrigation for the full duration (<a href="water_bc.html#irrigation">water flow boundary conditions</a>).</li>
+<li>The native project format <code>.h1dr</code>, CSV output, measured data shown with the results.</li>
+</ul>
+<h2 id="not-supported">Not supported</h2>
+<p>HP1 (coupling with PHREEQC), UNSATCHEM (major-ion chemistry) and the carbon dioxide transport are separate modules beside the HYDRUS-1D core and are not included.</p>
+<h2 id="literature">Literature cited in this topic</h2>
+<ul>
+<li>Šimůnek, J., M. Šejna, H. Saito, M. Sakai, and M. Th. van Genuchten (2009). <em>The HYDRUS-1D Software Package for Simulating the One-Dimensional Movement of Water, Heat, and Multiple Solutes in Variably-Saturated Media, Version 4.08.</em> HYDRUS Software Series 3, Department of Environmental Sciences, University of California Riverside, Riverside, CA, USA, 330 pp. <a href="https://www.pc-progress.com/en/Default.aspx?h1d-description" target="_blank" rel="noopener">https://www.pc-progress.com/en/Default.aspx?h1d-description</a></li>
+<li>Šimůnek, J., M. Šejna, H. Saito, M. Sakai, and M. Th. van Genuchten (2013). <em>The HYDRUS-1D Software Package for Simulating the One-Dimensional Movement of Water, Heat, and Multiple Solutes in Variably-Saturated Media, Version 4.17.</em> HYDRUS Software Series 3, Department of Environmental Sciences, University of California Riverside, Riverside, CA, USA, 307 pp. <a href="https://www.pc-progress.com/en/Default.aspx?hydrus-1d" target="_blank" rel="noopener">https://www.pc-progress.com/en/Default.aspx?hydrus-1d</a></li>
+</ul>
+<p>All sources: <a href="references.html">References</a>.</p>
+</article>
+<div class="pager"><a class="prev" href="units.html">← Units</a><a class="next" href="projects.html">Projects and files →</a></div>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 1.0.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>

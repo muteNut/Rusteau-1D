@@ -22,12 +22,16 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libxkbcommon-dev libwayland-dev libx11-dev libxcb1-dev libgl1-mesa-dev
       - name: Test engine
         run: cargo test -p rusteau-core --release
+      - name: Test interface (help, tooltips)
+        run: cargo test -p rusteau-gui --release
       - name: Build release binaries
         run: cargo build --release -p rusteau-gui -p rusteau-cli
       - name: Package (Linux)
         if: runner.os == 'Linux'
         run: |
           mkdir dist && cp target/release/rusteau target/release/rusteau-cli dist/
+          cp -r docs/help dist/help
+          mkdir dist/fonts && cp crates/rusteau-gui/fonts/OFL-*.txt crates/rusteau-gui/fonts/README.md dist/fonts/
           tar czf rusteau-linux-x86_64.tar.gz -C dist .
       - name: Package (Windows)
         if: runner.os == 'Windows'
@@ -36,6 +40,9 @@ jobs:
           mkdir dist
           copy target\release\rusteau.exe dist\
           copy target\release\rusteau-cli.exe dist\
+          Copy-Item -Recurse docs\help dist\help
+          New-Item -ItemType Directory dist\fonts
+          Copy-Item crates\rusteau-gui\fonts\OFL-*.txt, crates\rusteau-gui\fonts\README.md dist\fonts\
           Compress-Archive -Path dist\* -DestinationPath rusteau-windows-x86_64.zip
       - uses: actions/upload-artifact@v4
         with:
@@ -48,6 +55,8 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
+          name: Rusteau-1D ${{ github.ref_name }}
+          body_path: RELEASE_NOTES.md
           files: |
             rusteau-linux-x86_64.tar.gz
             rusteau-windows-x86_64.zip

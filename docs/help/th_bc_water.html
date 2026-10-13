@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boundary conditions of water flow – Rusteau-1D Help</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html"><img src="favicon.png" alt="" width="22" height="22">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li><a href="units.html">Units</a></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details><summary>Solute transport</summary>
+<ul>
+<li><a href="solute_general.html">Solute transport: general</a></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+<li><a href="figures.html">Figure editor</a></li>
+<li><a href="run_comparison.html">Comparison of runs</a></li>
+</ul>
+</details></li>
+<li class="book"><details open><summary>Theory and equations</summary>
+<ul>
+<li><a href="th_richards.html">Variably saturated water flow</a></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li class="current"><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<div class="crumbs">Theory and equations</div>
+<h1>Boundary conditions of water flow</h1>
+<p>The Richards equation needs a condition at the soil surface (x = L) and at the bottom (x = 0) <a href="references.html#simunek2009" class="cite" title="Šimůnek, J., M. Šejna, H. Saito, M. Sakai, and M. Th. van Genuchten (2009). The HYDRUS-1D Software Package for Simulating the One-Dimensional Movement of Water, Heat, and Multiple Solutes in Variably-Saturated Media, Version 4.08. HYDRUS Software Series 3, Department of Environmental Sciences, University of California Riverside, Riverside, CA, USA, 330 pp.">Šimůnek et al. (2009)</a>.</p>
+<h2 id="pressure-head-and-flux-conditions">Pressure head and flux conditions</h2>
+<div class="formula">
+<div>h(x, t) = h<sub>0</sub>(t)   at x = 0 or x = L   (first type, Dirichlet)</div>
+<div>−K (∂h/∂x + 1) = q<sub>0</sub>(t)   at x = 0 or x = L   (second type, Neumann)</div>
+</div>
+<p>with the prescribed head h<sub>0</sub> and flux q<sub>0</sub> (positive upward).</p>
+<h2 id="atmospheric">Atmospheric boundary condition</h2>
+<p>The potential fluid flux across the soil surface is determined by the external conditions (precipitation, potential evaporation), but the actual flux depends on the moisture conditions in the soil. The atmospheric boundary condition of <a href="references.html#neuman1974" class="cite" title="Neuman, S. P., R. A. Feddes, and E. Bresler (1974). Finite Element Simulation of Flow in Saturated-Unsaturated Soils Considering Water Uptake by Plants. Third Annual Report, Project No. ALO-SWC-77, Hydraulic Engineering Laboratory, Technion, Haifa, Israel.">Neuman et al. (1974)</a> limits the absolute flux and the pressure head at the surface:</p>
+<div class="formula">
+<div>|−K (∂h/∂x + 1)| ≤ E   at x = L</div>
+<div>h<sub>A</sub> ≤ h ≤ h<sub>S</sub>   at x = L</div>
+</div>
+<p>E is the maximum potential rate of infiltration or evaporation, h<sub>A</sub> the minimum pressure head allowed at the surface (−hCritA, the dry limit) and h<sub>S</sub> the maximum (hCritS, the ponding depth; 0 without a surface layer). When one of the head limits is reached, the boundary switches from a flux to a head condition: during evaporation from a dry surface the surface stays at h<sub>A</sub> and the actual evaporation falls below the potential one; during rain on a saturated surface the water ponds up to h<sub>S</sub> and the excess runs off. When the actual flux again falls within the limits, the boundary switches back.</p>
+<p>With a <strong>surface layer</strong>, ponded water accumulates and its height h changes with the balance of precipitation, infiltration and evaporation:</p>
+<div class="formula">
+<div>−K (∂h/∂x + 1) = q<sub>0</sub>(t) − dh/dt   at x = L</div>
+</div>
+<h2 id="free">Free drainage</h2>
+<p>A unit vertical hydraulic gradient at the bottom (gravity flow):</p>
+<div class="formula">
+<div>∂h/∂x = 0,   q = −K(h)   at x = 0</div>
+</div>
+<p>suitable where the water table is far below the domain.</p>
+<h2 id="deep">Deep drainage</h2>
+<p>The bottom flux depends on the position of the groundwater level <a href="references.html#hopmansStricker1989" class="cite" title="Hopmans, J. W., and J. N. M. Stricker (1989). Stochastic analysis of soil water regime in a watershed. Journal of Hydrology 105(1–2): 57–84.">Hopmans and Stricker (1989)</a>:</p>
+<div class="formula">
+<div>q(h) = −A<sub>qh</sub> exp(B<sub>qh</sub> |h − GWL<sub>0L</sub>|)</div>
+</div>
+<p>with the empirical parameters A<sub>qh</sub> [L/T] and B<sub>qh</sub> [1/L] and the reference position of the groundwater level GWL<sub>0L</sub>.</p>
+<h2 id="seepage">Seepage face</h2>
+<p>The bottom of a lysimeter or a column with a free outlet: as long as the bottom is unsaturated the flux is zero; once the pressure head reaches h<sub>Seep</sub> (usually 0) the head is fixed at h<sub>Seep</sub> and water flows out.</p>
+<h2 id="drains">Horizontal drains</h2>
+<p>The bottom flux equals the discharge to parallel drains or ditches, computed from the groundwater level with the formulas of <a href="references.html#hooghoudt1940" class="cite" title="Hooghoudt, S. B. (1940). Bijdragen tot de kennis van eenige natuurkundige grootheden van den grond, 7. Algemeene beschouwing van het probleem van de detail ontwatering en de infiltratie door middel van parallel loopende drains, greppels, slooten en kanalen. Verslagen van Landbouwkundige Onderzoekingen 46(14)B: 515–707.">Hooghoudt (1940)</a> (homogeneous profiles, equivalent depth) and <a href="references.html#ernst1962" class="cite" title="Ernst, L. F. (1962). Grondwaterstromingen in de verzadigde zone en hun berekening bij aanwezigheid van horizontale evenwijdige open leidingen. Verslagen van Landbouwkundige Onderzoekingen 67(15), Pudoc, Wageningen, 189 pp.">Ernst (1962)</a> (layered profiles with vertical, horizontal and radial resistances), as implemented in SWAP <a href="references.html#vanDam1997" class="cite" title="van Dam, J. C., J. Huygen, J. G. Wesseling, R. A. Feddes, P. Kabat, P. E. V. van Walsum, P. Groenendijk, and C. A. van Diepen (1997). Theory of SWAP Version 2.0. Report 71, Department of Water Resources, Wageningen Agricultural University, Wageningen, 167 pp.">van Dam et al. (1997)</a>, with the drain spacing, the entrance resistance and the conductivities of the layers.</p>
+<h2 id="time-variable-conditions">Time-variable conditions</h2>
+<p>Heads and fluxes at both boundaries, precipitation, evaporation and the dry limit can change with time (<a href="time_variable_bc.html">time-variable data</a>). Time steps end at the times of the records.</p>
+<h2 id="literature">Literature cited in this topic</h2>
+<ul>
+<li>Ernst, L. F. (1962). <em>Grondwaterstromingen in de verzadigde zone en hun berekening bij aanwezigheid van horizontale evenwijdige open leidingen.</em> Verslagen van Landbouwkundige Onderzoekingen 67(15), Pudoc, Wageningen, 189 pp.</li>
+<li>Hooghoudt, S. B. (1940). Bijdragen tot de kennis van eenige natuurkundige grootheden van den grond, 7. Algemeene beschouwing van het probleem van de detail ontwatering en de infiltratie door middel van parallel loopende drains, greppels, slooten en kanalen. <em>Verslagen van Landbouwkundige Onderzoekingen</em> 46(14)B: 515–707.</li>
+<li>Hopmans, J. W., and J. N. M. Stricker (1989). Stochastic analysis of soil water regime in a watershed. <em>Journal of Hydrology</em> 105(1–2): 57–84. doi:<a href="https://doi.org/10.1016/0022-1694(89)90096-6" target="_blank" rel="noopener">10.1016/0022-1694(89)90096-6</a></li>
+<li>Neuman, S. P., R. A. Feddes, and E. Bresler (1974). <em>Finite Element Simulation of Flow in Saturated-Unsaturated Soils Considering Water Uptake by Plants.</em> Third Annual Report, Project No. ALO-SWC-77, Hydraulic Engineering Laboratory, Technion, Haifa, Israel.</li>
+<li>van Dam, J. C., J. Huygen, J. G. Wesseling, R. A. Feddes, P. Kabat, P. E. V. van Walsum, P. Groenendijk, and C. A. van Diepen (1997). <em>Theory of SWAP Version 2.0.</em> Report 71, Department of Water Resources, Wageningen Agricultural University, Wageningen, 167 pp.</li>
+<li>Šimůnek, J., M. Šejna, H. Saito, M. Sakai, and M. Th. van Genuchten (2009). <em>The HYDRUS-1D Software Package for Simulating the One-Dimensional Movement of Water, Heat, and Multiple Solutes in Variably-Saturated Media, Version 4.08.</em> HYDRUS Software Series 3, Department of Environmental Sciences, University of California Riverside, Riverside, CA, USA, 330 pp. <a href="https://www.pc-progress.com/en/Default.aspx?h1d-description" target="_blank" rel="noopener">https://www.pc-progress.com/en/Default.aspx?h1d-description</a></li>
+</ul>
+<p>All sources: <a href="references.html">References</a>.</p>
+</article>
+<div class="pager"><a class="prev" href="th_root_solute.html">← Root solute uptake</a><a class="next" href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow →</a></div>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 1.0.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>

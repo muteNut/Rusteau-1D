@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Heat transport – Rusteau-1D Help</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html"><img src="favicon.png" alt="" width="22" height="22">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li><a href="units.html">Units</a></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details open><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li class="current"><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details><summary>Solute transport</summary>
+<ul>
+<li><a href="solute_general.html">Solute transport: general</a></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+<li><a href="figures.html">Figure editor</a></li>
+<li><a href="run_comparison.html">Comparison of runs</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Theory and equations</summary>
+<ul>
+<li><a href="th_richards.html">Variably saturated water flow</a></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<div class="crumbs">Input (pre-processing)</div>
+<h1>Heat transport</h1>
+<p>The page holds the <em>Heat Transport Parameters</em> and <em>Heat Transport Boundary Conditions</em> of HYDRUS-1D. The equations are in <a href="th_heat.html">heat transport</a>.</p>
+<figure><a href="img/heat_page.png"><img src="img/heat_page.png" alt="The page Heat transport." loading="lazy"></a><figcaption>The page Heat transport.</figcaption></figure>
+<h2 id="parameters-per-material">Parameters per material</h2>
+<div class="table"><table>
+<thead><tr><th>Parameter</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>θn</td><td>volume fraction of the solid phase [–] (≈ 1 − porosity)</td></tr>
+<tr><td>θo</td><td>volume fraction of organic matter [–]</td></tr>
+<tr><td>λL</td><td>longitudinal thermal dispersivity [L]</td></tr>
+<tr><td>b1, b2, b3</td><td>coefficients of the thermal conductivity λ0(θ) = b1 + b2 θ + b3 θ<sup>0.5</sup> <a href="references.html#chungHorton1987" class="cite" title="Chung, S.-O., and R. Horton (1987). Soil heat and water flow with a partial surface mulch. Water Resources Research 23(12): 2175–2186.">Chung and Horton (1987)</a></td></tr>
+<tr><td>Cn, Co, Cw</td><td>volumetric heat capacities of the solid phase, organic matter and water <a href="references.html#deVries1963" class="cite" title="de Vries, D. A. (1963). Thermal properties of soils. In: W. R. van Wijk (ed.), Physics of Plant Environment, North-Holland, Amsterdam, pp. 210–235.">de Vries (1963)</a></td></tr>
+</tbody></table></div>
+<p>The thermal parameters are in the project's units with the mass in kg (<a href="units.html#heat">units</a>). The buttons enter typical values converted to the project's units:</p>
+<div class="table"><table>
+<thead><tr><th>Button</th><th>Values</th></tr></thead>
+<tbody>
+<tr><td>b1, b2, b3 for sand / loam / clay</td><td><a href="references.html#chungHorton1987" class="cite" title="Chung, S.-O., and R. Horton (1987). Soil heat and water flow with a partial surface mulch. Water Resources Research 23(12): 2175–2186.">Chung and Horton (1987)</a>: sand 0.228, −2.406, 4.909; loam 0.243, 0.393, 1.534; clay −0.197, −0.962, 2.521 W/m/K</td></tr>
+<tr><td>Default heat capacities</td><td>Cn = 1.92, Co = 2.51, Cw = 4.18 MJ/m³/K</td></tr>
+</tbody></table></div>
+<p><em>Campbell (1985) thermal conductivity</em> uses the function of <a href="references.html#campbell1985" class="cite" title="Campbell, G. S. (1985). Soil Physics with BASIC: Transport Models for Soil-Plant Systems. Elsevier, Amsterdam, 150 pp.">Campbell (1985)</a> instead; b1, b2 and b3 then hold the volume fractions of quartz, other minerals and clay.</p>
+<h2 id="boundary-conditions">Boundary conditions</h2>
+<div class="table"><table>
+<thead><tr><th>Input</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>Upper boundary</td><td>temperature (first type) or heat flux (third type: the heat carried by the entering water)</td></tr>
+<tr><td>Lower boundary</td><td>temperature, heat flux or zero gradient</td></tr>
+<tr><td>Upper / lower temperature</td><td>[°C]; overridden by the Ttop / Tbot columns of the time-variable data</td></tr>
+<tr><td>Amplitude, period</td><td>sinusoidal daily variation of the surface temperature, T(t) = Ttop + A sin(2π t / p − 7π/12) with the amplitude A and the period p; the maximum is reached at 13:00 for p = 1 d</td></tr>
+</tbody></table></div>
+<p>With the <a href="th_energy_balance.html">surface energy balance</a> the surface temperature follows from the energy balance instead.</p>
+<p>The initial temperatures are set on the page <a href="profile_editor.html">Soil profile</a>.</p>
+<h2 id="literature">Literature cited in this topic</h2>
+<ul>
+<li>Campbell, G. S. (1985). <em>Soil Physics with BASIC: Transport Models for Soil-Plant Systems.</em> Elsevier, Amsterdam, 150 pp.</li>
+<li>Chung, S.-O., and R. Horton (1987). Soil heat and water flow with a partial surface mulch. <em>Water Resources Research</em> 23(12): 2175–2186. doi:<a href="https://doi.org/10.1029/WR023i012p02175" target="_blank" rel="noopener">10.1029/WR023i012p02175</a></li>
+<li>de Vries, D. A. (1963). Thermal properties of soils. In: W. R. van Wijk (ed.), <em>Physics of Plant Environment</em>, North-Holland, Amsterdam, pp. 210–235.</li>
+</ul>
+<p>All sources: <a href="references.html">References</a>.</p>
+</article>
+<div class="pager"><a class="prev" href="root_uptake_page.html">← Root water and solute uptake</a><a class="next" href="solute_general.html">Solute transport: general →</a></div>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 1.0.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>

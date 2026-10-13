@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Surface energy balance – Rusteau-1D Help</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html"><img src="favicon.png" alt="" width="22" height="22">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li><a href="units.html">Units</a></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details><summary>Solute transport</summary>
+<ul>
+<li><a href="solute_general.html">Solute transport: general</a></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+<li><a href="figures.html">Figure editor</a></li>
+<li><a href="run_comparison.html">Comparison of runs</a></li>
+</ul>
+</details></li>
+<li class="book"><details open><summary>Theory and equations</summary>
+<ul>
+<li><a href="th_richards.html">Variably saturated water flow</a></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li class="current"><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<div class="crumbs">Theory and equations</div>
+<h1>Surface energy balance</h1>
+<p>With the option <em>Evaporation and heat flux from the surface energy balance</em> (page <a href="meteo_page.html">Meteorological data</a>) the evaporation is not prescribed but follows, together with the soil heat flux, from the energy balance at the soil surface <a href="references.html#saito2006" class="cite" title="Saito, H., J. Šimůnek, and B. P. Mohanty (2006). Numerical analysis of coupled water, vapor, and heat transport in the vadose zone. Vadose Zone Journal 5(2): 784–800.">Saito et al. (2006)</a>; <a href="references.html#vanBavelHillel1976" class="cite" title="van Bavel, C. H. M., and D. Hillel (1976). Calculating potential and actual evaporation from a bare soil surface by simulation of concurrent flow of water and heat. Agricultural Meteorology 17(6): 453–476.">van Bavel and Hillel (1976)</a>:</p>
+<div class="formula">
+<div>R<sub>n</sub> − H − L E − G = 0</div>
+</div>
+<div class="table"><table>
+<thead><tr><th>Symbol</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td>R<sub>n</sub></td><td>net radiation [W/m²]</td></tr>
+<tr><td>H</td><td>sensible heat flux [W/m²]</td></tr>
+<tr><td>L E</td><td>latent heat flux [W/m²]: the evaporation E times the latent heat of vaporization L</td></tr>
+<tr><td>G</td><td>soil heat flux [W/m²], the upper boundary condition of the <a href="th_heat.html">heat transport</a></td></tr>
+</tbody></table></div>
+<p>It requires heat transport and is usually combined with <a href="th_vapor.html">vapor flow</a>.</p>
+<h2 id="net-radiation">Net radiation</h2>
+<div class="formula">
+<div>R<sub>n</sub> = (1 − a) R<sub>s</sub> + R<sub>L↓</sub> − R<sub>L↑</sub></div>
+<div>R<sub>L↑</sub> = ε<sub>s</sub> σ T<sub>s</sub><sup>4</sup>,   R<sub>L↓</sub> = ε<sub>a</sub> σ T<sub>a</sub><sup>4</sup></div>
+</div>
+<ul>
+<li>the surface albedo a depends on the water content θ of the surface <a href="references.html#vanBavelHillel1976" class="cite" title="van Bavel, C. H. M., and D. Hillel (1976). Calculating potential and actual evaporation from a bare soil surface by simulation of concurrent flow of water and heat. Agricultural Meteorology 17(6): 453–476.">van Bavel and Hillel (1976)</a>: 0.25 for θ ≤ 0.1, 0.35 − θ for 0.1 &lt; θ ≤ 0.25, 0.1 for θ &gt; 0.25;</li>
+<li>the soil emissivity ε<sub>s</sub> = min(0.9 + 0.18 θ, 1) <a href="references.html#vanBavelHillel1976" class="cite" title="van Bavel, C. H. M., and D. Hillel (1976). Calculating potential and actual evaporation from a bare soil surface by simulation of concurrent flow of water and heat. Agricultural Meteorology 17(6): 453–476.">van Bavel and Hillel (1976)</a>;</li>
+<li>the clear-sky emissivity of the atmosphere ε<sub>ac</sub> = 1.24 (e<sub>a</sub>/T<sub>a</sub>)<sup>1/7</sup> <a href="references.html#brutsaert1975" class="cite" title="Brutsaert, W. (1975). On a derivable formula for long-wave radiation from clear skies. Water Resources Research 11(5): 742–744.">Brutsaert (1975)</a>, corrected for the cloud cover c: ε<sub>a</sub> = (1 − 0.84 c) ε<sub>ac</sub> + 0.84 c <a href="references.html#campbellNorman1998" class="cite" title="Campbell, G. S., and J. M. Norman (1998). An Introduction to Environmental Biophysics. 2nd ed., Springer, New York, 286 pp.">Campbell and Norman (1998)</a>;</li>
+<li>daily radiation is distributed over the day with the sine of the solar elevation.</li>
+</ul>
+<h2 id="sensible-and-latent-heat">Sensible and latent heat</h2>
+<div class="formula">
+<div>H = C<sub>a</sub> (T<sub>s</sub> − T<sub>a</sub>) / r<sub>h</sub></div>
+<div>E = (ρ<sub>vs</sub> − ρ<sub>va</sub>) / (r<sub>v</sub> + r<sub>s</sub>)</div>
+</div>
+<p>C<sub>a</sub> is the volumetric heat capacity of the air, T<sub>s</sub> and T<sub>a</sub> the surface and air temperatures, ρ<sub>vs</sub> the water vapor density at the soil surface (the saturated vapor density times the relative humidity of the soil air, from the pressure head and temperature of the top node), ρ<sub>va</sub> that of the air, r<sub>h</sub> = r<sub>v</sub> the aerodynamic resistances to heat and vapor transfer, and r<sub>s</sub> the soil surface resistance to evaporation.</p>
+<p>The aerodynamic resistance follows from the wind speed with stability corrections for unstable and stable atmospheric conditions (Monin–Obukhov similarity, iterated) <a href="references.html#campbellNorman1998" class="cite" title="Campbell, G. S., and J. M. Norman (1998). An Introduction to Environmental Biophysics. 2nd ed., Springer, New York, 286 pp.">Campbell and Norman (1998)</a>; <a href="references.html#saito2006" class="cite" title="Saito, H., J. Šimůnek, and B. P. Mohanty (2006). Numerical analysis of coupled water, vapor, and heat transport in the vadose zone. Vadose Zone Journal 5(2): 784–800.">Saito et al. (2006)</a>; with no wind, heat is transferred by diffusion only. The soil surface resistance increases as the surface dries <a href="references.html#vanDeGriendOwe1994" class="cite" title="van de Griend, A. A., and M. Owe (1994). Bare soil surface resistance to evaporation by vapor diffusion under semiarid conditions. Water Resources Research 30(2): 181–188.">van de Griend and Owe (1994)</a>:</p>
+<div class="formula">
+<div>r<sub>s</sub> = 10 exp[35.63 (0.15 − θ)]   for θ &lt; 0.15;   r<sub>s</sub> = 10 s/m   otherwise</div>
+</div>
+<h2 id="coupling">Coupling</h2>
+<p>The energy balance is solved together with the <a href="th_heat.html">heat transport</a> for the surface temperature; the evaporation becomes the flux condition of the water flow, limited by hCritA (<a href="th_bc_water.html#atmospheric">atmospheric boundary condition</a>). With vapor flow, the latent heat carried through the surface by the soil vapor flux is returned to the top node. The time step is limited so that the surface temperature changes smoothly.</p>
+<h2 id="literature">Literature cited in this topic</h2>
+<ul>
+<li>Brutsaert, W. (1975). On a derivable formula for long-wave radiation from clear skies. <em>Water Resources Research</em> 11(5): 742–744. doi:<a href="https://doi.org/10.1029/WR011i005p00742" target="_blank" rel="noopener">10.1029/WR011i005p00742</a></li>
+<li>Campbell, G. S., and J. M. Norman (1998). <em>An Introduction to Environmental Biophysics.</em> 2nd ed., Springer, New York, 286 pp.</li>
+<li>Saito, H., J. Šimůnek, and B. P. Mohanty (2006). Numerical analysis of coupled water, vapor, and heat transport in the vadose zone. <em>Vadose Zone Journal</em> 5(2): 784–800. doi:<a href="https://doi.org/10.2136/vzj2006.0007" target="_blank" rel="noopener">10.2136/vzj2006.0007</a></li>
+<li>van Bavel, C. H. M., and D. Hillel (1976). Calculating potential and actual evaporation from a bare soil surface by simulation of concurrent flow of water and heat. <em>Agricultural Meteorology</em> 17(6): 453–476. doi:<a href="https://doi.org/10.1016/0002-1571(76)90022-4" target="_blank" rel="noopener">10.1016/0002-1571(76)90022-4</a></li>
+<li>van de Griend, A. A., and M. Owe (1994). Bare soil surface resistance to evaporation by vapor diffusion under semiarid conditions. <em>Water Resources Research</em> 30(2): 181–188. doi:<a href="https://doi.org/10.1029/93WR02747" target="_blank" rel="noopener">10.1029/93WR02747</a></li>
+</ul>
+<p>All sources: <a href="references.html">References</a>.</p>
+</article>
+<div class="pager"><a class="prev" href="th_hargreaves.html">← Hargreaves equation</a><a class="next" href="th_vapor.html">Coupled water, vapor and heat flow →</a></div>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 1.0.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>

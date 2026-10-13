@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dual-permeability model – Rusteau-1D Help</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html"><img src="favicon.png" alt="" width="22" height="22">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li><a href="units.html">Units</a></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details><summary>Solute transport</summary>
+<ul>
+<li><a href="solute_general.html">Solute transport: general</a></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+<li><a href="figures.html">Figure editor</a></li>
+<li><a href="run_comparison.html">Comparison of runs</a></li>
+</ul>
+</details></li>
+<li class="book"><details open><summary>Theory and equations</summary>
+<ul>
+<li><a href="th_richards.html">Variably saturated water flow</a></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li class="current"><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<div class="crumbs">Theory and equations</div>
+<h1>Dual-permeability model</h1>
+<p>The dual-permeability model of <a href="references.html#gerkeVG1993a" class="cite" title="Gerke, H. H., and M. Th. van Genuchten (1993a). A dual-porosity model for simulating the preferential movement of water and solutes in structured porous media. Water Resources Research 29(2): 305–319.">Gerke and van Genuchten (1993a)</a> assumes that the porous medium consists of two overlapping domains, both of which conduct water: the <strong>fracture</strong> (macropore, inter-aggregate) domain and the <strong>matrix</strong> (micropore, intra-aggregate) domain. Each domain has its own Richards equation, coupled by a water transfer term.</p>
+<h2 id="governing-equations">Governing equations</h2>
+<div class="formula">
+<div>∂θ<sub>f</sub>/∂t = ∂/∂x [ K<sub>f</sub>(h<sub>f</sub>) (∂h<sub>f</sub>/∂x + cos α) ] − S<sub>f</sub> − Γ<sub>w</sub>/w</div>
+<div>∂θ<sub>m</sub>/∂t = ∂/∂x [ K<sub>m</sub>(h<sub>m</sub>) (∂h<sub>m</sub>/∂x + cos α) ] − S<sub>m</sub> + Γ<sub>w</sub>/(1 − w)</div>
+<div>θ = w θ<sub>f</sub> + (1 − w) θ<sub>m</sub></div>
+</div>
+<p>The subscripts f and m refer to the fracture and the matrix domain, and w is the ratio of the volume of the fracture domain to the total soil volume. Each domain has its own van Genuchten–Mualem functions: in the parameter table of <a href="soil_params.html">Materials &amp; parameters</a> the primary columns describe the fractures and the extra columns θ<sub>r,m</sub>, θ<sub>s,m</sub>, α<sub>m</sub>, n<sub>m</sub>, K<sub>s,m</sub> the matrix.</p>
+<h2 id="water-transfer">Water transfer</h2>
+<p>The water transfer is proportional to the difference of the pressure heads <a href="references.html#gerkeVG1993a" class="cite" title="Gerke, H. H., and M. Th. van Genuchten (1993a). A dual-porosity model for simulating the preferential movement of water and solutes in structured porous media. Water Resources Research 29(2): 305–319.">Gerke and van Genuchten (1993a)</a>; <a href="references.html#gerkeVG1993b" class="cite" title="Gerke, H. H., and M. Th. van Genuchten (1993b). Evaluation of a first-order water transfer term for variably saturated dual-porosity flow models. Water Resources Research 29(4): 1225–1238.">Gerke and van Genuchten (1993b)</a>:</p>
+<div class="formula">
+<div>Γ<sub>w</sub> = α<sub>w</sub> (h<sub>f</sub> − h<sub>m</sub>)</div>
+<div>α<sub>w</sub> = (β / a<sup>2</sup>) γ<sub>w</sub> K<sub>a</sub>,   K<sub>a</sub> = [K<sub>a</sub>(h<sub>f</sub>) + K<sub>a</sub>(h<sub>m</sub>)] / 2,   K<sub>a</sub>(h) = K<sub>a,s</sub> K<sub>r,m</sub>(h)</div>
+</div>
+<p>with the shape factor β of the matrix blocks (3 for rectangular slabs, 15 for spheres <a href="references.html#gerkeVG1996" class="cite" title="Gerke, H. H., and M. Th. van Genuchten (1996). Macroscopic representation of structural geometry for simulating water and solute movement in dual-porosity media. Advances in Water Resources 19(6): 343–357.">Gerke and van Genuchten (1996)</a>), the effective diffusion path length a (the half width of the blocks), the empirical scaling coefficient γ<sub>w</sub> = 0.4 <a href="references.html#gerkeVG1993b" class="cite" title="Gerke, H. H., and M. Th. van Genuchten (1993b). Evaluation of a first-order water transfer term for variably saturated dual-porosity flow models. Water Resources Research 29(4): 1225–1238.">Gerke and van Genuchten (1993b)</a>, and the conductivity K<sub>a</sub> of the fracture–matrix interface (K<sub>a,s</sub> = 0 uses the matrix K<sub>s</sub>). A positive Γ<sub>w</sub> moves water from the fractures into the matrix.</p>
+<h2 id="boundary-fluxes">Boundary fluxes</h2>
+<p>A prescribed flux at a boundary is distributed between the two domains, in proportion to their volumes (f = w) or with a given fraction entering the fractures (<a href="hyd_model.html#dualperm">soil hydraulic model</a>).</p>
+<h2 id="dual-porosity-inside-the-matrix">Dual porosity inside the matrix</h2>
+<p>Optionally the matrix itself has a mobile and an immobile region, with a water-content or pressure-head driven transfer as in the <a href="th_dual_porosity.html">dual-porosity models</a>.</p>
+<h2 id="solute-transport">Solute transport</h2>
+<p>The advection–dispersion equation is solved in both domains, coupled by the solute transfer</p>
+<div class="formula">
+<div>Γ<sub>s</sub> = α<sub>s</sub> (1 − w) θ<sub>m</sub> (c<sub>f</sub> − c<sub>m</sub>) + Γ<sub>w</sub> c</div>
+</div>
+<p>with the solute transfer coefficient α<sub>s</sub> [1/T] and the concentration c of the transferred water (c<sub>f</sub> for flow into the matrix, c<sub>m</sub> otherwise) <a href="references.html#gerkeVG1993a" class="cite" title="Gerke, H. H., and M. Th. van Genuchten (1993a). A dual-porosity model for simulating the preferential movement of water and solutes in structured porous media. Water Resources Research 29(2): 305–319.">Gerke and van Genuchten (1993a)</a>; <a href="references.html#simunekVG2008" class="cite" title="Šimůnek, J., and M. Th. van Genuchten (2008). Modeling nonequilibrium flow and transport processes using HYDRUS. Vadose Zone Journal 7(2): 782–797.">Šimůnek and van Genuchten (2008)</a>.</p>
+<div class="note">The interface parameters of the dual-permeability model cannot be stored in HYDRUS-1D project files. Non-equilibrium water flow, the centrifuge and density-dependent flow are not available with this model.</div>
+<h2 id="literature">Literature cited in this topic</h2>
+<ul>
+<li>Gerke, H. H., and M. Th. van Genuchten (1993a). A dual-porosity model for simulating the preferential movement of water and solutes in structured porous media. <em>Water Resources Research</em> 29(2): 305–319. doi:<a href="https://doi.org/10.1029/92WR02339" target="_blank" rel="noopener">10.1029/92WR02339</a></li>
+<li>Gerke, H. H., and M. Th. van Genuchten (1993b). Evaluation of a first-order water transfer term for variably saturated dual-porosity flow models. <em>Water Resources Research</em> 29(4): 1225–1238. doi:<a href="https://doi.org/10.1029/92WR02467" target="_blank" rel="noopener">10.1029/92WR02467</a></li>
+<li>Gerke, H. H., and M. Th. van Genuchten (1996). Macroscopic representation of structural geometry for simulating water and solute movement in dual-porosity media. <em>Advances in Water Resources</em> 19(6): 343–357. doi:<a href="https://doi.org/10.1016/0309-1708(96)00012-7" target="_blank" rel="noopener">10.1016/0309-1708(96)00012-7</a></li>
+<li>Šimůnek, J., and M. Th. van Genuchten (2008). Modeling nonequilibrium flow and transport processes using HYDRUS. <em>Vadose Zone Journal</em> 7(2): 782–797. doi:<a href="https://doi.org/10.2136/vzj2007.0074" target="_blank" rel="noopener">10.2136/vzj2007.0074</a></li>
+</ul>
+<p>All sources: <a href="references.html">References</a>.</p>
+</article>
+<div class="pager"><a class="prev" href="th_dual_porosity.html">← Dual-porosity models</a><a class="next" href="th_root_uptake.html">Root water uptake →</a></div>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 1.0.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>

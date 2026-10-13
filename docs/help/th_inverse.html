@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parameter estimation – Rusteau-1D Help</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html"><img src="favicon.png" alt="" width="22" height="22">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li><a href="units.html">Units</a></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details><summary>Solute transport</summary>
+<ul>
+<li><a href="solute_general.html">Solute transport: general</a></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+<li><a href="figures.html">Figure editor</a></li>
+<li><a href="run_comparison.html">Comparison of runs</a></li>
+</ul>
+</details></li>
+<li class="book"><details open><summary>Theory and equations</summary>
+<ul>
+<li><a href="th_richards.html">Variably saturated water flow</a></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li class="current"><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<div class="crumbs">Theory and equations</div>
+<h1>Parameter estimation</h1>
+<p>The inverse problem estimates model parameters by minimizing the differences between observed and simulated values <a href="references.html#kool1987" class="cite" title="Kool, J. B., J. C. Parker, and M. Th. van Genuchten (1987). Parameter estimation for unsaturated flow and transport models – A review. Journal of Hydrology 91(3–4): 255–293.">Kool et al. (1987)</a>; <a href="references.html#hopmans2002" class="cite" title="Hopmans, J. W., J. Šimůnek, N. Romano, and W. Durner (2002). Inverse methods. In: J. H. Dane and G. C. Topp (eds.), Methods of Soil Analysis, Part 4, Physical Methods, SSSA Book Series No. 5, Soil Science Society of America, Madison, WI, pp. 963–1008.">Hopmans et al. (2002)</a>; <a href="references.html#simunekHopmans2002" class="cite" title="Šimůnek, J., and J. W. Hopmans (2002). Parameter optimization and nonlinear fitting. In: J. H. Dane and G. C. Topp (eds.), Methods of Soil Analysis, Part 4, Physical Methods, SSSA Book Series No. 5, Soil Science Society of America, Madison, WI, pp. 139–157.">Šimůnek and Hopmans (2002)</a>. The algorithm of HYDRUS 4.17 <a href="references.html#simunek2013" class="cite" title="Šimůnek, J., M. Šejna, H. Saito, M. Sakai, and M. Th. van Genuchten (2013). The HYDRUS-1D Software Package for Simulating the One-Dimensional Movement of Water, Heat, and Multiple Solutes in Variably-Saturated Media, Version 4.17. HYDRUS Software Series 3, Department of Environmental Sciences, University of California Riverside, Riverside, CA, USA, 307 pp.">Šimůnek et al. (2013)</a> was reconstructed from its manual and output; the objective function, the weighting, the statistics and the first iteration reproduce HYDRUS 4.17.</p>
+<h2 id="objective">Objective function</h2>
+<div class="formula">
+<div>Φ(b) = Σ<sub>i=1</sub><sup>n</sup> ( W<sub>i</sub> [ F<sub>i</sub> − F<sub>i</sub>(b) ] )<sup>2</sup>,   W<sub>i</sub> = w<sub>i</sub> v<sub>j</sub></div>
+</div>
+<p>with the vector b of the estimated parameters, the observations F<sub>i</sub> (types 0–15, see <a href="inverse_page.html#observations">observations</a>), the model values F<sub>i</sub>(b), the weight w<sub>i</sub> of the observation and the weight v<sub>j</sub> of its measurement set j. The measurement sets are the observation types (retention points belong to the water contents). The set weights are:</p>
+<ul>
+<li>no internal weighting: v<sub>j</sub> = 1;</li>
+<li>weighting by mean ratio: v<sub>j</sub> = the smallest mean of the absolute values of all sets divided by the mean of set j;</li>
+<li>weighting by standard deviation: v<sub>j</sub> = 1/(√n<sub>j</sub> σ<sub>j</sub>) with the standard deviation σ<sub>j</sub> of set j.</li>
+</ul>
+<p>Prior information on parameters (types 7–11) enters the same sum. The model values are taken at the observation times, which are fixed time levels of the simulation.</p>
+<h2 id="marquardt">Marquardt–Levenberg iteration</h2>
+<p>Φ is minimized with the Marquardt–Levenberg method <a href="references.html#marquardt1963" class="cite" title="Marquardt, D. W. (1963). An algorithm for least-squares estimation of nonlinear parameters. Journal of the Society for Industrial and Applied Mathematics 11(2): 431–441.">Marquardt (1963)</a>: from the sensitivity (Jacobian) matrix J of the model values with respect to the parameters, computed with forward differences (1 % of each parameter), each iteration solves</p>
+<div class="formula">
+<div>(J<sup>T</sup> W J + λ D) Δb = J<sup>T</sup> W r</div>
+</div>
+<p>for the change Δb of the parameters, with the residuals r, the diagonal D of J<sup>T</sup>WJ and the Marquardt parameter λ (0.02 at the start, divided by 10 at the start of every iteration and multiplied by 10 after a failed step). Parameters are kept within their constraints. The iteration ends when no parameter changes by more than 1 %, after MIT iterations, or when Φ cannot be reduced further.</p>
+<h2 id="rusteau">Rusteau iteration</h2>
+<p>With adaptive time steps in every run, Φ is not a smooth function of the parameters: a small change of a parameter changes the time steps, and Φ jumps by up to a few per cent. The derivatives then carry large errors, and the HYDRUS iteration can stop far from the minimum at a point that depends on the last bits of the arithmetic. Rusteau therefore (by default)</p>
+<ul>
+<li>iterates in <strong>stages on frozen time levels</strong>: within a stage all runs use the time levels of the run at the start of the stage, so Φ is smooth and the derivatives use increments of 0.1 %; a new stage starts from the end point of the previous one while that lowers Φ (computed with adaptive time steps) by more than 0.1 %;</li>
+<li>starts from <strong>further starting points</strong> (8 by default, in parallel threads), placed deterministically with a Halton sequence <a href="references.html#halton1960" class="cite" title="Halton, J. H. (1960). On the efficiency of certain quasi-random sequences of points in evaluating multi-dimensional integrals. Numerische Mathematik 2: 84–90.">Halton (1960)</a> within the constraints (log-uniformly over more than a decade) or within a factor of four of the initial estimates, and keeps the lowest Φ.</li>
+</ul>
+<p>The HYDRUS 4.17 iteration (adaptive time steps in every run, one starting point) is available for comparisons. In all twelve inverse examples of HYDRUS-1D the Rusteau iteration ends at the same or a lower Φ than HYDRUS 4.17.</p>
+<h2 id="statistics">Statistics</h2>
+<p>From the last iteration <a href="references.html#simunekHopmans2002" class="cite" title="Šimůnek, J., and J. W. Hopmans (2002). Parameter optimization and nonlinear fitting. In: J. H. Dane and G. C. Topp (eds.), Methods of Soil Analysis, Part 4, Physical Methods, SSSA Book Series No. 5, Soil Science Society of America, Madison, WI, pp. 139–157.">Šimůnek and Hopmans (2002)</a>:</p>
+<ul>
+<li>the <strong>covariance matrix</strong> C = s² (J<sup>T</sup>WJ)<sup>−1</sup> with the mean square error s² = Φ/(n − p) (n observations, p parameters);</li>
+<li>the <strong>standard errors</strong> SE<sub>k</sub> = √C<sub>kk</sub> and the <strong>95 % confidence intervals</strong> b<sub>k</sub> ± t<sub>0.975, n−p</sub> SE<sub>k</sub> (Student's t);</li>
+<li>the <strong>correlation matrix</strong> a<sub>kl</sub> = C<sub>kl</sub>/√(C<sub>kk</sub>C<sub>ll</sub>); |a| near 1 means that the two parameters cannot be estimated independently from the data;</li>
+<li><strong>R²</strong> of the regression of fitted on observed values;</li>
+<li>ME = Σ W r / n, MAE = Σ |W r| / n, RMSE = √(Σ (W r)² / (n − 1));</li>
+<li>the information criteria <strong>AIC</strong> = n ln(Φ<sub>0</sub>/n) + 2p <a href="references.html#akaike1974" class="cite" title="Akaike, H. (1974). A new look at the statistical model identification. IEEE Transactions on Automatic Control 19(6): 716–723.">Akaike (1974)</a> and <strong>BIC</strong> = n ln(Φ<sub>0</sub>/n) + p ln n <a href="references.html#schwarz1978" class="cite" title="Schwarz, G. (1978). Estimating the dimension of a model. The Annals of Statistics 6(2): 461–464.">Schwarz (1978)</a> with the objective function Φ<sub>0</sub> at the start of the last iteration (as HYDRUS 4.17 prints them).</li>
+</ul>
+<h2 id="good-practice">Good practice</h2>
+<ul>
+<li>Estimate as few parameters as possible; fix those known from measurements.</li>
+<li>Combine different kinds of data (e.g. outflow and retention points, or pressure heads and water contents).</li>
+<li>Give physically sensible constraints, especially with several starting points.</li>
+<li>Check the correlation matrix and the confidence intervals (<a href="res_inverse.html">results</a>).</li>
+</ul>
+<h2 id="literature">Literature cited in this topic</h2>
+<ul>
+<li>Akaike, H. (1974). A new look at the statistical model identification. <em>IEEE Transactions on Automatic Control</em> 19(6): 716–723. doi:<a href="https://doi.org/10.1109/TAC.1974.1100705" target="_blank" rel="noopener">10.1109/TAC.1974.1100705</a></li>
+<li>Halton, J. H. (1960). On the efficiency of certain quasi-random sequences of points in evaluating multi-dimensional integrals. <em>Numerische Mathematik</em> 2: 84–90. doi:<a href="https://doi.org/10.1007/BF01386213" target="_blank" rel="noopener">10.1007/BF01386213</a></li>
+<li>Hopmans, J. W., J. Šimůnek, N. Romano, and W. Durner (2002). Inverse methods. In: J. H. Dane and G. C. Topp (eds.), <em>Methods of Soil Analysis, Part 4, Physical Methods</em>, SSSA Book Series No. 5, Soil Science Society of America, Madison, WI, pp. 963–1008.</li>
+<li>Kool, J. B., J. C. Parker, and M. Th. van Genuchten (1987). Parameter estimation for unsaturated flow and transport models – A review. <em>Journal of Hydrology</em> 91(3–4): 255–293. doi:<a href="https://doi.org/10.1016/0022-1694(87)90207-1" target="_blank" rel="noopener">10.1016/0022-1694(87)90207-1</a></li>
+<li>Marquardt, D. W. (1963). An algorithm for least-squares estimation of nonlinear parameters. <em>Journal of the Society for Industrial and Applied Mathematics</em> 11(2): 431–441. doi:<a href="https://doi.org/10.1137/0111030" target="_blank" rel="noopener">10.1137/0111030</a></li>
+<li>Schwarz, G. (1978). Estimating the dimension of a model. <em>The Annals of Statistics</em> 6(2): 461–464. doi:<a href="https://doi.org/10.1214/aos/1176344136" target="_blank" rel="noopener">10.1214/aos/1176344136</a></li>
+<li>Šimůnek, J., and J. W. Hopmans (2002). Parameter optimization and nonlinear fitting. In: J. H. Dane and G. C. Topp (eds.), <em>Methods of Soil Analysis, Part 4, Physical Methods</em>, SSSA Book Series No. 5, Soil Science Society of America, Madison, WI, pp. 139–157.</li>
+<li>Šimůnek, J., M. Šejna, H. Saito, M. Sakai, and M. Th. van Genuchten (2013). <em>The HYDRUS-1D Software Package for Simulating the One-Dimensional Movement of Water, Heat, and Multiple Solutes in Variably-Saturated Media, Version 4.17.</em> HYDRUS Software Series 3, Department of Environmental Sciences, University of California Riverside, Riverside, CA, USA, 307 pp. <a href="https://www.pc-progress.com/en/Default.aspx?hydrus-1d" target="_blank" rel="noopener">https://www.pc-progress.com/en/Default.aspx?hydrus-1d</a></li>
+</ul>
+<p>All sources: <a href="references.html">References</a>.</p>
+</article>
+<div class="pager"><a class="prev" href="th_discretization.html">← Notes on spatial and temporal discretization</a><a class="next" href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow →</a></div>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 1.0.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>

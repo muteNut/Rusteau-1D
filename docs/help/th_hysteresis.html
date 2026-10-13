@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hysteresis – Rusteau-1D Help</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html"><img src="favicon.png" alt="" width="22" height="22">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li><a href="units.html">Units</a></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details><summary>Solute transport</summary>
+<ul>
+<li><a href="solute_general.html">Solute transport: general</a></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+<li><a href="figures.html">Figure editor</a></li>
+<li><a href="run_comparison.html">Comparison of runs</a></li>
+</ul>
+</details></li>
+<li class="book"><details open><summary>Theory and equations</summary>
+<ul>
+<li><a href="th_richards.html">Variably saturated water flow</a></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li class="current"><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<div class="crumbs">Theory and equations</div>
+<h1>Hysteresis</h1>
+<p>The relation between water content and pressure head depends on whether the soil is wetting or drying. The water content on a drying branch is higher than on a wetting branch at the same head (ink-bottle effect, contact angle, entrapped air).</p>
+<h2 id="koolparker">Kool and Parker model</h2>
+<p>HYDRUS incorporates hysteresis with the empirical model of <a href="references.html#scott1983" class="cite" title="Scott, P. S., G. J. Farquhar, and N. Kouwen (1983). Hysteretic effects on net infiltration. In: Advances in Infiltration, Publ. 11-83, American Society of Agricultural Engineers, St. Joseph, MI, pp. 163–170.">Scott et al. (1983)</a>, as modified by <a href="references.html#koolParker1987" class="cite" title="Kool, J. B., and J. C. Parker (1987). Development and evaluation of closed-form expressions for hysteretic soil hydraulic properties. Water Resources Research 23(1): 105–114.">Kool and Parker (1987)</a> to account for air entrapment. The <strong>main drying curve</strong> has the parameters θ<sub>r</sub>, θ<sub>s</sub>, α, n (and θ<sub>m</sub>); the <strong>main wetting curve</strong> has the same θ<sub>r</sub> and n and its own θ<sub>s</sub><sup>w</sup>, α<sup>w</sup> (often α<sup>w</sup> ≈ 2α). With hysteresis in the conductivity, the main wetting curve also has K<sub>s</sub><sup>w</sup>.</p>
+<p><strong>Scanning curves</strong> start at a reversal point (h<sub>Δ</sub>, θ<sub>Δ</sub>), where the direction of the change of the water content changes. They are scaled from the main curves so that they pass through the reversal point:</p>
+<ul>
+<li>A <strong>drying scanning curve</strong> is the main drying curve scaled towards θ<sub>r</sub>:</li>
+</ul>
+<div class="formula">
+<div>θ(h) = θ<sub>r</sub> + a<sup>d</sup> [θ<sup>d</sup>(h) − θ<sub>r</sub>],   a<sup>d</sup> = (θ<sub>Δ</sub> − θ<sub>r</sub>) / (θ<sup>d</sup>(h<sub>Δ</sub>) − θ<sub>r</sub>)</div>
+</div>
+<ul>
+<li>A <strong>wetting scanning curve</strong> is the main wetting curve scaled so that it passes through the reversal point and reaches, at saturation, the water content θ<sub>s</sub> that remains after air entrapment:</li>
+</ul>
+<div class="formula">
+<div>θ(h) = θ<sub>r</sub> + a<sup>w</sup> [θ<sup>w</sup>(h) − θ<sub>r</sub>],   θ<sub>r</sub> = θ<sub>s</sub> − a<sup>w</sup> (θ<sub>s</sub><sup>w</sup> − θ<sub>r</sub>)</div>
+<div>θ<sub>s</sub> = θ<sub>s</sub> − (θ<sub>s</sub> − θ<sub>Δ</sub>) / [1 + R (θ<sub>s</sub> − θ<sub>Δ</sub>)],   R = 1/(θ<sub>s</sub> − θ<sub>s</sub><sup>w</sup>) − 1/(θ<sub>s</sub> − θ<sub>r</sub>)</div>
+</div>
+<p>The trapped-air relation for θ<sub>s</sub> follows <a href="references.html#land1968" class="cite" title="Land, C. S. (1968). Calculation of imbibition relative permeability for two- and three-phase flow from rock properties. Society of Petroleum Engineers Journal 8(2): 149–156.">Land (1968)</a>, as in <a href="references.html#koolParker1987" class="cite" title="Kool, J. B., and J. C. Parker (1987). Development and evaluation of closed-form expressions for hysteretic soil hydraulic properties. Water Resources Research 23(1): 105–114.">Kool and Parker (1987)</a>: wetting from a dry state ends at θ<sub>s</sub><sup>w</sup>, wetting from saturation ends at θ<sub>s</sub>. With hysteresis in the conductivity, the scanning curves of K are scaled in the same way between K at the reversal point and K<sub>s</sub>.</p>
+<p>A node changes its branch when its water content changes in the opposite direction by more than the water content tolerance. The initial condition lies on the main drying or the main wetting curve (<em>Initially drying / wetting curve</em>), or on the scanning curves of a previous run (<a href="hyd_model.html#restart">restart</a>).</p>
+<h2 id="lenhard">The pumping effect and the model of Lenhard et al.</h2>
+<p>While simple to implement, the Kool–Parker model can suffer from a pumping effect: under repeated small wetting and drying cycles the hysteresis loops can drift to physically unrealistic parts of the retention function. The model of <a href="references.html#lenhard1991" class="cite" title="Lenhard, R. J., J. C. Parker, and J. J. Kaluarachchi (1991). Comparing simulated and experimental hysteretic two-phase transient fluid flow phenomena. Water Resources Research 27(8): 2113–2124.">Lenhard et al. (1991)</a> and <a href="references.html#lenhardParker1992" class="cite" title="Lenhard, R. J., and J. C. Parker (1992). Modeling multiphase fluid hysteresis and comparing results to laboratory investigations. In: M. Th. van Genuchten, F. J. Leij, and L. J. Lund (eds.), Proc. Intl. Workshop on Indirect Methods for Estimating the Hydraulic Properties of Unsaturated Soils, University of California, Riverside, CA, pp. 233–248.">Lenhard and Parker (1992)</a> eliminates pumping by keeping track of the historical reversal points: a scanning curve that returns to an earlier reversal point continues on the curve of that earlier reversal (closed scanning loops). <em>Hysteresis in the retention curve (no pumping, Lenhard et al.)</em> selects it.</p>
+<h2 id="parameters">Parameters</h2>
+<p>The hysteresis parameters are entered on the page <a href="soil_params.html">Materials &amp; parameters</a>: θ<sub>m</sub> (drying), θ<sub>s</sub>, α and K<sub>s</sub> of the wetting branch. For the <a href="inverse_page.html">parameter estimation</a> the constraints θ<sub>m</sub> = θ<sub>s</sub>, α<sup>w</sup> = 2α and K<sub>s</sub><sup>w</sup> = K<sub>s</sub> are available.</p>
+<h2 id="literature">Literature cited in this topic</h2>
+<ul>
+<li>Kool, J. B., and J. C. Parker (1987). Development and evaluation of closed-form expressions for hysteretic soil hydraulic properties. <em>Water Resources Research</em> 23(1): 105–114. doi:<a href="https://doi.org/10.1029/WR023i001p00105" target="_blank" rel="noopener">10.1029/WR023i001p00105</a></li>
+<li>Land, C. S. (1968). Calculation of imbibition relative permeability for two- and three-phase flow from rock properties. <em>Society of Petroleum Engineers Journal</em> 8(2): 149–156. doi:<a href="https://doi.org/10.2118/1942-PA" target="_blank" rel="noopener">10.2118/1942-PA</a></li>
+<li>Lenhard, R. J., and J. C. Parker (1992). Modeling multiphase fluid hysteresis and comparing results to laboratory investigations. In: M. Th. van Genuchten, F. J. Leij, and L. J. Lund (eds.), <em>Proc. Intl. Workshop on Indirect Methods for Estimating the Hydraulic Properties of Unsaturated Soils</em>, University of California, Riverside, CA, pp. 233–248.</li>
+<li>Lenhard, R. J., J. C. Parker, and J. J. Kaluarachchi (1991). Comparing simulated and experimental hysteretic two-phase transient fluid flow phenomena. <em>Water Resources Research</em> 27(8): 2113–2124. doi:<a href="https://doi.org/10.1029/91WR01272" target="_blank" rel="noopener">10.1029/91WR01272</a></li>
+<li>Scott, P. S., G. J. Farquhar, and N. Kouwen (1983). Hysteretic effects on net infiltration. In: <em>Advances in Infiltration</em>, Publ. 11-83, American Society of Agricultural Engineers, St. Joseph, MI, pp. 163–170.</li>
+</ul>
+<p>All sources: <a href="references.html">References</a>.</p>
+</article>
+<div class="pager"><a class="prev" href="th_hydraulic_models.html">← Soil hydraulic property models</a><a class="next" href="th_scaling.html">Scaling of the hydraulic properties →</a></div>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 1.0.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>

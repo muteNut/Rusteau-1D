@@ -8,6 +8,7 @@
 pub mod atm;
 pub mod error;
 pub mod examples;
+pub mod figure;
 pub mod grid;
 pub mod heat;
 pub mod lenhard;

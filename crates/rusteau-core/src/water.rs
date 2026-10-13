@@ -81,7 +81,8 @@ impl crate::model::DrainSettings {
 
 impl Simulation {
     fn lookup_tabular(&self, m: usize, him: f64) -> (f64, f64, f64) {
-        let tb = &self.tabs[m];
+        // a material without a table (prevented by Project::validate) gives zeros instead of an error
+        let Some(tb) = self.tabs.get(m) else { return (0.0, 0.0, 0.0) };
         let n_pts = tb.h.len();
         if n_pts == 0 {
             return (0.0, 0.0, 0.0);
@@ -140,7 +141,7 @@ impl Simulation {
             self.cap_matrix[i] = fc(SoilModel::VanGenuchten, hm, &par_m).max(1e-12);
             let q_min = qr_m.min(qs_m);
             let q_max = qr_m.max(qs_m);
-            self.th_matrix_new[i] = fq(SoilModel::VanGenuchten, hm, &par_m).clamp(q_min, q_max);
+            self.th_matrix_new[i] = fq(SoilModel::VanGenuchten, hm, &par_m).max(q_min).min(q_max);
             if (self.h_matrix_new[i] - self.h_matrix_old[i]).abs() < 1e-12 {
                 self.th_matrix_old[i] = self.th_matrix_new[i];
             }
@@ -1134,7 +1135,7 @@ impl Simulation {
                     let q_max = qr_m.max(qs_m);
                     self.th_matrix_new[i] = (self.th_matrix_new[i]
                         + self.cap_matrix[i] * (self.h_matrix_new[i] - h_m_temp[i]))
-                        .clamp(q_min, q_max);
+                        .max(q_min).min(q_max);
                 }
             }
             if self.w_layer && self.h_new[n - 1] > self.h_crit_s {
@@ -1233,7 +1234,7 @@ impl Simulation {
                 }
             }
 
-            self.th_new_im[i] = (self.th_old_im[i] + self.sink_im[i] * dt).clamp(thr_im, ths_im);
+            self.th_new_im[i] = (self.th_old_im[i] + self.sink_im[i] * dt).max(thr_im).min(ths_im);
 
             if i >= 1 {
                 self.w_transf += (self.sink_im[i - 1] + self.sink_im[i]) / 2.0 * (self.x[i] - self.x[i - 1]);
@@ -1301,7 +1302,7 @@ impl Simulation {
                 }
             }
             self.sink_imm[i] = s;
-            self.th_im_mat_new[i] = (self.th_im_mat_old[i] + s * dt).clamp(thr_im, ths_im);
+            self.th_im_mat_new[i] = (self.th_im_mat_old[i] + s * dt).max(thr_im).min(ths_im);
             if i >= 1 {
                 w_tr += (1.0 - w) * (self.sink_imm[i - 1] + self.sink_imm[i]) / 2.0 * (self.x[i] - self.x[i - 1]);
             }

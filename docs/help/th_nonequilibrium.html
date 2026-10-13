@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Non-equilibrium solute transport – Rusteau-1D Help</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html"><img src="favicon.png" alt="" width="22" height="22">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li><a href="units.html">Units</a></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details><summary>Solute transport</summary>
+<ul>
+<li><a href="solute_general.html">Solute transport: general</a></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+<li><a href="figures.html">Figure editor</a></li>
+<li><a href="run_comparison.html">Comparison of runs</a></li>
+</ul>
+</details></li>
+<li class="book"><details open><summary>Theory and equations</summary>
+<ul>
+<li><a href="th_richards.html">Variably saturated water flow</a></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li class="current"><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<div class="crumbs">Theory and equations</div>
+<h1>Non-equilibrium solute transport</h1>
+<p>Non-equilibrium transport describes early breakthrough and long tailing that the equilibrium advection–dispersion equation cannot reproduce <a href="references.html#simunekVG2008" class="cite" title="Šimůnek, J., and M. Th. van Genuchten (2008). Modeling nonequilibrium flow and transport processes using HYDRUS. Vadose Zone Journal 7(2): 782–797.">Šimůnek and van Genuchten (2008)</a>. Rusteau offers the models of HYDRUS-1D.</p>
+<h2 id="twosite">Two-site sorption (chemical non-equilibrium)</h2>
+<p>The sorption sites are divided into two fractions <a href="references.html#selim1976" class="cite" title="Selim, H. M., J. M. Davidson, and R. S. Mansell (1976). Evaluation of a two-site adsorption-desorption model for describing solute transport in soils. In: Proceedings of the Summer Computer Simulation Conference, Washington, D.C., pp. 444–448.">Selim et al. (1976)</a>; <a href="references.html#vanGenuchtenWagenet1989" class="cite" title="van Genuchten, M. Th., and R. J. Wagenet (1989). Two-site/two-region models for pesticide transport and degradation: Theoretical development and analytical solutions. Soil Science Society of America Journal 53(5): 1303–1310.">van Genuchten and Wagenet (1989)</a>: on type-1 sites (fraction f) sorption is instantaneous, on type-2 sites it is kinetic (first order):</p>
+<div class="formula">
+<div>s<sup>e</sup> = f K<sub>s</sub> c<sup>β</sup> / (1 + η c<sup>β</sup>)</div>
+<div>∂s<sup>k</sup>/∂t = α [ (1 − f) K<sub>s</sub> c<sup>β</sup>/(1 + η c<sup>β</sup>) − s<sup>k</sup> ] − φ<sub>k</sub></div>
+</div>
+<p>with the first-order rate coefficient α [1/T] and the degradation φ<sub>k</sub> on the kinetic sites. It is selected with f &lt; 1 (<a href="solute_params.html">transport parameters</a>). f = 0 gives a one-site kinetic sorption model.</p>
+<h2 id="mim">Mobile–immobile water (physical non-equilibrium)</h2>
+<p>The liquid phase is divided into a mobile (flowing) region θ<sub>mo</sub> and an immobile (stagnant) region θ<sub>im</sub> <a href="references.html#vanGenuchtenWierenga1976" class="cite" title="van Genuchten, M. Th., and P. J. Wierenga (1976). Mass transfer studies in sorbing porous media I. Analytical solutions. Soil Science Society of America Journal 40(4): 473–480.">van Genuchten and Wierenga (1976)</a>. Solutes are exchanged by diffusion at the rate α [1/T]:</p>
+<div class="formula">
+<div>∂(θ<sub>im</sub> c<sub>im</sub>)/∂t + ∂((1 − f) ρ s<sub>im</sub>)/∂t = α (c − c<sub>im</sub>) − φ<sub>im</sub></div>
+</div>
+<p>where f is the fraction of sorption sites in contact with the mobile water. It is selected with θ<sub>im</sub> &gt; 0. With the <a href="th_dual_porosity.html">dual-porosity flow models</a> the immobile water content is transient and the water transfer carries solute as well.</p>
+<h2 id="dual">Dual non-equilibrium</h2>
+<p>Physical and chemical non-equilibrium combined: mobile–immobile water and, in the mobile region, equilibrium (fraction f<sub>em</sub>) and kinetic sorption sites with the rate ω<sub>S</sub> <a href="references.html#simunekVG2008" class="cite" title="Šimůnek, J., and M. Th. van Genuchten (2008). Modeling nonequilibrium flow and transport processes using HYDRUS. Vadose Zone Journal 7(2): 782–797.">Šimůnek and van Genuchten (2008)</a>. In the reaction table, μ<sub>g</sub> holds f<sub>em</sub> and γ<sub>g</sub> holds ω<sub>S</sub>, as in HYDRUS-1D.</p>
+<h2 id="dualperm">Dual permeability</h2>
+<p>Advection–dispersion in both the fracture and the matrix domain, coupled by the solute transfer Γ<sub>s</sub> = α<sub>s</sub>(1 − w)θ<sub>m</sub>(c<sub>f</sub> − c<sub>m</sub>) + Γ<sub>w</sub>c (<a href="th_dual_permeability.html">dual permeability</a>) <a href="references.html#gerkeVG1993a" class="cite" title="Gerke, H. H., and M. Th. van Genuchten (1993a). A dual-porosity model for simulating the preferential movement of water and solutes in structured porous media. Water Resources Research 29(2): 305–319.">Gerke and van Genuchten (1993a)</a>.</p>
+<h2 id="initial-condition">Initial condition</h2>
+<p>With <em>Non-equilibrium phase initially in equilibrium</em> the initial kinetic or immobile concentrations are set in equilibrium with the liquid concentrations; otherwise they are given on the page <a href="profile_editor.html">Soil profile</a> (<em>Non-eq. conc.</em>).</p>
+<h2 id="typical-behaviour">Typical behaviour</h2>
+<ul>
+<li>small α: the non-equilibrium phase hardly takes part (early breakthrough, as with less sorption);</li>
+<li>large α: approaches equilibrium transport;</li>
+<li>intermediate α: asymmetric breakthrough curves with tailing.</li>
+</ul>
+<h2 id="literature">Literature cited in this topic</h2>
+<ul>
+<li>Gerke, H. H., and M. Th. van Genuchten (1993a). A dual-porosity model for simulating the preferential movement of water and solutes in structured porous media. <em>Water Resources Research</em> 29(2): 305–319. doi:<a href="https://doi.org/10.1029/92WR02339" target="_blank" rel="noopener">10.1029/92WR02339</a></li>
+<li>Selim, H. M., J. M. Davidson, and R. S. Mansell (1976). Evaluation of a two-site adsorption-desorption model for describing solute transport in soils. In: <em>Proceedings of the Summer Computer Simulation Conference</em>, Washington, D.C., pp. 444–448.</li>
+<li>van Genuchten, M. Th., and P. J. Wierenga (1976). Mass transfer studies in sorbing porous media I. Analytical solutions. <em>Soil Science Society of America Journal</em> 40(4): 473–480. doi:<a href="https://doi.org/10.2136/sssaj1976.03615995004000040011x" target="_blank" rel="noopener">10.2136/sssaj1976.03615995004000040011x</a></li>
+<li>van Genuchten, M. Th., and R. J. Wagenet (1989). Two-site/two-region models for pesticide transport and degradation: Theoretical development and analytical solutions. <em>Soil Science Society of America Journal</em> 53(5): 1303–1310. doi:<a href="https://doi.org/10.2136/sssaj1989.03615995005300050001x" target="_blank" rel="noopener">10.2136/sssaj1989.03615995005300050001x</a></li>
+<li>Šimůnek, J., and M. Th. van Genuchten (2008). Modeling nonequilibrium flow and transport processes using HYDRUS. <em>Vadose Zone Journal</em> 7(2): 782–797. doi:<a href="https://doi.org/10.2136/vzj2007.0074" target="_blank" rel="noopener">10.2136/vzj2007.0074</a></li>
+</ul>
+<p>All sources: <a href="references.html">References</a>.</p>
+</article>
+<div class="pager"><a class="prev" href="th_solute.html">← Solute transport equations</a><a class="next" href="th_colloids.html">Colloid, virus and bacteria transport →</a></div>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 1.0.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>

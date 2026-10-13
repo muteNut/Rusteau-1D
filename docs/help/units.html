@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Units – Rusteau-1D Help</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html"><img src="favicon.png" alt="" width="22" height="22">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details open><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li class="current"><a href="units.html">Units</a></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details><summary>Solute transport</summary>
+<ul>
+<li><a href="solute_general.html">Solute transport: general</a></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+<li><a href="figures.html">Figure editor</a></li>
+<li><a href="run_comparison.html">Comparison of runs</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Theory and equations</summary>
+<ul>
+<li><a href="th_richards.html">Variably saturated water flow</a></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<div class="crumbs">Introduction</div>
+<h1>Units</h1>
+<p>All inputs and results use the units chosen on the page <a href="processes.html">Processes &amp; units</a>: a length unit (mm, cm, m), a time unit (s, min, h, d, yr) and a mass unit, which is only a label. As in HYDRUS-1D, the dimension of a quantity is given in the help and the tooltips with L (length), T (time) and M (mass), e.g. Ks [L/T], α [1/L], concentrations [M/L³].</p>
+<h2 id="conversion">Unit conversion</h2>
+<p>When the length or the time unit is changed with <em>Convert all values when a unit changes</em> switched on, every input is rescaled:</p>
+<div class="formula">
+<div>value<sub>new</sub> = value<sub>old</sub> · f<sub>L</sub><sup>a</sup> · f<sub>T</sub><sup>b</sup></div>
+</div>
+<p>with f<sub>L</sub> and f<sub>T</sub> the ratios of the units and a, b the dimension of the quantity. Converted are heads, depths and lengths, conductivities and fluxes, α (1/L), times and print times, atmospheric records, root uptake parameters, heat parameters, transport parameters (dispersivities, diffusion coefficients, rate constants, Freundlich / Langmuir coefficients Ks and η with the exponent β), concentrations (M/L³), the initial profile and the tables of tabular soil properties.</p>
+<p>Not converted are the mass unit (only a label), dimensionless quantities, temperatures, activation energies and the meteorological inputs that HYDRUS reads in fixed units (radiation in MJ/m²/d, wind speed in km/d, sunshine hours, crop height and measurement heights in cm, latitude, altitude in m, the interception constant in mm). The time and rooting-depth columns of the meteorological data are converted.</p>
+<p>With the option switched off only the unit label changes and all numbers stay as they are – useful when the values were entered in the wrong unit label.</p>
+<p>Changing a unit discards the results and the measured data of the project (they are in the old units).</p>
+<h2 id="heat">Units of the heat parameters</h2>
+<p>The thermal parameters are given in the project's length and time units with the mass in kg, as in HYDRUS-1D: the coefficients b1, b2, b3 of the thermal conductivity in kg L T⁻³ K⁻¹ (W/m/K = kg m s⁻³ K⁻¹ in SI units) and the volumetric heat capacities Cn, Co, Cw in kg L⁻¹ T⁻² K⁻¹ (J/m³/K). For cm and days:</p>
+<div class="table"><table>
+<thead><tr><th>SI value</th><th>in cm and days</th></tr></thead>
+<tbody>
+<tr><td>1 W/m/K</td><td>100 · 86400³ = 6.45 × 10<sup>16</sup> kg cm d⁻³ K⁻¹</td></tr>
+<tr><td>1 J/m³/K</td><td>86400² / 100 = 7.46 × 10<sup>7</sup> kg cm⁻¹ d⁻² K⁻¹</td></tr>
+</tbody></table></div>
+<p>The buttons on the page <a href="heat_page.html">Heat transport</a> enter typical values already converted to the project's units.</p>
+<div class="note">Vapor flow depends slightly on the length unit, as in HYDRUS: the capacity term of the equivalent vapor content contains the unit conversion factor in a way that is exact only for metres. Rusteau keeps the HYDRUS expression so that its results match HYDRUS 4.17 (<a href="th_vapor.html">vapor flow</a>).</div>
+</article>
+<div class="pager"><a class="prev" href="workflow.html">← Workflow of a project</a><a class="next" href="hydrus_relation.html">Relation to HYDRUS-1D →</a></div>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 1.0.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>

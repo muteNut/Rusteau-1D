@@ -1,6 +1,11 @@
 #![cfg_attr(all(not(debug_assertions), windows), windows_subsystem = "windows")]
 
+mod colorpick;
+mod figure;
 mod files;
+mod fonts;
+mod guard;
+mod help;
 mod hydro;
 mod inverse_ui;
 mod measured;
@@ -8,10 +13,15 @@ mod post;
 mod pre;
 mod profile;
 mod rosetta_ui;
+mod shots;
+#[cfg(test)]
+mod smoke;
+mod tips;
 mod util;
 
 use eframe::egui;
 use files::{DialogResult, FileDialog, Mode, Purpose};
+use tips::TipExt;
 use rusteau_core::{Project, Results, Simulation};
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
@@ -108,39 +118,10 @@ impl Default for PostState {
     }
 }
 
-fn load_system_font(ctx: &egui::Context) {
+/// The fonts of the interface: the bundled Noto Sans on every system (see [`fonts::install`]).
+fn load_fonts(ctx: &egui::Context) {
     let mut fonts = egui::FontDefinitions::default();
-
-    let candidate_paths: &[&str] = &[
-        // Linux / Ubuntu / GNOME
-        "/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf",
-        "/usr/share/fonts/opentype/cantarell/Cantarell-Regular.otf",
-        "/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf",
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-        "/usr/share/fonts/TTF/DejaVuSans.ttf",
-        // Windows
-        "C:\\Windows\\Fonts\\segoeui.ttf",
-        "C:\\Windows\\Fonts\\arial.ttf",
-        // macOS
-        "/System/Library/Fonts/SFProText-Regular.otf",
-        "/System/Library/Fonts/HelveticaNeue.ttc",
-        "/Library/Fonts/Arial.ttf",
-    ];
-
-    for path in candidate_paths {
-        if let Ok(data) = std::fs::read(path) {
-            fonts.font_data.insert(
-                "os_default".to_owned(),
-                std::sync::Arc::new(egui::FontData::from_owned(data)),
-            );
-
-            if let Some(family) = fonts.families.get_mut(&egui::FontFamily::Proportional) {
-                family.insert(0, "os_default".to_owned());
-            }
-            break;
-        }
-    }
-
+    fonts::install(&mut fonts);
     ctx.set_fonts(fonts);
 }
 
@@ -227,6 +208,20 @@ pub struct App {
     pub legacy_on_save: bool,
     /// Rosetta dialog
     pub ros: Option<rosetta_ui::RosettaDlg>,
+    /// Help window
+    pub help: help::HelpState,
+    /// Screenshot tour for the help (`RUSTEAU_SCREENSHOTS`)
+    tour: Option<shots::Tour>,
+    /// figure editor (its own window)
+    pub figs: figure::ui::FigState,
+    /// copy of the unsaved project for a restart after a crash
+    recovery: guard::Recovery,
+    /// a recovery copy of an earlier session that did not end normally (path, age)
+    recover_offer: Option<(PathBuf, std::time::Duration)>,
+    /// a page whose drawing failed with an internal error, and the message
+    broken_page: Option<(Page, String)>,
+    /// the program icon in the About dialog
+    icon_tex: Option<egui::TextureHandle>,
 }
 
 #[derive(Clone, Debug)]
@@ -240,7 +235,7 @@ pub enum PendingAction {
 
 impl App {
     fn new(cc: &eframe::CreationContext<'_>) -> Self {
-        load_system_font(&cc.egui_ctx);
+        load_fonts(&cc.egui_ctx);
 
         #[cfg(target_os = "linux")]
         {
@@ -257,8 +252,19 @@ impl App {
         style.spacing.window_margin = egui::Margin::same(12);
         cc.egui_ctx.set_style(style);
 
-        let prj = rusteau_core::examples::infiltration_evaporation();
-        let mut app = App {
+        let mut app = App::with_project(rusteau_core::examples::infiltration_evaporation());
+        if app.tour.is_none() {
+            app.recover_offer = guard::pending_recovery();
+        }
+        if let Some(arg) = std::env::args().nth(1) {
+            app.open_path(&PathBuf::from(&arg));
+        }
+        app
+    }
+
+    /// The state of the interface with project `prj` (without a window).
+    fn with_project(prj: Project) -> Self {
+        App {
             prj,
             path: None,
             dirty: false,
@@ -286,11 +292,14 @@ impl App {
             convert_units: true,
             legacy_on_save: false,
             ros: None,
-        };
-        if let Some(arg) = std::env::args().nth(1) {
-            app.open_path(&PathBuf::from(&arg));
+            help: help::HelpState::default(),
+            tour: shots::Tour::from_env(),
+            figs: Default::default(),
+            recovery: Default::default(),
+            recover_offer: None,
+            broken_page: None,
+            icon_tex: None,
         }
-        app
     }
 
     /// Opens a project: a Rusteau project (`.h1dr`, `.json`) or a HYDRUS-1D project (the `.h1d` file, its folder or any
@@ -367,6 +376,7 @@ impl App {
         self.inv.result = None;
         self.inv.settings = None;
         self.page = Page::Main;
+        self.figs.project_changed();
         self.sync();
     }
 
@@ -398,7 +408,8 @@ impl App {
         let (p2, c2) = (progress.clone(), cancel.clone());
         let (t_init, t_max) = (prj.time.t_init, prj.time.t_max);
         std::thread::spawn(move || {
-            let res = match Simulation::new(prj) {
+            // an internal error of the engine ends the run with a message instead of a run that never finishes
+            let res = guard::catch("Calculation", || match Simulation::new(prj) {
                 Ok(mut sim) => {
                     sim.run(|s| {
                         p2.store(s.t.to_bits(), Ordering::Relaxed);
@@ -407,7 +418,8 @@ impl App {
                     Ok(std::mem::take(&mut sim.res))
                 }
                 Err(e) => Err(e.to_string()),
-            };
+            })
+            .and_then(|r| r);
             let _ = tx.send(res);
         });
         self.run = Some(RunHandle {
@@ -425,12 +437,14 @@ impl App {
         let mut finished = None;
         if let Some(r) = &self.run {
             ctx.request_repaint_after(std::time::Duration::from_millis(80));
-            if let Ok(res) = r.rx.try_recv() {
-                finished = Some((
-                    res,
-                    r.started.elapsed().as_secs_f64(),
-                    r.cancel.load(Ordering::Relaxed),
-                ));
+            match r.rx.try_recv() {
+                Ok(res) => {
+                    finished = Some((res, r.started.elapsed().as_secs_f64(), r.cancel.load(Ordering::Relaxed)));
+                }
+                Err(std::sync::mpsc::TryRecvError::Disconnected) => {
+                    finished = Some((Err("The calculation ended without results (internal error).".into()), r.started.elapsed().as_secs_f64(), false));
+                }
+                Err(std::sync::mpsc::TryRecvError::Empty) => {}
             }
         }
         if let Some((res, secs, cancelled)) = finished {
@@ -578,6 +592,15 @@ impl App {
     }
 
     fn menu(&mut self, ctx: &egui::Context) {
+        let help_before = (self.help.open, self.help.current().to_string());
+        self.menu_bar(ctx);
+        // help asked for in the main window is shown there, also while the figure window shows it
+        if (self.help.open, self.help.current().to_string()) != help_before {
+            self.figs.help_here = false;
+        }
+    }
+
+    fn menu_bar(&mut self, ctx: &egui::Context) {
         egui::TopBottomPanel::top("menu").show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
                 ui.menu_button("File", |ui| {
@@ -710,6 +733,11 @@ impl App {
                     }
                 });
                 ui.menu_button("View", |ui| {
+                    if ui.button("Figures (new window)…").on_hover_text("Diagrams of the results, the input and measured data for publications: titles, annotations, several panels, comparison of runs; PNG and SVG").clicked() {
+                        self.figs.open = true;
+                        ui.close_menu();
+                    }
+                    ui.separator();
                     if ui.button("Dark theme").clicked() {
                         apply_custom_dark_theme(ctx);
                         ui.close_menu();
@@ -720,6 +748,51 @@ impl App {
                     }
                 });
                 ui.menu_button("Help", |ui| {
+                    if ui.button("Help on this page   (F1)").clicked() {
+                        self.help.show_topic(help::topic_of(self.page), None);
+                        ui.close_menu();
+                    }
+                    if ui.button("Contents").clicked() {
+                        self.help.show_topic("contents", None);
+                        ui.close_menu();
+                    }
+                    if ui.button("Getting started").clicked() {
+                        self.help.show_topic("getting_started", None);
+                        ui.close_menu();
+                    }
+                    if ui.button("Theory and equations").clicked() {
+                        self.help.show_topic("th_richards", None);
+                        ui.close_menu();
+                    }
+                    if ui.button("References (scientific sources)").clicked() {
+                        self.help.show_topic("references", None);
+                        ui.close_menu();
+                    }
+                    ui.separator();
+                    if ui
+                        .button("Open the help in the web browser")
+                        .on_hover_text("Writes the help as HTML pages (offline) and opens them in the web browser")
+                        .clicked()
+                    {
+                        self.open_help_in_browser(ctx, help::topic_of(self.page));
+                        ui.close_menu();
+                    }
+                    if ui.button("Export the HTML help…").on_hover_text("Writes the help as HTML pages into the folder \"Rusteau-1D help\" of a folder of your choice").clicked() {
+                        self.dialog = Some(FileDialog::new(
+                            Purpose::ExportHelp,
+                            Mode::PickDir,
+                            "Choose a folder for the HTML help (a folder \"Rusteau-1D help\" is created in it)",
+                            self.last_dir.clone(),
+                            "",
+                            &[],
+                        ));
+                        ui.close_menu();
+                    }
+                    ui.separator();
+                    if ui.button("Keyboard and mouse").clicked() {
+                        self.help.show_topic("shortcuts", None);
+                        ui.close_menu();
+                    }
                     if ui.button("About Rusteau-1D").clicked() {
                         self.show_about = true;
                         ui.close_menu();
@@ -747,6 +820,43 @@ impl App {
         if ctx.input(|i| i.key_pressed(egui::Key::F5)) && self.run.is_none() && self.inv.run.is_none() {
             self.start_run();
         }
+        if ctx.input(|i| i.key_pressed(egui::Key::F1)) {
+            let id = if self.ros.is_some() { "rosetta" } else { help::topic_of(self.page) };
+            self.help.show_topic(id, None);
+        }
+    }
+
+    /// Writes the HTML help into the cache folder and opens topic `id` in the web browser.
+    fn open_help_in_browser(&mut self, ctx: &egui::Context, id: &str) {
+        match help::html_url(id) {
+            Ok(url) => {
+                ctx.open_url(egui::OpenUrl::new_tab(&url));
+                self.status = format!("Help opened in the web browser ({url})");
+            }
+            Err(e) => self.status = e,
+        }
+    }
+
+    /// The help window and the help requests of the pages ("?" next to a page title, help buttons of dialogs).
+    fn help_ui(&mut self, ctx: &egui::Context) {
+        match help::take_request(ctx) {
+            Some(None) => {
+                self.figs.help_here = false;
+                self.help.show_topic(help::topic_of(self.page), None);
+            }
+            Some(Some(id)) => {
+                self.figs.help_here = false;
+                self.help.show_topic(id, None);
+            }
+            None => {}
+        }
+        // the figure window shows the help itself when it was asked for there
+        if self.figs.open && self.figs.help_here {
+            return;
+        }
+        if let Some(help::HelpEvent::OpenInBrowser(id)) = self.help.window(ctx) {
+            self.open_help_in_browser(ctx, &id);
+        }
     }
 
     fn save(&mut self) {
@@ -754,6 +864,10 @@ impl App {
             match rusteau_io::save_project(&self.prj, &p) {
                 Ok(_) => {
                     self.dirty = false;
+                    // the saved project needs no recovery copy (a copy of an earlier crash waits for its answer)
+                    if self.recover_offer.is_none() {
+                        self.recovery.discard();
+                    }
                     self.status = format!("Saved {}", p.display());
                     if self.legacy_on_save {
                         let msg = self.save_legacy(&p.with_extension("h1d"));
@@ -906,22 +1020,75 @@ impl App {
                                 };
                             }
                         }
+                        Purpose::ExportHelp => {
+                            let path = path.join("Rusteau-1D help");
+                            self.status = match help::html::export(&path) {
+                                Ok(start) => format!("HTML help written to {} (start page {})", path.display(), start.display()),
+                                Err(e) => format!("Could not write the HTML help: {e}"),
+                            };
+                        }
                         Purpose::ImportAtmosphere => {
                             self.status = match self.import_atmosphere_text(&path) {
                                 Ok(n) => format!("Imported {} atmospheric records", n),
                                 Err(e) => e,
                             };
                         }
+                        // dialogs of the figure window
+                        Purpose::FigurePng | Purpose::FigureSvg | Purpose::FigureData | Purpose::FigureLoadRun | Purpose::FigureSaveRun => {}
                     }
                 }
             }
         }
+        if let Some((path, age)) = self.recover_offer.clone() {
+            egui::Window::new("Recover unsaved project")
+                .collapsible(false)
+                .resizable(false)
+                .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
+                .show(ctx, |ui| {
+                    let mins = age.as_secs() / 60;
+                    let when = if mins < 120 { format!("{mins} minutes") } else { format!("{} hours", mins / 60) };
+                    ui.label(format!("Rusteau-1D did not close normally. A copy of a project with unsaved changes was kept {when} ago."));
+                    ui.label(egui::RichText::new(path.display().to_string()).weak());
+                    ui.add_space(8.0);
+                    ui.horizontal(|ui| {
+                        if ui.button("Open the copy").clicked() {
+                            match rusteau_io::load_project(&path) {
+                                Ok(p) => {
+                                    self.set_project(p, None);
+                                    self.dirty = true;
+                                    self.status = "Recovered the unsaved project: save it with File → Save as…".into();
+                                }
+                                Err(e) => self.status = format!("The recovery copy could not be read: {e}"),
+                            }
+                            self.recover_offer = None;
+                        }
+                        if ui.button("Discard it").clicked() {
+                            self.recovery.discard();
+                            self.recover_offer = None;
+                        }
+                    });
+                    ui.label(egui::RichText::new(format!("Error reports: {}", guard::crash_log().display())).weak().small());
+                });
+        }
         if self.show_about {
+            if self.icon_tex.is_none() {
+                if let Ok(img) = image::load_from_memory(fonts::ICON_PNG) {
+                    let img = img.to_rgba8();
+                    let ci = egui::ColorImage::from_rgba_unmultiplied([img.width() as usize, img.height() as usize], img.as_raw());
+                    self.icon_tex = Some(ctx.load_texture("program_icon", ci, egui::TextureOptions::LINEAR));
+                }
+            }
+            let icon = self.icon_tex.clone();
             egui::Window::new("About Rusteau-1D")
                 .open(&mut self.show_about)
                 .collapsible(false)
                 .show(ctx, |ui| {
-                    ui.heading("Rusteau-1D");
+                    ui.horizontal(|ui| {
+                        if let Some(t) = &icon {
+                            ui.add(egui::Image::new((t.id(), egui::vec2(48.0, 48.0))));
+                        }
+                        ui.heading("Rusteau-1D");
+                    });
                     ui.label("Modern, performant porous media & vadose zone simulator.\nNumerical engine ported and verified against HYDRUS-1D Fortran routines:\nvariably saturated flow (Richards), solute transport, and heat flow.");
                     ui.add_space(4.0);
                     ui.hyperlink_to(
@@ -929,6 +1096,15 @@ impl App {
                         "https://www.pc-progress.com/en/Default.aspx?hydrus-1d",
                     );
                     ui.label(format!("Version {} – free software under the GNU General Public License, version 3 or later.", env!("CARGO_PKG_VERSION")));
+                    ui.add_space(4.0);
+                    ui.label("Fonts: Noto Sans 2.015 and Noto Sans Math 3.000, © The Noto Project Authors, bundled unmodified under the SIL Open Font License 1.1.");
+                    ui.collapsing("Font license (SIL Open Font License 1.1)", |ui| {
+                        egui::ScrollArea::vertical().max_height(260.0).show(ui, |ui| {
+                            ui.label(egui::RichText::new(fonts::OFL_NOTO_SANS).monospace().small());
+                            ui.separator();
+                            ui.label(egui::RichText::new(fonts::OFL_NOTO_SANS_MATH).monospace().small());
+                        });
+                    });
                 });
         }
     }
@@ -997,8 +1173,8 @@ impl App {
                     ui.separator();
                     for (k, (step, pages)) in self.pre_steps().into_iter().enumerate() {
                         ui.add_space(if k == 0 { 0.0 } else { 6.0 });
-                        let head = if step == "Parameter estimation" { step.to_uppercase() } else { format!("{} · {}", k + 1, step.to_uppercase()) };
-                        ui.label(egui::RichText::new(head).small().weak());
+                        let head = if step == "Parameter estimation" { step.to_string() } else { format!("{} · {}", k + 1, step) };
+                        ui.label(util::section_head(ui, &head));
                         for (p, label) in pages {
                             ui.horizontal(|ui| {
                                 ui.add_space(8.0);
@@ -1030,6 +1206,15 @@ impl App {
                             }
                         });
                     }
+                    ui.add_space(6.0);
+                    ui.horizontal(|ui| {
+                        ui.add_space(8.0);
+                        let n = self.prj.figures.len();
+                        let label = if n == 0 { "📈 Figures ↗".to_string() } else { format!("📈 Figures ({n}) ↗") };
+                        if ui.selectable_label(self.figs.open, label).tip("Figures").clicked() {
+                            self.figs.open = true;
+                        }
+                    });
                 });
             });
     }
@@ -1079,12 +1264,35 @@ impl App {
 }
 
 impl eframe::App for App {
+    /// A normal end: the recovery copy is not needed (unless the copy of an earlier crash was not answered).
+    fn on_exit(&mut self, _gl: Option<&eframe::glow::Context>) {
+        if self.recover_offer.is_none() {
+            self.recovery.discard();
+        }
+    }
+
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        self.frame(ctx);
+    }
+}
+
+impl App {
+    /// One frame of the interface.
+    fn frame(&mut self, ctx: &egui::Context) {
+        util::filter_number_input(ctx);
+        if self.tour.is_none() && self.recover_offer.is_none() {
+            self.recovery.tick(&self.prj, self.dirty);
+        }
+        if let Some(mut tour) = self.tour.take() {
+            if tour.frame(self, ctx) {
+                self.tour = Some(tour);
+            }
+        }
         if self.first_frame {
             self.first_frame = false;
             // 80 % of the monitor (the viewport itself is not the monitor); without monitor information the default
-            // size of the native options stays
-            if let Some(m) = ctx.input(|i| i.viewport().monitor_size) {
+            // size of the native options stays; the screenshots of the tour keep the default size
+            if let Some(m) = ctx.input(|i| i.viewport().monitor_size).filter(|_| self.tour.is_none()) {
                 if m.x > 0.0 && m.y > 0.0 {
                     let target_w = (m.x * 0.80).clamp(960.0_f32.min(m.x), 1920.0);
                     let target_h = (m.y * 0.82).clamp(620.0_f32.min(m.y), 1200.0);
@@ -1108,19 +1316,40 @@ impl eframe::App for App {
         self.flow_bar(ctx);
         self.nav(ctx);
         egui::CentralPanel::default().show(ctx, |ui| {
-            if self.page == Page::Profile {
-                // the profile editor fits the window and scrolls its own parts
-                self.page_ui(ui);
-                return;
+            if let Some((page, msg)) = self.broken_page.clone() {
+                if page == self.page {
+                    // the page failed: a message instead of the same error in every frame
+                    ui.add_space(12.0);
+                    ui.label(egui::RichText::new("This page could not be shown").heading().color(ui.visuals().error_fg_color));
+                    ui.label(&msg);
+                    ui.label("Save the project (File → Save as…) and report the error with the crash log.");
+                    if ui.button("Try again").clicked() {
+                        self.broken_page = None;
+                    }
+                    return;
+                }
+                self.broken_page = None;
             }
-            egui::ScrollArea::both()
-                .auto_shrink([false, false])
-                .show(ui, |ui| {
+            let page = self.page;
+            let r = guard::catch("Drawing the page", || {
+                if self.page == Page::Profile {
+                    // the profile editor fits the window and scrolls its own parts
+                    self.page_ui(ui);
+                    return;
+                }
+                egui::ScrollArea::both().auto_shrink([false, false]).show(ui, |ui| {
                     self.page_ui(ui);
                 });
+            });
+            if let Err(e) = r {
+                self.status = e.clone();
+                self.broken_page = Some((page, e));
+            }
         });
         self.dialogs(ctx);
         self.rosetta_window(ctx);
+        self.help_ui(ctx);
+        self.figure_window(ctx);
         self.drop_overlay(ctx);
     }
 }
@@ -1177,13 +1406,30 @@ fn is_project_path(p: &std::path::Path) -> bool {
 }
 
 fn main() -> eframe::Result<()> {
+    guard::install_panic_hook();
+    // rusteau --export-help DIR: write the HTML help and exit (no window)
+    let args: Vec<String> = std::env::args().collect();
+    if let Some(k) = args.iter().position(|a| a == "--export-help") {
+        let dir = PathBuf::from(args.get(k + 1).map(|s| s.as_str()).unwrap_or("help"));
+        match help::html::export(&dir) {
+            Ok(start) => {
+                println!("HTML help written to {} (start page {})", dir.display(), start.display());
+                std::process::exit(0);
+            }
+            Err(e) => {
+                eprintln!("Could not write the HTML help to {}: {e}", dir.display());
+                std::process::exit(1);
+            }
+        }
+    }
     let opts = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_inner_size([1280.0, 800.0])
             .with_min_inner_size([920.0, 600.0])
             .with_resizable(true)
             .with_drag_and_drop(true)
-            .with_title("Rusteau-1D"),
+            .with_title("Rusteau-1D")
+            .with_icon(fonts::icon()),
         ..Default::default()
     };
     eframe::run_native("Rusteau-1D", opts, Box::new(|cc| Ok(Box::new(App::new(cc)))))

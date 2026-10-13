@@ -1,3 +1,4 @@
+use crate::tips::TipExt;
 use egui::{Color32, DragValue, Ui};
 use rusteau_core::{LengthUnit, Project, SoilMaterial, TimeUnit};
 
@@ -121,8 +122,43 @@ fn fmt_num(v: f64, _r: std::ops::RangeInclusive<usize>) -> String {
     }
 }
 
-fn parse_num(s: &str) -> Option<f64> {
+/// Reads a typed number: a comma is a decimal separator, `d` / `D` an exponent (as in Fortran files).
+pub fn parse_num(s: &str) -> Option<f64> {
     s.trim().replace(',', ".").replace(['d', 'D'], "e").parse::<f64>().ok()
+}
+
+fn int_fields_id() -> egui::Id {
+    egui::Id::new("rusteau_int_fields")
+}
+
+/// Marks a number field as an integer field: typing accepts only digits and the minus sign.
+pub fn int(r: egui::Response) -> egui::Response {
+    r.ctx.data_mut(|d| d.get_temp_mut_or_default::<std::collections::HashSet<egui::Id>>(int_fields_id()).insert(r.id));
+    r
+}
+
+/// Characters a number field accepts while it is typed: digits, the decimal separators `.` and `,`, signs and the
+/// exponent letters `e`, `E`, `d`, `D`; integer fields ([`int`]) only digits and the minus sign.
+pub fn number_char(c: char, integer: bool) -> bool {
+    c.is_ascii_digit() || c == '-' || (!integer && matches!(c, '.' | ',' | '+' | 'e' | 'E' | 'd' | 'D'))
+}
+
+/// Removes the characters that cannot be part of a number from the keyboard input (typed and pasted text) while a
+/// number field is edited. Called at the start of every frame of a window, before its widgets.
+pub fn filter_number_input(ctx: &egui::Context) {
+    let Some(id) = ctx.memory(|m| m.focused()) else { return };
+    // a number field (DragValue) being edited keeps its text in the temporary data under its id
+    if ctx.data(|d| d.get_temp::<String>(id)).is_none() {
+        return;
+    }
+    let integer = ctx.data_mut(|d| d.get_temp_mut_or_default::<std::collections::HashSet<egui::Id>>(int_fields_id()).contains(&id));
+    ctx.input_mut(|i| {
+        for e in i.events.iter_mut() {
+            if let egui::Event::Text(t) | egui::Event::Paste(t) = e {
+                t.retain(|c| number_char(c, integer));
+            }
+        }
+    });
 }
 
 pub fn dv(ui: &mut Ui, ch: &mut bool, v: &mut f64) {
@@ -132,6 +168,35 @@ pub fn dv(ui: &mut Ui, ch: &mut bool, v: &mut f64) {
     }
 }
 
+/// Number field that returns its response (for tooltips).
+pub fn dv_r(ui: &mut Ui, ch: &mut bool, v: &mut f64) -> egui::Response {
+    let speed = (v.abs() * 0.01).max(1e-6);
+    let r = ui.add(DragValue::new(v).speed(speed).custom_formatter(fmt_num).custom_parser(parse_num));
+    if r.changed() {
+        *ch = true;
+    }
+    r
+}
+
+/// Number field with a unit that returns its response (for tooltips).
+pub fn dv_unit_r(ui: &mut Ui, ch: &mut bool, v: &mut f64, unit: &str) -> egui::Response {
+    let speed = (v.abs() * 0.01).max(1e-6);
+    let r = ui.add(DragValue::new(v).speed(speed).custom_formatter(fmt_num).custom_parser(parse_num).suffix(format!(" {}", unit)));
+    if r.changed() {
+        *ch = true;
+    }
+    r
+}
+
+/// Integer field that returns its response (for tooltips).
+pub fn di_r(ui: &mut Ui, ch: &mut bool, v: &mut usize) -> egui::Response {
+    let r = int(ui.add(DragValue::new(v).speed(0.2)));
+    if r.changed() {
+        *ch = true;
+    }
+    r
+}
+
 pub fn dv_unit(ui: &mut Ui, ch: &mut bool, v: &mut f64, unit: &str) {
     let speed = (v.abs() * 0.01).max(1e-6);
     if ui.add(DragValue::new(v).speed(speed).custom_formatter(fmt_num).custom_parser(parse_num).suffix(format!(" {}", unit))).changed() {
@@ -139,28 +204,52 @@ pub fn dv_unit(ui: &mut Ui, ch: &mut bool, v: &mut f64, unit: &str) {
     }
 }
 
-pub fn di(ui: &mut Ui, ch: &mut bool, v: &mut usize) {
-    if ui.add(DragValue::new(v).speed(0.2)).changed() {
-        *ch = true;
-    }
-}
-
+/// Grid row: label and number field, both with the description of the label as tooltip.
 pub fn field(ui: &mut Ui, ch: &mut bool, label: &str, v: &mut f64) {
-    ui.label(label);
-    dv(ui, ch, v);
+    let r = ui.label(label).tip(label);
+    crate::shots::note(ui.ctx(), label, r.rect);
+    dv_r(ui, ch, v).tip(label);
     ui.end_row();
 }
 
+/// Grid row: label and number field with a unit, both with the description of the label as tooltip.
 pub fn field_u(ui: &mut Ui, ch: &mut bool, label: &str, v: &mut f64, unit: &str) {
-    ui.label(label);
-    dv_unit(ui, ch, v, unit);
+    let r = ui.label(label).tip(label);
+    crate::shots::note(ui.ctx(), label, r.rect);
+    dv_unit_r(ui, ch, v, unit).tip(label);
     ui.end_row();
 }
 
+/// Grid row: label and integer field with the description of the label as tooltip.
+pub fn field_i(ui: &mut Ui, ch: &mut bool, label: &str, v: &mut usize) {
+    ui.label(label).tip(label);
+    di_r(ui, ch, v).tip(label);
+    ui.end_row();
+}
+
+/// Check box with the description of its label as tooltip.
 pub fn check(ui: &mut Ui, ch: &mut bool, v: &mut bool, label: &str) {
-    if ui.checkbox(v, label).changed() {
+    if ui.checkbox(v, label).tip(label).changed() {
         *ch = true;
     }
+}
+
+/// Text in the bold font of the interface (registered by [`crate::fonts::install`]; the normal font without it).
+pub fn bold(ui: &Ui, text: impl Into<String>, size: f32) -> egui::RichText {
+    let family = egui::FontFamily::Name(crate::fonts::BOLD.into());
+    let has = ui.fonts(|f| f.families().contains(&family));
+    let t = egui::RichText::new(text).size(size);
+    if has {
+        t.family(family)
+    } else {
+        t.strong()
+    }
+}
+
+/// Heading of a group of entries in a side panel (steps of the input, sections of the figure editor): bold, slightly
+/// larger than the entries, in the normal text colour (readable in the light and the dark theme).
+pub fn section_head(ui: &Ui, text: &str) -> egui::RichText {
+    bold(ui, text, 13.0).color(ui.visuals().text_color())
 }
 
 pub fn section(ui: &mut Ui, title: &str) {
@@ -193,9 +282,19 @@ pub fn sig(v: f64) -> String {
     }
 }
 
-/// Page title (heading in the strong text colour).
+/// Page title (heading in the strong text colour) with a "?" button that opens the help of the page (as F1).
 pub fn page_title(ui: &mut Ui, title: &str) {
-    ui.label(egui::RichText::new(title).heading().strong());
+    ui.horizontal(|ui| {
+        ui.label(egui::RichText::new(title).heading().strong());
+        help_button(ui);
+    });
+}
+
+/// Small "?" button: help on the current page.
+pub fn help_button(ui: &mut Ui) {
+    if ui.small_button("?").on_hover_text("Help on this page (F1)").clicked() {
+        crate::help::request_page_help(ui.ctx());
+    }
 }
 
 /// Grid marks at whole decades for an axis that shows log10 values: thin lines at every decade, labelled lines at
@@ -244,4 +343,41 @@ pub fn conc_unit(p: &Project) -> String {
     let m = p.units.mass.trim();
     let m = if m.is_empty() || m == "-" { "M" } else { m };
     format!("{}/{}³", m, p.units.length_str())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn number_fields_accept_only_number_characters() {
+        assert!(number_char('5', true) && number_char('-', true) && !number_char('.', true) && !number_char('e', true));
+        assert!(number_char(',', false) && number_char('.', false) && number_char('e', false) && number_char('D', false));
+        assert!(!number_char('x', false) && !number_char(' ', false) && !number_char('%', false));
+        assert_eq!(parse_num(" 0,25 "), Some(0.25));
+        assert_eq!(parse_num("1d-3"), Some(1e-3));
+        assert_eq!(parse_num("abc"), None);
+        // typing into a number field of a running interface: letters are dropped, the comma stays
+        let ctx = egui::Context::default();
+        let mut v = 1.0f64;
+        let mut id = egui::Id::NULL;
+        let frame = |events: Vec<egui::Event>, focus: bool, v: &mut f64, id: &mut egui::Id| {
+            let input = egui::RawInput { events, ..Default::default() };
+            let _ = ctx.run(input, |ctx| {
+                filter_number_input(ctx);
+                egui::CentralPanel::default().show(ctx, |ui| {
+                    let r = ui.add(DragValue::new(v).custom_parser(parse_num));
+                    if focus {
+                        r.request_focus();
+                    }
+                    *id = r.id;
+                });
+            });
+        };
+        frame(vec![], true, &mut v, &mut id);
+        frame(vec![], false, &mut v, &mut id);
+        frame(vec![egui::Event::Text("ab2,5x".into())], false, &mut v, &mut id);
+        let text = ctx.data(|d| d.get_temp::<String>(id)).unwrap_or_default();
+        assert!(text.contains("2,5") && !text.contains('a') && !text.contains('x'), "{text:?}");
+    }
 }

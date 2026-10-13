@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Materials &amp; parameters – Rusteau-1D Help</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html"><img src="favicon.png" alt="" width="22" height="22">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li><a href="units.html">Units</a></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details open><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li class="current"><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details><summary>Solute transport</summary>
+<ul>
+<li><a href="solute_general.html">Solute transport: general</a></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+<li><a href="figures.html">Figure editor</a></li>
+<li><a href="run_comparison.html">Comparison of runs</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Theory and equations</summary>
+<ul>
+<li><a href="th_richards.html">Variably saturated water flow</a></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<div class="crumbs">Input (pre-processing)</div>
+<h1>Materials &amp; parameters</h1>
+<p>Each material (soil layer type) has its soil hydraulic parameters. The page corresponds to the <em>Water Flow Parameters</em> dialog of HYDRUS-1D; it also adds, removes and renames materials and draws θ(h) and K(h) of the selected material.</p>
+<figure><a href="img/soil_params.png"><img src="img/soil_params.png" alt="The page Materials &amp; parameters with the retention and conductivity curves of the selected material." loading="lazy"></a><figcaption>The page Materials &amp; parameters with the retention and conductivity curves of the selected material.</figcaption></figure>
+<h2 id="materials">Materials</h2>
+<p>Click a material in the list to edit it. <em>➕ Add material</em> adds a copy of the selected material with all its water, heat, solute and root parameters; <em>➖ Remove</em> deletes it (nodes of this material get the material before it). Materials are assigned to the nodes on the page <a href="profile_editor.html">Soil profile</a>. The name is shown in the profile and the plots (HYDRUS-1D files do not store it).</p>
+<h2 id="parameters">Parameters</h2>
+<p>The units are those of the project: α in 1/L, Ks in L/T.</p>
+<div class="table"><table>
+<thead><tr><th>Parameter</th><th>HYDRUS</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>θr</td><td>Qr</td><td>Residual water content [–].</td></tr>
+<tr><td>θs</td><td>Qs</td><td>Saturated water content [–].</td></tr>
+<tr><td>α</td><td>Alpha</td><td>Parameter of the retention function [1/L], roughly the inverse of the air-entry head. Brooks–Corey: inverse of the air-entry value; Kosugi: the median head hm.</td></tr>
+<tr><td>n</td><td>n</td><td>Shape parameter [–] (&gt; 1), the steeper the retention curve the larger n. Brooks–Corey: pore-size distribution index λ; Kosugi: standard deviation σ.</td></tr>
+<tr><td>Ks</td><td>Ks</td><td>Saturated hydraulic conductivity [L/T].</td></tr>
+<tr><td>l</td><td>l</td><td>Pore-connectivity parameter of the conductivity function [–].</td></tr>
+</tbody></table></div>
+<p>Further parameters of the models:</p>
+<div class="table"><table>
+<thead><tr><th>Model</th><th>Parameters</th></tr></thead>
+<tbody>
+<tr><td>Modified van Genuchten</td><td>θm (extrapolated water content at h = 0, ≥ θs), θa (≤ θr), θk and Kk (a measured point of K(θ)) <a href="references.html#vogelCislerova1988" class="cite" title="Vogel, T., and M. Císlerová (1988). On the reliability of unsaturated hydraulic conductivity calculated from the moisture retention curve. Transport in Porous Media 3: 1–15.">Vogel and Císlerová (1988)</a></td></tr>
+<tr><td>Durner</td><td>w2 (weight of the second pore system), α2, n2 <a href="references.html#durner1994" class="cite" title="Durner, W. (1994). Hydraulic conductivity estimation for soils with heterogeneous pore structure. Water Resources Research 30(2): 211–223.">Durner (1994)</a></td></tr>
+<tr><td>Dual porosity, water-content transfer</td><td>θr,im, θs,im of the immobile region, ω [1/T]</td></tr>
+<tr><td>Dual porosity, head transfer</td><td>θr,im, θs,im, α_im, n_im of the immobile region, ω</td></tr>
+<tr><td>Dual permeability</td><td>θr,m, θs,m, α_m, n_m, Ks,m of the matrix (the primary columns describe the fractures)</td></tr>
+<tr><td>Hysteresis</td><td>θm (drying), θs, α and (with hysteresis in K) Ks of the main wetting curve</td></tr>
+</tbody></table></div>
+<h2 id="l">The parameter l</h2>
+<p>The parameter l represents the tortuosity and connectivity of the pores. <a href="references.html#mualem1976" class="cite" title="Mualem, Y. (1976). A new model for predicting the hydraulic conductivity of unsaturated porous media. Water Resources Research 12(3): 513–522.">Mualem (1976)</a> estimated it as 0.5 for many soils, but there is no general agreement; from the UNSODA database, <a href="references.html#schaapLeij2000" class="cite" title="Schaap, M. G., and F. J. Leij (2000). Improved prediction of unsaturated hydraulic conductivity with the Mualem–van Genuchten model. Soil Science Society of America Journal 64(3): 843–851.">Schaap and Leij (2000)</a> found a mean of about −1 together with a matching conductivity K0 below Ks. Since the shape parameters α and n of the conductivity function come from the retention curve, l is the only parameter that shapes K(h) independently – useful in the <a href="th_inverse.html">parameter estimation</a> from outflow or evaporation experiments.</p>
+<h2 id="catalog">Soil catalog</h2>
+<p><em>Load from catalog</em> enters the average van Genuchten parameters of the 12 USDA textural classes of <a href="references.html#carselParrish1988" class="cite" title="Carsel, R. F., and R. S. Parrish (1988). Developing joint probability distributions of soil water retention characteristics. Water Resources Research 24(5): 755–769.">Carsel and Parrish (1988)</a>, converted to the project's units (l = 0.5). The values were derived statistically from the data of <a href="references.html#rawls1982" class="cite" title="Rawls, W. J., D. L. Brakensiek, and K. E. Saxton (1982). Estimation of soil water properties. Transactions of the ASAE 25(5): 1316–1320.">Rawls et al. (1982)</a>; they are only rough averages of each class.</p>
+<div class="table"><table>
+<thead><tr><th>Texture</th><th>θr</th><th>θs</th><th>α [1/cm]</th><th>n</th><th>Ks [cm/d]</th></tr></thead>
+<tbody>
+<tr><td>Sand</td><td>0.045</td><td>0.43</td><td>0.145</td><td>2.68</td><td>712.8</td></tr>
+<tr><td>Loamy sand</td><td>0.057</td><td>0.41</td><td>0.124</td><td>2.28</td><td>350.2</td></tr>
+<tr><td>Sandy loam</td><td>0.065</td><td>0.41</td><td>0.075</td><td>1.89</td><td>106.1</td></tr>
+<tr><td>Loam</td><td>0.078</td><td>0.43</td><td>0.036</td><td>1.56</td><td>24.96</td></tr>
+<tr><td>Silt</td><td>0.034</td><td>0.46</td><td>0.016</td><td>1.37</td><td>6.0</td></tr>
+<tr><td>Silt loam</td><td>0.067</td><td>0.45</td><td>0.020</td><td>1.41</td><td>10.8</td></tr>
+<tr><td>Sandy clay loam</td><td>0.100</td><td>0.39</td><td>0.059</td><td>1.48</td><td>31.44</td></tr>
+<tr><td>Clay loam</td><td>0.095</td><td>0.41</td><td>0.019</td><td>1.31</td><td>6.24</td></tr>
+<tr><td>Silty clay loam</td><td>0.089</td><td>0.43</td><td>0.010</td><td>1.23</td><td>1.68</td></tr>
+<tr><td>Sandy clay</td><td>0.100</td><td>0.38</td><td>0.027</td><td>1.23</td><td>2.88</td></tr>
+<tr><td>Silty clay</td><td>0.070</td><td>0.36</td><td>0.005</td><td>1.09</td><td>0.48</td></tr>
+<tr><td>Clay</td><td>0.068</td><td>0.38</td><td>0.008</td><td>1.09</td><td>4.8</td></tr>
+</tbody></table></div>
+<h2 id="neural-network-prediction-rosetta">Neural network prediction (Rosetta)</h2>
+<p><em>Neural network prediction (Rosetta)…</em> predicts θr, θs, α, n and Ks from the texture, the bulk density and measured water contents (<a href="rosetta.html">Rosetta</a>).</p>
+<h2 id="curves">Curves</h2>
+<p>Below the parameters the retention curve θ(h) and the conductivity K(h) of the material are drawn (with hysteresis also the main wetting curve). More curves – K(θ), C(h), linear axes, several materials – are on the results page <a href="res_soilprops.html">Soil hydraulic properties</a>, which is available before a run as well.</p>
+<h2 id="literature">Literature cited in this topic</h2>
+<ul>
+<li>Carsel, R. F., and R. S. Parrish (1988). Developing joint probability distributions of soil water retention characteristics. <em>Water Resources Research</em> 24(5): 755–769. doi:<a href="https://doi.org/10.1029/WR024i005p00755" target="_blank" rel="noopener">10.1029/WR024i005p00755</a></li>
+<li>Durner, W. (1994). Hydraulic conductivity estimation for soils with heterogeneous pore structure. <em>Water Resources Research</em> 30(2): 211–223. doi:<a href="https://doi.org/10.1029/93WR02676" target="_blank" rel="noopener">10.1029/93WR02676</a></li>
+<li>Mualem, Y. (1976). A new model for predicting the hydraulic conductivity of unsaturated porous media. <em>Water Resources Research</em> 12(3): 513–522. doi:<a href="https://doi.org/10.1029/WR012i003p00513" target="_blank" rel="noopener">10.1029/WR012i003p00513</a></li>
+<li>Rawls, W. J., D. L. Brakensiek, and K. E. Saxton (1982). Estimation of soil water properties. <em>Transactions of the ASAE</em> 25(5): 1316–1320. doi:<a href="https://doi.org/10.13031/2013.33720" target="_blank" rel="noopener">10.13031/2013.33720</a></li>
+<li>Schaap, M. G., and F. J. Leij (2000). Improved prediction of unsaturated hydraulic conductivity with the Mualem–van Genuchten model. <em>Soil Science Society of America Journal</em> 64(3): 843–851. doi:<a href="https://doi.org/10.2136/sssaj2000.643843x" target="_blank" rel="noopener">10.2136/sssaj2000.643843x</a></li>
+<li>Vogel, T., and M. Císlerová (1988). On the reliability of unsaturated hydraulic conductivity calculated from the moisture retention curve. <em>Transport in Porous Media</em> 3: 1–15. doi:<a href="https://doi.org/10.1007/BF00222683" target="_blank" rel="noopener">10.1007/BF00222683</a></li>
+</ul>
+<p>All sources: <a href="references.html">References</a>.</p>
+</article>
+<div class="pager"><a class="prev" href="hyd_model.html">← Soil hydraulic model</a><a class="next" href="rosetta.html">Neural network prediction (Rosetta) →</a></div>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 1.0.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>

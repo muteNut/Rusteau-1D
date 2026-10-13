@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meteorological data – Rusteau-1D Help</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html"><img src="favicon.png" alt="" width="22" height="22">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li><a href="units.html">Units</a></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details open><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li class="current"><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details><summary>Solute transport</summary>
+<ul>
+<li><a href="solute_general.html">Solute transport: general</a></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+<li><a href="figures.html">Figure editor</a></li>
+<li><a href="run_comparison.html">Comparison of runs</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Theory and equations</summary>
+<ul>
+<li><a href="th_richards.html">Variably saturated water flow</a></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<div class="crumbs">Input (pre-processing)</div>
+<h1>Meteorological data</h1>
+<p>With <em>Meteorological ET</em> switched on (<a href="processes.html">Processes &amp; units</a>), the potential evaporation and transpiration are computed from meteorological records with the Penman–Monteith combination equation <a href="references.html#monteith1981" class="cite" title="Monteith, J. L. (1981). Evaporation and surface temperature. Quarterly Journal of the Royal Meteorological Society 107(451): 1–27.">Monteith (1981)</a>; <a href="references.html#allen1998" class="cite" title="Allen, R. G., L. S. Pereira, D. Raes, and M. Smith (1998). Crop Evapotranspiration – Guidelines for Computing Crop Water Requirements. FAO Irrigation and Drainage Paper 56, Food and Agriculture Organization of the United Nations, Rome, 300 pp.">Allen et al. (1998)</a> or the Hargreaves equation <a href="references.html#hargreavesSamani1985" class="cite" title="Hargreaves, G. H., and Z. A. Samani (1985). Reference crop evapotranspiration from temperature. Applied Engineering in Agriculture 1(2): 96–99.">Hargreaves and Samani (1985)</a>, or the evaporation follows from the surface energy balance <a href="references.html#saito2006" class="cite" title="Saito, H., J. Šimůnek, and B. P. Mohanty (2006). Numerical analysis of coupled water, vapor, and heat transport in the vadose zone. Vadose Zone Journal 5(2): 784–800.">Saito et al. (2006)</a>. The page corresponds to the <em>Meteorological Parameters</em> and <em>Meteorological Conditions</em> dialogs of HYDRUS-1D (file <code>METEO.IN</code>).</p>
+<figure><a href="img/meteo_page.png"><img src="img/meteo_page.png" alt="The page Meteorological data." loading="lazy"></a><figcaption>The page Meteorological data.</figcaption></figure>
+<h2 id="radiation-and-cloudiness">Radiation and cloudiness</h2>
+<div class="table"><table>
+<thead><tr><th>Option</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>Potential radiation</td><td>No radiation data: the solar radiation is estimated with the Ångström formula Rs = (as + bs n/N) Ra <a href="references.html#angstrom1924" class="cite" title="Ångström, A. (1924). Solar and terrestrial radiation. Quarterly Journal of the Royal Meteorological Society 50(210): 121–126.">Ångström (1924)</a>.</td></tr>
+<tr><td>Solar radiation</td><td>Measured global radiation Rs [MJ/m²/d].</td></tr>
+<tr><td>Net radiation</td><td>Measured net radiation Rn [MJ/m²/d].</td></tr>
+<tr><td>Sunshine hours / cloudiness index / transmission coefficient / derived from solar radiation</td><td>What the last column of the records holds and how the cloudiness factor of the long-wave radiation is obtained.</td></tr>
+<tr><td>Relative humidity / vapor pressure</td><td>What the humidity column holds.</td></tr>
+<tr><td>Hargreaves</td><td>Use the Hargreaves equation instead of Penman–Monteith (<a href="th_hargreaves.html">theory</a>).</td></tr>
+<tr><td>Energy balance</td><td>Evaporation and soil heat flux from the surface energy balance (requires heat transport; <a href="th_energy_balance.html">theory</a>).</td></tr>
+<tr><td>Daily variations</td><td>Hourly air temperatures and humidities generated from the daily records; the time step is limited to one hour.</td></tr>
+</tbody></table></div>
+<h2 id="geographical-and-radiation-parameters">Geographical and radiation parameters</h2>
+<div class="table"><table>
+<thead><tr><th>Parameter</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>Latitude, altitude</td><td>location of the site (extraterrestrial radiation, day length, atmospheric pressure)</td></tr>
+<tr><td>Ångström a, b</td><td>as = 0.25, bs = 0.50 (FAO-56) <a href="references.html#allen1998" class="cite" title="Allen, R. G., L. S. Pereira, D. Raes, and M. Smith (1998). Crop Evapotranspiration – Guidelines for Computing Crop Water Requirements. FAO Irrigation and Drainage Paper 56, Food and Agriculture Organization of the United Nations, Rome, 300 pp.">Allen et al. (1998)</a></td></tr>
+<tr><td>Long-wave cloud factors a1, b1</td><td>f = a1 n/N + b1 (0.9, 0.1) <a href="references.html#doorenbosPruitt1977" class="cite" title="Doorenbos, J., and W. O. Pruitt (1977). Guidelines for Predicting Crop Water Requirements. FAO Irrigation and Drainage Paper 24, Food and Agriculture Organization of the United Nations, Rome, 144 pp.">Doorenbos and Pruitt (1977)</a></td></tr>
+<tr><td>Long-wave emissivity al, bl</td><td>net emissivity ε = al + bl √ea (0.34, −0.14)</td></tr>
+<tr><td>Cloudiness from solar radiation ac, bc</td><td>f = ac Rs/Rso + bc (1.35, −0.35)</td></tr>
+<tr><td>Wind and temperature measurement heights</td><td>[cm]; must exceed the zero-plane displacement 0.67 × crop height</td></tr>
+</tbody></table></div>
+<h2 id="crop">Crop</h2>
+<div class="table"><table>
+<thead><tr><th>Option</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>Bare soil</td><td>evaporation only</td></tr>
+<tr><td>Constant crop</td><td>crop height, albedo, LAI (and root depth) constant</td></tr>
+<tr><td>Crop growth table</td><td>values interpolated from a table of times</td></tr>
+<tr><td>Daily crop data in the records</td><td>every record carries crop height, albedo, LAI and root depth</td></tr>
+<tr><td>LAI from height (clipped grass / alfalfa) or direct input</td><td>leaf area index from the crop height <a href="references.html#allen1998" class="cite" title="Allen, R. G., L. S. Pereira, D. Raes, and M. Smith (1998). Crop Evapotranspiration – Guidelines for Computing Crop Water Requirements. FAO Irrigation and Drainage Paper 56, Food and Agriculture Organization of the United Nations, Rome, 300 pp.">Allen et al. (1998)</a> or given directly (a value below 1 is read as the soil cover fraction)</td></tr>
+<tr><td>Radiation extinction coefficient</td><td>k for the partitioning of ETp into evaporation and transpiration <a href="references.html#ritchie1972" class="cite" title="Ritchie, J. T. (1972). Model for predicting evaporation from a row crop with incomplete cover. Water Resources Research 8(5): 1204–1213.">Ritchie (1972)</a></td></tr>
+<tr><td>Canopy interception</td><td>interception constant a [mm] <a href="references.html#vonHoyningenHune1983" class="cite" title="von Hoyningen-Hüne, J. (1983). Die Interception des Niederschlags in landwirtschaftlichen Beständen. Schriftenreihe des DVWK 57: 1–53.">von Hoyningen-Hüne (1983)</a>; <a href="references.html#braden1985" class="cite" title="Braden, H. (1985). Ein Energiehaushalts- und Verdunstungsmodell für Wasser- und Stoffhaushaltsuntersuchungen landwirtschaftlich genutzter Einzugsgebiete. Mitteilungen der Deutschen Bodenkundlichen Gesellschaft 42: 294–299.">Braden (1985)</a></td></tr>
+</tbody></table></div>
+<h2 id="records">Records</h2>
+<p>Each record gives the time t [T], radiation [MJ/m²/d], maximum and minimum air temperature [°C], mean relative humidity [%] or vapor pressure [kPa], wind speed [km/d] and sunshine hours (or cloudiness, transmission coefficient), and optionally the crop data. The meteorological inputs are in these fixed units whatever the project's units are (<a href="units.html#conversion">units</a>).</p>
+<p>See also: <a href="th_penman.html">Penman–Monteith equation</a> · <a href="th_hargreaves.html">Hargreaves equation</a> · <a href="th_energy_balance.html">surface energy balance</a> · <a href="th_atmosphere.html">atmospheric inputs</a></p>
+<h2 id="literature">Literature cited in this topic</h2>
+<ul>
+<li>Allen, R. G., L. S. Pereira, D. Raes, and M. Smith (1998). <em>Crop Evapotranspiration – Guidelines for Computing Crop Water Requirements.</em> FAO Irrigation and Drainage Paper 56, Food and Agriculture Organization of the United Nations, Rome, 300 pp. <a href="https://www.fao.org/4/x0490e/x0490e00.htm" target="_blank" rel="noopener">https://www.fao.org/4/x0490e/x0490e00.htm</a></li>
+<li>Braden, H. (1985). Ein Energiehaushalts- und Verdunstungsmodell für Wasser- und Stoffhaushaltsuntersuchungen landwirtschaftlich genutzter Einzugsgebiete. <em>Mitteilungen der Deutschen Bodenkundlichen Gesellschaft</em> 42: 294–299.</li>
+<li>Doorenbos, J., and W. O. Pruitt (1977). <em>Guidelines for Predicting Crop Water Requirements.</em> FAO Irrigation and Drainage Paper 24, Food and Agriculture Organization of the United Nations, Rome, 144 pp.</li>
+<li>Hargreaves, G. H., and Z. A. Samani (1985). Reference crop evapotranspiration from temperature. <em>Applied Engineering in Agriculture</em> 1(2): 96–99. doi:<a href="https://doi.org/10.13031/2013.26773" target="_blank" rel="noopener">10.13031/2013.26773</a></li>
+<li>Monteith, J. L. (1981). Evaporation and surface temperature. <em>Quarterly Journal of the Royal Meteorological Society</em> 107(451): 1–27. doi:<a href="https://doi.org/10.1002/qj.49710745102" target="_blank" rel="noopener">10.1002/qj.49710745102</a></li>
+<li>Ritchie, J. T. (1972). Model for predicting evaporation from a row crop with incomplete cover. <em>Water Resources Research</em> 8(5): 1204–1213. doi:<a href="https://doi.org/10.1029/WR008i005p01204" target="_blank" rel="noopener">10.1029/WR008i005p01204</a></li>
+<li>Saito, H., J. Šimůnek, and B. P. Mohanty (2006). Numerical analysis of coupled water, vapor, and heat transport in the vadose zone. <em>Vadose Zone Journal</em> 5(2): 784–800. doi:<a href="https://doi.org/10.2136/vzj2006.0007" target="_blank" rel="noopener">10.2136/vzj2006.0007</a></li>
+<li>von Hoyningen-Hüne, J. (1983). Die Interception des Niederschlags in landwirtschaftlichen Beständen. <em>Schriftenreihe des DVWK</em> 57: 1–53.</li>
+<li>Ångström, A. (1924). Solar and terrestrial radiation. <em>Quarterly Journal of the Royal Meteorological Society</em> 50(210): 121–126. doi:<a href="https://doi.org/10.1002/qj.49705021008" target="_blank" rel="noopener">10.1002/qj.49705021008</a></li>
+</ul>
+<p>All sources: <a href="references.html">References</a>.</p>
+</article>
+<div class="pager"><a class="prev" href="time_variable_bc.html">← Time-variable boundary data</a><a class="next" href="root_uptake_page.html">Root water and solute uptake →</a></div>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 1.0.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>

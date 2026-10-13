@@ -2,6 +2,7 @@
 //! Fit.out (fitted parameters with their confidence limits, goodness of fit, observed against fitted values).
 
 use crate::files::{FileDialog, Mode, Purpose};
+use crate::tips::{hdr, lbl, TipExt};
 use crate::util::*;
 use crate::{App, Page};
 use eframe::egui::{self, Color32, RichText, Ui};
@@ -122,10 +123,13 @@ impl App {
         let s2 = s.clone();
         std::thread::spawn(move || {
             let tx2 = tx.clone();
-            let r = optimize(&prj, &s2, &MarqOptions::default(), Some(&c2), |p| {
-                let _ = tx2.send(InvMsg::Progress(p.clone()));
+            let r = crate::guard::catch("Parameter estimation", || {
+                optimize(&prj, &s2, &MarqOptions::default(), Some(&c2), |p| {
+                    let _ = tx2.send(InvMsg::Progress(p.clone()));
+                })
+                .map_err(|e| e.to_string())
             })
-            .map_err(|e| e.to_string());
+            .and_then(|r| r);
             let _ = tx.send(InvMsg::Done(Box::new(r)));
         });
         let n_starts = if s.hydrus_stop { 1 } else { 1 + s.extra_starts };
@@ -139,7 +143,16 @@ impl App {
         let mut done = None;
         if let Some(h) = self.inv.run.as_mut() {
             ctx.request_repaint_after(std::time::Duration::from_millis(100));
-            while let Ok(m) = h.rx.try_recv() {
+            // until the result arrives; a closed channel without a result means the thread ended abnormally
+            while done.is_none() {
+                let m = match h.rx.try_recv() {
+                    Ok(m) => m,
+                    Err(std::sync::mpsc::TryRecvError::Empty) => break,
+                    Err(std::sync::mpsc::TryRecvError::Disconnected) => {
+                        done = Some((Err("The parameter estimation ended without results (internal error).".to_string()), h.started.elapsed().as_secs_f64()));
+                        break;
+                    }
+                };
                 match m {
                     InvMsg::Progress(p) if p.finished => {
                         h.finished.push(p);
@@ -160,7 +173,7 @@ impl App {
                     self.status = format!(
                         "Parameter estimation finished in {:.1} s: {} iterations, SSQ {:.4e}, R² {:.5} ({}).",
                         secs,
-                        res.iterations.len() - 1,
+                        res.iterations.len().saturating_sub(1),
                         res.ssq,
                         res.measures.r_squared,
                         stop_text(res.stop)
@@ -196,11 +209,11 @@ impl App {
             ui.add_space(6.0);
             ui.label("There are no inverse settings yet.");
             ui.horizontal(|ui| {
-                if ui.button("Create from the current project").clicked() {
+                if ui.button("Create from the current project").tip("Create from the current project").clicked() {
                     self.prj.inverse = Some(InverseSettings::from_project(&self.prj));
                     *ch = true;
                 }
-                if ui.button("Import Fit.in…").clicked() {
+                if ui.button("Import Fit.in…").tip("Import Fit.in…").clicked() {
                     self.dialog = Some(FileDialog::new(Purpose::ImportFitIn, Mode::OpenFile, "Select a Fit.in", self.last_dir.clone(), "Fit.in", &["in"]));
                 }
             });
@@ -215,15 +228,17 @@ impl App {
         let n_mat = self.prj.water.materials.len();
         let solute = self.prj.processes.solute && !self.prj.solute.species.is_empty();
         let hyst = self.prj.water.hysteresis.code();
-        let mut s = self.prj.inverse.take().unwrap();
+        // a copy, written back at the end: an internal error while drawing (caught by the page guard) cannot lose the
+        // settings
+        let Some(mut s) = self.prj.inverse.clone() else { return };
         // keep the parameter records in line with the project (materials added or removed, solute switched on)
         sync_records(&mut s, &self.prj);
 
         ui.horizontal(|ui| {
-            if ui.button("Import Fit.in…").clicked() {
+            if ui.button("Import Fit.in…").tip("Import Fit.in…").clicked() {
                 self.dialog = Some(FileDialog::new(Purpose::ImportFitIn, Mode::OpenFile, "Select a Fit.in", self.last_dir.clone(), "Fit.in", &["in"]));
             }
-            if ui.button("Export Fit.in…").clicked() {
+            if ui.button("Export Fit.in…").tip("Export Fit.in…").clicked() {
                 self.dialog = Some(FileDialog::new(Purpose::ExportFitIn, Mode::SaveFile, "Save Fit.in", self.last_dir.clone(), "Fit.in", &["in"]));
             }
         });
@@ -234,10 +249,10 @@ impl App {
             check(ui, ch, &mut s.fit_water, "Soil hydraulic parameters");
             if hyst > 0 && s.fit_water {
                 ui.add_space(12.0);
-                ui.label(RichText::new("constraints:").weak());
+                ui.label(RichText::new("constraints:").weak()).tip("constraints:");
                 egui::ComboBox::from_id_salt("inv_qs").selected_text(Q_SAME[s.q_same.clamp(0, 2) as usize]).show_ui(ui, |ui| {
                     for (k, n) in Q_SAME.iter().enumerate() {
-                        if ui.selectable_value(&mut s.q_same, k as i32, *n).changed() {
+                        if ui.selectable_value(&mut s.q_same, k as i32, *n).tip(n).changed() {
                             *ch = true;
                         }
                     }
@@ -255,7 +270,7 @@ impl App {
                 ui.horizontal_wrapped(|ui| {
                     ui.label("from");
                     for (k, n) in CONC_TYPES.iter().enumerate() {
-                        if ui.radio_value(&mut s.conc_type, k as i32, *n).changed() {
+                        if ui.radio_value(&mut s.conc_type, k as i32, *n).tip(n).changed() {
                             *ch = true;
                         }
                     }
@@ -277,7 +292,7 @@ impl App {
         section(ui, "Weighting of the measurement sets");
         ui.horizontal_wrapped(|ui| {
             for (k, n) in WEIGHTING.iter().enumerate() {
-                if ui.radio_value(&mut s.weighting, k as i32, *n).changed() {
+                if ui.radio_value(&mut s.weighting, k as i32, *n).tip(n).changed() {
                     *ch = true;
                 }
             }
@@ -285,8 +300,8 @@ impl App {
 
         section(ui, "Iteration");
         ui.horizontal(|ui| {
-            ui.label("Maximum number of iterations (MIT)");
-            if ui.add(egui::DragValue::new(&mut s.max_iter).range(0..=1000)).changed() {
+            lbl(ui, "Maximum number of iterations (MIT)");
+            if crate::util::int(ui.add(egui::DragValue::new(&mut s.max_iter).range(0..=1000))).tip("Maximum number of iterations (MIT)").changed() {
                 *ch = true;
             }
         });
@@ -303,8 +318,7 @@ impl App {
             ui.add_space(28.0);
             ui.add_enabled_ui(!hydrus, |ui| {
                 ui.label("Additional starting points");
-                if ui
-                    .add(egui::DragValue::new(&mut s.extra_starts).range(0..=64))
+                if crate::util::int(ui.add(egui::DragValue::new(&mut s.extra_starts).range(0..=64)))
                     .on_hover_text("Number of starting points besides the initial estimates (0: only the initial estimates). They run in parallel threads.")
                     .changed()
                 {
@@ -383,24 +397,24 @@ impl App {
                         ui.strong(column_label(&s, p)).on_hover_text(s.param_name(p));
                     }
                     ui.end_row();
-                    ui.label("Initial estimate");
+                    lbl(ui, "Initial estimate");
                     for &i in &idx {
                         dv(ui, ch, &mut s.params[i].value);
                     }
                     ui.end_row();
-                    ui.label("Minimum value");
+                    lbl(ui, "Minimum value");
                     for &i in &idx {
                         let f = s.params[i].fit;
                         ui.add_enabled_ui(f, |ui| dv(ui, ch, &mut s.params[i].min));
                     }
                     ui.end_row();
-                    ui.label("Maximum value");
+                    lbl(ui, "Maximum value");
                     for &i in &idx {
                         let f = s.params[i].fit;
                         ui.add_enabled_ui(f, |ui| dv(ui, ch, &mut s.params[i].max));
                     }
                     ui.end_row();
-                    ui.label("Fitted?");
+                    lbl(ui, "Fitted?");
                     for &i in &idx {
                         check(ui, ch, &mut s.params[i].fit, "");
                     }
@@ -430,7 +444,7 @@ impl App {
                 .header(22.0, |mut h| {
                     for c in ["#", "Type", "Position", "Time / h / x", "Value", "Weight", ""] {
                         h.col(|ui| {
-                            ui.strong(c);
+                            hdr(ui, c);
                         });
                     }
                 })
@@ -452,7 +466,7 @@ impl App {
                             });
                         });
                         row.col(|ui| {
-                            if ui.add(egui::DragValue::new(&mut o.pos).range(-99..=999)).on_hover_text(pos_help(o.kind)).changed() {
+                            if crate::util::int(ui.add(egui::DragValue::new(&mut o.pos).range(-99..=999))).on_hover_text(pos_help(o.kind)).changed() {
                                 *ch = true;
                             }
                         });
@@ -472,7 +486,7 @@ impl App {
             *ch = true;
         }
         ui.horizontal(|ui| {
-            if ui.button("+ Add observation").clicked() {
+            if ui.button("+ Add observation").tip("+ Add observation").clicked() {
                 let o = s.observations.last().cloned().unwrap_or(Observation { x: self.prj.time.t_max, value: 0.0, kind: 2, pos: 1, weight: 1.0 });
                 s.observations.push(o);
                 *ch = true;
@@ -519,9 +533,8 @@ impl App {
                 self.page = Page::InverseResults;
             }
         });
-        if self.prj.inverse.is_none() {
-            self.prj.inverse = Some(s);
-        }
+        // the edited copy back into the project
+        self.prj.inverse = Some(s);
     }
 
     /// Results page (the content of Fit.out).
@@ -586,7 +599,7 @@ impl App {
             if ui.button("Apply the fitted parameters to the project").on_hover_text("Writes the fitted values into the materials and makes them the initial estimates of a new estimation").clicked() {
                 self.apply_fitted();
             }
-            if ui.button("Save Fit.out…").clicked() {
+            if ui.button("Save Fit.out…").tip("Save Fit.out…").clicked() {
                 self.dialog = Some(FileDialog::new(Purpose::SaveFitOut, Mode::SaveFile, "Save Fit.out", self.last_dir.clone(), "Fit.out", &["out"]));
             }
         });
@@ -595,7 +608,7 @@ impl App {
         section(ui, "Fitted parameters");
         egui::Grid::new("inv_res").striped(true).num_columns(6).spacing([18.0, 4.0]).show(ui, |ui| {
             for h in ["Parameter", "Initial", "Fitted", "S.E.", "Lower 95 %", "Upper 95 %"] {
-                ui.strong(h);
+                hdr(ui, h);
             }
             ui.end_row();
             for (j, p) in r.params.iter().enumerate() {
@@ -626,12 +639,13 @@ impl App {
                 ("Akaike information criterion AIC", m.aic),
                 ("Bayesian information criterion BIC", m.bic),
             ] {
-                ui.label(l);
+                lbl(ui, l);
                 ui.label(sig(v));
                 ui.end_row();
             }
             for (k, c) in &r.contributions {
-                ui.label(format!("Contribution of set {}", type_name(*k, s.observes_temperature())));
+                ui.label(format!("Contribution of set {}", type_name(*k, s.observes_temperature())))
+                    .tip_text("Part of the objective function SSQ contributed by this measurement set.");
                 ui.label(sig(*c));
                 ui.end_row();
             }
@@ -642,8 +656,8 @@ impl App {
         kinds.sort_unstable();
         kinds.dedup();
         ui.horizontal(|ui| {
-            ui.radio_value(&mut self.inv.plot_kind, 0, "Fitted against observed");
-            ui.radio_value(&mut self.inv.plot_kind, 1, "Against time / pressure head");
+            ui.radio_value(&mut self.inv.plot_kind, 0, "Fitted against observed").tip("Fitted against observed");
+            ui.radio_value(&mut self.inv.plot_kind, 1, "Against time / pressure head").tip("Against time / pressure head");
             if self.inv.plot_kind == 1 && !kinds.is_empty() {
                 self.inv.plot_set = self.inv.plot_set.min(kinds.len() - 1);
                 let heat = s.observes_temperature();
@@ -712,13 +726,13 @@ impl App {
             )).weak());
             egui::ScrollArea::horizontal().id_salt("inv_starts_scroll").show(ui, |ui| {
                 egui::Grid::new("inv_starts").striped(true).spacing([18.0, 3.0]).show(ui, |ui| {
-                    ui.strong("Start");
+                    hdr(ui, "Start");
                     for n in &r.names {
                         ui.strong(format!("{n} (initial)"));
                     }
-                    ui.strong("Final SSQ");
-                    ui.strong("Iterations");
-                    ui.strong("End");
+                    hdr(ui, "Final SSQ");
+                    hdr(ui, "Iterations");
+                    hdr(ui, "End");
                     ui.end_row();
                     for (k, st) in r.starts.iter().enumerate() {
                         let mark = |t: String| if k == r.best_start { RichText::new(t).strong() } else { RichText::new(t) };
@@ -826,8 +840,8 @@ fn pos_help(kind: i32) -> &'static str {
 /// Iteration table: (iteration, SSQ, parameters).
 fn iteration_grid(ui: &mut Ui, id: &str, names: &[String], rows: Vec<(usize, f64, Vec<f64>)>) {
     egui::Grid::new(id).striped(true).spacing([18.0, 3.0]).show(ui, |ui| {
-        ui.strong("Iteration");
-        ui.strong("SSQ");
+        hdr(ui, "Iteration");
+        hdr(ui, "SSQ");
         for n in names {
             ui.strong(n);
         }
@@ -875,5 +889,61 @@ fn sync_records(s: &mut InverseSettings, prj: &rusteau_core::Project) {
     s.params.sort_by_key(|p| (rank(p.group), p.mat, p.index));
     if s.n_water_par < 10 && s.params.iter().any(|p| p.group == ParamGroup::Water && p.index > s.n_water_par) {
         s.params.retain(|p| p.group != ParamGroup::Water || p.index <= s.n_water_par);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::App;
+
+    /// A parameter estimation started like the Run button and polled like the interface delivers its result (the
+    /// thread has ended, so the result and the closed channel are seen in the same poll).
+    #[test]
+    fn a_finished_estimation_delivers_its_result() {
+        let mut app = App::with_project(rusteau_core::examples::inverse_outflow());
+        app.start_inverse();
+        assert!(app.inv.run.is_some(), "{}", app.status);
+        let ctx = egui::Context::default();
+        let start = std::time::Instant::now();
+        // wait for the end of the thread before polling: the worst case of the polling
+        while app.inv.run.as_ref().is_some_and(|h| !h.cancel.load(std::sync::atomic::Ordering::Relaxed)) && start.elapsed().as_secs() < 300 {
+            std::thread::sleep(std::time::Duration::from_millis(200));
+            app.poll_inverse(&ctx);
+        }
+        assert!(app.inv.run.is_none(), "still running after 300 s");
+        assert!(app.inv.result.is_some(), "no result: {}", app.status);
+        assert!(app.status.starts_with("Parameter estimation finished"), "{}", app.status);
+    }
+
+    /// A HYDRUS-1D project with Fit.in (folder in `RUSTEAU_INVERSE_PROJECT`) opened and estimated as in the interface:
+    /// `RUSTEAU_INVERSE_PROJECT=<folder> cargo test -p rusteau-gui --release -- --ignored imported`.
+    #[test]
+    #[ignore]
+    fn imported_project_estimation() {
+        let dir = std::path::PathBuf::from(std::env::var_os("RUSTEAU_INVERSE_PROJECT").expect("RUSTEAU_INVERSE_PROJECT"));
+        let mut app = App::with_project(rusteau_core::examples::infiltration_evaporation());
+        app.open_path(&dir);
+        assert!(app.prj.processes.inverse, "{}", app.status);
+        app.start_inverse();
+        assert!(app.inv.run.is_some(), "{} {:?}", app.status, app.problems);
+        let ctx = egui::Context::default();
+        let start = std::time::Instant::now();
+        while app.inv.run.is_some() && start.elapsed().as_secs() < 900 {
+            std::thread::sleep(std::time::Duration::from_millis(200));
+            app.poll_inverse(&ctx);
+        }
+        assert!(app.inv.result.is_some(), "{}", app.status);
+        println!("{}", app.status);
+    }
+
+    #[test]
+    fn a_thread_that_ends_without_a_result_is_reported() {
+        let mut app = App::with_project(rusteau_core::examples::inverse_outflow());
+        let (tx, rx) = std::sync::mpsc::channel::<super::InvMsg>();
+        drop(tx);
+        app.inv.run = Some(super::InvHandle { rx, cancel: Default::default(), started: std::time::Instant::now(), rows: vec![], finished: vec![], n_starts: 1 });
+        app.poll_inverse(&egui::Context::default());
+        assert!(app.inv.run.is_none());
+        assert!(app.status.contains("ended without results"), "{}", app.status);
     }
 }

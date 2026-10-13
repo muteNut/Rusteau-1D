@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Numerical solution – Rusteau-1D Help</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html"><img src="favicon.png" alt="" width="22" height="22">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li><a href="units.html">Units</a></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details><summary>Solute transport</summary>
+<ul>
+<li><a href="solute_general.html">Solute transport: general</a></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+<li><a href="figures.html">Figure editor</a></li>
+<li><a href="run_comparison.html">Comparison of runs</a></li>
+</ul>
+</details></li>
+<li class="book"><details open><summary>Theory and equations</summary>
+<ul>
+<li><a href="th_richards.html">Variably saturated water flow</a></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li class="current"><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<div class="crumbs">Theory and equations</div>
+<h1>Numerical solution</h1>
+<p>Rusteau uses the numerical methods of HYDRUS-1D <a href="references.html#simunek2009" class="cite" title="Šimůnek, J., M. Šejna, H. Saito, M. Sakai, and M. Th. van Genuchten (2009). The HYDRUS-1D Software Package for Simulating the One-Dimensional Movement of Water, Heat, and Multiple Solutes in Variably-Saturated Media, Version 4.08. HYDRUS Software Series 3, Department of Environmental Sciences, University of California Riverside, Riverside, CA, USA, 330 pp.">Šimůnek et al. (2009)</a>: Galerkin-type linear finite elements in space and finite differences in time.</p>
+<h2 id="water">Water flow</h2>
+<p>The Richards equation is discretized with linear finite elements on the nodes of the profile, with a lumped (diagonal) mass matrix, and with a fully implicit finite difference scheme in time <a href="references.html#vogel1987" class="cite" title="Vogel, T. (1987). SWMII – Numerical Model of Two-Dimensional Flow in a Variably Saturated Porous Medium. Research Report No. 87, Department of Hydraulics and Catchment Hydrology, Agricultural University, Wageningen, The Netherlands.">Vogel (1987)</a>. The non-linearity is resolved by the mass-conservative modified Picard iteration of <a href="references.html#celia1990" class="cite" title="Celia, M. A., E. T. Bouloutas, and R. L. Zarba (1990). A general mass-conservative numerical solution for the unsaturated flow equation. Water Resources Research 26(7): 1483–1496.">Celia et al. (1990)</a>: the time derivative is written in terms of the water content,</p>
+<div class="formula">
+<div>(θ<sub>i</sub><sup>j+1,k+1</sup> − θ<sub>i</sub><sup>j</sup>) / Δt = C<sub>i</sub><sup>j+1,k</sup> (h<sub>i</sub><sup>j+1,k+1</sup> − h<sub>i</sub><sup>j+1,k</sup>) / Δt + (θ<sub>i</sub><sup>j+1,k</sup> − θ<sub>i</sub><sup>j</sup>) / Δt</div>
+</div>
+<p>(j time level, k iteration), which conserves mass much better than the head form. Each iteration solves a tridiagonal system (Thomas algorithm). The iteration ends when the changes of θ (unsaturated nodes) and h (saturated nodes) are below the tolerances (<a href="iteration.html">iteration criteria</a>). The first estimate of the heads of a new time step is extrapolated from the two previous time levels.</p>
+<h2 id="timestep">Time step control</h2>
+<p>Three time discretizations are used: one for the numerical solution, one for the boundary conditions (the records) and one for the output (the print times). The time step of the solution adapts automatically:</p>
+<ol>
+<li>it always ends at the times of the boundary records and the print times;</li>
+<li>it stays between Δt<sub>min</sub> and Δt<sub>max</sub>;</li>
+<li>after a step that converged in at most ItMin iterations (3) it is multiplied by dMul (1.3), after a step with at least ItMax iterations (7) by dMul2 (0.7);</li>
+<li>when the iteration does not converge within MaxIt iterations, the step is repeated with Δt/3; below Δt<sub>min</sub> the run stops.</li>
+</ol>
+<p>The solute and heat transport can further limit the step (Courant number, see <a href="th_discretization.html">discretization</a>). As in HYDRUS, the time step is handled in single precision so that the time levels agree with HYDRUS.</p>
+<h2 id="tables">Interpolation tables</h2>
+<p>To save time, θ(h), K(h) and C(h) of every material are tabulated at 100 logarithmically spaced heads between hTab1 and hTabN and interpolated linearly in log |h| <a href="references.html#vogel1987" class="cite" title="Vogel, T. (1987). SWMII – Numerical Model of Two-Dimensional Flow in a Variably Saturated Porous Medium. Research Report No. 87, Department of Hydraulics and Catchment Hydrology, Agricultural University, Wageningen, The Netherlands.">Vogel (1987)</a>; outside this interval the functions are evaluated directly (<a href="iteration.html#tables">iteration criteria</a>).</p>
+<h2 id="solute">Solute and heat transport</h2>
+<p>The advection–dispersion and heat transport equations are solved after the water flow of each time step with Galerkin linear finite elements and a weighted time scheme (ε = 0.5: Crank–Nicolson; 1: implicit) <a href="references.html#huyakornPinder1983" class="cite" title="Huyakorn, P. S., and G. F. Pinder (1983). Computational Methods in Subsurface Flow. Academic Press, New York, 473 pp.">Huyakorn and Pinder (1983)</a>. With non-linear sorption the solution is iterated. To limit oscillations at sharp fronts, upstream weighting <a href="references.html#christie1976" class="cite" title="Christie, I., D. F. Griffiths, A. R. Mitchell, and O. C. Zienkiewicz (1976). Finite element methods for second order differential equations with significant first derivatives. International Journal for Numerical Methods in Engineering 10(6): 1389–1396.">Christie et al. (1976)</a> or artificial dispersion can be used: the artificial dispersion is added where the product of the Peclet and Courant numbers exceeds the stability criterion <a href="references.html#perrochetBerod1993" class="cite" title="Perrochet, P., and D. Berod (1993). Stability of the standard Crank-Nicolson-Galerkin scheme applied to the diffusion-convection equation: some new insights. Water Resources Research 29(9): 3291–3297.">Perrochet and Berod (1993)</a></p>
+<div class="formula">
+<div>Pe · Cr ≤ ω<sub>s</sub> = 2</div>
+</div>
+<h2 id="balance">Mass balance</h2>
+<p>At every print time the water and solute balance of the whole profile and of the sub-regions is computed from the nodal values and the cumulative boundary fluxes (<a href="res_balance.html">mass balance</a>); its error measures the accuracy of the numerical solution.</p>
+<h2 id="literature">Literature cited in this topic</h2>
+<ul>
+<li>Celia, M. A., E. T. Bouloutas, and R. L. Zarba (1990). A general mass-conservative numerical solution for the unsaturated flow equation. <em>Water Resources Research</em> 26(7): 1483–1496. doi:<a href="https://doi.org/10.1029/WR026i007p01483" target="_blank" rel="noopener">10.1029/WR026i007p01483</a></li>
+<li>Christie, I., D. F. Griffiths, A. R. Mitchell, and O. C. Zienkiewicz (1976). Finite element methods for second order differential equations with significant first derivatives. <em>International Journal for Numerical Methods in Engineering</em> 10(6): 1389–1396. doi:<a href="https://doi.org/10.1002/nme.1620100617" target="_blank" rel="noopener">10.1002/nme.1620100617</a></li>
+<li>Huyakorn, P. S., and G. F. Pinder (1983). <em>Computational Methods in Subsurface Flow.</em> Academic Press, New York, 473 pp.</li>
+<li>Perrochet, P., and D. Berod (1993). Stability of the standard Crank-Nicolson-Galerkin scheme applied to the diffusion-convection equation: some new insights. <em>Water Resources Research</em> 29(9): 3291–3297. doi:<a href="https://doi.org/10.1029/93WR00927" target="_blank" rel="noopener">10.1029/93WR00927</a></li>
+<li>Vogel, T. (1987). <em>SWMII – Numerical Model of Two-Dimensional Flow in a Variably Saturated Porous Medium.</em> Research Report No. 87, Department of Hydraulics and Catchment Hydrology, Agricultural University, Wageningen, The Netherlands.</li>
+<li>Šimůnek, J., M. Šejna, H. Saito, M. Sakai, and M. Th. van Genuchten (2009). <em>The HYDRUS-1D Software Package for Simulating the One-Dimensional Movement of Water, Heat, and Multiple Solutes in Variably-Saturated Media, Version 4.08.</em> HYDRUS Software Series 3, Department of Environmental Sciences, University of California Riverside, Riverside, CA, USA, 330 pp. <a href="https://www.pc-progress.com/en/Default.aspx?h1d-description" target="_blank" rel="noopener">https://www.pc-progress.com/en/Default.aspx?h1d-description</a></li>
+</ul>
+<p>All sources: <a href="references.html">References</a>.</p>
+</article>
+<div class="pager"><a class="prev" href="th_reaction_dependence.html">← Temperature and water-content dependence of reactions</a><a class="next" href="th_discretization.html">Notes on spatial and temporal discretization →</a></div>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 1.0.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>

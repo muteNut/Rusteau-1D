@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parameter estimation results – Rusteau-1D Help</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html"><img src="favicon.png" alt="" width="22" height="22">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li><a href="units.html">Units</a></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details><summary>Solute transport</summary>
+<ul>
+<li><a href="solute_general.html">Solute transport: general</a></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details open><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li class="current"><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+<li><a href="figures.html">Figure editor</a></li>
+<li><a href="run_comparison.html">Comparison of runs</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Theory and equations</summary>
+<ul>
+<li><a href="th_richards.html">Variably saturated water flow</a></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<div class="crumbs">Results (post-processing)</div>
+<h1>Parameter estimation results</h1>
+<p>The page shows the run and the results of a parameter estimation, the content of <code>Fit.out</code> of HYDRUS-1D (<em>Inverse Solution Information</em>).</p>
+<figure><a href="img/res_inverse.png"><img src="img/res_inverse.png" alt="The results page Parameter estimation with the fitted parameters, the goodness of fit and observed against fitted values." loading="lazy"></a><figcaption>The results page Parameter estimation with the fitted parameters, the goodness of fit and observed against fitted values.</figcaption></figure>
+<h2 id="during-the-run">During the run</h2>
+<p>The iteration table of the first starting point is filled live (iteration, objective function SSQ, parameter values), and the finished starting points are listed. <em>■ Stop</em> ends the estimation.</p>
+<h2 id="results">Results</h2>
+<div class="table"><table>
+<thead><tr><th>Section</th><th>Content</th></tr></thead>
+<tbody>
+<tr><td>Fitted parameters</td><td>initial estimate, fitted value, standard error (S.E.) and the 95 % confidence interval of every fitted parameter <a href="references.html#simunekHopmans2002" class="cite" title="Šimůnek, J., and J. W. Hopmans (2002). Parameter optimization and nonlinear fitting. In: J. H. Dane and G. C. Topp (eds.), Methods of Soil Analysis, Part 4, Physical Methods, SSSA Book Series No. 5, Soil Science Society of America, Madison, WI, pp. 139–157.">Šimůnek and Hopmans (2002)</a></td></tr>
+<tr><td>Goodness of fit</td><td>SSQ, R² of observed against fitted values, mean error ME, mean absolute error MAE, RMSE, AIC <a href="references.html#akaike1974" class="cite" title="Akaike, H. (1974). A new look at the statistical model identification. IEEE Transactions on Automatic Control 19(6): 716–723.">Akaike (1974)</a>, BIC <a href="references.html#schwarz1978" class="cite" title="Schwarz, G. (1978). Estimating the dimension of a model. The Annals of Statistics 6(2): 461–464.">Schwarz (1978)</a> and the contribution of every measurement set to SSQ</td></tr>
+<tr><td>Observed and fitted values</td><td>fitted against observed values with the 1:1 line, or observed (points) and fitted (line) values of one measurement set against time, pressure head or depth</td></tr>
+<tr><td>Correlation matrix</td><td>correlations between the fitted parameters; |r| &gt; 0.95 is highlighted (the data cannot separate these parameters)</td></tr>
+<tr><td>Starting points</td><td>the further starting points with their initial values, final SSQ, iterations and why they stopped; the result of the lowest SSQ is shown</td></tr>
+<tr><td>Iterations</td><td>SSQ and the parameters of every iteration</td></tr>
+</tbody></table></div>
+<p><em>Apply the fitted parameters to the project</em> writes the fitted values into the materials and makes them the initial estimates of a new estimation. <em>Save Fit.out…</em> writes the results in the layout of HYDRUS-1D 4.17. The results of the final run with the fitted parameters fill the other results pages.</p>
+<h2 id="interpreting-the-results">Interpreting the results</h2>
+<ul>
+<li>Wide confidence intervals or high correlations mean that the data do not determine the parameters well: fit fewer parameters, add different kinds of data (e.g. retention points to outflow data) or use constraints.</li>
+<li>Compare the objective functions of the starting points: if they end at different SSQ values, the objective function has several local minima.</li>
+</ul>
+<p>See <a href="th_inverse.html">parameter estimation (theory)</a> for the definitions.</p>
+<h2 id="literature">Literature cited in this topic</h2>
+<ul>
+<li>Akaike, H. (1974). A new look at the statistical model identification. <em>IEEE Transactions on Automatic Control</em> 19(6): 716–723. doi:<a href="https://doi.org/10.1109/TAC.1974.1100705" target="_blank" rel="noopener">10.1109/TAC.1974.1100705</a></li>
+<li>Schwarz, G. (1978). Estimating the dimension of a model. <em>The Annals of Statistics</em> 6(2): 461–464. doi:<a href="https://doi.org/10.1214/aos/1176344136" target="_blank" rel="noopener">10.1214/aos/1176344136</a></li>
+<li>Šimůnek, J., and J. W. Hopmans (2002). Parameter optimization and nonlinear fitting. In: J. H. Dane and G. C. Topp (eds.), <em>Methods of Soil Analysis, Part 4, Physical Methods</em>, SSSA Book Series No. 5, Soil Science Society of America, Madison, WI, pp. 139–157.</li>
+</ul>
+<p>All sources: <a href="references.html">References</a>.</p>
+</article>
+<div class="pager"><a class="prev" href="res_balance.html">← Mass balance</a><a class="next" href="measured_data.html">Measured data →</a></div>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 1.0.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>

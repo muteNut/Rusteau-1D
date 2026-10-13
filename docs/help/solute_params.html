@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solute transport: transport parameters – Rusteau-1D Help</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html"><img src="favicon.png" alt="" width="22" height="22">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li><a href="units.html">Units</a></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details open><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details open><summary>Solute transport</summary>
+<ul>
+<li><a href="solute_general.html">Solute transport: general</a></li>
+<li class="current"><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+<li><a href="figures.html">Figure editor</a></li>
+<li><a href="run_comparison.html">Comparison of runs</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Theory and equations</summary>
+<ul>
+<li><a href="th_richards.html">Variably saturated water flow</a></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<div class="crumbs">Input (pre-processing) › Solute transport</div>
+<h1>Solute transport: transport parameters</h1>
+<p>The soil-specific transport parameters (per material) and the molecular diffusion coefficients (per solute), the first part of the <em>Solute Transport Parameters</em> dialog of HYDRUS-1D.</p>
+<figure><a href="img/solute_params.png"><img src="img/solute_params.png" alt="The page Solute transport: transport parameters." loading="lazy"></a><figcaption>The page Solute transport: transport parameters.</figcaption></figure>
+<h2 id="per-material">Per material</h2>
+<div class="table"><table>
+<thead><tr><th>Parameter</th><th>HYDRUS</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>Bulk density ρ</td><td>Bulk.d.</td><td>dry bulk density [M/L³], in the project's mass and length units (e.g. 1.5 g/cm³ with mass unit g and cm)</td></tr>
+<tr><td>Dispersivity Dl</td><td>DisperL.</td><td>longitudinal dispersivity [L]; the dispersion coefficient is D = Dl |q|/θ + Dw τw <a href="references.html#bear1972" class="cite" title="Bear, J. (1972). Dynamics of Fluids in Porous Media. Elsevier, New York, 764 pp.">Bear (1972)</a></td></tr>
+<tr><td>Fraction f</td><td>Frac</td><td>fraction of the sorption sites in equilibrium with the liquid (two-site model) [–]; 1 = equilibrium sorption. With mobile–immobile water: fraction of sites in contact with mobile water</td></tr>
+<tr><td>Immobile water θim</td><td>ThImob</td><td>immobile water content of the mobile–immobile model [–]; 0 = none <a href="references.html#vanGenuchtenWierenga1976" class="cite" title="van Genuchten, M. Th., and P. J. Wierenga (1976). Mass transfer studies in sorbing porous media I. Analytical solutions. Soil Science Society of America Journal 40(4): 473–480.">van Genuchten and Wierenga (1976)</a></td></tr>
+<tr><td>Immobile water θim (matrix)</td><td>–</td><td>dual permeability: immobile water content of the matrix domain</td></tr>
+</tbody></table></div>
+<p>Non-equilibrium transport is switched on automatically when f &lt; 1 (two-site sorption) or θim &gt; 0 (mobile–immobile water) (<a href="th_nonequilibrium.html">non-equilibrium transport</a>).</p>
+<p>Typical dispersivities are a few millimetres to centimetres in laboratory columns and about one tenth of the travel distance in the field.</p>
+<h2 id="molecular-diffusion">Molecular diffusion</h2>
+<div class="table"><table>
+<thead><tr><th>Parameter</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>Dw</td><td>diffusion coefficient in free water [L²/T] (small ions about 1–2 cm²/d)</td></tr>
+<tr><td>Dg</td><td>diffusion coefficient in the soil air [L²/T] (volatile solutes, about 10⁴ times Dw)</td></tr>
+</tbody></table></div>
+<p>With the tortuosity factor (<a href="solute_general.html">general</a>) the effective diffusion is θ D<sub>w</sub> τ<sub>w</sub> in the liquid and a<sub>v</sub> D<sub>g</sub> τ<sub>g</sub> in the gas phase.</p>
+<h2 id="literature">Literature cited in this topic</h2>
+<ul>
+<li>Bear, J. (1972). <em>Dynamics of Fluids in Porous Media.</em> Elsevier, New York, 764 pp.</li>
+<li>van Genuchten, M. Th., and P. J. Wierenga (1976). Mass transfer studies in sorbing porous media I. Analytical solutions. <em>Soil Science Society of America Journal</em> 40(4): 473–480. doi:<a href="https://doi.org/10.2136/sssaj1976.03615995004000040011x" target="_blank" rel="noopener">10.2136/sssaj1976.03615995004000040011x</a></li>
+</ul>
+<p>All sources: <a href="references.html">References</a>.</p>
+</article>
+<div class="pager"><a class="prev" href="solute_general.html">← Solute transport: general</a><a class="next" href="solute_reactions.html">Solute transport: reactions →</a></div>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 1.0.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>

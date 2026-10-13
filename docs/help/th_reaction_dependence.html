@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Temperature and water-content dependence of reactions – Rusteau-1D Help</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html"><img src="favicon.png" alt="" width="22" height="22">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li><a href="units.html">Units</a></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details><summary>Solute transport</summary>
+<ul>
+<li><a href="solute_general.html">Solute transport: general</a></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+<li><a href="figures.html">Figure editor</a></li>
+<li><a href="run_comparison.html">Comparison of runs</a></li>
+</ul>
+</details></li>
+<li class="book"><details open><summary>Theory and equations</summary>
+<ul>
+<li><a href="th_richards.html">Variably saturated water flow</a></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li class="current"><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<div class="crumbs">Theory and equations</div>
+<h1>Temperature and water-content dependence of reactions</h1>
+<h2 id="temperature">Temperature dependence</h2>
+<p>The transport and reaction parameters (diffusion coefficients, sorption coefficients, Henry's constant, decay and production rates, mass-transfer coefficients) can depend on the temperature after the Arrhenius equation <a href="references.html#stummMorgan1981" class="cite" title="Stumm, W., and J. J. Morgan (1981). Aquatic Chemistry. 2nd ed., John Wiley &amp; Sons, New York, 780 pp.">Stumm and Morgan (1981)</a>:</p>
+<div class="formula">
+<div>a<sub>T</sub> = a<sub>r</sub> exp[ E<sub>a</sub> (T<sup>A</sup> − T<sub>r</sub><sup>A</sup>) / (R<sub>u</sub> T<sup>A</sup> T<sub>r</sub><sup>A</sup>) ]</div>
+</div>
+<p>with the parameter value a<sub>r</sub> at the reference absolute temperature T<sub>r</sub><sup>A</sup> = 293.15 K (20 °C), the absolute temperature T<sup>A</sup> [K], the universal gas constant R<sub>u</sub> = 8.314 J/mol/K and the activation energy E<sub>a</sub> [J/mol] of the parameter. The temperature comes from the <a href="th_heat.html">heat transport</a>, or is the constant initial temperature of each node.</p>
+<h2 id="water">Water-content dependence</h2>
+<p>Degradation is often slower in dry soil. Following <a href="references.html#walker1974" class="cite" title="Walker, A. (1974). A simulation model for prediction of herbicide persistence. Journal of Environmental Quality 3(4): 396–401.">Walker (1974)</a>, the reaction rates can be reduced below a reference water content:</p>
+<div class="formula">
+<div>a(θ) = a<sub>r</sub> (θ/θ<sub>ref</sub>)<sup>B</sup>   for θ &lt; θ<sub>ref</sub>;   a(θ) = a<sub>r</sub>   otherwise</div>
+</div>
+<p>with the exponent B (≈ 0.7) and the reference water content θ<sub>ref</sub> = θ(h<sub>ref</sub>) at the reference pressure head h<sub>ref</sub>, defined separately for each rate.</p>
+<p>Alternatively, a <strong>trapezoidal function</strong> per reaction (file <code>MoistDep.in</code>) multiplies the rate: ReacMin0 below θ<sub>0</sub>, a linear rise to 1 at θ<sub>1</sub>, 1 up to θ<sub>2</sub>, and a linear decrease to ReacMin1 at θ<sub>3</sub> (oxygen limitation in wet soil). HYDRUS-1D writes the file but does not use it; Rusteau does.</p>
+<h2 id="literature">Literature cited in this topic</h2>
+<ul>
+<li>Stumm, W., and J. J. Morgan (1981). <em>Aquatic Chemistry.</em> 2nd ed., John Wiley &amp; Sons, New York, 780 pp.</li>
+<li>Walker, A. (1974). A simulation model for prediction of herbicide persistence. <em>Journal of Environmental Quality</em> 3(4): 396–401. doi:<a href="https://doi.org/10.2134/jeq1974.00472425000300040021x" target="_blank" rel="noopener">10.2134/jeq1974.00472425000300040021x</a></li>
+</ul>
+<p>All sources: <a href="references.html">References</a>.</p>
+</article>
+<div class="pager"><a class="prev" href="th_colloids.html">← Colloid, virus and bacteria transport</a><a class="next" href="th_numerics.html">Numerical solution →</a></div>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 1.0.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>

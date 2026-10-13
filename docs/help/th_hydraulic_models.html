@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Soil hydraulic property models – Rusteau-1D Help</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html"><img src="favicon.png" alt="" width="22" height="22">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li><a href="units.html">Units</a></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details><summary>Solute transport</summary>
+<ul>
+<li><a href="solute_general.html">Solute transport: general</a></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+<li><a href="figures.html">Figure editor</a></li>
+<li><a href="run_comparison.html">Comparison of runs</a></li>
+</ul>
+</details></li>
+<li class="book"><details open><summary>Theory and equations</summary>
+<ul>
+<li><a href="th_richards.html">Variably saturated water flow</a></li>
+<li class="current"><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<div class="crumbs">Theory and equations</div>
+<h1>Soil hydraulic property models</h1>
+<p>The unsaturated soil hydraulic properties θ(h) and K(h) are described with closed-form equations <a href="references.html#simunek2009" class="cite" title="Šimůnek, J., M. Šejna, H. Saito, M. Sakai, and M. Th. van Genuchten (2009). The HYDRUS-1D Software Package for Simulating the One-Dimensional Movement of Water, Heat, and Multiple Solutes in Variably-Saturated Media, Version 4.08. HYDRUS Software Series 3, Department of Environmental Sciences, University of California Riverside, Riverside, CA, USA, 330 pp.">Šimůnek et al. (2009)</a>. In all models the effective saturation is</p>
+<div class="formula">
+<div>S<sub>e</sub> = (θ − θ<sub>r</sub>) / (θ<sub>s</sub> − θ<sub>r</sub>)</div>
+</div>
+<p>with the residual and saturated water contents θ<sub>r</sub> and θ<sub>s</sub>.</p>
+<h2 id="vg">van Genuchten – Mualem</h2>
+<p><a href="references.html#vanGenuchten1980" class="cite" title="van Genuchten, M. Th. (1980). A closed-form equation for predicting the hydraulic conductivity of unsaturated soils. Soil Science Society of America Journal 44(5): 892–898.">van Genuchten (1980)</a> used the statistical pore-size distribution model of <a href="references.html#mualem1976" class="cite" title="Mualem, Y. (1976). A new model for predicting the hydraulic conductivity of unsaturated porous media. Water Resources Research 12(3): 513–522.">Mualem (1976)</a> to obtain a predictive equation for the unsaturated conductivity from the retention function:</p>
+<div class="formula">
+<div>θ(h) = θ<sub>r</sub> + (θ<sub>s</sub> − θ<sub>r</sub>) / [1 + |αh|<sup>n</sup>]<sup>m</sup>   for h &lt; 0;   θ(h) = θ<sub>s</sub>   for h ≥ 0</div>
+<div>K(h) = K<sub>s</sub> S<sub>e</sub><sup>l</sup> [1 − (1 − S<sub>e</sub><sup>1/m</sup>)<sup>m</sup>]<sup>2</sup>,   m = 1 − 1/n,   n &gt; 1</div>
+</div>
+<p>α [1/L], n and l are empirical parameters; l is the pore-connectivity parameter, estimated as 0.5 by <a href="references.html#mualem1976" class="cite" title="Mualem, Y. (1976). A new model for predicting the hydraulic conductivity of unsaturated porous media. Water Resources Research 12(3): 513–522.">Mualem (1976)</a> (<a href="soil_params.html#l">the parameter l</a>).</p>
+<h2 id="airentry">van Genuchten with an air-entry value of −2 cm</h2>
+<p>For fine-textured soils with n close to 1 the van Genuchten–Mualem conductivity drops steeply just below saturation, which makes the numerical solution unstable and the predictions poor. <a href="references.html#vogel2001" class="cite" title="Vogel, T., M. Th. van Genuchten, and M. Císlerová (2001). Effect of the shape of the soil hydraulic functions near saturation on variably-saturated flow predictions. Advances in Water Resources 24(2): 133–144.">Vogel et al. (2001)</a> and <a href="references.html#schaapVG2006" class="cite" title="Schaap, M. G., and M. Th. van Genuchten (2006). A modified Mualem–van Genuchten formulation for improved description of the hydraulic conductivity near saturation. Vadose Zone Journal 5(1): 27–34.">Schaap and van Genuchten (2006)</a> introduced a small minimum capillary height h<sub>s</sub> = −2 cm: the retention curve is the van Genuchten function with the fictitious saturated water content θ<sub>m</sub> chosen so that θ(h<sub>s</sub>) = θ<sub>s</sub>,</p>
+<div class="formula">
+<div>θ<sub>m</sub> = θ<sub>r</sub> + (θ<sub>s</sub> − θ<sub>r</sub>) (1 + |α h<sub>s</sub>|<sup>n</sup>)<sup>m</sup></div>
+</div>
+<p>and the conductivity follows the modified model below with θ<sub>a</sub> = θ<sub>r</sub>, θ<sub>k</sub> = θ<sub>s</sub>, K<sub>k</sub> = K<sub>s</sub>.</p>
+<h2 id="modified">Modified van Genuchten (Vogel and Císlerová)</h2>
+<p><a href="references.html#vogelCislerova1988" class="cite" title="Vogel, T., and M. Císlerová (1988). On the reliability of unsaturated hydraulic conductivity calculated from the moisture retention curve. Transport in Porous Media 3: 1–15.">Vogel and Císlerová (1988)</a> added flexibility near saturation with a non-zero air-entry value h<sub>s</sub>:</p>
+<div class="formula">
+<div>θ(h) = θ<sub>a</sub> + (θ<sub>m</sub> − θ<sub>a</sub>) / (1 + |αh|<sup>n</sup>)<sup>m</sup>   for h &lt; h<sub>s</sub>;   θ(h) = θ<sub>s</sub>   for h ≥ h<sub>s</sub></div>
+<div>K(h) = K<sub>s</sub> K<sub>r</sub>(h)   for h ≤ h<sub>k</sub>;   K(h) = K<sub>k</sub> + (h − h<sub>k</sub>)(K<sub>s</sub> − K<sub>k</sub>)/(h<sub>s</sub> − h<sub>k</sub>)   for h<sub>k</sub> &lt; h &lt; h<sub>s</sub>;   K(h) = K<sub>s</sub>   for h ≥ h<sub>s</sub></div>
+<div>K<sub>r</sub> = (K<sub>k</sub>/K<sub>s</sub>) (S<sub>e</sub>/S<sub>ek</sub>)<sup>l</sup> [ (F(θ<sub>r</sub>) − F(θ)) / (F(θ<sub>r</sub>) − F(θ<sub>k</sub>)) ]<sup>2</sup></div>
+<div>F(θ) = [1 − ((θ − θ<sub>a</sub>)/(θ<sub>m</sub> − θ<sub>a</sub>))<sup>1/m</sup>]<sup>m</sup>,   S<sub>ek</sub> = (θ<sub>k</sub> − θ<sub>r</sub>)/(θ<sub>s</sub> − θ<sub>r</sub>)</div>
+</div>
+<p>θ<sub>m</sub> ≥ θ<sub>s</sub> and θ<sub>a</sub> ≤ θ<sub>r</sub> are fictitious extrapolations of the retention curve; K<sub>k</sub> is a measured conductivity at the water content θ<sub>k</sub> (h<sub>k</sub> = h(θ<sub>k</sub>)). With θ<sub>a</sub> = θ<sub>r</sub>, θ<sub>m</sub> = θ<sub>k</sub> = θ<sub>s</sub> and K<sub>k</sub> = K<sub>s</sub> the original van Genuchten–Mualem model results.</p>
+<h2 id="bc">Brooks and Corey</h2>
+<div class="formula">
+<div>S<sub>e</sub> = |αh|<sup>−n</sup>   for h &lt; −1/α;   S<sub>e</sub> = 1   for h ≥ −1/α</div>
+<div>K = K<sub>s</sub> S<sub>e</sub><sup>2/n + l + 2</sup></div>
+</div>
+<p><a href="references.html#brooksCorey1964" class="cite" title="Brooks, R. H., and A. T. Corey (1964). Hydraulic Properties of Porous Media. Hydrology Paper No. 3, Colorado State University, Fort Collins, CO, 27 pp.">Brooks and Corey (1964)</a>; here n is the pore-size distribution index (λ) and 1/α the air-entry (bubbling) pressure head.</p>
+<h2 id="kosugi">Kosugi (log-normal)</h2>
+<p><a href="references.html#kosugi1996" class="cite" title="Kosugi, K. (1996). Lognormal distribution model for unsaturated soil hydraulic properties. Water Resources Research 32(9): 2697–2703.">Kosugi (1996)</a> assumed a log-normal pore-size distribution; with Mualem's model:</p>
+<div class="formula">
+<div>S<sub>e</sub> = ½ erfc[ ln(h/h<sub>0</sub>) / (√2 σ) ]   for h &lt; 0</div>
+<div>K = K<sub>s</sub> S<sub>e</sub><sup>l</sup> { ½ erfc[ ln(h/h<sub>0</sub>) / (√2 σ) + σ/√2 ] }<sup>2</sup></div>
+</div>
+<p>In the parameter table α holds h<sub>0</sub> (the median pressure head) and n holds σ (the standard deviation of ln |h|), as in HYDRUS.</p>
+<h2 id="durner">Durner (dual porosity)</h2>
+<p><a href="references.html#durner1994" class="cite" title="Durner, W. (1994). Hydraulic conductivity estimation for soils with heterogeneous pore structure. Water Resources Research 30(2): 211–223.">Durner (1994)</a> divided the pore space into two overlapping regions, each with a van Genuchten–Mualem function; their linear superposition describes multimodal pore systems:</p>
+<div class="formula">
+<div>S<sub>e</sub> = w<sub>1</sub> [1 + (α<sub>1</sub> h)<sup>n</sup><sub>1</sub>]<sup>−m</sup><sub>1</sub> + w<sub>2</sub> [1 + (α<sub>2</sub> h)<sup>n</sup><sub>2</sub>]<sup>−m</sup><sub>2</sub></div>
+<div>K(S<sub>e</sub>) = K<sub>s</sub> (w<sub>1</sub> S<sub>e1</sub> + w<sub>2</sub> S<sub>e2</sub>)<sup>l</sup> ( w<sub>1</sub> α<sub>1</sub> [1 − (1 − S<sub>e1</sub><sup>1/m</sup><sub>1</sub>)<sup>m</sup><sub>1</sub>] + w<sub>2</sub> α<sub>2</sub> [1 − (1 − S<sub>e2</sub><sup>1/m</sup><sub>2</sub>)<sup>m</sup><sub>2</sub>] )<sup>2</sup> / (w<sub>1</sub> α<sub>1</sub> + w<sub>2</sub> α<sub>2</sub>)<sup>2</sup></div>
+</div>
+<p>with the weights w<sub>1</sub> = 1 − w<sub>2</sub> and m<sub>i</sub> = 1 − 1/n<sub>i</sub>.</p>
+<h2 id="tables">Look-up tables</h2>
+<p>Instead of a model, θ(h), K(h) and C(h) can be given as tables (file <code>Mater.in</code> of HYDRUS-1D); values between the tabulated heads are interpolated.</p>
+<h2 id="temperature">Temperature dependence</h2>
+<p>With temperature-dependent hydraulic properties, the pressure head is scaled with the surface tension σ and the conductivity with the dynamic viscosity μ and the density ρ of water at the soil temperature T, relative to a reference temperature <a href="references.html#philipDeVries1957" class="cite" title="Philip, J. R., and D. A. de Vries (1957). Moisture movement in porous materials under temperature gradients. Transactions, American Geophysical Union 38(2): 222–232.">Philip and de Vries (1957)</a>; <a href="references.html#constantz1982" class="cite" title="Constantz, J. (1982). Temperature dependence of unsaturated hydraulic conductivity of two soils. Soil Science Society of America Journal 46(3): 466–470.">Constantz (1982)</a>:</p>
+<div class="formula">
+<div>h(T) = h(T<sub>ref</sub>) σ(T) / σ(T<sub>ref</sub>)</div>
+<div>K(T) = K(T<sub>ref</sub>) [μ(T<sub>ref</sub>) ρ(T)] / [μ(T) ρ(T<sub>ref</sub>)]</div>
+</div>
+<p>The conductivity of water-saturated soil increases by about 2 % per °C, mostly through the viscosity.</p>
+<h2 id="typical-values">Typical values</h2>
+<p>The <a href="soil_params.html#catalog">soil catalog</a> of <a href="references.html#carselParrish1988" class="cite" title="Carsel, R. F., and R. S. Parrish (1988). Developing joint probability distributions of soil water retention characteristics. Water Resources Research 24(5): 755–769.">Carsel and Parrish (1988)</a> gives average parameters of the textural classes; <a href="rosetta.html">Rosetta</a> predicts them from the texture <a href="references.html#schaap2001" class="cite" title="Schaap, M. G., F. J. Leij, and M. Th. van Genuchten (2001). Rosetta: a computer program for estimating soil hydraulic parameters with hierarchical pedotransfer functions. Journal of Hydrology 251(3–4): 163–176.">Schaap et al. (2001)</a>; <a href="references.html#zhangSchaap2017" class="cite" title="Zhang, Y., and M. G. Schaap (2017). Weighted recalibration of the Rosetta pedotransfer model with improved estimates of hydraulic parameter distributions and summary statistics (Rosetta3). Journal of Hydrology 547: 39–53.">Zhang and Schaap (2017)</a>.</p>
+<h2 id="literature">Literature cited in this topic</h2>
+<ul>
+<li>Brooks, R. H., and A. T. Corey (1964). <em>Hydraulic Properties of Porous Media.</em> Hydrology Paper No. 3, Colorado State University, Fort Collins, CO, 27 pp.</li>
+<li>Carsel, R. F., and R. S. Parrish (1988). Developing joint probability distributions of soil water retention characteristics. <em>Water Resources Research</em> 24(5): 755–769. doi:<a href="https://doi.org/10.1029/WR024i005p00755" target="_blank" rel="noopener">10.1029/WR024i005p00755</a></li>
+<li>Constantz, J. (1982). Temperature dependence of unsaturated hydraulic conductivity of two soils. <em>Soil Science Society of America Journal</em> 46(3): 466–470. doi:<a href="https://doi.org/10.2136/sssaj1982.03615995004600030005x" target="_blank" rel="noopener">10.2136/sssaj1982.03615995004600030005x</a></li>
+<li>Durner, W. (1994). Hydraulic conductivity estimation for soils with heterogeneous pore structure. <em>Water Resources Research</em> 30(2): 211–223. doi:<a href="https://doi.org/10.1029/93WR02676" target="_blank" rel="noopener">10.1029/93WR02676</a></li>
+<li>Kosugi, K. (1996). Lognormal distribution model for unsaturated soil hydraulic properties. <em>Water Resources Research</em> 32(9): 2697–2703. doi:<a href="https://doi.org/10.1029/96WR01776" target="_blank" rel="noopener">10.1029/96WR01776</a></li>
+<li>Mualem, Y. (1976). A new model for predicting the hydraulic conductivity of unsaturated porous media. <em>Water Resources Research</em> 12(3): 513–522. doi:<a href="https://doi.org/10.1029/WR012i003p00513" target="_blank" rel="noopener">10.1029/WR012i003p00513</a></li>
+<li>Philip, J. R., and D. A. de Vries (1957). Moisture movement in porous materials under temperature gradients. <em>Transactions, American Geophysical Union</em> 38(2): 222–232. doi:<a href="https://doi.org/10.1029/TR038i002p00222" target="_blank" rel="noopener">10.1029/TR038i002p00222</a></li>
+<li>Schaap, M. G., and M. Th. van Genuchten (2006). A modified Mualem–van Genuchten formulation for improved description of the hydraulic conductivity near saturation. <em>Vadose Zone Journal</em> 5(1): 27–34. doi:<a href="https://doi.org/10.2136/vzj2005.0005" target="_blank" rel="noopener">10.2136/vzj2005.0005</a></li>
+<li>Schaap, M. G., F. J. Leij, and M. Th. van Genuchten (2001). Rosetta: a computer program for estimating soil hydraulic parameters with hierarchical pedotransfer functions. <em>Journal of Hydrology</em> 251(3–4): 163–176. doi:<a href="https://doi.org/10.1016/S0022-1694(01)00466-8" target="_blank" rel="noopener">10.1016/S0022-1694(01)00466-8</a></li>
+<li>van Genuchten, M. Th. (1980). A closed-form equation for predicting the hydraulic conductivity of unsaturated soils. <em>Soil Science Society of America Journal</em> 44(5): 892–898. doi:<a href="https://doi.org/10.2136/sssaj1980.03615995004400050002x" target="_blank" rel="noopener">10.2136/sssaj1980.03615995004400050002x</a></li>
+<li>Vogel, T., and M. Císlerová (1988). On the reliability of unsaturated hydraulic conductivity calculated from the moisture retention curve. <em>Transport in Porous Media</em> 3: 1–15. doi:<a href="https://doi.org/10.1007/BF00222683" target="_blank" rel="noopener">10.1007/BF00222683</a></li>
+<li>Vogel, T., M. Th. van Genuchten, and M. Císlerová (2001). Effect of the shape of the soil hydraulic functions near saturation on variably-saturated flow predictions. <em>Advances in Water Resources</em> 24(2): 133–144. doi:<a href="https://doi.org/10.1016/S0309-1708(00)00037-3" target="_blank" rel="noopener">10.1016/S0309-1708(00)00037-3</a></li>
+<li>Zhang, Y., and M. G. Schaap (2017). Weighted recalibration of the Rosetta pedotransfer model with improved estimates of hydraulic parameter distributions and summary statistics (Rosetta3). <em>Journal of Hydrology</em> 547: 39–53. doi:<a href="https://doi.org/10.1016/j.jhydrol.2017.01.004" target="_blank" rel="noopener">10.1016/j.jhydrol.2017.01.004</a></li>
+<li>Šimůnek, J., M. Šejna, H. Saito, M. Sakai, and M. Th. van Genuchten (2009). <em>The HYDRUS-1D Software Package for Simulating the One-Dimensional Movement of Water, Heat, and Multiple Solutes in Variably-Saturated Media, Version 4.08.</em> HYDRUS Software Series 3, Department of Environmental Sciences, University of California Riverside, Riverside, CA, USA, 330 pp. <a href="https://www.pc-progress.com/en/Default.aspx?h1d-description" target="_blank" rel="noopener">https://www.pc-progress.com/en/Default.aspx?h1d-description</a></li>
+</ul>
+<p>All sources: <a href="references.html">References</a>.</p>
+</article>
+<div class="pager"><a class="prev" href="th_richards.html">← Variably saturated water flow</a><a class="next" href="th_hysteresis.html">Hysteresis →</a></div>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 1.0.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>
