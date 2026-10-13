@@ -2074,6 +2074,7 @@ dependencies = [
  "egui_extras",
  "egui_plot",
  "image",
+ "png",
  "rusteau-core",
  "rusteau-io",
  "serde",

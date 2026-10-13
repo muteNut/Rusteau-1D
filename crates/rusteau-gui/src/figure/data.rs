@@ -63,6 +63,9 @@ pub struct Series {
     pub y: Vec<f64>,
     pub x_info: ColInfo,
     pub y_info: ColInfo,
+    /// position of the item and the run in the selection of the layer (colours and line styles of comparisons)
+    pub item: usize,
+    pub run: usize,
 }
 
 /// Everything the figures can show.
@@ -524,8 +527,8 @@ impl DataCtx<'_> {
         };
         let runs: Vec<String> = if per_run(&layer.source) && !layer.runs.is_empty() { layer.runs.clone() } else { vec![String::new()] };
         let mut out = vec![];
-        for run in &runs {
-            for &k in &items {
+        for (ri, run) in runs.iter().enumerate() {
+            for (ii, &k) in items.iter().enumerate() {
                 let Some(t) = self.table(&layer.source, k, run, fig) else { continue };
                 let (Some((xi, xv)), Some((yi, yv))) = (t.get(&layer.x), t.get(&layer.y)) else { continue };
                 let item = if has_items(&layer.source) { item_labels.get(k).cloned().unwrap_or_default() } else { String::new() };
@@ -553,6 +556,8 @@ impl DataCtx<'_> {
                     y: yv[..n].iter().map(|v| v * layer.y_scale).collect(),
                     x_info: xi.clone(),
                     y_info: yi.clone(),
+                    item: ii,
+                    run: ri,
                 });
             }
         }

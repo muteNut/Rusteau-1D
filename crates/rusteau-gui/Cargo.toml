@@ -18,6 +18,8 @@ egui_plot = "0.31"
 egui_extras = "0.31"
 # PNG images of the help and the figures (already a dependency of eframe)
 image = { version = "0.25", default-features = false, features = ["png"] }
+# PNG export of the figures with the resolution in the file (already a dependency of image)
+png = "0.18"
 # figures: anti-aliased rasterizing; glyph outlines and font names (both already dependencies of egui)
 tiny-skia = { version = "0.11", default-features = false, features = ["std", "simd"] }
 ab_glyph = "0.2"
