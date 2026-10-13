@@ -48,7 +48,9 @@ Click a field to type a value; drag it with the mouse to change the value contin
 | drag (tool *Select nodes*) | selects a depth range |
 | click | selects one node; for material and sub-region the whole layer |
 | Shift+click | extends the selection |
-| click (tool *Observation nodes*) | adds or removes an observation node |
+| click (tool *Observation nodes*) | adds an observation node, or selects the one under the pointer |
+| drag (tool *Observation nodes*) | moves the observation node to another node |
+| double-click / Delete (tool *Observation nodes*) | removes the observation node |
 | click (tool *Fixed points*) | adds or removes a fixed point |
 | wheel / Ctrl+wheel / double-click | scroll / zoom / whole profile |
 

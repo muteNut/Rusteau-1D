@@ -44,7 +44,7 @@ With the mouse tool *Select nodes*: drag a depth range; a click selects one node
 
 ## Observation nodes {#observation}
 
-Observation nodes record h, θ, temperature, flux and concentrations at every time step ([Observation points](res_obs)). Add them with the mouse tool *Observation nodes* (click toggles a node) or *Add at depth*; *✖* removes one, *Delete all* removes all (at most 100).
+Observation nodes record h, θ, temperature, flux and concentrations at every time step ([Observation points](res_obs)). With the mouse tool *Observation nodes* a click in the profile adds an observation node at the nearest node, or selects the observation node under the pointer (it is drawn larger); dragging moves it to another node, a double-click or the Delete key removes it. The list on the right shows every observation node with its node number and depth: select one, drag or type its node number or depth (a depth moves it to the nearest node; nodes that are already observation nodes are skipped), *✖* removes one. *Add at depth* adds one at a typed depth, *Delete all* removes all (at most 100).
 
 ## Profile depth and discretization {#discretization}
 

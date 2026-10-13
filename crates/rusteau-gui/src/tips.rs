@@ -522,6 +522,8 @@ const TIPS: &[(&str, &str)] = &[
     ("θs (drying) > θs (wetting)", "No constraint between the saturated water contents of the branches."),
     ("θm = θs", "Constraint θm = θs of the drying branch."),
     ("θm = θs(wetting) = θs", "Constraint: the same saturated water content for both branches."),
+    ("Node", "Number of the node of the observation node (1 at the surface). Drag or type to move it; nodes that are already observation nodes are skipped."),
+    ("Depth", "Depth of the observation node; a typed depth moves it to the nearest node (the nodes do not move)."),
     // ------------------------------------------------------------------ Figure editor
     ("Figures", "Opens the figure editor in a window of its own: diagrams of the results, the input and measured data with titles, annotations and several panels, exported as PNG or SVG. The figures are saved with the project."),
     ("New figure", "Creates a figure from a template (profiles, observation nodes, fluxes, water balance, hydraulic properties, comparison of runs …). Everything can be changed afterwards."),
