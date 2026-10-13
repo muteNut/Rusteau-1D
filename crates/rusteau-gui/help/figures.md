@@ -40,7 +40,7 @@ Every change shows at once in the preview. A click on a panel of the preview sel
 
 The size is the size in the document: the fonts are given in points (1 pt = 1/72 inch ≈ 0.35 mm) and keep their size whatever the resolution. Journals usually ask for text of at least 6–8 pt at the printed size; the defaults (8.5 pt for the numbers, 10 pt for the axis titles) fit a figure of 85–170 mm.
 
-The palettes follow the advice to use colours that remain distinguishable for readers with a colour vision deficiency and in print [@crameri2020]: Okabe–Ito, the default, is the palette of [@okabeIto2008] ([@wong2011]); Viridis is a perceptually uniform sequence [@smith2015viridis] for series in an order such as print times or depths; Grey for black-and-white print.
+The palettes follow the advice to use colours that remain distinguishable for readers with a colour vision deficiency and in print [@crameri2020]: Okabe–Ito, the default, is the palette of [@okabeIto2008], recommended for scientific figures by [@wong2011]. Viridis [@smith2015viridis] is a perceptually uniform sequence for series in an order such as print times or depths. Grey suits black-and-white print.
 
 ## Font and text sizes
 

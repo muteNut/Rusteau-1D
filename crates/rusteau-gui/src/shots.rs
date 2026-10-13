@@ -7,8 +7,8 @@
 //! ```
 //!
 //! With `RUSTEAU_SCREENSHOTS_TOPICS=1` the tour also shows every help topic (`topic_<id>.png`, for proof-reading the
-//! formulas and tables; not used by the help). `RUSTEAU_SCREENSHOTS_ONLY=<prefix>` limits the tour to the steps whose
-//! names start with the prefix. Steps whose names start with `_` prepare the next step and save no screenshot. The
+//! formulas and tables; not used by the help). `RUSTEAU_SCREENSHOTS_ONLY=<prefix>[,<prefix>…]` limits the tour to the
+//! steps whose names start with one of the prefixes. Steps whose names start with `_` prepare the next step and save no screenshot. The
 //! figure window is embedded in the main window during the tour (screenshots of other windows are not available).
 
 use crate::{App, Page};
@@ -278,7 +278,8 @@ impl Tour {
         ];
         if let Some(only) = std::env::var_os("RUSTEAU_SCREENSHOTS_ONLY") {
             let only = only.to_string_lossy().to_string();
-            steps.retain(|s| s.name.trim_start_matches('_').starts_with(&only));
+            let prefixes: Vec<&str> = only.split(',').map(|p| p.trim()).collect();
+            steps.retain(|s| prefixes.iter().any(|p| s.name.trim_start_matches('_').starts_with(p)));
         }
         if std::env::var_os("RUSTEAU_SCREENSHOTS_TOPICS").is_some() {
             for id in crate::help::topics::order() {

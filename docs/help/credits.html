@@ -68,6 +68,8 @@
 <li><a href="res_balance.html">Mass balance</a></li>
 <li><a href="res_inverse.html">Parameter estimation results</a></li>
 <li><a href="measured_data.html">Measured data</a></li>
+<li><a href="figures.html">Figure editor</a></li>
+<li><a href="run_comparison.html">Comparison of runs</a></li>
 </ul>
 </details></li>
 <li class="book"><details><summary>Theory and equations</summary>
@@ -118,7 +120,11 @@
 <h2 id="pedotransfer-functions">Pedotransfer functions</h2>
 <p>The Rosetta network weights come from rosetta-soil of the USDA-ARS U.S. Salinity Laboratory (CC0 1.0) <a href="references.html#rosettaSoil" class="cite" title="USDA-ARS U.S. Salinity Laboratory. rosetta-soil, version 0.3.2: Python implementation of the Rosetta pedotransfer functions (CC0 1.0).">rosetta-soil</a>; the models are those of <a href="references.html#schaap2001" class="cite" title="Schaap, M. G., F. J. Leij, and M. Th. van Genuchten (2001). Rosetta: a computer program for estimating soil hydraulic parameters with hierarchical pedotransfer functions. Journal of Hydrology 251(3–4): 163–176.">Schaap et al. (2001)</a>; <a href="references.html#schaap2004" class="cite" title="Schaap, M. G., A. Nemes, and M. Th. van Genuchten (2004). Comparison of models for indirect estimation of water retention and available water in surface soils. Vadose Zone Journal 3(4): 1455–1463.">Schaap et al. (2004)</a> and <a href="references.html#zhangSchaap2017" class="cite" title="Zhang, Y., and M. G. Schaap (2017). Weighted recalibration of the Rosetta pedotransfer model with improved estimates of hydraulic parameter distributions and summary statistics (Rosetta3). Journal of Hydrology 547: 39–53.">Zhang and Schaap (2017)</a>.</p>
 <h2 id="interface">Interface</h2>
-<p>The interface is built with egui and eframe (Rust).</p>
+<p>The interface is built with egui and eframe (Rust). The figures are drawn with tiny-skia (BSD-3-Clause license); glyph outlines are read with ab_glyph and ttf-parser (Apache-2.0 / MIT licenses), PNG files are written with the png crate (MIT / Apache-2.0).</p>
+<h2 id="fonts">Fonts</h2>
+<p>The program bundles the fonts <strong>Noto Sans</strong> (version 2.015, regular, bold, italic and bold italic) and <strong>Noto Sans Math</strong> (version 3.000), unmodified. They are the default font of the <a href="figures.html">figures</a> and supply the symbols that the system font of the interface lacks.</p>
+<p>Copyright 2022 The Noto Project Authors (https://github.com/notofonts/latin-greek-cyrillic) and Copyright 2022 The Noto Project Authors (https://github.com/notofonts/math).</p>
+<p>These fonts are licensed under the <strong>SIL Open Font License, Version 1.1</strong> (https://openfontlicense.org). The license allows the fonts to be used, embedded, bundled and redistributed with software, also commercially, as long as they are not sold by themselves and their copyright notice and license accompany them. The full license text is in the files <code>OFL-NotoSans.txt</code> and <code>OFL-NotoSansMath.txt</code> next to the program (folder <code>fonts</code> of the release archive and of the source code, <code>crates/rusteau-gui/fonts</code>) and under <em>Help → About Rusteau-1D</em>. Figures made with the fonts (PNG, SVG) are not affected by the license.</p>
 <h2 id="license">License</h2>
 <p>Rusteau-1D is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. It is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the file LICENSE of the program or <a href="https://www.gnu.org/licenses/" target="_blank" rel="noopener">the GNU licenses</a> for details.</p>
 <div class="note">Rusteau-1D is an independent project. It is not affiliated with or endorsed by PC-Progress or the HYDRUS authors. &quot;HYDRUS&quot; is used only to name the program whose numerical methods Rusteau follows. HYDRUS-1D is available from <a href="https://www.pc-progress.com/en/Default.aspx?hydrus-1d" target="_blank" rel="noopener">PC-Progress</a>.</div>
@@ -136,6 +142,6 @@
 <div class="pager"><a class="prev" href="references.html">← References</a></div>
 </main>
 </div>
-<footer class="foot">Rusteau-1D 0.1.0 · offline help · free software under the GNU GPL v3 or later</footer>
+<footer class="foot">Rusteau-1D 1.0.0 · offline help · free software under the GNU GPL v3 or later</footer>
 </body>
 </html>

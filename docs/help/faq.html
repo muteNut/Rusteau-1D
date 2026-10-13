@@ -68,6 +68,8 @@
 <li><a href="res_balance.html">Mass balance</a></li>
 <li><a href="res_inverse.html">Parameter estimation results</a></li>
 <li><a href="measured_data.html">Measured data</a></li>
+<li><a href="figures.html">Figure editor</a></li>
+<li><a href="run_comparison.html">Comparison of runs</a></li>
 </ul>
 </details></li>
 <li class="book"><details><summary>Theory and equations</summary>
@@ -134,6 +136,8 @@
 <p>Long simulations with small time steps (frequent rain, dry soil, fine mesh) take longer. Reduce the number of print times and use <em>Short output</em>; thin the time-level output (<em>Store time-level info every n-th step</em>). Parameter estimation runs the model many times; fewer starting points speed it up.</p>
 <h2 id="where-are-the-results-stored">Where are the results stored?</h2>
 <p>In memory with the project. Use <em>File → Export results (CSV)…</em> to write them (<a href="output_files.html">output files</a>).</p>
+<h2 id="how-do-i-make-a-figure-for-a-paper-or-a-presentation">How do I make a figure for a paper or a presentation?</h2>
+<p>Open the <a href="figures.html">figure editor</a> (<em>Results → 📈 Figures</em>), start from a template, set the size to the column width of the journal (e.g. 85 or 170 mm), add axis titles with units (markup such as <code>cm^{3} cm^{−3}</code>), and export a PNG at 300 dpi or an SVG. To compare scenarios, keep the results of each run (<a href="run_comparison.html">comparison of runs</a>).</p>
 <h2 id="how-do-i-cite-the-methods">How do I cite the methods?</h2>
 <p>The help topics cite the publications behind every calculation; the topic <a href="references.html">References</a> lists all of them, each with what Rusteau bases on it. For the numerical methods cite the HYDRUS-1D manual <a href="references.html#simunek2009" class="cite" title="Šimůnek, J., M. Šejna, H. Saito, M. Sakai, and M. Th. van Genuchten (2009). The HYDRUS-1D Software Package for Simulating the One-Dimensional Movement of Water, Heat, and Multiple Solutes in Variably-Saturated Media, Version 4.08. HYDRUS Software Series 3, Department of Environmental Sciences, University of California Riverside, Riverside, CA, USA, 330 pp.">Šimůnek et al. (2009)</a>; <a href="references.html#simunek2013" class="cite" title="Šimůnek, J., M. Šejna, H. Saito, M. Sakai, and M. Th. van Genuchten (2013). The HYDRUS-1D Software Package for Simulating the One-Dimensional Movement of Water, Heat, and Multiple Solutes in Variably-Saturated Media, Version 4.17. HYDRUS Software Series 3, Department of Environmental Sciences, University of California Riverside, Riverside, CA, USA, 307 pp.">Šimůnek et al. (2013)</a>.</p>
 <h2 id="literature">Literature cited in this topic</h2>
@@ -146,6 +150,6 @@
 <div class="pager"><a class="prev" href="shortcuts.html">← Keyboard and mouse</a><a class="next" href="references.html">References →</a></div>
 </main>
 </div>
-<footer class="foot">Rusteau-1D 0.1.0 · offline help · free software under the GNU GPL v3 or later</footer>
+<footer class="foot">Rusteau-1D 1.0.0 · offline help · free software under the GNU GPL v3 or later</footer>
 </body>
 </html>

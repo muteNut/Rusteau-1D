@@ -68,6 +68,8 @@
 <li><a href="res_balance.html">Mass balance</a></li>
 <li><a href="res_inverse.html">Parameter estimation results</a></li>
 <li><a href="measured_data.html">Measured data</a></li>
+<li><a href="figures.html">Figure editor</a></li>
+<li><a href="run_comparison.html">Comparison of runs</a></li>
 </ul>
 </details></li>
 <li class="book"><details><summary>Theory and equations</summary>
@@ -114,7 +116,7 @@
 <div class="crumbs">Projects and files</div>
 <h1>Projects and files</h1>
 <h2 id="h1dr">Rusteau projects (.h1dr)</h2>
-<p>A Rusteau project is one file <code>name.h1dr</code> (JSON text) with all inputs. <em>File → Save</em> (Ctrl+S) writes it, <em>Save as…</em> (Ctrl+Shift+S) asks for a new name, <em>Open project</em> (Ctrl+O) reads it. A project with unsaved changes shows <code>*</code> after the title; <em>New project</em>, <em>Open project</em> and <em>Quit</em> ask before discarding changes.</p>
+<p>A Rusteau project is one file <code>name.h1dr</code> (JSON text) with all inputs and the <a href="figures.html">figures</a>. <em>File → Save</em> (Ctrl+S) writes it, <em>Save as…</em> (Ctrl+Shift+S) asks for a new name, <em>Open project</em> (Ctrl+O) reads it. A project with unsaved changes shows <code>*</code> after the title; <em>New project</em>, <em>Open project</em> and <em>Quit</em> ask before discarding changes.</p>
 <h2 id="hydrus">HYDRUS-1D projects (.h1d)</h2>
 <p>HYDRUS-1D 4.x keeps a project as <code>&lt;workspace&gt;/&lt;name&gt;.h1d</code> next to the folder <code>&lt;workspace&gt;/&lt;name&gt;</code> with the input files.</p>
 <p><strong>Reading:</strong> <em>File → Open project</em> with the <code>.h1d</code> file, <em>File → Import HYDRUS-1D project folder…</em>, or dropping the <code>.h1d</code> file, the folder or any file in it onto the window. The imported project has no file name yet; <em>Save</em> asks for a <code>.h1dr</code>. If the folder has a <code>Fit.in</code>, its observations are shown with the results as <a href="measured_data.html">measured data</a>.</p>
@@ -132,7 +134,7 @@
 <tr><td><code>HYDRUS1D.DAT</code>, <code>DESCRIPT.TXT</code></td><td>project summary and description of the HYDRUS interface</td></tr>
 </tbody></table></div>
 <p>Input files of the folder that the project does not need any more are removed; output files are left alone. With the option <em>Save also writes a HYDRUS-1D project</em> every <em>Save</em> also writes <code>name.h1d</code> and the folder <code>name</code> next to the <code>.h1dr</code>.</p>
-<p>Settings that HYDRUS-1D cannot store are listed on the page <em>Check &amp; run</em> after writing: the interface parameters of the dual-permeability model, irrigation for the full duration, flux-averaged output concentrations, the trapezoidal water-content dependence of reactions, the extended flux output, the Rusteau iteration of the parameter estimation, the <a href="further_options.html">further options</a>, and the names of materials and solutes.</p>
+<p>Settings that HYDRUS-1D cannot store are listed on the page <em>Check &amp; run</em> after writing: the interface parameters of the dual-permeability model, irrigation for the full duration, flux-averaged output concentrations, the trapezoidal water-content dependence of reactions, the extended flux output, the Rusteau iteration of the parameter estimation, the <a href="further_options.html">further options</a>, the names of materials and solutes, and the <a href="figures.html">figures</a>.</p>
 <h2 id="fitin">Fit.in</h2>
 <p><em>File → Import optimization file (Fit.in)…</em> reads the settings and observations of a HYDRUS-1D parameter estimation into the project, switches the inverse problem on and opens the page <a href="inverse_page.html">Inverse problem</a>. The page has buttons to import and export <code>Fit.in</code> as well.</p>
 <h2 id="results">Results</h2>
@@ -143,6 +145,6 @@
 <div class="pager"><a class="prev" href="hydrus_relation.html">← Relation to HYDRUS-1D</a><a class="next" href="examples.html">Examples →</a></div>
 </main>
 </div>
-<footer class="foot">Rusteau-1D 0.1.0 · offline help · free software under the GNU GPL v3 or later</footer>
+<footer class="foot">Rusteau-1D 1.0.0 · offline help · free software under the GNU GPL v3 or later</footer>
 </body>
 </html>

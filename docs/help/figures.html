@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Figure editor – Rusteau-1D Help</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="contents.html">Rusteau-1D Help</a><nav class="top"><a href="contents.html">Contents</a><a href="keywords.html">Index</a><a href="references.html">References</a></nav><form class="search" action="search.html"><input type="search" name="q" placeholder="Search the help" aria-label="Search the help"></form></header>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+<ul>
+<li class="book"><details><summary>Introduction</summary>
+<ul>
+<li><a href="contents.html">Rusteau-1D Help</a></li>
+<li><a href="introduction.html">Introduction to Rusteau-1D</a></li>
+<li><a href="getting_started.html">Getting started</a></li>
+<li><a href="interface.html">The main window</a></li>
+<li><a href="workflow.html">Workflow of a project</a></li>
+<li><a href="units.html">Units</a></li>
+<li><a href="hydrus_relation.html">Relation to HYDRUS-1D</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Projects and files</summary>
+<ul>
+<li><a href="projects.html">Projects and files</a></li>
+<li><a href="examples.html">Examples</a></li>
+<li><a href="output_files.html">Output files</a></li>
+<li><a href="cli.html">Command line program</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Input (pre-processing)</summary>
+<ul>
+<li><a href="processes.html">Processes &amp; units</a></li>
+<li><a href="time_output.html">Time &amp; output</a></li>
+<li><a href="hyd_model.html">Soil hydraulic model</a></li>
+<li><a href="soil_params.html">Materials &amp; parameters</a></li>
+<li><a href="rosetta.html">Neural network prediction (Rosetta)</a></li>
+<li><a href="profile_editor.html">Soil profile</a></li>
+<li><a href="water_bc.html">Water flow boundary conditions</a></li>
+<li><a href="time_variable_bc.html">Time-variable boundary data</a></li>
+<li><a href="meteo_page.html">Meteorological data</a></li>
+<li><a href="root_uptake_page.html">Root water and solute uptake</a></li>
+<li><a href="heat_page.html">Heat transport</a></li>
+<li class="book"><details><summary>Solute transport</summary>
+<ul>
+<li><a href="solute_general.html">Solute transport: general</a></li>
+<li><a href="solute_params.html">Solute transport: transport parameters</a></li>
+<li><a href="solute_reactions.html">Solute transport: reactions</a></li>
+<li><a href="solute_advanced.html">Solute transport: temperature and water-content dependence, colloids</a></li>
+<li><a href="solute_bc.html">Solute transport: boundary conditions</a></li>
+</ul>
+</details></li>
+<li><a href="iteration.html">Iteration criteria</a></li>
+<li><a href="further_options.html">Further options of the HYDRUS code</a></li>
+<li><a href="check_run.html">Check &amp; run</a></li>
+<li><a href="inverse_page.html">Parameter estimation (inverse problem)</a></li>
+</ul>
+</details></li>
+<li class="book"><details open><summary>Results (post-processing)</summary>
+<ul>
+<li><a href="res_obs.html">Observation points</a></li>
+<li><a href="res_profiles.html">Profiles</a></li>
+<li><a href="res_fluxes.html">Boundary fluxes, heads and cumulative quantities</a></li>
+<li><a href="res_soilprops.html">Soil hydraulic properties</a></li>
+<li><a href="res_runtime.html">Run-time information</a></li>
+<li><a href="res_balance.html">Mass balance</a></li>
+<li><a href="res_inverse.html">Parameter estimation results</a></li>
+<li><a href="measured_data.html">Measured data</a></li>
+<li class="current"><a href="figures.html">Figure editor</a></li>
+<li><a href="run_comparison.html">Comparison of runs</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Theory and equations</summary>
+<ul>
+<li><a href="th_richards.html">Variably saturated water flow</a></li>
+<li><a href="th_hydraulic_models.html">Soil hydraulic property models</a></li>
+<li><a href="th_hysteresis.html">Hysteresis</a></li>
+<li><a href="th_scaling.html">Scaling of the hydraulic properties</a></li>
+<li><a href="th_dual_porosity.html">Dual-porosity models</a></li>
+<li><a href="th_dual_permeability.html">Dual-permeability model</a></li>
+<li><a href="th_root_uptake.html">Root water uptake</a></li>
+<li><a href="th_root_solute.html">Root solute uptake</a></li>
+<li><a href="th_bc_water.html">Boundary conditions of water flow</a></li>
+<li><a href="th_atmosphere.html">Atmospheric inputs: partitioning, daily variation, interception, snow</a></li>
+<li><a href="th_penman.html">Penman–Monteith combination equation</a></li>
+<li><a href="th_hargreaves.html">Hargreaves equation</a></li>
+<li><a href="th_energy_balance.html">Surface energy balance</a></li>
+<li><a href="th_vapor.html">Coupled water, vapor and heat flow</a></li>
+<li><a href="th_heat.html">Heat transport</a></li>
+<li><a href="th_solute.html">Solute transport equations</a></li>
+<li><a href="th_nonequilibrium.html">Non-equilibrium solute transport</a></li>
+<li><a href="th_colloids.html">Colloid, virus and bacteria transport</a></li>
+<li><a href="th_reaction_dependence.html">Temperature and water-content dependence of reactions</a></li>
+<li><a href="th_numerics.html">Numerical solution</a></li>
+<li><a href="th_discretization.html">Notes on spatial and temporal discretization</a></li>
+<li><a href="th_inverse.html">Parameter estimation</a></li>
+<li><a href="th_advanced_options.html">Non-equilibrium water flow, centrifuge and density-dependent flow</a></li>
+<li><a href="th_rosetta.html">Pedotransfer functions (Rosetta)</a></li>
+</ul>
+</details></li>
+<li class="book"><details><summary>Reference</summary>
+<ul>
+<li><a href="glossary.html">Symbols and glossary</a></li>
+<li><a href="shortcuts.html">Keyboard and mouse</a></li>
+<li><a href="faq.html">Questions and problems</a></li>
+<li><a href="references.html">References</a></li>
+<li><a href="credits.html">Credits and license</a></li>
+</ul>
+</details></li>
+</ul>
+</nav>
+<main>
+<article>
+<div class="crumbs">Results (post-processing)</div>
+<h1>Figure editor</h1>
+<p>The figure editor makes diagrams of the results, the input and measured data for reports, papers and presentations: with a title, subtitle and caption, several panels, axis titles with sub- and superscripts, annotations, a choice of fonts, colours and line styles, and the export as PNG or SVG. It opens in a window of its own with <strong>Results → Figures</strong> in the list on the left or <strong>View → Figures (new window)</strong>. The figures belong to the project: they are saved in the <code>.h1dr</code> file (the HYDRUS-1D project files cannot store them).</p>
+<figure><a href="img/figures.png"><img src="img/figures.png" alt="The figure editor: the settings on the left, the preview on the right." loading="lazy"></a><figcaption>The figure editor: the settings on the left, the preview on the right.</figcaption></figure>
+<h2 id="the-window">The window</h2>
+<div class="table"><table>
+<thead><tr><th>Part</th><th>Contents</th></tr></thead>
+<tbody>
+<tr><td>tool bar</td><td>the figure shown (list of the figures of the project), <strong>New figure</strong> (templates), <strong>Duplicate</strong>, <strong>Delete</strong>, <strong>Export PNG…</strong>, <strong>Export SVG…</strong>, <strong>Copy image</strong></td></tr>
+<tr><td>left</td><td>the settings, in sections: Figure, Font and text sizes, Panel, Layers (data), Axes, Annotations, Data files, Runs for comparison, Symbols and markup</td></tr>
+<tr><td>right</td><td>the preview: the figure as it will be exported, at its proportions</td></tr>
+<tr><td>status bar</td><td>under the mouse: the panel and the values of its axes (and the relative position 0–1); otherwise the size of the PNG and notes about the data</td></tr>
+</tbody></table></div>
+<p>Every change shows at once in the preview. A click on a panel of the preview selects it for the settings on the left. F1 or <strong>?</strong> shows this topic.</p>
+<h2 id="building-a-figure">Building a figure</h2>
+<ol>
+<li><strong>New figure ▾</strong> offers templates: water content and pressure head profiles, concentration profiles, observation nodes, breakthrough curves, surface and bottom fluxes, the cumulative water balance, the atmospheric forcing, the retention curve and conductivity, the mass balance error, simulated against measured data, observed and fitted values of a parameter estimation, the comparison of runs and an overview with four panels. Templates that need other data (solutes, observation nodes, measured data, kept runs) are greyed out.</li>
+<li>Change the size, the title and the look in the section <strong>Figure</strong>.</li>
+<li>Choose the data of each panel in <strong>Layers (data)</strong>: the source, the x and the y variable.</li>
+<li>Adjust the axes, add annotations, and export.</li>
+</ol>
+<h2 id="figure">Figure</h2>
+<div class="table"><table>
+<thead><tr><th>Setting</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td>Figure name</td><td>name in the list and the default file name; not drawn</td></tr>
+<tr><td>Title, Subtitle</td><td>above the figure (the subtitle smaller, grey); empty: none</td></tr>
+<tr><td>Caption</td><td>under the figure, wrapped to its width</td></tr>
+<tr><td>Size (mm)</td><td>width × height in millimetres; <strong>▾</strong> offers common sizes (1, 1.5 and 2 journal columns of 85, 120 and 170 mm, a 16:9 slide, A4 landscape)</td></tr>
+<tr><td>Resolution (dpi)</td><td>dots per inch of the PNG (300 for print, 150–200 for screens)</td></tr>
+<tr><td>Panels (rows × columns)</td><td>number of diagrams in a grid (up to 4 × 4)</td></tr>
+<tr><td>Theme</td><td>Grid (frame and light grid), Classic (axis lines left and bottom), Minimal (no frame), Dark (presentations)</td></tr>
+<tr><td>Palette</td><td>colours of the series in order: Okabe–Ito, Tableau 10, Viridis, Grey</td></tr>
+<tr><td>Transparent background</td><td>the exported files have no background</td></tr>
+<tr><td>SVG: text as outlines</td><td>see <a href="figures.html#export">Export</a></td></tr>
+</tbody></table></div>
+<p>The size is the size in the document: the fonts are given in points (1 pt = 1/72 inch ≈ 0.35 mm) and keep their size whatever the resolution. Journals usually ask for text of at least 6–8 pt at the printed size; the defaults (8.5 pt for the numbers, 10 pt for the axis titles) fit a figure of 85–170 mm.</p>
+<p>The palettes follow the advice to use colours that remain distinguishable for readers with a colour vision deficiency and in print <a href="references.html#crameri2020" class="cite" title="Crameri, F., G. E. Shephard, and P. J. Heron (2020). The misuse of colour in science communication. Nature Communications 11: 5444.">Crameri et al. (2020)</a>: Okabe–Ito, the default, is the palette of <a href="references.html#okabeIto2008" class="cite" title="Okabe, M., and K. Ito (2008). Color Universal Design (CUD): How to make figures and presentations that are friendly to colorblind people. J*Fly, Department of Molecular Biology, University of Tokyo.">Okabe and Ito (2008)</a> (<a href="references.html#wong2011" class="cite" title="Wong, B. (2011). Points of view: Color blindness. Nature Methods 8(6): 441.">Wong (2011)</a>); Viridis is a perceptually uniform sequence <a href="references.html#smith2015viridis" class="cite" title="Smith, N. J., and S. van der Walt (2015). A Better Default Colormap for Matplotlib. SciPy 2015 conference, Austin, TX.">Smith and van der Walt (2015)</a> for series in an order such as print times or depths; Grey for black-and-white print.</p>
+<h2 id="font-and-text-sizes">Font and text sizes</h2>
+<p><strong>Font</strong> offers Noto Sans, bundled with the program, and the font families installed on the computer. Noto Sans has all the symbols of soil physics: Greek letters, sub- and superscript digits and letters, the mathematical signs and arrows (from Noto Sans Math). Characters that a chosen system font lacks are taken from Noto Sans, so θ, ≤ or ⁻¹ always appear. The sizes of the title, subtitle, caption, panel titles, axis titles, tick labels and legend are set separately.</p>
+<h2 id="markup">Text: markup and symbols</h2>
+<p>All texts (titles, axis titles, legend labels, annotations) understand the markup of this help:</p>
+<div class="table"><table>
+<thead><tr><th>Write</th><th>Shows</th></tr></thead>
+<tbody>
+<tr><td><code>θ_{s}</code></td><td>θₛ (subscript)</td></tr>
+<tr><td><code>cm^{3} cm^{−3}</code></td><td>cm³ cm⁻³ (superscript)</td></tr>
+<tr><td><code>*K*</code></td><td>italic</td></tr>
+<tr><td><code>**Loam**</code></td><td>bold</td></tr>
+<tr><td><code>\*</code></td><td>a literal </td></tr>
+</tbody></table></div>
+<p>A line break in the title or the caption starts a new line. The section <strong>Symbols and markup</strong> has buttons for the common symbols (θ, α, ψ, Δ, °, ±, ≤, √, ∂, →, ², ⁻¹, ₛ …): a click copies the symbol, Ctrl+V pastes it.</p>
+<h2 id="layers">Panels and layers</h2>
+<p>A panel is one diagram with its axes, legend and annotations. Its title (e.g. &quot;(a) Loam&quot;) and the position of its legend (a corner inside the plot area, outside on the right, below, or none) are set in the section <strong>Panel</strong>; with several panels the row of numbers selects the panel.</p>
+<p>A panel shows one or more <strong>layers</strong>. A layer takes its x and y values from two columns of a data source; it draws one series for each selected item (observation node, print time, material, data set) and run. The check box shows or hides a layer, ⬆ ⬇ change the drawing order (later layers are drawn on top), 🗑 removes it, <strong>+ Add layer</strong> adds a copy of the selected one.</p>
+<figure><a href="img/figures_layer.png"><img src="img/figures_layer.png" alt="The settings of a layer: source, variables, style." loading="lazy"></a><figcaption>The settings of a layer: source, variables, style.</figcaption></figure>
+<h3 id="data-sources">Data sources</h3>
+<div class="table"><table>
+<thead><tr><th>Source</th><th>Items</th><th>Variables</th></tr></thead>
+<tbody>
+<tr><td>Boundary fluxes and heads (T_Level)</td><td>–</td><td>time, time step, iterations; potential and actual surface flux, bottom flux, transpiration, runoff, precipitation; their cumulative values, infiltration, evaporation; heads at the surface, in the root zone and at the bottom; storage, snow; temperatures; Peclet and Courant numbers; per solute: fluxes, cumulative fluxes, concentrations and root uptake</td></tr>
+<tr><td>Observation nodes</td><td>nodes</td><td>time; h, θ, temperature, flux, concentrations (and the values of the matrix / immobile region)</td></tr>
+<tr><td>Profiles at the print times</td><td>print times</td><td>depth; h, θ, K, C, flux, root water uptake, v/Ks, temperature, concentrations, sorbed concentrations, node number</td></tr>
+<tr><td>Mass balance</td><td>–</td><td>time; water volume, absolute and relative balance error, fluxes; per solute: mass and balance error; volumes of the sub-regions</td></tr>
+<tr><td>Atmospheric records (A_Level), extended fluxes (T_Level1), meteorological output</td><td>–</td><td>the columns of these tables (when they were written)</td></tr>
+<tr><td>Soil hydraulic properties</td><td>materials</td><td>|h|, pF; θ, K, C (and the main wetting branch with hysteresis)</td></tr>
+<tr><td>Time-variable boundary data</td><td>–</td><td>the input records: precipitation, potential evaporation and transpiration, hCritA, bottom flux and head, surface head, temperatures, concentrations, rooting depth</td></tr>
+<tr><td>Soil profile: initial condition</td><td>–</td><td>depth; initial h or θ, material, sub-region, root distribution, scaling factors, temperature, concentrations</td></tr>
+<tr><td>Measured data</td><td>data sets</td><td>x and y of the <a href="measured_data.html">measured data</a> loaded on the results pages</td></tr>
+<tr><td>Parameter estimation: observed and fitted</td><td>measurement sets</td><td>x, observed, fitted, residual (after a <a href="res_inverse.html">parameter estimation</a>)</td></tr>
+<tr><td>Data file</td><td>–</td><td>the columns of an <a href="figures.html#data-files">imported table</a></td></tr>
+</tbody></table></div>
+<p>The menus of the x and y variables list the columns with their units, grouped (time and position, water, cumulative water fluxes, solutes, heat, numerics). When the source changes, the variables stay if the new source has them. <strong>Scale factors</strong> multiply the values (10 for cm → mm, −1 to plot downward fluxes as positive, 1/24 for hours → days).</p>
+<p>The depth increases downward: the templates of profiles reverse the y axis (<strong>Reversed</strong> in the axis settings).</p>
+<h3 id="style">Style</h3>
+<div class="table"><table>
+<thead><tr><th>Setting</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td>Geometry</td><td>Line; Points; Line and points; Steps (the value of a point holds from the previous x, as the records of the time-variable boundary data); Area (filled down to zero); Bars (centred, 80 % of the distance to the neighbours)</td></tr>
+<tr><td>Colour</td><td>the next colours of the palette, or one fixed colour</td></tr>
+<tr><td>Line width, Line style</td><td>in points; solid, dashed, dotted, dash-dot</td></tr>
+<tr><td>Marker</td><td>shape (filled or open circle, square, triangle, diamond, cross, plus) and size</td></tr>
+<tr><td>Fill opacity</td><td>of areas and bars</td></tr>
+<tr><td>Legend label</td><td>empty: automatic; <code>{item}</code>, <code>{run}</code> and <code>{y}</code> are replaced by the item, the run and the variable</td></tr>
+<tr><td>In the legend, Right y axis</td><td>list the series in the legend; plot against a second y axis on the right</td></tr>
+</tbody></table></div>
+<h2 id="axes">Axes</h2>
+<p>The section <strong>Axes</strong> has the x axis, the y axis and the right y axis of the selected panel:</p>
+<div class="table"><table>
+<thead><tr><th>Setting</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td>Axis title</td><td>auto: the variables of the layers with their unit (e.g. &quot;Water content θ (–)&quot;); otherwise your own text with markup, e.g. <code>K (cm d^{−1})</code></td></tr>
+<tr><td>Range</td><td>auto: from the data, extended to the next ticks; otherwise from – to</td></tr>
+<tr><td>Tick step</td><td>distance of the labelled ticks; 0: automatic (1, 2, 2.5 or 5 times a power of ten, as many as fit) <a href="references.html#heckbert1990" class="cite" title="Heckbert, P. S. (1990). Nice numbers for graph labels. In: A. S. Glassner (ed.), Graphics Gems, Academic Press, Boston, 61–63.">Heckbert (1990)</a>; <a href="references.html#talbot2010" class="cite" title="Talbot, J., S. Lin, and P. Hanrahan (2010). An extension of Wilkinson's algorithm for positioning tick labels on axes. IEEE Transactions on Visualization and Computer Graphics 16(6): 1036–1043.">Talbot et al. (2010)</a></td></tr>
+<tr><td>Logarithmic</td><td>decades labelled 10⁻¹, 10⁰ … (plain numbers between 0.01 and 1000); values ≤ 0 are left out, which the status bar notes</td></tr>
+<tr><td>Reversed</td><td>values increase downward or to the left</td></tr>
+<tr><td>Grid lines, Minor ticks</td><td>lines at the ticks; small ticks between them (2 … 9 times the powers of ten on logarithmic axes)</td></tr>
+</tbody></table></div>
+<h2 id="annotations">Annotations</h2>
+<p>Annotations add a text, a horizontal line (e.g. field capacity, a water table), a vertical line (the start of irrigation, a print time) or an arrow with a text to the selected panel. Their position is either in the units of the axes or <strong>relative to the plot area</strong> (0–1 from the bottom left; such annotations stay in place when the data change). With <strong>🖱 Place with the mouse</strong> a click in the panel moves the selected annotation there; a right click sets the end of an arrow. Black annotations follow the text colour of the theme.</p>
+<h2 id="data-files">Data files</h2>
+<p><strong>Import table…</strong> reads a text or CSV file as a data source of the figure, e.g. measurements or the results of another model:</p>
+<pre><code>time (d); theta (-)
+0.5; 0.231
+1.0; 0.245</code></pre>
+<p>Columns are separated by tabs, semicolons, commas or blanks (with semicolons a decimal comma is allowed); the first line with text gives the column names, and a unit in brackets at the end of a name becomes the unit of the axis title. Lines starting with <code>#</code> are ignored. The table is stored with the figure in the project.</p>
+<h2 id="export">Export</h2>
+<div class="table"><table>
+<thead><tr><th>Button</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>Export PNG…</td><td>an image with the size of the figure at its resolution (e.g. 160 × 100 mm at 300 dpi: 1890 × 1181 pixels); the resolution is written into the file, so word processors insert it at its size</td></tr>
+<tr><td>Export SVG…</td><td>a vector graphic (sharp at every size; editable in Inkscape, Illustrator or LibreOffice), sized in millimetres</td></tr>
+<tr><td>Copy image</td><td>the PNG image to the clipboard</td></tr>
+</tbody></table></div>
+<p>An SVG file names the fonts of its texts; where Noto Sans is not installed another font is used. <strong>SVG: text as outlines</strong> writes the glyphs as shapes instead: the file then looks the same everywhere but the text cannot be edited. The PNG, the copied image and SVG files with outlines contain the shapes of the letters of the bundled fonts, which their license permits (see <a href="credits.html">Credits and license</a>).</p>
+<p>The figures are drawn by the program itself, the same way for the preview, the PNG and the SVG: a figure consists of layers of data drawn with a geometry against scales, as in the grammar of graphics <a href="references.html#wilkinson2005" class="cite" title="Wilkinson, L. (2005). The Grammar of Graphics, 2nd edition. Springer, New York, 690 pp.">Wilkinson (2005)</a> and ggplot2 <a href="references.html#wickham2016" class="cite" title="Wickham, H. (2016). ggplot2: Elegant Graphics for Data Analysis, 2nd edition. Springer, Cham, 260 pp.">Wickham (2016)</a>, whose themes and legend positions the editor also follows.</p>
+<h2 id="see-also">See also</h2>
+<ul>
+<li><a href="run_comparison.html">Comparison of runs</a>: several runs in one figure.</li>
+<li><a href="measured_data.html">Measured data</a>: data shown with the results and in the figures.</li>
+<li><a href="res_profiles.html">Results pages</a>: the quick plots of the results.</li>
+</ul>
+<figure><a href="img/figure_example.png"><img src="img/figure_example.png" alt="An overview figure of the example &quot;Infiltration and evaporation&quot; exported as PNG." loading="lazy"></a><figcaption>An overview figure of the example &quot;Infiltration and evaporation&quot; exported as PNG.</figcaption></figure>
+<h2 id="literature">Literature cited in this topic</h2>
+<ul>
+<li>Crameri, F., G. E. Shephard, and P. J. Heron (2020). The misuse of colour in science communication. <em>Nature Communications</em> 11: 5444. doi:<a href="https://doi.org/10.1038/s41467-020-19160-7" target="_blank" rel="noopener">10.1038/s41467-020-19160-7</a></li>
+<li>Heckbert, P. S. (1990). Nice numbers for graph labels. In: A. S. Glassner (ed.), <em>Graphics Gems</em>, Academic Press, Boston, 61–63.</li>
+<li>Okabe, M., and K. Ito (2008). <em>Color Universal Design (CUD): How to make figures and presentations that are friendly to colorblind people.</em> J*Fly, Department of Molecular Biology, University of Tokyo. <a href="https://jfly.uni-koeln.de/color/" target="_blank" rel="noopener">https://jfly.uni-koeln.de/color/</a></li>
+<li>Smith, N. J., and S. van der Walt (2015). <em>A Better Default Colormap for Matplotlib.</em> SciPy 2015 conference, Austin, TX. <a href="https://bids.github.io/colormap/" target="_blank" rel="noopener">https://bids.github.io/colormap/</a></li>
+<li>Talbot, J., S. Lin, and P. Hanrahan (2010). An extension of Wilkinson's algorithm for positioning tick labels on axes. <em>IEEE Transactions on Visualization and Computer Graphics</em> 16(6): 1036–1043. doi:<a href="https://doi.org/10.1109/TVCG.2010.130" target="_blank" rel="noopener">10.1109/TVCG.2010.130</a></li>
+<li>Wickham, H. (2016). <em>ggplot2: Elegant Graphics for Data Analysis</em>, 2nd edition. Springer, Cham, 260 pp. doi:<a href="https://doi.org/10.1007/978-3-319-24277-4" target="_blank" rel="noopener">10.1007/978-3-319-24277-4</a></li>
+<li>Wilkinson, L. (2005). <em>The Grammar of Graphics</em>, 2nd edition. Springer, New York, 690 pp. doi:<a href="https://doi.org/10.1007/0-387-28695-0" target="_blank" rel="noopener">10.1007/0-387-28695-0</a></li>
+<li>Wong, B. (2011). Points of view: Color blindness. <em>Nature Methods</em> 8(6): 441. doi:<a href="https://doi.org/10.1038/nmeth.1618" target="_blank" rel="noopener">10.1038/nmeth.1618</a></li>
+</ul>
+<p>All sources: <a href="references.html">References</a>.</p>
+</article>
+<div class="pager"><a class="prev" href="measured_data.html">← Measured data</a><a class="next" href="run_comparison.html">Comparison of runs →</a></div>
+</main>
+</div>
+<footer class="foot">Rusteau-1D 1.0.0 · offline help · free software under the GNU GPL v3 or later</footer>
+</body>
+</html>
