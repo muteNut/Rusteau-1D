@@ -1,15 +1,16 @@
 cff-version: 1.2.0
 message: If you use this software, please cite it using the metadata from this file.
-repository-code: https://github.com/muteNut/Rusteau-1D/tree/v1.1
+repository-code: https://github.com/muteNut/Rusteau-1D/tree/v1.2
 authors:
 - affiliation: '@anthropics'
   family-names: Claude
-- family-names: "David Sutterlütti"
-  orcid: "https://orcid.org/my-orcid?orcid=0009-0005-9893-1843"
-license:
-- gpl-3.0-only
+- given-names: David
+  family-names: Sutterlütti
+  orcid: "https://orcid.org/0009-0005-9893-1843"
+license: GPL-3.0-or-later
 title: Rusteau-1D
+version: 1.2.0
 type: software
 doi: 10.5281/zenodo.23343103
-date-released: 2026-10-13
+date-released: 2026-10-14
 url: "https://github.com/muteNut/Rusteau-1D"

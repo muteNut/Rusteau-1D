@@ -1,5 +1,7 @@
 # Rusteau-1D
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23343103.svg)](https://doi.org/10.5281/zenodo.23343103)
+
 <img src="crates/rusteau-gui/assets/icon-512.png" alt="Rusteau-1D icon" width="96" align="right">
 
 Rusteau-1D is a Rust port of the numerical engine of **HYDRUS-1D**, the program for one-dimensional water flow, heat
@@ -216,6 +218,9 @@ differences and the check runs are described in the [technical notes](docs/techn
 - **Release notes:** [`RELEASE_NOTES.md`](RELEASE_NOTES.md).
 
 ## Credits
+
+To cite Rusteau-1D, use its DOI [10.5281/zenodo.23343103](https://doi.org/10.5281/zenodo.23343103), archived on
+Zenodo; *Cite this repository* on the GitHub page gives the reference from [`CITATION.cff`](CITATION.cff).
 
 The numerical methods are those of HYDRUS-1D:
 
