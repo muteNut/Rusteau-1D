@@ -2091,7 +2091,7 @@ dependencies = [
 
 [[package]]
 name = "rusteau-cli"
-version = "1.0.0"
+version = "1.2.0"
 dependencies = [
  "rusteau-core",
  "rusteau-io",
@@ -2099,7 +2099,7 @@ dependencies = [
 
 [[package]]
 name = "rusteau-core"
-version = "1.0.0"
+version = "1.2.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -2108,7 +2108,7 @@ dependencies = [
 
 [[package]]
 name = "rusteau-gui"
-version = "1.0.0"
+version = "1.2.0"
 dependencies = [
  "ab_glyph",
  "eframe",
@@ -2129,7 +2129,7 @@ dependencies = [
 
 [[package]]
 name = "rusteau-io"
-version = "1.0.0"
+version = "1.2.0"
 dependencies = [
  "rusteau-core",
  "serde",

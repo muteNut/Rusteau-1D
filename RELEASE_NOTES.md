@@ -1,8 +1,18 @@
 Rusteau-1D is a Rust port of the numerical engine of **HYDRUS-1D**: one-dimensional variably saturated water flow, heat
 transport and solute transport in porous media. It comes with a desktop interface for Windows, macOS and Linux, a figure
-editor for publication figures and a complete help. Version 1.0.0 is the first release.
+editor for publication figures and a complete help.
 
 > Rusteau-1D is an independent project. It is not affiliated with or endorsed by PC-Progress or the HYDRUS authors.
+
+## What's new in 1.2
+
+- **File dialogs of the operating system:** Open and Save use the dialogs of Windows and macOS, and on Linux the dialog
+  of the desktop (through the XDG desktop portal, or zenity). Without either, the built-in file browser is used; it
+  can also be chosen with `RUSTEAU_FILE_DIALOG=builtin`.
+- **Root growth only with root water uptake:** the option is shown under root water uptake and is switched off with
+  it, as in HYDRUS-1D. Projects with root growth but without root water uptake are calculated without root growth.
+- **Figures:** the last tick label of an x axis is no longer cut off at the right edge of the figure.
+- The programs report their version correctly (*Help → About*, `rusteau-cli --version`); 1.0 and 1.1 reported 1.0.0.
 
 ## Download
 
