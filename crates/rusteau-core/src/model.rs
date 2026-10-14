@@ -87,6 +87,13 @@ pub struct Processes {
     pub inverse: bool,
 }
 
+impl Processes {
+    /// Root growth takes effect only with root water uptake (as in HYDRUS-1D, which offers it only then).
+    pub fn root_growth_active(&self) -> bool {
+        self.root_growth && self.root_water_uptake
+    }
+}
+
 impl Default for Processes {
     fn default() -> Self {
         Processes {
@@ -1442,6 +1449,25 @@ impl Hysteresis {
 #[cfg(test)]
 mod validation_tests {
     use super::*;
+
+    /// Root growth takes effect only with root water uptake: without uptake it changes nothing.
+    #[test]
+    fn root_growth_needs_root_water_uptake() {
+        let mut p = crate::examples::infiltration_evaporation();
+        p.processes.root_water_uptake = false;
+        p.root.growth = RootGrowthMode::Logistic { t_min: 0.0, t_med: 10.0, t_harv: 30.0, x_min: 1.0, x_med: 15.0, x_max: 30.0, period: 1e30, fit_from_half: false };
+        let run = |p: &Project| {
+            let mut sim = crate::Simulation::new(p.clone()).unwrap();
+            sim.run(|_| true);
+            sim.res.tlevel.last().map(|l| (l.cum_v_top, l.cum_v_bot, l.volume)).unwrap()
+        };
+        let without = run(&p);
+        p.processes.root_growth = true;
+        assert!(!p.processes.root_growth_active());
+        assert_eq!(run(&p), without);
+        p.processes.root_water_uptake = true;
+        assert!(p.processes.root_growth_active());
+    }
 
     #[test]
     fn second_region_parameters_are_checked_and_adapted() {

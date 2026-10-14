@@ -229,7 +229,15 @@ impl App {
         check(ui, ch, &mut self.prj.processes.water_flow, "Water flow (uncheck for transport under steady flow from the initial condition)");
         check(ui, ch, &mut self.prj.processes.vapor, "Vapor flow (coupled non-isothermal liquid & water vapor flow)");
         check(ui, ch, &mut self.prj.processes.root_water_uptake, "Root water uptake");
-        check(ui, ch, &mut self.prj.processes.root_growth, "Root growth");
+        // root growth only with root water uptake (as in HYDRUS-1D)
+        if !self.prj.processes.root_water_uptake && self.prj.processes.root_growth {
+            self.prj.processes.root_growth = false;
+            *ch = true;
+        }
+        ui.horizontal(|ui| {
+            ui.add_space(22.0);
+            ui.add_enabled_ui(self.prj.processes.root_water_uptake, |ui| check(ui, ch, &mut self.prj.processes.root_growth, "Root growth"));
+        });
         check(ui, ch, &mut self.prj.processes.heat, "Heat transport");
         check(ui, ch, &mut self.prj.processes.solute, "Solute transport");
         if self.prj.processes.solute {

@@ -22,7 +22,7 @@ The first page of a project (the *Main Processes* and *Units* dialogs of HYDRUS-
 | Water flow | Variably saturated water flow ([Richards equation](th_richards)). Off: the water contents and fluxes of the initial condition stay constant, e.g. for heat or solute transport in a steady flow field. |
 | Vapor flow | Coupled liquid water, water vapor and heat flow [@saito2006] ([vapor flow](th_vapor)); requires heat transport. |
 | Root water uptake | Sink term of [root water uptake](th_root_uptake); enables the page *Root water & solute uptake* and the root distribution in the soil profile. |
-| Root growth | Time-variable rooting depth ([root growth](th_root_uptake#growth)). |
+| Root growth | Time-variable rooting depth ([root growth](th_root_uptake#growth)). Only with root water uptake: switching uptake off switches root growth off too. |
 | Heat transport | [Heat transport](th_heat) by conduction and convection. |
 | Solute transport | [Solute transport](th_solute) with the number of solutes (1–11). |
 | Short output | Writes the time-level tables only at the print times (lShort). |

@@ -1,8 +1,10 @@
-//! A small self-contained file/folder browser (works identically on Linux and Windows
-//! without native dialog dependencies).
+//! File and folder dialogs: those of the operating system (Windows, macOS; on Linux the dialog of the desktop through
+//! the XDG desktop portal, or zenity), or a small built-in browser drawn with egui. The built-in browser is used with
+//! `RUSTEAU_FILE_DIALOG=builtin`, and on Linux when there is neither a desktop portal nor zenity.
 
 use egui::{Context, ScrollArea, Window};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+use std::sync::OnceLock;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Mode {
@@ -52,6 +54,26 @@ pub struct FileDialog {
     err: String,
     new_folder_name: String,
     show_new_folder: bool,
+    /// the dialog of the operating system (else the built-in browser)
+    native: bool,
+}
+
+/// Whether the dialogs of the operating system are used (decided once).
+pub fn native_dialogs() -> bool {
+    static NATIVE: OnceLock<bool> = OnceLock::new();
+    *NATIVE.get_or_init(|| {
+        if std::env::var("RUSTEAU_FILE_DIALOG").is_ok_and(|v| v.eq_ignore_ascii_case("builtin")) {
+            return false;
+        }
+        if cfg!(target_os = "linux") {
+            // the desktop portal is reached over the D-Bus session bus; zenity is the fallback of rfd
+            let bus = std::env::var_os("DBUS_SESSION_BUS_ADDRESS").is_some()
+                || std::env::var_os("XDG_RUNTIME_DIR").is_some_and(|d| Path::new(&d).join("bus").exists());
+            let zenity = std::env::var_os("PATH").is_some_and(|p| std::env::split_paths(&p).any(|d| d.join("zenity").is_file()));
+            return bus || zenity;
+        }
+        true
+    })
 }
 
 pub fn home_dir() -> PathBuf {
@@ -63,7 +85,11 @@ pub fn home_dir() -> PathBuf {
 
 impl FileDialog {
     pub fn new(purpose: Purpose, mode: Mode, title: &str, start: Option<PathBuf>, name: &str, ext: &[&str]) -> Self {
-        let dir = start.filter(|p| p.is_dir()).unwrap_or_else(|| std::env::current_dir().unwrap_or_else(|_| home_dir()));
+        // a program started from the desktop has the root of the file system as working directory
+        let dir = start
+            .filter(|p| p.is_dir())
+            .or_else(|| std::env::current_dir().ok().filter(|d| d.parent().is_some()))
+            .unwrap_or_else(home_dir);
         let mut d = FileDialog {
             purpose,
             mode,
@@ -76,8 +102,11 @@ impl FileDialog {
             err: String::new(),
             new_folder_name: String::new(),
             show_new_folder: false,
+            native: native_dialogs(),
         };
-        d.refresh();
+        if !d.native {
+            d.refresh();
+        }
         d
     }
 
@@ -110,6 +139,22 @@ impl FileDialog {
         self.dir_text = self.dir.display().to_string();
     }
 
+    /// The dialog of the operating system: it is modal and returns when it is closed.
+    fn show_native(&self) -> DialogResult {
+        let mut d = rfd::FileDialog::new().set_title(&self.title).set_directory(&self.dir);
+        if !self.ext.is_empty() && self.mode != Mode::PickDir {
+            let ext: Vec<&str> = self.ext.iter().map(String::as_str).collect();
+            let label = ext.iter().map(|e| format!("*.{e}")).collect::<Vec<_>>().join(", ");
+            d = d.add_filter(label, &ext);
+        }
+        let chosen = match self.mode {
+            Mode::OpenFile => d.pick_file(),
+            Mode::SaveFile => d.set_file_name(&self.name).save_file(),
+            Mode::PickDir => d.pick_folder(),
+        };
+        chosen.map_or(DialogResult::Cancel, DialogResult::Chosen)
+    }
+
     fn go(&mut self, p: PathBuf) {
         if p.is_dir() {
             self.dir = p;
@@ -119,6 +164,9 @@ impl FileDialog {
     }
 
     pub fn show(&mut self, ctx: &Context) -> DialogResult {
+        if self.native {
+            return self.show_native();
+        }
         let mut result = DialogResult::Open;
         let mut open = true;
         let mut nav: Option<PathBuf> = None;

@@ -916,6 +916,8 @@ fn render_panel(d: &mut Drawing, fig: &Figure, pi: usize, panel: &Panel, series:
                 right -= y2t.height + 4.0;
             }
         }
+        // room for the half of the last x tick label, centred on the right end of the axis
+        right = right.min(cx1 - xl.last().map_or(0.0, |t| t.width / 2.0) - 1.0);
         let mut bot = cy1 - (tick_h + tick_len + 3.0);
         if !xt.is_empty() {
             bot -= xt.height + 4.0;
@@ -1345,6 +1347,25 @@ mod tests {
                 let list = builtin_colors(p, n, dark);
                 for k in 0..n {
                     assert_eq!(palette_color(Palette::Custom, &list, k, n, dark), palette_color(p, &[], k, n, dark), "{p:?} {n} {k}");
+                }
+            }
+        }
+    }
+
+    /// The tick labels of the right panel stay inside the figure (the last x label is centred on the end of the axis).
+    #[test]
+    fn tick_labels_stay_inside_the_figure() {
+        let mut fig = Figure { cols: 2, width_mm: 120.0, ..Default::default() };
+        fig.sync_panels();
+        // labels 0.0025 … 0.0100 as in a panel of root water uptake
+        fig.panels[1].x = Axis { auto: false, min: 0.0, max: 0.01, step: 0.0025, ..Default::default() };
+        let s = series(11, |t| t, "uptake");
+        let wide = Series { x: s.x.iter().map(|v| v * 0.001).collect(), ..s.clone() };
+        let r = render(&fig, &[vec![vec![s]], vec![vec![wide]]]);
+        for p in &r.drawing.prims {
+            if let Prim::Text { t, x, angle, .. } = p {
+                if *angle == 0.0 {
+                    assert!(x + t.width <= r.drawing.width + 0.01, "{t:?} ends at {} of {}", x + t.width, r.drawing.width);
                 }
             }
         }
