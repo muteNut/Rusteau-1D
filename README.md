@@ -1,6 +1,6 @@
 # Rusteau-1D
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23343103.svg)](https://doi.org/10.5281/zenodo.23362225)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23362225.svg)](https://doi.org/10.5281/zenodo.23362225)
 
 <img src="crates/rusteau-gui/assets/icon-512.png" alt="Rusteau-1D icon" width="96" align="right">
 
