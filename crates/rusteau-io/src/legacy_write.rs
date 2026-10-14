@@ -132,7 +132,7 @@ fn water_header(prj: &Project) -> &'static str {
 
 /// Root depth column in ATMOSPH.IN (root growth from the atmospheric records).
 fn atm_root_depth(prj: &Project) -> bool {
-    prj.processes.root_growth && matches!(prj.root.growth, RootGrowthMode::FromAtmosphere)
+    prj.processes.root_growth_active() && matches!(prj.root.growth, RootGrowthMode::FromAtmosphere)
 }
 
 fn needs_atmosph(prj: &Project) -> bool {
@@ -224,7 +224,7 @@ pub fn selector_text(prj: &Project) -> String {
         lg(p.solute),
         lg(p.heat),
         lg(p.root_water_uptake),
-        lg(p.root_growth),
+        lg(p.root_growth_active()),
         lg(p.short_output),
         lg(wf.l_w_dep),
         lg(bc.atmospheric),
@@ -344,7 +344,7 @@ pub fn selector_text(prj: &Project) -> String {
     }
 
     // ---------------- D: root growth
-    if p.root_growth {
+    if p.root_growth_active() {
         let _ = writeln!(o, "*** BLOCK D: ROOT GROWTH INFORMATION ***********************************");
         let _ = writeln!(o, "iRootDepthEntry");
         match &prj.root.growth {
@@ -784,7 +784,7 @@ pub fn hydrus1d_dat_text(prj: &Project) -> String {
     let _ = writeln!(o, "EquilibriumAdsorption={}", u8::from(p.equilibrium_adsorption));
     let _ = writeln!(o, "MobileImmobile=0");
     let _ = writeln!(o, "RootWaterUptake={}", u8::from(p.root_water_uptake));
-    let _ = writeln!(o, "RootGrowth={}", u8::from(p.root_growth));
+    let _ = writeln!(o, "RootGrowth={}", u8::from(p.root_growth_active()));
     let _ = writeln!(o, "MaterialNumbers={}", prj.water.materials.len());
     let _ = writeln!(o, "SubregionNumbers={n_lay}");
     let _ = writeln!(o, "SpaceUnit={}", length_unit(prj.units.length));

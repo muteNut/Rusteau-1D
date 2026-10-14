@@ -38,6 +38,10 @@ An internal error while drawing a page or a figure shows a message in place of t
 
 A project with unsaved changes is copied to `recovery.h1dr` in the same folder, at most once a minute and only when it changed since the last copy; the file always holds the latest state only. Saving the project (or closing the program normally) removes the copy. If the program did not close normally, the next start offers to open this copy (*Open the copy*) or to discard it. Save the recovered project under a name of your choice.
 
+## No file dialog appears (Linux) {#file-dialog}
+
+Rusteau uses the file dialogs of the system: on Windows and macOS their own, on Linux the dialog of the desktop through the XDG desktop portal (installed with GNOME, KDE and most other desktops) or, without it, `zenity`. Without either, Rusteau shows its own simple file browser. If the dialog of the desktop does not appear, start the program with the built-in browser: `RUSTEAU_FILE_DIALOG=builtin ./rusteau`.
+
 ## Where are the results stored?
 
 In memory with the project. Use *File → Export results (CSV)…* to write them ([output files](output_files)).

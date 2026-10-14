@@ -311,7 +311,7 @@ impl Simulation {
         let l_chem = prj.processes.solute;
         let l_temp = prj.processes.heat;
         let sink_f = prj.processes.root_water_uptake;
-        let l_root = prj.processes.root_growth;
+        let l_root = prj.processes.root_growth_active();
         let ns = prj.n_solutes();
 
         // ---- materials
