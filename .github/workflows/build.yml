@@ -76,31 +76,3 @@ jobs:
 
   # a tag v… (pushed, or given to Run workflow): publish the release with the archives of all systems (only when every
   # build succeeded)
-  release:
-    needs: build
-    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    env:
-      TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
-    steps:
-      - name: Check the tag
-        run: |
-          case "$TAG" in v[0-9]*) ;; *) echo "The tag must start with v and a number, e.g. v1.3: $TAG"; exit 1 ;; esac
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          path: dist
-          merge-multiple: true
-      - uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ env.TAG }}
-          target_commitish: ${{ github.sha }}
-          name: Rusteau-1D ${{ env.TAG }}
-          body_path: RELEASE_NOTES.md
-          fail_on_unmatched_files: true
-          files: |
-            dist/rusteau-linux-x86_64.tar.gz
-            dist/rusteau-windows-x86_64.zip
-            dist/rusteau-macos-universal.zip
